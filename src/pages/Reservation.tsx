@@ -120,15 +120,19 @@ const Reservation = () => {
       </Link>
 
       <header className="mt-4 animate-fade-up">
-        <h1 className="text-2xl md:text-4xl font-bold leading-tight">
+        <div className="inline-flex items-center gap-2 rounded-full glass px-3 py-1.5 text-xs font-medium text-muted-foreground">
+          <ShieldCheck className="h-3.5 w-3.5 text-accent" />
+          Reservation
+        </div>
+        <h1 className="mt-4 text-3xl md:text-5xl font-extrabold leading-tight">
           {facility.facility}
         </h1>
-        <div className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
-          <MapPin className="h-3.5 w-3.5" />
+        <div className="mt-3 flex items-center gap-1.5 text-base text-muted-foreground">
+          <MapPin className="h-4 w-4" />
           {facility.location}
         </div>
 
-        <div className="mt-3 flex flex-wrap gap-1.5">
+        <div className="mt-4 flex flex-wrap gap-1.5">
           {facility.services.map((s) => (
             <Badge
               key={s}
@@ -142,37 +146,50 @@ const Reservation = () => {
 
         <a
           href={`tel:${facility.contact}`}
-          className="mt-3 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          className="mt-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          <Phone className="h-3.5 w-3.5" />
+          <Phone className="h-4 w-4" />
           {facility.contact}
         </a>
       </header>
 
       {/* Reservation card */}
-      <section className="glass-strong mt-6 rounded-2xl p-6 animate-fade-up" style={{ animationDelay: "80ms" }}>
-        <div className="flex items-center justify-between gap-4 flex-wrap">
+      <section
+        className="glass-strong mt-8 rounded-3xl p-6 md:p-8 animate-fade-up"
+        style={{ animationDelay: "80ms" }}
+      >
+        <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">
+            <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
               Confirmation code
             </p>
-            <p className="mt-1 font-mono text-3xl md:text-4xl font-bold text-gradient-primary tracking-tight">
+            <p className="mt-2 font-mono text-4xl md:text-6xl font-extrabold text-gradient-primary tracking-tight">
               {code}
+            </p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Show this code on arrival to claim your spot.
             </p>
           </div>
 
-          <div className="glass inline-flex items-center gap-2 rounded-xl px-3 py-2">
-            <Timer className="h-4 w-4 text-accent" />
+          <div className="glass inline-flex items-center gap-3 rounded-2xl px-4 py-3">
+            <Timer className="h-5 w-5 text-accent" />
             <div className="leading-tight">
-              <p className="text-[11px] text-muted-foreground">Expires in</p>
-              <p className="text-sm font-semibold">{countdown}</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                Expires in
+              </p>
+              <p className="text-lg font-bold">{countdown}</p>
             </div>
           </div>
         </div>
 
-        <p className="mt-4 text-sm text-muted-foreground leading-relaxed">
-          {facility.report_text}
-        </p>
+        <div className="mt-6 rounded-2xl bg-secondary/40 border border-border/40 p-4">
+          <p className="text-xs uppercase tracking-wider font-semibold text-muted-foreground">
+            Latest report from this facility
+          </p>
+          <p className="mt-2 text-sm md:text-base leading-relaxed">
+            {facility.report_text}
+          </p>
+        </div>
 
         {!confirmed ? (
           <Button
