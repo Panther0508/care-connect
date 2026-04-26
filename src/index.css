@@ -1,179 +1,71 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@600;700;800&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* CareSentinel design system — dark base, teal + amber accents, glassmorphism */
-
 @layer base {
-  :root {
-    /* Dark theme is the primary experience */
-    --background: 222 32% 7%;
-    --foreground: 210 40% 98%;
-
-    --card: 222 30% 11%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222 30% 11%;
-    --popover-foreground: 210 40% 98%;
-
-    /* Deep teal */
-    --primary: 174 84% 32%;
-    --primary-foreground: 0 0% 100%;
-    --primary-glow: 174 84% 45%;
-
-    --secondary: 222 25% 16%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 222 22% 14%;
-    --muted-foreground: 215 18% 65%;
-
-    /* Warm amber */
-    --accent: 38 92% 50%;
-    --accent-foreground: 222 47% 11%;
-    --accent-glow: 38 96% 60%;
-
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
-
-    --success: 152 65% 42%;
-    --success-foreground: 0 0% 100%;
-
-    --border: 222 20% 18%;
-    --input: 222 22% 14%;
-    --ring: 174 84% 45%;
-
-    --radius: 1rem;
-
-    /* Glass surfaces */
-    --glass-bg: 222 30% 14% / 0.55;
-    --glass-border: 210 40% 98% / 0.08;
-
-    /* Gradients & shadows */
-    --gradient-hero: radial-gradient(ellipse at top, hsl(174 84% 32% / 0.25), transparent 60%),
-                     radial-gradient(ellipse at bottom right, hsl(38 92% 50% / 0.12), transparent 55%),
-                     linear-gradient(180deg, hsl(222 32% 7%), hsl(222 36% 5%));
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
-    --gradient-accent: linear-gradient(135deg, hsl(var(--accent)), hsl(var(--accent-glow)));
-
-    --shadow-glass: 0 8px 32px hsl(222 60% 2% / 0.45);
-    --shadow-glow: 0 0 40px hsl(var(--primary-glow) / 0.35);
-    --shadow-amber: 0 8px 30px hsl(var(--accent) / 0.25);
-
-    --transition-base: all 0.2s ease;
-
-    --sidebar-background: 222 32% 9%;
-    --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 174 84% 45%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 222 25% 14%;
-    --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 222 20% 16%;
-    --sidebar-ring: 174 84% 45%;
-  }
-
-  .dark {
-    /* Same — app is dark-first */
-    --background: 222 32% 7%;
-    --foreground: 210 40% 98%;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
-
   html {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-text-primary font-sans;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-    font-feature-settings: "cv11", "ss01", "ss03";
+    font-variant-numeric: tabular-nums;
   }
 
-  body {
-    @apply bg-background text-foreground;
-    background: var(--gradient-hero);
-    background-attachment: fixed;
-    min-height: 100vh;
-    font-size: 16px;
-    line-height: 1.6;
-    letter-spacing: -0.005em;
+  /* Accessibility focus ring */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background transition-shadow;
   }
-
-  h1, h2, h3, h4 {
-    font-family: 'Sora', 'Inter', system-ui, sans-serif;
-    @apply tracking-tight;
-    letter-spacing: -0.022em;
-    font-weight: 700;
-  }
-
-  h1 { line-height: 1.05; }
-  h2 { line-height: 1.15; }
-  h3 { line-height: 1.25; }
-
-  p { line-height: 1.65; }
-  
 }
 
 @layer components {
-  .glass {
-    background: hsl(var(--glass-bg));
-    backdrop-filter: blur(20px) saturate(140%);
-    -webkit-backdrop-filter: blur(20px) saturate(140%);
-    border: 1px solid hsl(var(--glass-border));
-    box-shadow: var(--shadow-glass);
+  /* Glassmorphism utility */
+  .glass-card {
+    @apply bg-surface backdrop-blur-xl border border-white/10 rounded-2xl transition-all duration-300;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   }
 
-  .glass-strong {
-    background: hsl(222 30% 12% / 0.75);
-    backdrop-filter: blur(24px) saturate(160%);
-    -webkit-backdrop-filter: blur(24px) saturate(160%);
-    border: 1px solid hsl(var(--glass-border));
-    box-shadow: var(--shadow-glass);
+  .glass-card:hover {
+    @apply border-white/20 bg-slate-800/80;
+    box-shadow: 0 8px 32px 0 rgba(20, 184, 166, 0.1);
   }
 
-  .text-gradient-primary {
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  /* Buttons */
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-hover text-white rounded-xl py-3 px-6 font-bold transition-all duration-300 shadow-lg shadow-primary/20 tracking-wider uppercase text-xs;
+    background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
   }
 
-  .text-gradient-accent {
-    background: var(--gradient-accent);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  .btn-primary:active {
+    @apply scale-95;
+  }
+
+  .btn-secondary {
+    @apply bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 hover:border-white/20 rounded-xl py-2 px-4 transition-all duration-300 backdrop-blur-sm;
   }
 }
 
+/* Subtle glow shadows instead of black shadows */
 @layer utilities {
-  .pulse-dot::before {
-    content: '';
-    position: absolute;
-    inset: -4px;
-    border-radius: 9999px;
-    background: currentColor;
-    opacity: 0.4;
-    animation: pulse-ring 1.8s ease-out infinite;
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(20, 184, 166, 0.15);
+  }
+  .shadow-glow-amber {
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
+  }
+  .text-glow {
+    text-shadow: 0 0 10px rgba(20, 184, 166, 0.5);
   }
 }
 
-@keyframes pulse-ring {
-  0%   { transform: scale(0.6); opacity: 0.5; }
-  80%  { transform: scale(1.6); opacity: 0; }
-  100% { opacity: 0; }
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
 }
-
-@keyframes fade-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
 }
-
-@keyframes count-pop {
-  0% { transform: scale(0.9); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-700 rounded-full hover:bg-slate-600 transition-colors;
 }

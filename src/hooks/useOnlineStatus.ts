@@ -1,25 +1,20 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from 'react';
 
-/**
- * useOnlineStatus
- * Wraps navigator.onLine and listens to online/offline events.
- * Used to drive the global online/offline pill.
- */
-export function useOnlineStatus(): boolean {
-  const [online, setOnline] = useState<boolean>(() =>
-    typeof navigator === "undefined" ? true : navigator.onLine,
-  );
+export function useOnlineStatus() {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
-    const goOnline = () => setOnline(true);
-    const goOffline = () => setOnline(false);
-    window.addEventListener("online", goOnline);
-    window.addEventListener("offline", goOffline);
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
     return () => {
-      window.removeEventListener("online", goOnline);
-      window.removeEventListener("offline", goOffline);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
   }, []);
 
-  return online;
+  return isOnline;
 }

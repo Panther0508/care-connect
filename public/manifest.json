@@ -1,0 +1,16 @@
+{
+  "name": "CareSentinel",
+  "short_name": "CareSentinel",
+  "description": "Offline-first AI healthcare guardian for India",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0F172A",
+  "theme_color": "#0F172A",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

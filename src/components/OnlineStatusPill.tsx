@@ -1,26 +1,38 @@
-import { useOnlineStatus } from "@/hooks/useOnlineStatus";
-import { cn } from "@/lib/utils";
+import { useOnlineStatus } from "../hooks/useOnlineStatus";
+import { AnimatePresence, motion } from "framer-motion";
 
-export function OnlineStatusPill({ className }: { className?: string }) {
-  const online = useOnlineStatus();
+export function OnlineStatusPill() {
+  const isOnline = useOnlineStatus();
 
   return (
-    <div
-      className={cn(
-        "glass inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium",
-        className,
-      )}
-      aria-live="polite"
-    >
-      <span
-        className={cn(
-          "pulse-dot relative inline-block h-2 w-2 rounded-full",
-          online ? "bg-success text-success" : "bg-destructive text-destructive",
+    <div className="fixed top-4 right-4 z-50">
+      <AnimatePresence mode="wait">
+        {isOnline ? (
+          <motion.div
+            key="online"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.2 }}
+            className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full px-3 py-1 text-xs flex items-center gap-1"
+          >
+            <span>●</span>
+            <span>Online</span>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="offline"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.2 }}
+            className="bg-red-500/20 text-red-400 border border-red-500/30 rounded-full px-3 py-1 text-xs flex items-center gap-1"
+          >
+            <span>●</span>
+            <span>Offline</span>
+          </motion.div>
         )}
-      />
-      <span className={online ? "text-foreground" : "text-destructive"}>
-        {online ? "Online" : "Offline"}
-      </span>
+      </AnimatePresence>
     </div>
   );
 }
