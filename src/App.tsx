@@ -27,7 +27,6 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
 const App = () => {
   const location = useLocation();
   const { ready } = useIDB();
-  useSync();
 
   if (!ready) {
     return (
