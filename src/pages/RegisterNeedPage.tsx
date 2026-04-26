@@ -19,7 +19,7 @@ function RelativeTime({ timestamp }: { timestamp: number }) {
     return () => clearInterval(interval);
   }, [timestamp]);
 
-  return <span>Watching since {timeText}</span>;
+  return <span>{timeText}</span>;
 }
 
 export default function RegisterNeedPage() {
@@ -29,8 +29,13 @@ export default function RegisterNeedPage() {
 
   const handleSave = async () => {
     if (!needText.trim()) return;
-    await addNeed(needText);
-    setNeedText("");
+    try {
+      await addNeed(needText);
+      setNeedText("");
+    } catch (err) {
+      console.error('Failed to save need:', err);
+      // Could show toast to user
+    }
   };
 
   return (
@@ -114,7 +119,7 @@ export default function RegisterNeedPage() {
             <AnimatePresence>
               {needs.map((need, index) => (
                 <motion.div 
-                  key={need.date} 
+                  key={need.timestamp} 
                   initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, scale: 0.9 }}
                   className="glass-card p-4 flex items-start justify-between gap-4"
                 >
@@ -123,17 +128,17 @@ export default function RegisterNeedPage() {
                     <div>
                       <p className="text-slate-200 text-sm leading-relaxed">{need.text}</p>
                       <p className="text-slate-500 text-xs mt-1 tabular-nums">
-                        <RelativeTime date={need.date} />
+                        <RelativeTime timestamp={need.timestamp} />
                       </p>
                     </div>
                   </div>
-                  <motion.button
-                    whileTap={{ scale: 0.9 }}
-                    onClick={() => removeNeed(index)}
-                    className="btn-secondary text-xs py-1 px-3 flex-shrink-0"
-                  >
-                    Remove
-                  </motion.button>
+                   <motion.button
+                     whileTap={{ scale: 0.9 }}
+                     onClick={() => removeNeed(need.timestamp)}
+                     className="btn-secondary text-xs py-1 px-3 flex-shrink-0"
+                   >
+                     Remove
+                   </motion.button>
                 </motion.div>
               ))}
             </AnimatePresence>

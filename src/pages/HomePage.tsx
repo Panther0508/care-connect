@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { FacilityCard } from "../components/FacilityCard";
-import { searchCare, type Facility, useModelStatus } from "../services/aiSearch";
+import { searchCare, type Facility } from "../services/aiSearch";
 import { useIDB } from "../hooks/useIDB";
+import { getAllFacilities } from "../lib/idb";
 import { motion, AnimatePresence } from "framer-motion";
 
 const PLACEHOLDERS = [
@@ -41,47 +42,58 @@ export default function HomePage() {
     setIsSearching(true);
     setHasSearched(true);
     setQuery(q);
-    
-    const res = await searchCare(q);
-    setResults(res);
-    setIsSearching(false);
+
+    try {
+      const res = await searchCare(q);
+      setResults(res);
+    } catch (err) {
+      console.error('Search failed:', err);
+      setResults([]);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   const handleAdvancedSearch = async () => {
     setIsSearching(true);
-    // In a real implementation, this would call /api/agent/reason
-    // For now, we'll simulate with a simple filter
-    const { condition, location, specialRequirements, ruralOnly, publicFacility, availability247 } = advancedQuery;
-    
-    // Mock advanced search - filter facilities based on criteria
-    let filteredResults = [...results]; // Start with current results
-    
-    if (condition) {
-      filteredResults = filteredResults.filter(f => 
-        f.description.toLowerCase().includes(condition.toLowerCase()) ||
-        f.procedure.some(p => p.toLowerCase().includes(condition.toLowerCase()))
-      );
+    try {
+      const { condition, location, specialRequirements, ruralOnly, publicFacility, availability247 } = advancedQuery;
+
+      // Get all facilities from IDB
+      const allFacilities = await getAllFacilities();
+
+      // Filter based on criteria
+      let filteredResults = allFacilities;
+
+      if (condition) {
+        filteredResults = filteredResults.filter(f =>
+          f.description.toLowerCase().includes(condition.toLowerCase()) ||
+          f.procedure.some(p => p.toLowerCase().includes(condition.toLowerCase()))
+        );
+      }
+
+      if (location) {
+        filteredResults = filteredResults.filter(f =>
+          f.address_city.toLowerCase().includes(location.toLowerCase()) ||
+          f.address_stateOrRegion.toLowerCase().includes(location.toLowerCase())
+        );
+      }
+
+      if (specialRequirements) {
+        filteredResults = filteredResults.filter(f =>
+          f.description.toLowerCase().includes(specialRequirements.toLowerCase()) ||
+          f.capability.some(c => c.toLowerCase().includes(specialRequirements.toLowerCase())) ||
+          f.equipment.some(e => e.toLowerCase().includes(specialRequirements.toLowerCase()))
+        );
+      }
+
+      setResults(filteredResults);
+      setIsSearching(false);
+      setAdvancedPanelOpen(false);
+    } catch (err) {
+      console.error('Advanced search failed:', err);
+      setIsSearching(false);
     }
-    
-    if (location) {
-      filteredResults = filteredResults.filter(f => 
-        f.address_city.toLowerCase().includes(location.toLowerCase()) ||
-        f.address_stateOrRegion.toLowerCase().includes(location.toLowerCase())
-      );
-    }
-    
-    if (specialRequirements) {
-      filteredResults = filteredResults.filter(f => 
-        f.description.toLowerCase().includes(specialRequirements.toLowerCase()) ||
-        f.capability.some(c => c.toLowerCase().includes(specialRequirements.toLowerCase())) ||
-        f.equipment.some(e => e.toLowerCase().includes(specialRequirements.toLowerCase()))
-      );
-    }
-    
-    // For demo purposes, just update results with filtered data
-    setResults(filteredResults);
-    setIsSearching(false);
-    setAdvancedPanelOpen(false); // Close panel after search
   };
 
   return (

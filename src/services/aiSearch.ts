@@ -81,17 +81,17 @@ async function searchOffline(query: string): Promise<Facility[]> {
 export async function searchCare(query: string): Promise<Facility[]> {
   if (!query.trim()) return [];
 
-  // TRY ONLINE FIRST
-  if (navigator.onLine) {
-    try {
-      const onlineResults = await searchOnline(query);
-      if (onlineResults && onlineResults.length > 0) {
-        return onlineResults; // rich Gemini results
-      }
-    } catch (e) {
-      console.warn('Online search failed, falling back to offline:', (e as Error).message);
-    }
-  }
+   // TRY ONLINE FIRST
+   if (navigator.onLine) {
+     try {
+       const onlineResults = await searchOnline(query);
+       if (onlineResults && onlineResults.length > 0) {
+         return onlineResults; // rich Gemini results
+       }
+     } catch {
+       // Fallback to offline
+     }
+   }
 
   // FALLBACK TO OFFLINE (Transformers.js)
   return searchOffline(query);

@@ -14,9 +14,14 @@ export default function FacilityDetailPage() {
     const fetchFacility = async () => {
       if (!id) return;
       setLoading(true);
-      const data = await getFacilityById(id);
-      if (data) setFacility(data);
-      setLoading(false);
+      try {
+        const data = await getFacilityById(id);
+        if (data) setFacility(data);
+      } catch (err) {
+        console.error('Failed to fetch facility:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchFacility();
   }, [id]);
@@ -75,10 +80,12 @@ export default function FacilityDetailPage() {
             }`}>
               Trust: {facility.trust_score}
             </span>
-            {facility.contradictions.length > 0 && (
+            {facility.contradictions && facility.contradictions.length > 0 && (
               <span 
                 className="relative inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/30"
-                title={`Truth Gap: ${facility.contradictions.map(c => `${c.claim}: missing ${c.missing}`).join('; ')}`}
+                title={Array.isArray(facility.contradictions) 
+                  ? facility.contradictions.map(c => typeof c === 'string' ? c : `${c.claim}: missing ${c.missing}`).join('; ')
+                  : 'Potential contradictions found'}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
                   <path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>

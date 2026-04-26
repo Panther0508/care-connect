@@ -4,6 +4,7 @@ import { getFacility } from "../lib/idb";
 import type { Facility } from "../services/aiSearch";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
+import { submitFeedback } from "../services/feedback";
 
 export default function ReservationPage() {
   const { facilityId } = useParams();
@@ -18,13 +19,18 @@ export default function ReservationPage() {
   const code = "CONF-7X3A";
 
   useEffect(() => {
-  const fetchFacility = async () => {
-    if (!facilityId) return;
-    setLoading(true);
-    const data = await getFacility(facilityId);
-    if (data) setFacility(data);
-    setLoading(false);
-  };
+    const fetchFacility = async () => {
+      if (!facilityId) return;
+      setLoading(true);
+      try {
+        const data = await getFacility(facilityId);
+        if (data) setFacility(data);
+      } catch (err) {
+        console.error('Failed to fetch facility:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchFacility();
   }, [facilityId]);
 
@@ -94,8 +100,14 @@ export default function ReservationPage() {
     frame();
   };
 
-  const handleFeedback = (helpful: boolean) => {
+  const handleFeedback = async (helpful: boolean) => {
     setFeedbackGiven(true);
+    try {
+      await submitFeedback(facility.id, helpful);
+    } catch (err) {
+      console.error('Feedback submission failed:', err);
+      // Still optimistically mark as given
+    }
   };
 
   const formatTime = (seconds: number) => {
@@ -148,12 +160,12 @@ export default function ReservationPage() {
           )}
 
           <div>
-            <h3 className="text-xl font-bold text-slate-100">{facility.facility}</h3>
+            <h3 className="text-xl font-bold text-slate-100">{facility.name}</h3>
             <p className="text-slate-400 text-sm mt-1 flex items-center gap-1.5">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/>
               </svg>
-              {facility.location}
+              {facility.address_line1 ? `${facility.address_line1}, ` : ''}{facility.address_city}, {facility.address_stateOrRegion}{facility.address_zipOrPostcode ? ` ${facility.address_zipOrPostcode}` : ''}
             </p>
           </div>
 

@@ -32,10 +32,9 @@ export function useSavedNeeds() {
     setNeeds(prev => [newNeed, ...prev]);
   };
 
-  const removeNeed = async (index: number) => {
-    const needToRemove = needs[index];
-    await removeIDBNeed(needToRemove.timestamp);
-    setNeeds(prev => prev.filter((_, i) => i !== index));
+  const removeNeed = async (timestamp: number) => {
+    await removeIDBNeed(timestamp);
+    setNeeds(prev => prev.filter(need => need.timestamp !== timestamp));
   };
 
   return { needs, loading, addNeed, removeNeed };

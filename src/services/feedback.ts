@@ -1,4 +1,4 @@
-import { kv } from '../lib/idb'; // This is a placeholder - we'll actually use fetch to talk to our Vercel API
+// No imports needed; uses fetch directly
 
 /**
  * Submits feedback for a facility to the Vercel API
@@ -30,10 +30,9 @@ export async function submitFeedback(facilityId: string, helpful: boolean): Prom
     }
 
     return await response.json();
-  } catch (err) {
-    console.error('Error submitting feedback:', err);
-    throw err;
-  }
+    } catch (err) {
+      throw err;
+    }
 }
 
 /**

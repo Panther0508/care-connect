@@ -44,11 +44,13 @@ export function FacilityCard({ facility, index = 0 }: FacilityCardProps) {
               {facility.trust_score}% Trust
             </span>
             {/* Contradictions Indicator */}
-            {facility.contradictions && facility.contradictions.length > 0 && (
-              <span 
-                className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30 cursor-help animate-pulse shadow-lg shadow-red-500/10"
-                title={facility.contradictions.join('\n')}
-              >
+             {facility.contradictions && facility.contradictions.length > 0 && (
+               <span 
+                 className="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30 cursor-help animate-pulse shadow-lg shadow-red-500/10"
+                 title={Array.isArray(facility.contradictions) 
+                   ? facility.contradictions.map(c => typeof c === 'string' ? c : `${c.claim}: missing ${c.missing}`).join('\n')
+                   : 'Potential contradictions'}
+               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>
                 </svg>
@@ -126,17 +128,23 @@ export function FacilityCard({ facility, index = 0 }: FacilityCardProps) {
         </button>
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-3">
-        <motion.a
-          whileTap={{ scale: 0.95 }}
-          href={`tel:${facility.phone_numbers[0]}`}
-          className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-200 transition-colors active:scale-95"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-          </svg>
-          {facility.phone_numbers[0]}
-        </motion.a>
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <div className="text-sm text-slate-400 hover:text-slate-200 transition-colors">
+            {facility.phone_numbers && facility.phone_numbers.length > 0 ? (
+              <motion.a
+                whileTap={{ scale: 0.95 }}
+                href={`tel:${facility.phone_numbers[0]}`}
+                className="inline-flex items-center gap-1.5"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                {facility.phone_numbers[0]}
+              </motion.a>
+            ) : (
+              <span className="text-slate-500">Phone not available</span>
+            )}
+          </div>
 
         <motion.div whileTap={{ scale: 0.95 }}>
           <Link to={`/reservation/${facility.id}`} className="btn-primary py-2 px-4 text-sm flex items-center gap-1">

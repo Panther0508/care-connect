@@ -91,8 +91,8 @@ async function enrich() {
       email: String(row.email || ''),
       websites: parseArrayField(row.websites || row.officialWebsite),
       facilityTypeId: String(row.facilityTypeId || ''),
-      numberDoctors: row.numberDoctors != null ? parseInt(row.numberDoctors, 10) : null,
-      capacity: row.capacity != null ? parseInt(row.capacity, 10) : null,
+      numberDoctors: row.numberDoctors != null ? (parseInt(row.numberDoctors, 10) || null) : null,
+      capacity: row.capacity != null ? (parseInt(row.capacity, 10) || null) : null,
     });
   }
 

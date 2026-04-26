@@ -141,8 +141,9 @@ function parseGeminiResponse(text, candidates, allFacilities) {
   }
 
   return agentResults.map(r => {
-    const candidate = candidates[r.candidate_id];
-    const full = allFacilities.find(f => f.name === candidate?.name) || candidate || {};
+    const idx = r.candidate_id;
+    const candidate = (typeof idx === 'number' && idx >= 0 && idx < candidates.length) ? candidates[idx] : null;
+    const full = candidate ? (allFacilities.find(f => f.name === candidate?.name) || candidate) : (candidate || {});
     return {
       name: full.name || candidate?.name || 'Unknown',
       description: full.description || '',
@@ -154,8 +155,8 @@ function parseGeminiResponse(text, candidates, allFacilities) {
       address_stateOrRegion: full.address_stateOrRegion || candidate?.state || '',
       latitude: full.latitude || candidate?.lat || null,
       longitude: full.longitude || candidate?.lng || null,
-      trust_score: r.trust_score || 50,
-      contradictions: r.contradictions || [],
+      trust_score: r.trust_score != null ? r.trust_score : 50,
+      contradictions: Array.isArray(r.contradictions) ? r.contradictions : [],
       citation: r.citation || '',
       relevance_reason: r.relevance_reason || ''
     };

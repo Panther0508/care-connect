@@ -9,7 +9,6 @@ import ImpactPage from "./pages/ImpactPage";
 import CrisisMapPage from "./pages/CrisisMapPage";
 import FacilityDetailPage from "./pages/FacilityDetailPage";
 import { useIDB } from "./hooks/useIDB";
-import { useSync } from "./hooks/useSync";
 
 const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
