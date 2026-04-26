@@ -1,6 +1,7 @@
 export async function searchOnline(query: string) {
-  const apiUrl = import.meta.env.VITE_API_URL || '';
-  const res = await fetch(`${apiUrl}/api/search`, {
+  const baseUrl = import.meta.env.VITE_API_URL;
+  const url = baseUrl ? `${baseUrl.replace(/\/+$/, '')}/api/search` : '/api/search';
+  const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ query })
