@@ -20,11 +20,10 @@ env.useBrowserCache = false;
 
 // ── Helper Functions ───────────────────────────────────────────────────────────
 
-function parseArrayField(value: any): string[] {
+function parseArrayField(value) {
   if (!value) return [];
   if (Array.isArray(value)) return value.map(v => String(v).trim()).filter(v => v);
   if (typeof value === 'string') {
-    // Try parsing as JSON array first
     const trimmed = value.trim();
     if ((trimmed.startsWith('[') && trimmed.endsWith(']')) || (trimmed.startsWith('{') && trimmed.endsWith('}'))) {
       try {
@@ -32,13 +31,12 @@ function parseArrayField(value: any): string[] {
         if (Array.isArray(parsed)) return parsed.map(v => String(v).trim()).filter(v => v);
       } catch { /* fall back to string split */ }
     }
-    // Split on comma or semicolon
     return value.split(/[;,]/).map(v => v.trim()).filter(v => v.length > 0);
   }
   return [];
 }
 
-function generateId(index: number): string {
+function generateId(index) {
   return `fac-${String(index + 1).padStart(4, '0')}`;
 }
 
@@ -70,7 +68,7 @@ async function enrich() {
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     const name = row.name || row.Name || row.Facility_Name || '';
-    if (!name) continue; // skip rows with empty name
+    if (!name) continue;
 
     const description = row.description || row.Description || row.summary || '';
 
@@ -82,10 +80,19 @@ async function enrich() {
       procedure: parseArrayField(row.procedure || row.Procedures || row.Services),
       equipment: parseArrayField(row.equipment || row.Equipment),
       capability: parseArrayField(row.capability || row.Capabilities),
+      address_line1: String(row.address_line1 || '').trim(),
       address_city: String(row.address_city || row.City || row.city || '').trim(),
       address_stateOrRegion: String(row.address_stateOrRegion || row.State || row.state || '').trim(),
+      address_zipOrPostcode: String(row.address_zipOrPostcode || '').trim(),
+      address_country: String(row.address_country || '').trim(),
       latitude: row.latitude != null ? parseFloat(row.latitude) : null,
       longitude: row.longitude != null ? parseFloat(row.longitude) : null,
+      phone_numbers: parseArrayField(row.phone_numbers || row.officialPhone),
+      email: String(row.email || ''),
+      websites: parseArrayField(row.websites || row.officialWebsite),
+      facilityTypeId: String(row.facilityTypeId || ''),
+      numberDoctors: row.numberDoctors != null ? parseInt(row.numberDoctors, 10) : null,
+      capacity: row.capacity != null ? parseInt(row.capacity, 10) : null,
     });
   }
 
@@ -97,7 +104,6 @@ async function enrich() {
   console.log('       First run will download the model (~100MB) to cache.\n');
 
   const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-
   console.log('       Model loaded. Generating embeddings...\n');
 
   let successCount = 0;
@@ -112,16 +118,15 @@ async function enrich() {
         pooling: 'mean',
         normalize: true
       });
-      facility.embedding = Array.from(output.data) as number[];
+      // Round to 6 decimal places to reduce JSON size (~8KB → ~3KB per embedding)
+      facility.embedding = Array.from(output.data).map(v => Math.round(v * 1e6) / 1e6);
       successCount++;
     } catch (err) {
       console.warn(`       Warning: Failed to generate embedding for "${facility.name}" (${i + 1}/${facilities.length}):`, err.message);
       failCount++;
-      // Generate a zero vector as fallback (should not happen normally)
       facility.embedding = new Array(384).fill(0);
     }
 
-    // Progress log every 500 items
     if ((i + 1) % 500 === 0 || i === facilities.length - 1) {
       console.log(`       Progress: ${i + 1}/${facilities.length} processed (${successCount} success, ${failCount} failed)`);
     }
@@ -132,16 +137,13 @@ async function enrich() {
   // 4. Write output files
   console.log('\n[4/4] Writing output files...');
 
-  // Ensure public/ directory exists
   if (!fs.existsSync(path.dirname(OFFLINE_OUTPUT_PATH))) {
     fs.mkdirSync(path.dirname(OFFLINE_OUTPUT_PATH), { recursive: true });
   }
 
-  // 4a. Write facilities_offline.json (facilities WITH embeddings, for IndexedDB offline search)
   fs.writeFileSync(OFFLINE_OUTPUT_PATH, JSON.stringify(facilities, null, 2));
   console.log(`       -> ${OFFLINE_OUTPUT_PATH} (${facilities.length} facilities with embeddings)`);
 
-  // 4b. Write enriched_dataset.json (same data, used to seed Vercel KV)
   fs.writeFileSync(ENRICHED_OUTPUT_PATH, JSON.stringify(facilities, null, 2));
   console.log(`       -> ${ENRICHED_OUTPUT_PATH} (${facilities.length} facilities with 384-dim embeddings)`);
 
