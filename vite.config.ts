@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import wasm from "vite-plugin-wasm";
 
 export default defineConfig(({ mode }) => ({
   server: {
@@ -10,11 +11,17 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
-  plugins: [react()],
+  plugins: [react(), wasm()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-    dedupe: ["react", "react-dom", "react/jsx-runtime", "react/jsx-dev-runtime"],
+    dedupe: ["react", "react-dom", "react/jsx/runtime", "react/jsx-dev/runtime"],
+  },
+  build: {
+    target: 'esnext',
+  },
+  optimizeDeps: {
+    exclude: ["@automerge/automerge"],
   },
 }));

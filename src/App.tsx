@@ -1,24 +1,53 @@
-import { Routes, Route, useLocation } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
+import { SignedIn, SignedOut, ClerkLoaded, ClerkLoading } from "@clerk/clerk-react";
 import AppLayout from "./components/AppLayout";
+import { useOfflineAuth } from "./hooks/auth/useOfflineAuth";
+import { useEffect, useState } from "react";
+
+// Auth Pages
+import SignInPage from "./pages/auth/SignInPage";
+import SignUpPage from "./pages/auth/SignUpPage";
+
+// Public
+import Landing from "./pages/Landing";
+
+// Protected Pages
+import Onboarding from "./pages/onboarding";
+import PatientDashboard from "./pages/dashboards/PatientDashboard";
+import ClinicianDashboard from "./pages/dashboards/ClinicianDashboard";
+import CHWDashboard from "./pages/dashboards/CHWDashboard";
+import AdminDashboard from "./pages/dashboards/AdminDashboard";
+
+// Existing Pages
 import HomePage from "./pages/HomePage";
-import RegisterNeedPage from "./pages/RegisterNeedPage";
+import HealthGraph from "./pages/HealthGraph";
+import AIAssistant from "./pages/AIAssistant";
+import Passport from "./pages/Passport";
+import ClinicianView from "./pages/ClinicianView";
+import OutbreakDashboard from "./pages/OutbreakDashboard";
 import AlertsPage from "./pages/AlertsPage";
 import ReservationPage from "./pages/ReservationPage";
 import ImpactPage from "./pages/ImpactPage";
 import CrisisMapPage from "./pages/CrisisMapPage";
 import FacilityDetailPage from "./pages/FacilityDetailPage";
-import OutbreakDashboard from "./pages/OutbreakDashboard";
-import HealthGraph from "./pages/HealthGraph";
-import AIAssistant from "./pages/AIAssistant";
-import Passport from "./pages/Passport";
-import ClinicianView from "./pages/ClinicianView";
-import { useIDB } from "./hooks/useIDB";
-import { initMeshOrchestrator } from "./services/meshOrchestrator";
-import { useEffect, useRef } from "react";
-import { StatusProvider } from "./context/StatusContext";
-import { StatusToastContainer } from "./components/StatusToast";
-import { useStatus } from "./hooks/useStatus";
+import RegisterNeedPage from "./pages/RegisterNeedPage";
+
+// Settings & Support
+import Settings from "./pages/Settings";
+import Support from "./pages/Support";
+import LanguageSelector from "./pages/LanguageSelector";
+
+// Admin
+import AuditLog from "./pages/AuditLog";
+
+// Auth Guards
+import { ProtectedRoute, PublicOnlyRoute } from "./components/role/RequireRole";
+import { useRole } from "./hooks/auth/useRole";
+
+import { useEffect, useState } from "react";
+import { initHealthGraph } from "./services/healthGraph";
+import { initPassport } from "./services/passport";
 
 const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -34,75 +63,264 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const App = () => {
-  const location = useLocation();
-  const { ready } = useIDB();
+// Loading component while Clerk loads
+const ClerkInitializer = ({ children }: { children: React.ReactNode }) => {
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    if (ready) {
-      initMeshOrchestrator().catch(console.error);
-    }
-  }, [ready]);
+    const init = async () => {
+      try {
+        // Initialize core services
+        await initHealthGraph();
+        await initPassport();
+      } catch (error) {
+        console.error('Init error:', error);
+      } finally {
+        setInitialized(true);
+      }
+    };
+    init();
+  }, []);
 
-  return (
-    <StatusProvider>
-      <AppContent ready={ready} />
-    </StatusProvider>
-  );
-};
-
-const AppContent = ({ ready }: { ready: boolean }) => {
-  const location = useLocation();
-  const { showStatus, dismissStatus } = useStatus();
-  const loaderToastRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (!ready && !loaderToastRef.current) {
-      loaderToastRef.current = showStatus(
-        'loading', 
-        'Initializing AI Engine', 
-        'This only happens once. The model will work offline after download.',
-        { duration: 0 }
-      );
-    } else if (ready && loaderToastRef.current) {
-      dismissStatus(loaderToastRef.current);
-      loaderToastRef.current = null;
-    }
-  }, [ready, showStatus, dismissStatus]);
-
-  if (!ready) {
+  if (!initialized) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-400">
-        <StatusToastContainer />
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
-          <p>Preparing environment...</p>
+          <p>Loading VitaChain...</p>
         </div>
       </div>
     );
   }
 
+  return <>{children}</>;
+};
+
+const App = () => {
+  const location = useLocation();
+  const { canAccessApp } = useOfflineAuth();
+
   return (
-    <AppLayout>
-      <StatusToastContainer />
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
-          <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />
-          <Route path="/health" element={<PageWrapper><HealthGraph /></PageWrapper>} />
-          <Route path="/ai" element={<PageWrapper><AIAssistant /></PageWrapper>} />
-          <Route path="/passport" element={<PageWrapper><Passport /></PageWrapper>} />
-          <Route path="/clinician-view" element={<PageWrapper><ClinicianView /></PageWrapper>} />
-          <Route path="/register-need" element={<PageWrapper><RegisterNeedPage /></PageWrapper>} />
-          <Route path="/alerts" element={<PageWrapper><AlertsPage /></PageWrapper>} />
-          <Route path="/reservation/:facilityId" element={<PageWrapper><ReservationPage /></PageWrapper>} />
-          <Route path="/impact" element={<PageWrapper><ImpactPage /></PageWrapper>} />
-          <Route path="/crisis-map" element={<PageWrapper><CrisisMapPage /></PageWrapper>} />
-          <Route path="/facility/:id" element={<PageWrapper><FacilityDetailPage /></PageWrapper>} />
-          <Route path="/outbreak" element={<PageWrapper><OutbreakDashboard /></PageWrapper>} />
+    <ClerkLoaded>
+      <ClerkInitializer>
+        <Routes location={location}>
+          {/* Public routes */}
+          <Route path="/" element={<Landing />} />
+          <Route path="/sign-in" element={<SignInPage />} />
+          <Route path="/sign-up" element={<SignUpPage />} />
+
+          {/* Onboarding - signed in but not completed */}
+          <Route
+            path="/onboarding"
+            element={
+              <SignedIn>
+                <Onboarding />
+              </SignedIn>
+            }
+          />
+
+          {/* Protected routes for signed-in users */}
+          <Route
+            path="/dashboard"
+            element={
+              <SignedIn>
+                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                  <RoleBasedDashboard />
+                </ProtectedRoute>
+              </SignedIn>
+            }
+          />
+
+          {/* Existing protected routes */}
+          <Route
+            path="/health"
+            element={
+              <SignedIn>
+                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw']}>
+                  <PageWrapper><HealthGraph /></PageWrapper>
+                </ProtectedRoute>
+              </SignedIn>
+            }
+          />
+
+          <Route
+            path="/ai"
+            element={
+              <SignedIn>
+                <ProtectedRoute allowedRoles={['patient', 'clinician']}>
+                  <PageWrapper><AIAssistant /></PageWrapper>
+                </ProtectedRoute>
+              </SignedIn>
+            }
+          />
+
+          <Route
+            path="/passport"
+            element={
+              <SignedIn>
+                <ProtectedRoute allowedRoles={['patient', 'chw']}>
+                  <PageWrapper><Passport /></PageWrapper>
+                </ProtectedRoute>
+              </SignedIn>
+            }
+          />
+
+          <Route
+            path="/clinician-view"
+            element={
+              <SignedIn>
+                <ProtectedRoute allowedRoles={['clinician']}>
+                  <PageWrapper><ClinicianView /></PageWrapper>
+                </ProtectedRoute>
+              </SignedIn>
+            }
+          />
+
+          <Route
+            path="/outbreak"
+            element={
+              <SignedIn>
+                <ProtectedRoute allowedRoles={['chw', 'admin']}>
+                  <PageWrapper><OutbreakDashboard /></PageWrapper>
+                </ProtectedRoute>
+              </SignedIn>
+            }
+          />
+
+          {/* Generic routes */}
+          <Route
+            path="/register-need"
+            element={
+              <SignedIn>
+                <PageWrapper><RegisterNeedPage /></PageWrapper>
+              </SignedIn>
+            }
+          />
+
+          <Route
+            path="/alerts"
+            element={
+              <SignedIn>
+                <PageWrapper><AlertsPage /></PageWrapper>
+              </SignedIn>
+            }
+          />
+
+          <Route
+            path="/reservation/:facilityId"
+            element={
+              <SignedIn>
+                <PageWrapper><ReservationPage /></PageWrapper>
+              </SignedIn>
+            }
+          />
+
+          <Route
+            path="/impact"
+            element={
+              <SignedIn>
+                <PageWrapper><ImpactPage /></PageWrapper>
+              </SignedIn>
+            }
+          />
+
+          <Route
+            path="/crisis-map"
+            element={
+              <SignedIn>
+                <PageWrapper><CrisisMapPage /></PageWrapper>
+              </SignedIn>
+            }
+          />
+
+          <Route
+            path="/facility/:id"
+            element={
+              <SignedIn>
+                <PageWrapper><FacilityDetailPage /></PageWrapper>
+              </SignedIn>
+            }
+          />
+
+          {/* Settings pages */}
+          <Route
+            path="/settings"
+            element={
+              <SignedIn>
+                <PageWrapper><Settings /></PageWrapper>
+              </SignedIn>
+            }
+          />
+
+          <Route
+            path="/support"
+            element={
+              <SignedIn>
+                <PageWrapper><Support /></PageWrapper>
+              </SignedIn>
+            }
+          />
+
+          <Route
+            path="/language"
+            element={
+              <SignedIn>
+                <PageWrapper><LanguageSelector /></PageWrapper>
+              </SignedIn>
+            }
+          />
+
+          {/* Admin routes */}
+          <Route
+            path="/admin"
+            element={
+              <SignedIn>
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <PageWrapper><AdminDashboard /></PageWrapper>
+                </ProtectedRoute>
+              </SignedIn>
+            }
+          />
+
+          <Route
+            path="/audit-log"
+            element={
+              <SignedIn>
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <PageWrapper><AuditLog /></PageWrapper>
+                </ProtectedRoute>
+              </SignedIn>
+            }
+          />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </AnimatePresence>
-    </AppLayout>
+      </ClerkInitializer>
+    </ClerkLoaded>
   );
 };
+
+// Component that redirects to appropriate dashboard based on role
+function RoleBasedDashboard() {
+  const { role } = useRole();
+
+  if (!role) {
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  switch (role) {
+    case 'patient':
+      return <PatientDashboard />;
+    case 'clinician':
+      return <ClinicianDashboard />;
+    case 'chw':
+      return <CHWDashboard />;
+    case 'admin':
+      return <AdminDashboard />;
+    default:
+      return <Navigate to="/" replace />;
+  }
+}
 
 export default App;

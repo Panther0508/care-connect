@@ -1,6 +1,3 @@
-// src/components/VitaAvatar.jsx
-// Unified Vita avatar component for all UI states
-
 const STATE_MAP = {
   default: 'vita-default.png',
   success: 'vita-success.png',

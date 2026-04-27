@@ -1,5 +1,5 @@
 // src/services/healthGraph.ts
-// Public API for encrypted health graph operations
+// User-aware health graph service with per-user isolated storage
 
 import type { HealthDoc } from '../lib/crdtHealthGraph';
 import {
@@ -34,53 +34,72 @@ import {
   HealthGraphRecord,
 } from '../lib/idb';
 
-// Demo passphrase - in production this will come from a secure unlock screen
-const DEMO_PASSPHRASE = 'vita-demo-2026';
-
-// Store the derived key in memory (never persisted unencrypted)
+// In-memory state per user (since we handle one active user at a time)
+let currentUserId: string | null = null;
 let currentKey: CryptoKey | null = null;
 let currentDoc: HealthDoc | null = null;
 let currentSalt: Uint8Array | null = null;
 
+const DEMO_PASSPHRASE = 'vita-demo-2026';
+
 /**
- * Initialize the health graph: load from IndexedDB, decrypt, and deserialize.
- * Creates a new empty doc if none exists.
+ * Set the active user - loads their encrypted health graph from storage
  */
-export async function initHealthGraph(): Promise<void> {
-  const record = await loadHealthGraph();
+export async function setActiveUser(userId: string, passphrase: string = DEMO_PASSPHRASE): Promise<void> {
+  currentUserId = userId;
+  currentKey = null;
+  currentDoc = null;
+  currentSalt = null;
+
+  const storageKey = `healthgraph_${userId}`;
+  const record = await loadHealthGraph(storageKey);
 
   if (record) {
     currentSalt = record.salt;
-    currentKey = await deriveKey(DEMO_PASSPHRASE, currentSalt);
+    currentKey = await deriveKey(passphrase, currentSalt);
     const decrypted = await decrypt(record.iv, record.encryptedBlob, currentKey);
     const bytes = new TextEncoder().encode(decrypted);
     currentDoc = deserializeDoc(new Uint8Array(bytes));
   } else {
+    // Create fresh health graph
     currentDoc = createHealthDoc();
     currentSalt = generateSalt();
-    currentKey = await deriveKey(DEMO_PASSPHRASE, currentSalt);
+    currentKey = await deriveKey(passphrase, currentSalt);
     await persistCurrentDoc();
   }
 }
 
 /**
- * Persist the current document to encrypted storage
+ * Clear active user (on logout)
+ */
+export function clearActiveUser(): void {
+  currentUserId = null;
+  currentKey = null;
+  currentDoc = null;
+  currentSalt = null;
+}
+
+/**
+ * Get current user ID
+ */
+export function getCurrentUserId(): string | null {
+  return currentUserId;
+}
+
+/**
+ * Persist current document to encrypted storage
  */
 async function persistCurrentDoc(): Promise<void> {
-  if (!currentDoc || !currentKey || !currentSalt) {
+  if (!currentDoc || !currentKey || !currentSalt || !currentUserId) {
     throw new Error('Health graph not initialized');
   }
 
-  // Serialize to Uint8Array
   const serialized = serializeDoc(currentDoc);
   const plaintext = new TextDecoder().decode(serialized);
-
-  // Encrypt
   const { iv, ciphertext } = await encrypt(plaintext, currentKey);
 
-  // Save to IndexedDB
   const record: HealthGraphRecord = {
-    key: 'latest',
+    key: `healthgraph_${currentUserId}`,
     encryptedBlob: ciphertext,
     iv,
     lastModified: new Date().toISOString(),
@@ -91,8 +110,15 @@ async function persistCurrentDoc(): Promise<void> {
 }
 
 /**
- * Add a new condition
+ * Ensure initialized (for backward compatibility)
  */
+export async function initHealthGraph(): Promise<void> {
+  if (currentDoc) return; // already initialized
+  await setActiveUser('latest', DEMO_PASSPHRASE);
+}
+
+// --------------------------- CRUD Operations ---------------------------
+
 export async function addCondition(
   name: string,
   diagnosedDate: string,
@@ -103,9 +129,6 @@ export async function addCondition(
   await persistCurrentDoc();
 }
 
-/**
- * Add a new medication
- */
 export async function addMedication(
   name: string,
   dose: string,
@@ -118,9 +141,6 @@ export async function addMedication(
   await persistCurrentDoc();
 }
 
-/**
- * Add a new allergy
- */
 export async function addAllergy(
   substance: string,
   reaction: string,
@@ -131,9 +151,6 @@ export async function addAllergy(
   await persistCurrentDoc();
 }
 
-/**
- * Add a new encounter
- */
 export async function addEncounter(
   date: string,
   facilityName: string,
@@ -145,9 +162,6 @@ export async function addEncounter(
   await persistCurrentDoc();
 }
 
-/**
- * Update a condition
- */
 export async function updateCondition(
   id: string,
   updates: Partial<{ name: string; diagnosedDate: string; notes: string }>
@@ -157,9 +171,6 @@ export async function updateCondition(
   await persistCurrentDoc();
 }
 
-/**
- * Update a medication
- */
 export async function updateMedication(
   id: string,
   updates: Partial<{ name: string; dose: string; frequency: string; startDate: string; endDate: string }>
@@ -169,36 +180,24 @@ export async function updateMedication(
   await persistCurrentDoc();
 }
 
-/**
- * Delete a condition
- */
 export async function removeCondition(id: string): Promise<void> {
   if (!currentDoc) await initHealthGraph();
   currentDoc = deleteCondition(currentDoc, id);
   await persistCurrentDoc();
 }
 
-/**
- * Delete a medication
- */
 export async function removeMedication(id: string): Promise<void> {
   if (!currentDoc) await initHealthGraph();
   currentDoc = deleteMedication(currentDoc, id);
   await persistCurrentDoc();
 }
 
-/**
- * Delete an allergy
- */
 export async function removeAllergy(id: string): Promise<void> {
   if (!currentDoc) await initHealthGraph();
   currentDoc = deleteAllergy(currentDoc, id);
   await persistCurrentDoc();
 }
 
-/**
- * Delete an encounter
- */
 export async function removeEncounter(id: string): Promise<void> {
   if (!currentDoc) await initHealthGraph();
   currentDoc = deleteEncounter(currentDoc, id);
@@ -206,7 +205,7 @@ export async function removeEncounter(id: string): Promise<void> {
 }
 
 /**
- * Get the current health state as a plain object
+ * Get the current health state
  */
 export function getCurrentHealthState() {
   if (!currentDoc) {
@@ -221,7 +220,7 @@ export function getCurrentHealthState() {
 }
 
 /**
- * Merge with a remote health document (for future sync features)
+ * Merge with remote document
  */
 export async function mergeWithRemote(remoteSerialized: Uint8Array): Promise<void> {
   if (!currentDoc) await initHealthGraph();
@@ -231,7 +230,7 @@ export async function mergeWithRemote(remoteSerialized: Uint8Array): Promise<voi
 }
 
 /**
- * Export the current health document as an encrypted blob (for backup/sharing)
+ * Export as encrypted blob
  */
 export async function exportEncryptedBlob(): Promise<{ iv: Uint8Array; ciphertext: ArrayBuffer; salt: Uint8Array }> {
   if (!currentDoc || !currentKey) await initHealthGraph();
@@ -242,18 +241,21 @@ export async function exportEncryptedBlob(): Promise<{ iv: Uint8Array; ciphertex
 }
 
 /**
- * Import an encrypted health blob (replaces current data)
+ * Import encrypted blob
  */
 export async function importEncryptedBlob(
   iv: Uint8Array,
   ciphertext: ArrayBuffer,
-  salt: Uint8Array
+  salt: Uint8Array,
+  userId?: string
 ): Promise<void> {
+  const targetUserId = userId || currentUserId || 'latest';
   const key = await deriveKey(DEMO_PASSPHRASE, salt);
   const decrypted = await decrypt(iv, ciphertext, key);
   const bytes = new TextEncoder().encode(decrypted);
   currentDoc = deserializeDoc(new Uint8Array(bytes));
   currentKey = key;
   currentSalt = salt;
+  currentUserId = targetUserId;
   await persistCurrentDoc();
 }
