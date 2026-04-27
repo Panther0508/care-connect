@@ -6,11 +6,12 @@ import StepRoleSelection from './steps/StepRoleSelection';
 import StepHealthProfile from './steps/StepHealthProfile';
 import StepPrivacyConsent from './steps/StepPrivacyConsent';
 import StepPassphrase from './steps/StepPassphrase';
+import StepAdminMFA from './steps/StepAdminMFA';
 import StepBiometrics from './steps/StepBiometrics';
 import StepDone from './steps/StepDone';
 import { updateUserMetadata } from '../../services/auth/userMetadata';
 
-type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
 interface OnboardingData {
   step: Step;
@@ -24,6 +25,7 @@ interface OnboardingData {
   consentGiven: boolean;
   passphrase: string;
   biometricsEnabled: boolean;
+  adminMFACompleted?: boolean;
 }
 
 export default function Onboarding() {
@@ -40,12 +42,13 @@ export default function Onboarding() {
     consentGiven: false,
     passphrase: '',
     biometricsEnabled: false,
+    adminMFACompleted: false,
   });
 
   const nextStep = () => {
     setData((prev) => ({
       ...prev,
-      step: Math.min(prev.step + 1, 7) as Step,
+      step: Math.min(prev.step + 1, 8) as Step,
     }));
   };
 
@@ -102,8 +105,19 @@ export default function Onboarding() {
       case 5:
         return <StepPassphrase onNext={nextStep} onBack={prevStep} onSave={updateData} />;
       case 6:
+        // If user is admin and MFA not yet completed, show MFA step
+        if (data.role === 'admin' && !data.adminMFACompleted) {
+          return <StepAdminMFA onNext={nextStep} onBack={prevStep} onMFAComplete={() => updateData({ adminMFACompleted: true })} />;
+        }
+        // Otherwise fall through to biometrics
         return <StepBiometrics onNext={nextStep} onBack={prevStep} onUpdate={updateData} enabled={data.biometricsEnabled} />;
       case 7:
+        // After MFA step for admin, biometrics is step 7
+        if (data.role === 'admin' && data.adminMFACompleted && !data.biometricsEnabled) {
+          return <StepBiometrics onNext={nextStep} onBack={prevStep} onUpdate={updateData} enabled={data.biometricsEnabled} />;
+        }
+        return <StepDone onFinish={() => window.location.href = '/dashboard'} />;
+      case 8:
         return <StepDone onFinish={() => window.location.href = '/dashboard'} />;
       default:
         return null;
@@ -115,18 +129,24 @@ export default function Onboarding() {
       {/* Progress Indicator */}
       <div className="px-4 py-6">
         <div className="flex items-center justify-center gap-2">
-          {[1, 2, 3, 4, 5, 6, 7].map((stepNum) => (
-            <div
-              key={stepNum}
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
-                stepNum <= data.step
-                  ? 'bg-teal-500 text-white'
-                  : 'bg-slate-700 text-slate-400'
-              }`}
-            >
-              {stepNum}
-            </div>
-          ))}
+          {(() => {
+            // Determine total steps based on role
+            const isAdmin = data.role === 'admin';
+            const totalSteps = isAdmin && !data.adminMFACompleted ? 8 : 7;
+            const steps = Array.from({ length: totalSteps }, (_, i) => i + 1);
+            return steps.map((stepNum) => (
+              <div
+                key={stepNum}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
+                  stepNum <= data.step
+                    ? 'bg-teal-500 text-white'
+                    : 'bg-slate-700 text-slate-400'
+                }`}
+              >
+                {stepNum}
+              </div>
+            ));
+          })()}
         </div>
       </div>
 

@@ -2,6 +2,8 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth, SignedIn, SignedOut } from '@clerk/clerk-react';
 import { useRole } from '../../hooks/auth/useRole';
 import { UserRole } from '../../lib/roles';
+import { adminAuditLogger } from '../../services/adminAuditLogger';
+import { useEffect, useRef } from 'react';
 
 interface RequireRoleProps {
   children: React.ReactNode;
@@ -12,6 +14,8 @@ interface RequireRoleProps {
 export function RequireRole({ children, allowedRoles, fallbackPath = '/onboarding' }: RequireRoleProps) {
   const { role, isLoading } = useRole();
   const location = useLocation();
+  const { user } = useAuth();
+  const loggedRef = useRef(false);
 
   if (isLoading) {
     return (
@@ -45,6 +49,23 @@ export function RequireRole({ children, allowedRoles, fallbackPath = '/onboardin
 
     return <Navigate to={getDashboardForRole(role)} replace />;
   }
+
+  // Admin security checks: audit log access
+  useEffect(() => {
+    if (!user || !role) return;
+    if (role !== 'admin') return;
+    if (loggedRef.current) return;
+
+    adminAuditLogger.log(
+      user.id,
+      'route.access',
+      `admin_route:${location.pathname}`,
+      { pathname: location.pathname, allowedRoles: rolesArray },
+      user.publicMetadata?.did
+    );
+
+    loggedRef.current = true;
+  }, [user, role, location.pathname, rolesArray]);
 
   return <>{children}</>;
 }

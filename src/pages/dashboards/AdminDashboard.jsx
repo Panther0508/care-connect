@@ -1,8 +1,28 @@
 import { motion } from 'framer-motion';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { useAuth } from '@clerk/clerk-react';
+import { adminAuditLogger } from '@/services/adminAuditLogger';
+import { useState, useEffect } from 'react';
 
 export default function AdminDashboard() {
-  // Mock data for admin analytics
+  const { user } = useAuth();
+  const [auditLogs, setAuditLogs] = useState([]);
+  const isAdmin = user?.publicMetadata?.role === 'admin';
+  const mfaEnabled = user?.twoFactorEnabled ?? false;
+
+  // Load recent audit logs
+  useEffect(() => {
+    const loadAudit = async () => {
+      if (!isAdmin) return;
+      try {
+        const logs = await adminAuditLogger.getLogs(5);
+        setAuditLogs(logs);
+      } catch (err) {
+        console.error('Failed to load audit logs:', err);
+      }
+    };
+    loadAudit();
+  }, [isAdmin]);
   const userGrowth = [
     { week: 'W1', newUsers: 120 },
     { week: 'W2', newUsers: 158 },
@@ -130,6 +150,66 @@ export default function AdminDashboard() {
           <div className="font-medium">Audit Log</div>
           <div className="text-xs text-slate-400">Compliance and access logs</div>
         </a>
+      </div>
+
+      {/* Security Settings Section */}
+      <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
+        <h3 className="font-semibold mb-4 text-white">Security Status</h3>
+
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-700">
+            <div className="flex items-center gap-2 mb-1">
+              <div className={`w-2 h-2 rounded-full ${mfaEnabled ? 'bg-green-500' : 'bg-red-500'}`} />
+              <span className="text-sm font-medium text-white">Multi-Factor Auth</span>
+            </div>
+            <p className="text-xs text-slate-400">
+              {mfaEnabled ? 'Enabled' : 'Not enabled - required for admin access'}
+            </p>
+            {!mfaEnabled && (
+              <a href="/admin/security" className="text-xs text-teal-400 hover:underline mt-1 inline-block">
+                Enable now →
+              </a>
+            )}
+          </div>
+
+          <div className="bg-slate-900/50 rounded-lg p-3 border border-slate-700">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-2 h-2 rounded-full bg-green-500" />
+              <span className="text-sm font-medium text-white">Biometric Lock</span>
+            </div>
+            <p className="text-xs text-slate-400">
+              Active on navigation (15 min timeout)
+            </p>
+            <a href="/settings" className="text-xs text-teal-400 hover:underline mt-1 inline-block">
+              Configure →
+            </a>
+          </div>
+        </div>
+
+        {auditLogs.length > 0 && (
+          <div>
+            <h4 className="text-sm font-medium text-white mb-3">Recent Admin Activity</h4>
+            <div className="space-y-2">
+              {auditLogs.map((log) => (
+                <div key={log.id} className="bg-slate-900/50 rounded-lg p-3 border border-slate-700">
+                  <div className="flex justify-between items-start gap-2">
+                    <div>
+                      <div className="text-xs font-mono text-teal-300 truncate max-w-[200px]">
+                        {log.action}
+                      </div>
+                      <div className="text-xs text-slate-400 truncate max-w-[200px]">
+                        {log.resource}
+                      </div>
+                    </div>
+                    <div className="text-xs text-slate-500 text-right">
+                      {log.timestamp ? new Date(log.timestamp).toLocaleTimeString() : ''}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </motion.div>
   );

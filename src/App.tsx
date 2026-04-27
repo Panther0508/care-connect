@@ -42,6 +42,8 @@ import Referral from "./pages/Referral";
 
 // Admin
 import AuditLog from "./pages/AuditLog";
+import AdminMFAGate from "./components/AdminMFAGate";
+import AdminBiometricLock from "./components/AdminBiometricLock";
 
 // Auth Guards
 import { ProtectedRoute, PublicOnlyRoute } from "./components/role/RequireRole";
@@ -295,7 +297,11 @@ const App = () => {
             element={
               <SignedIn>
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <PageWrapper><AdminDashboard /></PageWrapper>
+                  <AdminMFAGate>
+                    <AdminBiometricLock>
+                      <PageWrapper><AdminDashboard /></PageWrapper>
+                    </AdminBiometricLock>
+                  </AdminMFAGate>
                 </ProtectedRoute>
               </SignedIn>
             }
@@ -306,7 +312,11 @@ const App = () => {
             element={
               <SignedIn>
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <PageWrapper><AuditLog /></PageWrapper>
+                  <AdminMFAGate>
+                    <AdminBiometricLock>
+                      <PageWrapper><AuditLog /></PageWrapper>
+                    </AdminBiometricLock>
+                  </AdminMFAGate>
                 </ProtectedRoute>
               </SignedIn>
             }
