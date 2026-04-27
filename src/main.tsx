@@ -20,8 +20,8 @@ if ("serviceWorker" in navigator) {
 }
 
 const clerkProviderProps = PUBLISHABLE_KEY
-  ? { publishableKey: PUBLISHABLE_KEY }
-  : {};
+  ? { publishableKey: PUBLISHABLE_KEY, rethrowOfflineNetworkErrors: true }
+  : { publishableKey: "pk_test_placeholder", rethrowOfflineNetworkErrors: true };
 
 function Root() {
   return (
@@ -37,4 +37,15 @@ function Root() {
   );
 }
 
-createRoot(document.getElementById("root")!).render(<Root />);
+try {
+  createRoot(document.getElementById("root")!).render(<Root />);
+} catch (error) {
+  console.error("Failed to mount React app:", error);
+  document.body.innerHTML = `
+    <div style="padding: 20px; font-family: monospace; color: red; background: #0F172A;">
+      <h1>Mount Error</h1>
+      <pre>${error instanceof Error ? error.message : String(error)}</pre>
+      <p>Check console for details.</p>
+    </div>
+  `;
+}
