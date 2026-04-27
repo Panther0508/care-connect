@@ -1,6 +1,6 @@
 export function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("caresentinel", 3); // Incremented to version 3 for health graph
+    const request = indexedDB.open("vitachain", 3); // Incremented to version 3 for health graph
 
     request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
       const db = (event.target as IDBOpenDBRequest).result;

@@ -38,13 +38,13 @@ export async function submitFeedback(facilityId: string, helpful: boolean): Prom
  */
 export function updateLocalFeedbackCounts(helpful: boolean): void {
   // Increment total connections counter
-  const connections = parseInt(localStorage.getItem('caresentinel_connections') || '0', 10);
-  localStorage.setItem('caresentinel_connections', (connections + 1).toString());
+  const connections = parseInt(localStorage.getItem('vitachain_connections') || '0', 10);
+  localStorage.setItem('vitachain_connections', (connections + 1).toString());
 
   // If helpful, increment helpful counter
   if (helpful) {
-    const helpfulCount = parseInt(localStorage.getItem('caresentinel_helpful') || '0', 10);
-    localStorage.setItem('caresentinel_helpful', (helpfulCount + 1).toString());
+    const helpfulCount = parseInt(localStorage.getItem('vitachain_helpful') || '0', 10);
+    localStorage.setItem('vitachain_helpful', (helpfulCount + 1).toString());
   }
 }
 
@@ -52,7 +52,7 @@ export function updateLocalFeedbackCounts(helpful: boolean): void {
  * Gets local feedback counts
  */
 export function getLocalFeedbackCounts(): { connections: number; helpful: number } {
-  const connections = parseInt(localStorage.getItem('caresentinel_connections') || '0', 10);
-  const helpful = parseInt(localStorage.getItem('caresentinel_helpful') || '0', 10);
+  const connections = parseInt(localStorage.getItem('vitachain_connections') || '0', 10);
+  const helpful = parseInt(localStorage.getItem('vitachain_helpful') || '0', 10);
   return { connections, helpful };
 }

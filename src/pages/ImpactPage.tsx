@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 
 const TESTIMONIALS = [
-  "After 3 days of searching, CareSentinel found a pediatric surgeon for my son in Enugu. — Amina",
+  "After 3 days of searching, VitaChain found a pediatric surgeon for my son in Enugu. — Amina",
   "When the network went down during the storm, this app still helped us find emergency care. — Chinedu",
   "I registered a need for malaria medicine and got an alert within hours. It truly watches over us. — Fatima"
 ];
@@ -87,7 +87,7 @@ export default function ImpactPage() {
           Our Collective Impact
         </motion.h1>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-slate-400 mb-2 text-sm">
-          CareSentinel grows stronger with every community member.
+          VitaChain grows stronger with every community member.
         </motion.p>
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="text-xs font-medium tabular-nums flex items-center gap-1.5 text-teal-400/80 bg-teal-500/10 w-fit px-2 py-1 rounded-full border border-teal-500/20">
           <span className={`w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-teal-400 animate-pulse' : 'bg-amber-400'}`} />

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'caresentinel-v2';
+const CACHE_NAME = 'vitachain-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -115,15 +115,15 @@ self.addEventListener('push', (event) => {
   if (event.data) {
     data = event.data.json();
   }
-  const title = data.title || 'CareSentinel Alert';
-  const options = {
-    body: data.body || 'A new care match has been found for your registered need.',
-    icon: '/placeholder.svg', // We have a placeholder.svg in public
-    badge: '/placeholder.svg',
-    data: {
-      url: data.url || '/' // URL to open when notification is clicked
-    }
-  };
+  const title = data.title || 'VitaChain Alert';
+   const options = {
+     body: data.body || 'A new care match has been found for your registered need.',
+     icon: '/icon-192.png',
+     badge: '/icon-192.png',
+     data: {
+       url: data.url || '/' // URL to open when notification is clicked
+     }
+   };
 
   event.waitUntil(
     self.registration.showNotification(title, options)

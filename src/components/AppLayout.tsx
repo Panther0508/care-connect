@@ -19,7 +19,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       showStatus('success', 'Back Online', 'Syncing latest facility data...');
     };
     const handleOffline = () => {
-      showStatus('offline', 'You Are Offline', 'CareSentinel is still working. Your data stays private.');
+      showStatus('offline', 'You Are Offline', 'VitaChain is still guarding your health. Your data stays private.');
     };
 
     window.addEventListener('online', handleOnline);

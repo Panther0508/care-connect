@@ -16,7 +16,7 @@ export function useIDB() {
 
     async function initIDB() {
       try {
-        const initialized = localStorage.getItem('caresentinel_offline_loaded');
+        const initialized = localStorage.getItem('vitachain_offline_loaded');
         if (initialized === 'true') {
           await initMeshOrchestrator();
           if (!cancelled) setReady(true);
@@ -38,7 +38,7 @@ export function useIDB() {
             storeVectors(vectorsToStore),
           ]);
 
-          localStorage.setItem('caresentinel_offline_loaded', 'true');
+          localStorage.setItem('vitachain_offline_loaded', 'true');
 
           await initMeshOrchestrator();
 

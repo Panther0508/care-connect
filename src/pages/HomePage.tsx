@@ -117,12 +117,12 @@ export default function HomePage() {
               Guardian of Care, <br /> 
               <span className="text-teal-400 text-glow">Anywhere.</span>
             </motion.h1>
-            <motion.p 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
-              className="text-slate-400 text-base md:text-lg max-w-md"
-            >
-              CareSentinel provides instant AI-powered facility audits — fully offline and 100% private.
-            </motion.p>
+               <motion.p 
+                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}
+                 className="text-slate-400 text-base md:text-lg max-w-md"
+               >
+                 VitaChain provides instant AI-powered facility discovery — fully offline and 100% private.
+               </motion.p>
           </div>
           <motion.div
             initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
@@ -191,7 +191,7 @@ export default function HomePage() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                placeholder="Search..."
+                placeholder="Search for a condition, treatment, or specialist..."
               />
             </div>
             

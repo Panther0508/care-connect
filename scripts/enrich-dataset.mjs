@@ -44,7 +44,7 @@ function generateId(index) {
 
 async function enrich() {
   console.log('='.repeat(60));
-  console.log('CareSentinel Dataset Enrichment');
+  console.log('VitaChain Dataset Enrichment');
   console.log('='.repeat(60));
 
   // 1. Read Excel
