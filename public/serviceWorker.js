@@ -1,11 +1,10 @@
-const CACHE_NAME = 'caresentinel-v1';
-// We'll cache the app shell: index.html and the manifest.
-// The JS and CSS files will be cached via stale-while-revalidate.
+const CACHE_NAME = 'caresentinel-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/facilities_offline.json'
+  '/facilities_offline.json',
+  '/serviceWorker.js'
 ];
 
 self.addEventListener('install', (event) => {
@@ -73,14 +72,38 @@ self.addEventListener('fetch', (event) => {
 
 // Listen for background sync events
 self.addEventListener('sync', (event) => {
-  if (event.tag === 'sync-facilities') {
+  if (event.tag === 'mesh-gossip') {
     event.waitUntil(
-      // We cannot directly update IndexedDB from the service worker.
-      // Instead, we post a message to the client to trigger a sync.
       self.clients.matchAll({ includeUncontrolled: true }).then(clients => {
         clients.forEach(client => {
-          client.postMessage({ type: 'TRIGGER_SYNC' });
+          client.postMessage({ type: 'TRIGGER_MESH_GOSSIP' });
         });
+      })
+    );
+  }
+
+  if (event.tag === 'satellite-upload') {
+    event.waitUntil(
+      // For satellite upload, we can attempt to fetch from our own endpoint
+      // Since we're simulating, we'll just make a POST request to our own site
+      fetch('/api/satellite-ingest', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // In a real implementation, we would get the data from IndexedDB
+        // For now, we'll send empty data as this is a simulation
+        body: JSON.stringify({
+          facilities: [],
+          searches: {},
+          timestamp: new Date().toISOString()
+        })
+      }).then(response => {
+        console.log('Satellite upload completed via background sync:', response.status);
+        return response;
+      }).catch(error => {
+        console.error('Satellite upload failed in background sync:', error);
+        throw error;
       })
     );
   }

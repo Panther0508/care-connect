@@ -5,6 +5,7 @@ import {
   storeFacilities,
   storeVectors,
 } from '../lib/idb';
+import { initMeshOrchestrator } from '../services/meshOrchestrator';
 
 export function useIDB() {
   const [ready, setReady] = useState(false);
@@ -17,7 +18,8 @@ export function useIDB() {
       try {
         const initialized = localStorage.getItem('caresentinel_offline_loaded');
         if (initialized === 'true') {
-          setReady(true);
+          await initMeshOrchestrator();
+          if (!cancelled) setReady(true);
         } else {
           const response = await fetch('/facilities_offline.json');
           if (!response.ok) {
@@ -25,14 +27,12 @@ export function useIDB() {
           }
           const data = await response.json();
 
-          // Separate facilities (without embedding) and vectors (id + embedding)
           const facilitiesToStore = data.map(({ embedding, ...facility }) => facility);
           const vectorsToStore = data.map((item: any) => ({
             id: item.id,
-            vector: item.embedding
+            vector: item.embedding,
           }));
 
-          // Store in IDB
           await Promise.all([
             storeFacilities(facilitiesToStore),
             storeVectors(vectorsToStore),
@@ -40,9 +40,9 @@ export function useIDB() {
 
           localStorage.setItem('caresentinel_offline_loaded', 'true');
 
-          if (!cancelled) {
-            setReady(true);
-          }
+          await initMeshOrchestrator();
+
+          if (!cancelled) setReady(true);
         }
       } catch (err) {
         console.error('IDB Init failed:', err);
@@ -60,5 +60,10 @@ export function useIDB() {
     };
   }, []);
 
-  return { ready, error };
+  const storeSearch = async (term: string) => {
+    // Deprecated: use meshOrchestrator.recordSearch instead
+    console.warn('storeSearch is deprecated; use meshOrchestrator.recordSearch');
+  };
+
+  return { ready, error, storeSearch };
 }

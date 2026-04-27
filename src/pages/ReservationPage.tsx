@@ -5,6 +5,7 @@ import type { Facility } from "../services/aiSearch";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import { submitFeedback } from "../services/feedback";
+import { meshOrchestrator } from "../services/meshOrchestrator";
 
 export default function ReservationPage() {
   const { facilityId } = useParams();
@@ -67,6 +68,14 @@ export default function ReservationPage() {
       setTimeout(() => {
         // Step 3: Confirmed
         setConfirmState("confirmed");
+        
+        // Record confirmation in mesh (anonymised)
+        try {
+          meshOrchestrator.recordConfirmation(facilityId);
+        } catch (err) {
+          console.warn('Failed to record confirmation in mesh:', err);
+        }
+        
         triggerConfetti();
       }, 300);
       

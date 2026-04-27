@@ -1,6 +1,7 @@
 import { pipeline } from '@xenova/transformers';
 import { getAllFacilities, getAllVectors } from '../lib/idb';
 import { searchOnline } from './onlineSearch';
+import { meshOrchestrator } from './meshOrchestrator';
 
 export interface Facility {
   id: string;
@@ -81,6 +82,13 @@ async function searchOffline(query: string): Promise<Facility[]> {
 export async function searchCare(query: string): Promise<Facility[]> {
   if (!query.trim()) return [];
 
+  // Log search to mesh (privacy-preserving – only the term, no user identity)
+  try {
+    meshOrchestrator.recordSearch(query);
+  } catch (err) {
+    console.warn('Failed to record search in mesh:', err);
+  }
+
    // TRY ONLINE FIRST
    if (navigator.onLine) {
      try {
@@ -93,8 +101,8 @@ export async function searchCare(query: string): Promise<Facility[]> {
      }
    }
 
-  // FALLBACK TO OFFLINE (Transformers.js)
-  return searchOffline(query);
+   // FALLBACK TO OFFLINE (Transformers.js)
+   return searchOffline(query);
 }
 
 export async function getFacilityById(id: string): Promise<Facility | undefined> {

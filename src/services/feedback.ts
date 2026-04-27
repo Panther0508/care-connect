@@ -8,12 +8,10 @@
  */
 export async function submitFeedback(facilityId: string, helpful: boolean): Promise<{ success: boolean }> {
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || '';
-    if (!apiUrl) {
-      throw new Error('VITE_API_URL is not configured');
-    }
+    const baseUrl = import.meta.env.VITE_API_URL || '';
+    const url = baseUrl ? `${baseUrl.replace(/\/+$/, '')}/api/feedback` : '/api/feedback';
 
-    const response = await fetch(`${apiUrl}/api/feedback`, {
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

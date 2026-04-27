@@ -8,7 +8,12 @@ import ReservationPage from "./pages/ReservationPage";
 import ImpactPage from "./pages/ImpactPage";
 import CrisisMapPage from "./pages/CrisisMapPage";
 import FacilityDetailPage from "./pages/FacilityDetailPage";
+import OutbreakDashboard from "./pages/OutbreakDashboard";
+import HealthGraph from "./pages/HealthGraph";
+import AIAssistant from "./pages/AIAssistant";
 import { useIDB } from "./hooks/useIDB";
+import { initMeshOrchestrator } from "./services/meshOrchestrator";
+import { useEffect } from "react";
 
 const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -28,6 +33,13 @@ const App = () => {
   const location = useLocation();
   const { ready } = useIDB();
 
+  // Initialize mesh orchestrator once IDB is ready
+  useEffect(() => {
+    if (ready) {
+      initMeshOrchestrator().catch(console.error);
+    }
+  }, [ready]);
+
   if (!ready) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-400">
@@ -44,12 +56,15 @@ const App = () => {
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />
+          <Route path="/health" element={<PageWrapper><HealthGraph /></PageWrapper>} />
+          <Route path="/ai" element={<PageWrapper><AIAssistant /></PageWrapper>} />
           <Route path="/register-need" element={<PageWrapper><RegisterNeedPage /></PageWrapper>} />
           <Route path="/alerts" element={<PageWrapper><AlertsPage /></PageWrapper>} />
           <Route path="/reservation/:facilityId" element={<PageWrapper><ReservationPage /></PageWrapper>} />
           <Route path="/impact" element={<PageWrapper><ImpactPage /></PageWrapper>} />
           <Route path="/crisis-map" element={<PageWrapper><CrisisMapPage /></PageWrapper>} />
           <Route path="/facility/:id" element={<PageWrapper><FacilityDetailPage /></PageWrapper>} />
+          <Route path="/outbreak" element={<PageWrapper><OutbreakDashboard /></PageWrapper>} />
         </Routes>
       </AnimatePresence>
     </AppLayout>

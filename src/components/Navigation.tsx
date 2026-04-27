@@ -2,9 +2,9 @@ import { NavLink } from "react-router-dom";
 import { motion } from "framer-motion";
 
 const NAV = [
-  { 
-    to: "/", 
-    label: "Search", 
+  {
+    to: "/",
+    label: "Search",
     end: true,
     svg: (
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -12,8 +12,26 @@ const NAV = [
       </svg>
     )
   },
-  { 
-    to: "/alerts", 
+  {
+    to: "/health",
+    label: "Health",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+      </svg>
+    )
+  },
+  {
+    to: "/ai",
+    label: "AI",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+      </svg>
+    )
+  },
+  {
+    to: "/alerts",
     label: "Alerts",
     hasBadge: true,
     svg: (
@@ -22,8 +40,8 @@ const NAV = [
       </svg>
     )
   },
-  { 
-    to: "/reservation/1", 
+  {
+    to: "/reservation/1",
     label: "Reservation",
     svg: (
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -31,8 +49,8 @@ const NAV = [
       </svg>
     )
   },
-  { 
-    to: "/register-need", 
+  {
+    to: "/register-need",
     label: "Register",
     svg: (
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -40,12 +58,21 @@ const NAV = [
       </svg>
     )
   },
-  { 
-    to: "/impact", 
+  {
+    to: "/impact",
     label: "Impact",
     svg: (
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/>
+      </svg>
+    )
+  },
+  {
+    to: "/outbreak",
+    label: "Outbreaks",
+    svg: (
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
       </svg>
     )
   },

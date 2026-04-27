@@ -18,13 +18,22 @@ export default async function handler(req, res) {
     }
 
     // 1. Get candidate facilities from KV (fast pre-filter)
+    console.log('Fetching facilities from KV...');
     const allFacilities = await kv.get('facilities');
     if (!allFacilities || !Array.isArray(allFacilities)) {
-      return res.status(500).json({ error: 'Facility data not available' });
+      console.error('KV Error: Facilities data not found or invalid format');
+      return res.status(500).json({ error: 'Facility data not available in KV store' });
     }
+    console.log(`Successfully fetched ${allFacilities.length} facilities from KV.`);
 
     // 2. Build a condensed context for Gemini (top 30 candidates by keyword match)
     const candidates = preFilterByKeywords(query, allFacilities).slice(0, 30);
+    console.log(`Found ${candidates.length} candidates after pre-filtering.`);
+    
+    if (candidates.length === 0) {
+       return res.status(200).json({ results: [] });
+    }
+
     const context = candidates.map((f, i) => ({
       id: i,
       name: f.name,
@@ -41,15 +50,18 @@ export default async function handler(req, res) {
 
     // 3. Call Gemini to reason about the best matches
     const prompt = buildAgentPrompt(query, context);
+    console.log('Calling Gemini API...');
     const geminiResponse = await callGemini(prompt);
+    console.log('Gemini responded successfully.');
 
     // 4. Parse Gemini's structured response
     const results = parseGeminiResponse(geminiResponse, candidates, allFacilities);
+    console.log(`Parsed ${results.length} results from Gemini.`);
 
     return res.status(200).json({ results });
 
   } catch (err) {
-    console.error('Search error:', err);
+    console.error('Search error detail:', err);
     return res.status(500).json({ error: err.message });
   }
 }
@@ -108,21 +120,43 @@ If no facilities match, return an empty array [].`;
 }
 
 async function callGemini(prompt) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`;
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.1, maxOutputTokens: 2048 }
-    })
-  });
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Gemini API error ${response.status}: ${errText}`);
+  // Using gemini-flash-latest as it has available quota for this key
+  const model = 'gemini-flash-latest';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_KEY}`;
+  
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { 
+          temperature: 0.1, 
+          maxOutputTokens: 2048,
+          response_mime_type: "application/json" // Force JSON if supported
+        }
+      })
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error(`Gemini API Error [${response.status}]: ${errText}`);
+      throw new Error(`Gemini API error ${response.status}`);
+    }
+
+    const data = await response.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    
+    if (!text) {
+      console.error('Gemini Error: Empty response candidates', JSON.stringify(data));
+      return '[]';
+    }
+    
+    return text;
+  } catch (err) {
+    console.error('Fetch error calling Gemini:', err);
+    throw err;
   }
-  const data = await response.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || '[]';
 }
 
 function parseGeminiResponse(text, candidates, allFacilities) {
@@ -130,6 +164,44 @@ function parseGeminiResponse(text, candidates, allFacilities) {
   let jsonStr = text.trim();
   if (jsonStr.startsWith('```json')) jsonStr = jsonStr.slice(7);
   if (jsonStr.startsWith('```')) jsonStr = jsonStr.slice(3);
+  if (jsonStr.endsWith('```')) jsonStr = jsonStr.slice(0, -3);
+  jsonStr = jsonStr.trim();
+
+  let agentResults;
+  try {
+    agentResults = JSON.parse(jsonStr);
+  } catch (err) {
+    console.error('JSON Parse Error in parseGeminiResponse:', err, 'Raw text:', text);
+    return [];
+  }
+
+  if (!Array.isArray(agentResults)) {
+    console.warn('Gemini response is not an array:', agentResults);
+    return [];
+  }
+
+  return agentResults.map(r => {
+    const idx = r.candidate_id;
+    const candidate = (typeof idx === 'number' && idx >= 0 && idx < candidates.length) ? candidates[idx] : null;
+    const full = candidate ? (allFacilities.find(f => f.name === candidate?.name) || candidate) : (candidate || {});
+    return {
+      name: full.name || candidate?.name || 'Unknown',
+      description: full.description || '',
+      specialties: full.specialties || [],
+      procedure: full.procedure || [],
+      equipment: full.equipment || [],
+      capability: full.capability || [],
+      address_city: full.address_city || candidate?.city || '',
+      address_stateOrRegion: full.address_stateOrRegion || candidate?.state || '',
+      latitude: full.latitude || candidate?.lat || null,
+      longitude: full.longitude || candidate?.lng || null,
+      trust_score: r.trust_score != null ? r.trust_score : 50,
+      contradictions: Array.isArray(r.contradictions) ? r.contradictions : [],
+      citation: r.citation || '',
+      relevance_reason: r.relevance_reason || ''
+    };
+  });
+}
   if (jsonStr.endsWith('```')) jsonStr = jsonStr.slice(0, -3);
   jsonStr = jsonStr.trim();
 
