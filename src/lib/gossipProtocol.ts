@@ -20,7 +20,7 @@ export interface MeshDoc {
  * Create a fresh mesh document
  */
 export function createMeshDoc(): MeshDoc {
-  return automerge.emptyDoc<MeshDoc>();
+  return automerge.init<MeshDoc>();
 }
 
 /**

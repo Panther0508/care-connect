@@ -11,6 +11,8 @@ import FacilityDetailPage from "./pages/FacilityDetailPage";
 import OutbreakDashboard from "./pages/OutbreakDashboard";
 import HealthGraph from "./pages/HealthGraph";
 import AIAssistant from "./pages/AIAssistant";
+import Passport from "./pages/Passport";
+import ClinicianView from "./pages/ClinicianView";
 import { useIDB } from "./hooks/useIDB";
 import { initMeshOrchestrator } from "./services/meshOrchestrator";
 import { useEffect } from "react";
@@ -33,7 +35,6 @@ const App = () => {
   const location = useLocation();
   const { ready } = useIDB();
 
-  // Initialize mesh orchestrator once IDB is ready
   useEffect(() => {
     if (ready) {
       initMeshOrchestrator().catch(console.error);
@@ -58,6 +59,8 @@ const App = () => {
           <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />
           <Route path="/health" element={<PageWrapper><HealthGraph /></PageWrapper>} />
           <Route path="/ai" element={<PageWrapper><AIAssistant /></PageWrapper>} />
+          <Route path="/passport" element={<PageWrapper><Passport /></PageWrapper>} />
+          <Route path="/clinician-view" element={<PageWrapper><ClinicianView /></PageWrapper>} />
           <Route path="/register-need" element={<PageWrapper><RegisterNeedPage /></PageWrapper>} />
           <Route path="/alerts" element={<PageWrapper><AlertsPage /></PageWrapper>} />
           <Route path="/reservation/:facilityId" element={<PageWrapper><ReservationPage /></PageWrapper>} />

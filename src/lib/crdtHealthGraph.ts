@@ -45,7 +45,7 @@ export type HealthDoc = {
  * Create a new empty health document
  */
 export function createHealthDoc(): HealthDoc {
-  return automerge.emptyDoc<HealthDoc>();
+  return automerge.init<HealthDoc>();
 }
 
 /**
