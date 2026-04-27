@@ -1,53 +1,48 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { SignedIn, SignedOut, useAuth } from "@clerk/clerk-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { lazy, Suspense } from "react";
+
+// Layout & Components
 import AppLayout from "./components/AppLayout";
 import { useOfflineAuth } from "./hooks/auth/useOfflineAuth";
 import { useRole } from "./hooks/auth/useRole";
-
-// Auth Pages
-import SignInPage from "./pages/auth/SignInPage";
-import SignUpPage from "./pages/auth/SignUpPage";
-
-// Public
-import Landing from "./pages/Landing";
-
-// Protected Pages
-import Onboarding from "./pages/onboarding";
-import PatientDashboard from "./pages/dashboards/PatientDashboard";
-import ClinicianDashboard from "./pages/dashboards/ClinicianDashboard";
-import CHWDashboard from "./pages/dashboards/CHWDashboard";
-import AdminDashboard from "./pages/dashboards/AdminDashboard";
-
-// Existing Pages
-import HomePage from "./pages/HomePage";
-import HealthGraph from "./pages/HealthGraph";
-import AIAssistant from "./pages/AIAssistant";
-import Passport from "./pages/Passport";
-import ClinicianView from "./pages/ClinicianView";
-import OutbreakDashboard from "./pages/OutbreakDashboard";
-import AlertsPage from "./pages/AlertsPage";
-import ReservationPage from "./pages/ReservationPage";
-import ImpactPage from "./pages/ImpactPage";
-import CrisisMapPage from "./pages/CrisisMapPage";
-import FacilityDetailPage from "./pages/FacilityDetailPage";
-import RegisterNeedPage from "./pages/RegisterNeedPage";
-
-// Settings & Support
-import Settings from "./pages/Settings";
-import Support from "./pages/Support";
-import LanguageSelector from "./pages/LanguageSelector";
-import Subscription from "./pages/Subscription";
-import Referral from "./pages/Referral";
-
-// Admin
-import AuditLog from "./pages/AuditLog";
-import AdminMFAGate from "./components/AdminMFAGate";
-import AdminBiometricLock from "./components/AdminBiometricLock";
+import LoadingFallback from "./components/LoadingFallback";
 
 // Auth Guards
 import { ProtectedRoute, PublicOnlyRoute } from "./components/role/RequireRole";
 
+// Lazy-loaded pages for code splitting
+const Landing = lazy(() => import("./pages/Landing"));
+const SignInPage = lazy(() => import("./pages/auth/SignInPage"));
+const SignUpPage = lazy(() => import("./pages/auth/SignUpPage"));
+const Onboarding = lazy(() => import("./pages/onboarding"));
+const PatientDashboard = lazy(() => import("./pages/dashboards/PatientDashboard"));
+const ClinicianDashboard = lazy(() => import("./pages/dashboards/ClinicianDashboard"));
+const CHWDashboard = lazy(() => import("./pages/dashboards/CHWDashboard"));
+const AdminDashboard = lazy(() => import("./pages/dashboards/AdminDashboard"));
+const HomePage = lazy(() => import("./pages/HomePage"));
+const HealthGraph = lazy(() => import("./pages/HealthGraph"));
+const AIAssistant = lazy(() => import("./pages/AIAssistant"));
+const Passport = lazy(() => import("./pages/Passport"));
+const ClinicianView = lazy(() => import("./pages/ClinicianView"));
+const OutbreakDashboard = lazy(() => import("./pages/OutbreakDashboard"));
+const AlertsPage = lazy(() => import("./pages/AlertsPage"));
+const RegisterNeedPage = lazy(() => import("./pages/RegisterNeedPage"));
+const ReservationPage = lazy(() => import("./pages/ReservationPage"));
+const ImpactPage = lazy(() => import("./pages/ImpactPage"));
+const CrisisMapPage = lazy(() => import("./pages/CrisisMapPage"));
+const FacilityDetailPage = lazy(() => import("./pages/FacilityDetailPage"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Support = lazy(() => import("./pages/Support"));
+const LanguageSelector = lazy(() => import("./pages/LanguageSelector"));
+const Subscription = lazy(() => import("./pages/Subscription"));
+const Referral = lazy(() => import("./pages/Referral"));
+const AuditLog = lazy(() => import("./pages/AuditLog"));
+const AdminMFAGate = lazy(() => import("./components/AdminMFAGate"));
+const AdminBiometricLock = lazy(() => import("./components/AdminBiometricLock"));
+
+// Page wrapper with animation
 const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <motion.div
@@ -62,17 +57,7 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-// Simple loading fallback
-const LoadingFallback = () => (
-  <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-400">
-    <div className="flex flex-col items-center gap-4">
-      <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
-      <p>App is initializing...</p>
-    </div>
-  </div>
-);
-
-// Component that redirects to appropriate dashboard based on role
+// Role-based dashboard switcher
 function RoleBasedDashboard() {
   const { role } = useRole();
 
@@ -98,9 +83,8 @@ const App = () => {
   const location = useLocation();
   const { isLoaded } = useAuth();
 
-  // Show loading until Clerk is ready
   if (!isLoaded) {
-    return <LoadingFallback />;
+    return <LoadingFallback message="Loading VitaChain..." showProgress />;
   }
 
   return (
@@ -112,7 +96,7 @@ const App = () => {
           <Route path="/sign-in" element={<SignInPage />} />
           <Route path="/sign-up" element={<SignUpPage />} />
 
-          {/* Onboarding - signed in but not completed */}
+          {/* Onboarding */}
           <Route
             path="/onboarding"
             element={
@@ -122,7 +106,7 @@ const App = () => {
             }
           />
 
-          {/* Protected routes for signed-in users */}
+          {/* Dashboard */}
           <Route
             path="/dashboard"
             element={
@@ -134,7 +118,7 @@ const App = () => {
             }
           />
 
-          {/* Existing protected routes */}
+          {/* Protected pages */}
           <Route
             path="/health"
             element={
@@ -145,7 +129,6 @@ const App = () => {
               </SignedIn>
             }
           />
-
           <Route
             path="/ai"
             element={
@@ -156,7 +139,6 @@ const App = () => {
               </SignedIn>
             }
           />
-
           <Route
             path="/passport"
             element={
@@ -167,7 +149,6 @@ const App = () => {
               </SignedIn>
             }
           />
-
           <Route
             path="/clinician-view"
             element={
@@ -178,7 +159,6 @@ const App = () => {
               </SignedIn>
             }
           />
-
           <Route
             path="/outbreak"
             element={
@@ -189,8 +169,6 @@ const App = () => {
               </SignedIn>
             }
           />
-
-          {/* Generic routes */}
           <Route
             path="/register-need"
             element={
@@ -199,7 +177,6 @@ const App = () => {
               </SignedIn>
             }
           />
-
           <Route
             path="/alerts"
             element={
@@ -208,7 +185,6 @@ const App = () => {
               </SignedIn>
             }
           />
-
           <Route
             path="/reservation/:facilityId"
             element={
@@ -217,7 +193,6 @@ const App = () => {
               </SignedIn>
             }
           />
-
           <Route
             path="/impact"
             element={
@@ -226,7 +201,6 @@ const App = () => {
               </SignedIn>
             }
           />
-
           <Route
             path="/crisis-map"
             element={
@@ -235,7 +209,6 @@ const App = () => {
               </SignedIn>
             }
           />
-
           <Route
             path="/facility/:id"
             element={
@@ -245,78 +218,42 @@ const App = () => {
             }
           />
 
-          {/* Settings & related */}
-          <Route
-            path="/settings"
-            element={
-              <SignedIn>
-                <PageWrapper><Settings /></PageWrapper>
-              </SignedIn>
-            }
-          />
+          {/* Settings & support */}
+          <Route path="/settings" element={<SignedIn><PageWrapper><Settings /></PageWrapper></SignedIn>} />
+          <Route path="/subscription" element={<SignedIn><PageWrapper><Subscription /></PageWrapper></SignedIn>} />
+          <Route path="/referral" element={<SignedIn><PageWrapper><Referral /></PageWrapper></SignedIn>} />
+          <Route path="/support" element={<SignedIn><PageWrapper><Support /></PageWrapper></SignedIn>} />
+          <Route path="/language" element={<SignedIn><PageWrapper><LanguageSelector /></PageWrapper></SignedIn>} />
 
-          <Route
-            path="/subscription"
-            element={
-              <SignedIn>
-                <PageWrapper><Subscription /></PageWrapper>
-              </SignedIn>
-            }
-          />
-
-          <Route
-            path="/referral"
-            element={
-              <SignedIn>
-                <PageWrapper><Referral /></PageWrapper>
-              </SignedIn>
-            }
-          />
-
-          <Route
-            path="/support"
-            element={
-              <SignedIn>
-                <PageWrapper><Support /></PageWrapper>
-              </SignedIn>
-            }
-          />
-
-          <Route
-            path="/language"
-            element={
-              <SignedIn>
-                <PageWrapper><LanguageSelector /></PageWrapper>
-              </SignedIn>
-            }
-          />
-
-          {/* Admin routes */}
+          {/* Admin routes with security layers */}
           <Route
             path="/admin"
             element={
               <SignedIn>
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminMFAGate>
-                    <AdminBiometricLock>
-                      <PageWrapper><AdminDashboard /></PageWrapper>
-                    </AdminBiometricLock>
-                  </AdminMFAGate>
+                  <Suspense fallback={<LoadingFallback />}>
+                    <AdminMFAGate>
+                      <AdminBiometricLock>
+                        <PageWrapper><AdminDashboard /></PageWrapper>
+                      </AdminBiometricLock>
+                    </AdminMFAGate>
+                  </Suspense>
                 </ProtectedRoute>
               </SignedIn>
             }
           />
-
           <Route
             path="/audit-log"
             element={
               <SignedIn>
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <AdminMFAGate>
-                    <AdminBiometricLock>
-                      <PageWrapper><AuditLog /></PageWrapper>
-                    </AdminBiometricLock>
-                  </AdminMFAGate>
+                  <Suspense fallback={<LoadingFallback />}>
+                    <AdminMFAGate>
+                      <AdminBiometricLock>
+                        <PageWrapper><AuditLog /></PageWrapper>
+                      </AdminBiometricLock>
+                    </AdminMFAGate>
+                  </Suspense>
                 </ProtectedRoute>
               </SignedIn>
             }
