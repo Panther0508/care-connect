@@ -4,6 +4,7 @@ import App from "./App.tsx";
 import "./index.css";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { StatusProvider } from "./context/StatusContext";
+import { createRoot } from "react-dom/client";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -22,7 +23,7 @@ const clerkProviderProps = PUBLISHABLE_KEY
   ? { publishableKey: PUBLISHABLE_KEY }
   : {};
 
-export default function Root() {
+function Root() {
   return (
     <ErrorBoundary>
       <ClerkProvider {...clerkProviderProps}>
@@ -35,3 +36,5 @@ export default function Root() {
     </ErrorBoundary>
   );
 }
+
+createRoot(document.getElementById("root")!).render(<Root />);
