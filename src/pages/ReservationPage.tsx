@@ -6,8 +6,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import confetti from "canvas-confetti";
 import { submitFeedback } from "../services/feedback";
 import { meshOrchestrator } from "../services/meshOrchestrator";
+import VitaAvatar from "../components/VitaAvatar";
+import { useStatus } from "../hooks/useStatus";
 
 export default function ReservationPage() {
+  const { showStatus } = useStatus();
   const { facilityId } = useParams();
   const navigate = useNavigate();
   const [facility, setFacility] = useState<Facility | null>(null);
@@ -51,7 +54,13 @@ export default function ReservationPage() {
   useEffect(() => {
     if (!loading && facility) {
       const timer = setInterval(() => {
-        setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
+        setTimeLeft((prev) => {
+          if (prev === 1) {
+            showStatus('error', 'Reservation Expired', 'The slot is no longer available. We are still watching for new matches.');
+            return 0;
+          }
+          return prev > 0 ? prev - 1 : 0;
+        });
       }, 1000);
       return () => clearInterval(timer);
     }
@@ -68,6 +77,7 @@ export default function ReservationPage() {
       setTimeout(() => {
         // Step 3: Confirmed
         setConfirmState("confirmed");
+        showStatus('success', 'Care Secured!', 'Your reservation is confirmed. Show the QR code at the facility.');
         
         // Record confirmation in mesh (anonymised)
         try {
@@ -220,12 +230,14 @@ export default function ReservationPage() {
                 </motion.button>
               )}
 
-              {confirmState === "confirmed" && (
-                <motion.div 
+                {confirmState === "confirmed" && (
+                <motion.div
                   key="confirmed"
-                  initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
                   className="flex flex-col items-center gap-6"
                 >
+                  <VitaAvatar state="success" size={120} />
                   <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 py-4 px-6 rounded-xl w-full justify-center shadow-[0_0_25px_rgba(16,185,129,0.2)]">
                     <motion.svg initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", bounce: 0.6 }} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
@@ -244,9 +256,12 @@ export default function ReservationPage() {
                         </div>
                       </motion.div>
                     ) : (
-                      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-sm text-emerald-500/80 font-medium italic">
-                        Thank you. We're stronger together.
-                      </motion.p>
+                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-3">
+                        <VitaAvatar state="celebrate" size={80} />
+                        <p className="text-sm text-emerald-500/80 font-medium italic">
+                          Thank you. We're stronger together.
+                        </p>
+                      </motion.div>
                     )}
                   </AnimatePresence>
                 </motion.div>

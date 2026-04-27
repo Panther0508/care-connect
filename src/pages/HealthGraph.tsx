@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import VitaAvatar from "../components/VitaAvatar";
 import {
   initHealthGraph,
   addCondition,
@@ -212,11 +213,14 @@ export default function HealthGraph() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-3xl font-bold text-slate-100 mb-2">My Health Graph</h1>
-        <p className="text-slate-400 text-sm">
-          Your encrypted personal health record. All data stays on your device.
-        </p>
+      <header className="flex items-center gap-6">
+        <VitaAvatar state="health" size={100} />
+        <div>
+          <h1 className="text-3xl font-bold text-slate-100 mb-2">My Health Graph</h1>
+          <p className="text-slate-400 text-sm">
+            Your encrypted personal health record. All data stays on your device.
+          </p>
+        </div>
       </header>
 
       {renderSection(

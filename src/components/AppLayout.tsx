@@ -3,6 +3,7 @@ import { BottomNav } from "./Navigation";
 import { OnlineStatusPill } from "./OnlineStatusPill";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { AnimatePresence, motion } from "framer-motion";
+import { useStatus } from "../hooks/useStatus";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -10,17 +11,15 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   const isOnline = useOnlineStatus();
-  const [toast, setToast] = useState<{ message: string; type: "online" | "offline" } | null>(null);
+  const { showStatus } = useStatus();
 
   useEffect(() => {
     // Only show toast when state explicitly changes after initial mount
     const handleOnline = () => {
-      setToast({ message: "Back online — syncing latest facility data", type: "online" });
-      setTimeout(() => setToast(null), 3000);
+      showStatus('success', 'Back Online', 'Syncing latest facility data...');
     };
     const handleOffline = () => {
-      setToast({ message: "You're offline — CareSentinel is still watching", type: "offline" });
-      setTimeout(() => setToast(null), 3000);
+      showStatus('offline', 'You Are Offline', 'CareSentinel is still working. Your data stays private.');
     };
 
     window.addEventListener('online', handleOnline);
@@ -30,7 +29,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, []);
+  }, [showStatus]);
 
   return (
     <div className={`min-h-screen w-full relative transition-all duration-500 overflow-hidden ${!isOnline ? "shadow-[inset_0_0_100px_rgba(245,158,11,0.05)]" : ""}`}>
@@ -74,23 +73,6 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </main>
 
       <BottomNav />
-
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className={`fixed bottom-20 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full text-xs font-medium border shadow-lg whitespace-nowrap ${
-              toast.type === "online" 
-                ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" 
-                : "bg-amber-500/20 text-amber-400 border-amber-500/30"
-            }`}
-          >
-            {toast.message}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

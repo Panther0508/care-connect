@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
-import { FacilityCard } from "../components/FacilityCard";
-import type { Facility } from "../services/aiSearch";
+import { motion, AnimatePresence } from "framer-motion";
+import VitaAvatar from "../components/VitaAvatar";
 import { checkForAlerts } from "../services/needWatcher";
 import { useSavedNeeds } from "../hooks/useSavedNeeds";
-import { motion, AnimatePresence } from "framer-motion";
 
 export default function AlertsPage() {
   const [alerts, setAlerts] = useState<Facility[]>([]);
@@ -26,18 +25,23 @@ export default function AlertsPage() {
         <div className="absolute -top-20 inset-x-0 h-64 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-500/10 via-transparent to-transparent pointer-events-none -z-10 animate-pulse" />
       )}
       
-      <header className="pt-4 z-10">
-        <motion.h1 
+      <header className="pt-4 z-10 relative">
+        {alerts.length > 0 && (
+          <div className="absolute -top-20 right-0">
+            <VitaAvatar state="alert" size={60} />
+          </div>
+        )}
+        <motion.h1
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           className="text-2xl font-bold text-slate-100 mb-2 leading-tight"
         >
           Your Care Alerts
         </motion.h1>
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
           className="text-slate-400 mb-6 text-sm"
         >
-          Matches found while you were away.
+          {alerts.length > 0 ? `${alerts.length} new matches found!` : "Matches found while you were away."}
         </motion.p>
       </header>
 
@@ -63,19 +67,14 @@ export default function AlertsPage() {
                 />
               ))}
               
-              <div className="relative z-10 text-center flex flex-col items-center gap-4">
-                <motion.div animate={{ rotate: [0, 5, -5, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-teal-500/50">
-                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                  </svg>
-                </motion.div>
-                <p className="text-slate-300 text-lg font-medium tracking-wide">The night is quiet.</p>
-                <p className="text-slate-500 text-sm">
-                  {needs.length > 0 
-                    ? "But we're still watching over your family. Your needs are securely registered." 
-                    : "Register a need so we can watch 24/7."}
-                </p>
-              </div>
+               <div className="relative z-10 text-center flex flex-col items-center gap-4">
+                 <VitaAvatar state="empty" size={80} />
+                 <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-slate-300 text-lg font-medium tracking-wide">
+                   {needs.length > 0
+                     ? "We're watching over your family. Alerts will appear here."
+                     : "Register a need so we can watch 24/7."}
+                 </motion.p>
+               </div>
             </motion.div>
           ) : (
             <motion.div 

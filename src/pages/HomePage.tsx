@@ -4,6 +4,8 @@ import { searchCare, type Facility } from "../services/aiSearch";
 import { useIDB } from "../hooks/useIDB";
 import { getAllFacilities } from "../lib/idb";
 import { motion, AnimatePresence } from "framer-motion";
+import VitaAvatar from "../components/VitaAvatar";
+import { useStatus } from "../hooks/useStatus";
 
 const PLACEHOLDERS = [
   "Pediatric malaria care near Kano...",
@@ -14,6 +16,7 @@ const PLACEHOLDERS = [
 const QUICK_NEEDS = ["Emergency birth", "Child convulsions", "Malaria crisis"];
 
 export default function HomePage() {
+  const { showStatus } = useStatus();
   const [query, setQuery] = useState("");
   const [hasSearched, setHasSearched] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -46,9 +49,13 @@ export default function HomePage() {
     try {
       const res = await searchCare(q);
       setResults(res);
+      if (res.length === 0) {
+        showStatus('error', 'No Results', 'Try different wording or register a need so we can watch 24/7.');
+      }
     } catch (err) {
       console.error('Search failed:', err);
       setResults([]);
+      showStatus('error', 'Search Error', 'Something went wrong. Please try again.');
     } finally {
       setIsSearching(false);
     }
@@ -117,14 +124,14 @@ export default function HomePage() {
               CareSentinel provides instant AI-powered facility audits — fully offline and 100% private.
             </motion.p>
           </div>
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
             animate={{ opacity: 1, scale: 1, rotate: 0 }}
             transition={{ duration: 1, type: "spring" }}
             className="hidden md:block w-48 h-48 relative"
           >
             <div className="absolute inset-0 bg-teal-500/20 blur-3xl rounded-full animate-pulse" />
-            <img src="/assets/mascot.png" alt="CareSentinel Guardian" className="w-full h-full object-contain relative z-10" />
+            <VitaAvatar state="health" size={192} className="relative z-10" />
           </motion.div>
         </div>
 
@@ -227,7 +234,7 @@ export default function HomePage() {
           className={advancedPanelOpen ? "glass-card p-4 mb-4" : "hidden"}
         >
           <h3 className="text-slate-100 font-semibold mb-3 flex items-center gap-2">
-            <img src="/assets/nano_banana.png" alt="Nano-Banana" className="w-6 h-6 object-contain" />
+            <img src="/assets/nano_banana.jpg" alt="Nano-Banana" className="w-6 h-6 object-contain" />
             Advanced Reasoning Panel
           </h3>
           <p className="text-sm text-slate-400 mb-4">
@@ -366,12 +373,10 @@ export default function HomePage() {
 
         {hasSearched && !isSearching && results.length === 0 && (
           <motion.div key="no-results" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-10 flex flex-col items-center gap-4">
-            <div className="w-24 h-24 bg-slate-800/50 rounded-full flex items-center justify-center mb-2 shadow-inner">
-              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500/50">
-                <circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/>
-              </svg>
+            <div className="w-32 h-32 bg-slate-800/50 rounded-full flex items-center justify-center mb-2 shadow-inner border border-white/5">
+              <VitaAvatar state="empty" size={96} />
             </div>
-            <p className="text-slate-300 max-w-xs leading-relaxed">
+            <p className="text-slate-300 max-w-xs leading-relaxed font-medium">
               We couldn't find a match yet. Try different wording, or register a need so we can watch 24/7.
             </p>
           </motion.div>

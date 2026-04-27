@@ -1,8 +1,9 @@
 // src/pages/AIAssistant.tsx
 // On-device Medical AI assistant using Gemma 2B
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import VitaAvatar from "../components/VitaAvatar";
 import {
   loadModel,
   isModelReady,
@@ -14,6 +15,7 @@ import {
 import { checkInteractionsSimple } from "../services/medicationChecker";
 import { getCurrentHealthState } from "../services/healthGraph";
 import { getAllRxNorm } from "../lib/idb";
+import { useStatus } from "../hooks/useStatus";
 
 type MessageRole = "user" | "assistant" | "system";
 
@@ -23,6 +25,8 @@ interface Message {
 }
 
 export default function AIAssistant() {
+  const { showStatus, dismissStatus } = useStatus();
+  const loaderToastRef = useRef<string | null>(null);
   const [modelLoaded, setModelLoaded] = useState(false);
   const [loadingModel, setLoadingModel] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -35,16 +39,34 @@ export default function AIAssistant() {
     const prepareModel = async () => {
       try {
         setLoadingModel(true);
+        loaderToastRef.current = showStatus(
+          'loading', 
+          'Initializing AI Engine', 
+          'This only happens once. The model will work offline after download.',
+          { duration: 0 }
+        );
         await loadModel();
         setModelLoaded(true);
+        showStatus('success', 'AI Engine Ready', 'You can now use the assistant offline.');
       } catch (err) {
         console.error("Failed to load Gemma model:", err);
+        showStatus('error', 'AI Load Failed', 'Could not initialize the engine. Check your storage.');
       } finally {
         setLoadingModel(false);
+        if (loaderToastRef.current) {
+          dismissStatus(loaderToastRef.current);
+          loaderToastRef.current = null;
+        }
       }
     };
     prepareModel();
-  }, []);
+    return () => {
+      if (loaderToastRef.current) {
+        dismissStatus(loaderToastRef.current);
+        loaderToastRef.current = null;
+      }
+    };
+  }, [showStatus, dismissStatus]);
 
   // Initialize RxNorm data if needed
   useEffect(() => {
@@ -224,18 +246,17 @@ export default function AIAssistant() {
 
       {/* chat display */}
       <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-        {messages.length === 0 && (
+        {messages.length === 0 && modelLoaded && (
           <div className="text-center text-slate-500 py-10">
             <p>Ask a medical question or use the quick actions above.</p>
-            {!modelLoaded && (
-              <div className="mt-4 flex items-center justify-center gap-2 text-amber-400">
-                <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                Loading AI model, please wait...
-              </div>
-            )}
+          </div>
+        )}
+
+        {!modelLoaded && (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <VitaAvatar state="loading" size={100} />
+            <p className="mt-4 text-amber-400">Loading AI model, please wait…</p>
+            <p className="text-xs text-slate-500 mt-2">First load may take a few minutes</p>
           </div>
         )}
 

@@ -15,7 +15,10 @@ import Passport from "./pages/Passport";
 import ClinicianView from "./pages/ClinicianView";
 import { useIDB } from "./hooks/useIDB";
 import { initMeshOrchestrator } from "./services/meshOrchestrator";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { StatusProvider } from "./context/StatusContext";
+import { StatusToastContainer } from "./components/StatusToast";
+import { useStatus } from "./hooks/useStatus";
 
 const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -41,12 +44,39 @@ const App = () => {
     }
   }, [ready]);
 
+  return (
+    <StatusProvider>
+      <AppContent ready={ready} />
+    </StatusProvider>
+  );
+};
+
+const AppContent = ({ ready }: { ready: boolean }) => {
+  const location = useLocation();
+  const { showStatus, dismissStatus } = useStatus();
+  const loaderToastRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!ready && !loaderToastRef.current) {
+      loaderToastRef.current = showStatus(
+        'loading', 
+        'Initializing AI Engine', 
+        'This only happens once. The model will work offline after download.',
+        { duration: 0 }
+      );
+    } else if (ready && loaderToastRef.current) {
+      dismissStatus(loaderToastRef.current);
+      loaderToastRef.current = null;
+    }
+  }, [ready, showStatus, dismissStatus]);
+
   if (!ready) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-400">
+        <StatusToastContainer />
         <div className="flex flex-col items-center gap-4">
           <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
-          <p>Initializing AI Engine...</p>
+          <p>Preparing environment...</p>
         </div>
       </div>
     );
@@ -54,6 +84,7 @@ const App = () => {
 
   return (
     <AppLayout>
+      <StatusToastContainer />
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />

@@ -71,7 +71,7 @@ export default function FacilityDetailPage() {
         
         {/* Facility detail header with trust score and badges */}
         <div className="flex items-center gap-3 mb-4">
-          <img src="/assets/nano_banana.png" alt="Nano-Banana" className="w-8 h-8 object-contain" />
+          <img src="/assets/nano_banana.jpg" alt="Nano-Banana" className="w-8 h-8 object-contain" />
           <div className="flex items-center gap-2">
             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
               facility.trust_score >= 80 ? 'bg-green-500/20 text-green-400 border border-green-500/30' :

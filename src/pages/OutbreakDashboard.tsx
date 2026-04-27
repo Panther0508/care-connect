@@ -8,8 +8,10 @@ import { getAllFacilities, getAllSearchLogs } from "../lib/idb";
 import type { Facility } from "../services/aiSearch";
 import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import { useStatus } from "../hooks/useStatus";
 
 export default function OutbreakDashboard() {
+  const { showStatus } = useStatus();
   const [meshData, setMeshData] = useState<{
     searchCounters: Record<string, number>;
     confirmedFacilities: string[];
@@ -73,6 +75,7 @@ export default function OutbreakDashboard() {
     for (let i = 0; i < 25; i++) {
       meshOrchestrator.recordSearch(fakeTerm);
     }
+    showStatus('alert', 'New Health Alert', '5 fever cases detected in your area. Tap for details.');
     setTimeout(() => setIsSimulating(false), 500);
   };
 
@@ -222,15 +225,29 @@ export default function OutbreakDashboard() {
       {isDebug && (
         <section className="glass-card p-5 border-dashed border-2 border-teal-500/50">
           <h2 className="text-lg font-semibold text-slate-100 mb-3">Debug Panel</h2>
-          <button
-            onClick={simulateOutbreak}
-            disabled={isSimulating}
-            className="px-4 py-2 bg-teal-500/20 text-teal-300 rounded-lg text-sm hover:bg-teal-500/30 disabled:opacity-50"
-          >
-            {isSimulating ? 'Simulating...' : 'Simulate Outbreak'}
-          </button>
-          <p className="text-xs text-slate-500 mt-2">
-            Injects 25 searches for "fever with stiff neck" to trigger an anomaly alert.
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={simulateOutbreak}
+              disabled={isSimulating}
+              className="px-4 py-2 bg-teal-500/20 text-teal-300 rounded-lg text-sm hover:bg-teal-500/30 disabled:opacity-50"
+            >
+              {isSimulating ? 'Simulating...' : 'Simulate Outbreak'}
+            </button>
+            <button
+              onClick={() => showStatus('success', 'Test Success', 'The notification system is working perfectly!')}
+              className="px-4 py-2 bg-emerald-500/20 text-emerald-300 rounded-lg text-sm hover:bg-emerald-500/30"
+            >
+              Show Success Toast
+            </button>
+            <button
+              onClick={() => showStatus('error', 'Test Error', 'Something simulated went wrong.')}
+              className="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg text-sm hover:bg-red-500/30"
+            >
+              Show Error Toast
+            </button>
+          </div>
+          <p className="text-xs text-slate-500 mt-3">
+            Injects 25 searches for "fever with stiff neck" to trigger an anomaly alert and test notifications.
           </p>
         </section>
       )}

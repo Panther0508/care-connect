@@ -1,5 +1,6 @@
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { AnimatePresence, motion } from "framer-motion";
+import VitaAvatar from "./VitaAvatar";
 
 export function OnlineStatusPill() {
   const isOnline = useOnlineStatus();
@@ -26,9 +27,9 @@ export function OnlineStatusPill() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.2 }}
-            className="bg-red-500/20 text-red-400 border border-red-500/30 rounded-full px-3 py-1 text-xs flex items-center gap-1"
+            className="bg-red-500/20 text-red-400 border border-red-500/30 rounded-full px-3 py-1 text-xs flex items-center gap-2"
           >
-            <span>●</span>
+            <VitaAvatar state="offline" size={16} />
             <span>Offline</span>
           </motion.div>
         )}

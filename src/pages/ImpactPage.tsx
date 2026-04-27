@@ -179,7 +179,7 @@ export default function ImpactPage() {
             animate={{ opacity: 1, x: 0 }}
             className="w-24 h-24 rounded-full overflow-hidden border-2 border-teal-500/30 shadow-glow"
           >
-            <img src="/assets/nana.png" alt="Nana" className="w-full h-full object-cover" />
+            <img src="/assets/nana.jpg" alt="Nana" className="w-full h-full object-cover" />
           </motion.div>
           <div className="text-center md:text-left h-20 flex items-center justify-center flex-1">
             <AnimatePresence mode="wait">
