@@ -36,6 +36,11 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
+  // Skip caching for non-HTTP/HTTPS requests (chrome-extension://, data:, etc.)
+  if (!url.protocol.startsWith('http')) {
+    return;
+  }
+
   // Cache-first for huggingface.co (model files)
   if (url.hostname === 'huggingface.co') {
     event.respondWith(
