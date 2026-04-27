@@ -87,10 +87,11 @@ const App = () => {
     return <LoadingFallback message="Loading VitaChain..." showProgress />;
   }
 
-  return (
+   return (
     <AppLayout>
-      <AnimatePresence mode="wait">
-        <Routes location={location} key={location.pathname}>
+      <Suspense fallback={<LoadingFallback message="Loading page..." />}>
+        <AnimatePresence mode="wait">
+          <Routes location={location} key={location.pathname}>
           {/* Public routes */}
           <Route path="/" element={<Landing />} />
           <Route path="/sign-in" element={<SignInPage />} />
@@ -263,6 +264,7 @@ const App = () => {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AnimatePresence>
+      </Suspense>
     </AppLayout>
   );
 };
