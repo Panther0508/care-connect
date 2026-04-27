@@ -2,8 +2,11 @@ import { useState } from 'react';
 import { UserButton } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '../services/translation/useTranslation';
+import Referral from './Referral';
+import Support from './Support';
+import LanguageSelector from './LanguageSelector';
 
-type Tab = 'profile' | 'security' | 'notifications' | 'subscription' | 'export' | 'delete';
+type Tab = 'profile' | 'security' | 'notifications' | 'subscription' | 'export' | 'delete' | 'referral' | 'support' | 'language';
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -14,6 +17,9 @@ export default function Settings() {
     { id: 'security', label: 'Security' },
     { id: 'notifications', label: 'Notifications' },
     { id: 'subscription', label: 'Subscription' },
+    { id: 'referral', label: 'Referral' },
+    { id: 'support', label: 'Help & Support' },
+    { id: 'language', label: 'Language' },
     { id: 'export', label: 'Export Data' },
     { id: 'delete', label: 'Delete Account' },
   ];
@@ -54,6 +60,9 @@ export default function Settings() {
         {activeTab === 'security' && <SecurityTab t={t} />}
         {activeTab === 'notifications' && <NotificationsTab t={t} />}
         {activeTab === 'subscription' && <SubscriptionTab t={t} />}
+        {activeTab === 'referral' && <Referral />}
+        {activeTab === 'support' && <Support />}
+        {activeTab === 'language' && <LanguageSelector />}
         {activeTab === 'export' && <ExportTab t={t} />}
         {activeTab === 'delete' && <DeleteTab t={t} />}
       </div>

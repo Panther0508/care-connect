@@ -1,9 +1,9 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { AnimatePresence } from "framer-motion";
-import { SignedIn, SignedOut, ClerkLoaded, ClerkLoading } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, useAuth } from "@clerk/clerk-react";
+import { motion, AnimatePresence } from "framer-motion";
 import AppLayout from "./components/AppLayout";
 import { useOfflineAuth } from "./hooks/auth/useOfflineAuth";
-import { useEffect, useState } from "react";
+import { useRole } from "./hooks/auth/useRole";
 
 // Auth Pages
 import SignInPage from "./pages/auth/SignInPage";
@@ -37,17 +37,14 @@ import RegisterNeedPage from "./pages/RegisterNeedPage";
 import Settings from "./pages/Settings";
 import Support from "./pages/Support";
 import LanguageSelector from "./pages/LanguageSelector";
+import Subscription from "./pages/Subscription";
+import Referral from "./pages/Referral";
 
 // Admin
 import AuditLog from "./pages/AuditLog";
 
 // Auth Guards
 import { ProtectedRoute, PublicOnlyRoute } from "./components/role/RequireRole";
-import { useRole } from "./hooks/auth/useRole";
-
-import { useEffect, useState } from "react";
-import { initHealthGraph } from "./services/healthGraph";
-import { initPassport } from "./services/passport";
 
 const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -63,47 +60,51 @@ const PageWrapper = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-// Loading component while Clerk loads
-const ClerkInitializer = ({ children }: { children: React.ReactNode }) => {
-  const [initialized, setInitialized] = useState(false);
+// Simple loading fallback
+const LoadingFallback = () => (
+  <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-400">
+    <div className="flex flex-col items-center gap-4">
+      <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
+      <p>App is initializing...</p>
+    </div>
+  </div>
+);
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        // Initialize core services
-        await initHealthGraph();
-        await initPassport();
-      } catch (error) {
-        console.error('Init error:', error);
-      } finally {
-        setInitialized(true);
-      }
-    };
-    init();
-  }, []);
+// Component that redirects to appropriate dashboard based on role
+function RoleBasedDashboard() {
+  const { role } = useRole();
 
-  if (!initialized) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-400">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
-          <p>Loading VitaChain...</p>
-        </div>
-      </div>
-    );
+  if (!role) {
+    return <Navigate to="/onboarding" replace />;
   }
 
-  return <>{children}</>;
-};
+  switch (role) {
+    case 'patient':
+      return <PatientDashboard />;
+    case 'clinician':
+      return <ClinicianDashboard />;
+    case 'chw':
+      return <CHWDashboard />;
+    case 'admin':
+      return <AdminDashboard />;
+    default:
+      return <Navigate to="/" replace />;
+  }
+}
 
 const App = () => {
   const location = useLocation();
-  const { canAccessApp } = useOfflineAuth();
+  const { isLoaded } = useAuth();
+
+  // Show loading until Clerk is ready
+  if (!isLoaded) {
+    return <LoadingFallback />;
+  }
 
   return (
-    <ClerkLoaded>
-      <ClerkInitializer>
-        <Routes location={location}>
+    <AppLayout>
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
           {/* Public routes */}
           <Route path="/" element={<Landing />} />
           <Route path="/sign-in" element={<SignInPage />} />
@@ -242,12 +243,30 @@ const App = () => {
             }
           />
 
-          {/* Settings pages */}
+          {/* Settings & related */}
           <Route
             path="/settings"
             element={
               <SignedIn>
                 <PageWrapper><Settings /></PageWrapper>
+              </SignedIn>
+            }
+          />
+
+          <Route
+            path="/subscription"
+            element={
+              <SignedIn>
+                <PageWrapper><Subscription /></PageWrapper>
+              </SignedIn>
+            }
+          />
+
+          <Route
+            path="/referral"
+            element={
+              <SignedIn>
+                <PageWrapper><Referral /></PageWrapper>
               </SignedIn>
             }
           />
@@ -296,31 +315,9 @@ const App = () => {
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </ClerkInitializer>
-    </ClerkLoaded>
+      </AnimatePresence>
+    </AppLayout>
   );
 };
-
-// Component that redirects to appropriate dashboard based on role
-function RoleBasedDashboard() {
-  const { role } = useRole();
-
-  if (!role) {
-    return <Navigate to="/onboarding" replace />;
-  }
-
-  switch (role) {
-    case 'patient':
-      return <PatientDashboard />;
-    case 'clinician':
-      return <ClinicianDashboard />;
-    case 'chw':
-      return <CHWDashboard />;
-    case 'admin':
-      return <AdminDashboard />;
-    default:
-      return <Navigate to="/" replace />;
-  }
-}
 
 export default App;
