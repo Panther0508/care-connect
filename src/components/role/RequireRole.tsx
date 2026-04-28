@@ -49,30 +49,24 @@ export function ProtectedRoute({ children, allowedRoles }: GuardProps) {
     return <Navigate to="/onboarding" state={{ from: location }} replace />;
   }
 
-  if (allowedRoles) {
-    const rolesArray = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
-    if (!rolesArray.includes(role)) {
-      const getDashboardForRole = (r: UserRole): string => {
-        switch (r) {
-          case 'patient':
-            return '/health';
-          case 'clinician':
-            return '/clinician-view';
-          case 'chw':
-            return '/outbreak';
-          case 'admin':
-            return '/admin';
-          default:
-            return '/';
-        }
-      };
-      return <Navigate to={getDashboardForRole(role)} replace />;
-    }
-  }
+  const rolesArray = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
 
-  // Block access if onboarding not completed (except on /onboarding route)
-  if (location.pathname !== '/onboarding' && localStorage.getItem('onboarding_completed') !== 'true') {
-    return <Navigate to="/onboarding" state={{ from: location }} replace />;
+  if (!rolesArray.includes(role)) {
+    const getDashboardForRole = (r: UserRole): string => {
+      switch (r) {
+        case 'patient':
+          return '/health';
+        case 'clinician':
+          return '/clinician-view';
+        case 'chw':
+          return '/outbreak';
+        case 'admin':
+          return '/admin';
+        default:
+          return '/';
+      }
+    };
+    return <Navigate to={getDashboardForRole(role)} replace />;
   }
 
   // Admin audit logging
