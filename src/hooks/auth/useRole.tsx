@@ -4,12 +4,13 @@ import { getRoleFromMetadata, ROLES, UserRole, hasPermission, ROLE_PERMISSIONS }
 
 export function useRole() {
   const { user, isLoaded } = useAuth();
+
+  // Local role state that can be set from localStorage immediately
   const [localRole, setLocalRole] = useState<UserRole | null>(() => {
-    // Initialize from localStorage immediately (synchronous)
     return localStorage.getItem('user_role') as UserRole | null;
   });
 
-  // Update local role when Clerk metadata loads (in case it changed)
+  // Sync with Clerk metadata when it arrives
   useEffect(() => {
     if (isLoaded && user) {
       const clerkRole = getRoleFromMetadata(user.publicMetadata);
@@ -20,15 +21,15 @@ export function useRole() {
     }
   }, [isLoaded, user]);
 
-  const isLoading = !isLoaded;
-
   const role = useMemo((): UserRole | null => {
-    // Prioritize explicitly set role from onboarding (most recent)
+    // Always trust locally cached role immediately — it was set during onboarding
     if (localRole) return localRole;
-    // Fallback to Clerk metadata
+
+    // Fallback to Clerk metadata once loaded
     if (user && isLoaded) {
       return getRoleFromMetadata(user.publicMetadata);
     }
+
     return null;
   }, [user, isLoaded, localRole]);
 
@@ -53,16 +54,16 @@ export function useRole() {
   const isCHW = useMemo(() => role === ROLES.CHW, [role]);
   const isPatient = useMemo(() => role === ROLES.PATIENT, [role]);
 
-   return {
-     role,
-     permissions,
-     hasRole,
-     can,
-     isAdmin,
-     isClinician,
-     isCHW,
-     isPatient,
-     // Only loading if Clerk hasn't loaded AND we have no cached role
-     isLoading: (!isLoaded && !localRole),
-   };
+  return {
+    role,
+    permissions,
+    hasRole,
+    can,
+    isAdmin,
+    isClinician,
+    isCHW,
+    isPatient,
+    // Only truly loading on very first app load before we have any role info
+    isLoading: (!isLoaded && !localRole),
+  };
 }
