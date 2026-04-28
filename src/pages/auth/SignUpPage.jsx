@@ -1,6 +1,7 @@
 import { SignUp } from '@clerk/clerk-react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
+import { useEffect } from 'react';
 
 export default function SignUpPage() {
   const { isSignedIn } = useAuth();
@@ -28,8 +29,8 @@ export default function SignUpPage() {
           }}
           routing="path"
           path="/sign-up"
-          afterSignUpUrl="/onboarding"
-          afterSignInUrl="/dashboard"
+          forceRedirectUrl="/onboarding"
+          fallbackRedirectUrl="/onboarding"
         />
       </div>
     </div>

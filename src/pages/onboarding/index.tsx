@@ -111,14 +111,14 @@ export default function Onboarding() {
         }
         // Otherwise fall through to biometrics
         return <StepBiometrics onNext={nextStep} onBack={prevStep} onUpdate={updateData} enabled={data.biometricsEnabled} />;
-      case 7:
-        // After MFA step for admin, biometrics is step 7
-        if (data.role === 'admin' && data.adminMFACompleted && !data.biometricsEnabled) {
-          return <StepBiometrics onNext={nextStep} onBack={prevStep} onUpdate={updateData} enabled={data.biometricsEnabled} />;
-        }
-        return <StepDone onFinish={() => window.location.href = '/dashboard'} />;
-      case 8:
-        return <StepDone onFinish={() => window.location.href = '/dashboard'} />;
+       case 7:
+         // After MFA step for admin, biometrics is step 7
+         if (data.role === 'admin' && data.adminMFACompleted && !data.biometricsEnabled) {
+           return <StepBiometrics onNext={nextStep} onBack={prevStep} onUpdate={updateData} enabled={data.biometricsEnabled} />;
+         }
+         return <StepDone onFinish={handleFinish} />;
+       case 8:
+         return <StepDone onFinish={handleFinish} />;
       default:
         return null;
     }
