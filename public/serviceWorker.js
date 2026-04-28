@@ -1,7 +1,5 @@
 const CACHE_NAME = 'vitachain-v2';
 const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
   '/manifest.json',
   '/facilities_offline.json',
   '/serviceWorker.js'
@@ -41,6 +39,17 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // For HTML pages, use network-first to always get latest content
+  if (event.request.headers.get('accept')?.includes('text/html')) {
+    event.respondWith(
+      fetch(event.request).catch(() => {
+        // If network fails, try cache
+        return caches.match(event.request);
+      })
+    );
+    return;
+  }
+
   // Cache-first for huggingface.co (model files)
   if (url.hostname === 'huggingface.co') {
     event.respondWith(
@@ -58,7 +67,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Stale-while-revalidate for everything else
+  // Stale-while-revalidate for everything else (CSS, JS, assets)
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       const fetchPromise = fetch(event.request).then((networkResponse) => {
@@ -68,7 +77,7 @@ self.addEventListener('fetch', (event) => {
         }
         return networkResponse;
       }).catch(() => {
-        // network failed, just resolve to cached if exists
+        // network failed, return cached if available
       });
       return cachedResponse || fetchPromise;
     })
