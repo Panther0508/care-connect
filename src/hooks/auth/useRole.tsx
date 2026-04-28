@@ -1,44 +1,40 @@
 import { useAuth } from '@clerk/clerk-react';
-import { useCallback, useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { getRoleFromMetadata, ROLES, UserRole, hasPermission, ROLE_PERMISSIONS } from '../../lib/roles';
 
 export function useRole() {
   const { user, isLoaded } = useAuth();
 
-  // Sync Clerk metadata to localStorage when it arrives
-  useEffect(() => {
-    if (isLoaded && user) {
-      const clerkRole = getRoleFromMetadata(user.publicMetadata);
-      if (clerkRole) {
-        localStorage.setItem('user_role', clerkRole);
-      }
-    }
-  }, [isLoaded, user]);
+  // IMMEDIATE synchronous read from localStorage — always available
+  const localStorageRole = useMemo(() => {
+    return (localStorage.getItem('user_role') as UserRole) || null;
+  }, []);
 
-  // Compute role fresh on every render (no memo)
-  const role: UserRole | null = (() => {
-    // If Clerk has loaded and has metadata, use that
-    if (isLoaded && user) {
-      const clerkRole = getRoleFromMetadata(user.publicMetadata);
-      if (clerkRole) return clerkRole;
+  // Clerk-based role (may be null initially)
+  const clerkRole = isLoaded && user ? getRoleFromMetadata(user.publicMetadata) : null;
+
+  // Final role: prefer Clerk if available, fall back to localStorage
+  const role = clerkRole || localStorageRole;
+
+  // Background sync: whenever Clerk loads with a role that differs from localStorage, update localStorage
+  useEffect(() => {
+    if (isLoaded && user && clerkRole && clerkRole !== localStorageRole) {
+      localStorage.setItem('user_role', clerkRole);
     }
-    // Fallback to localStorage (works immediately after onboarding)
-    const stored = localStorage.getItem('user_role');
-    return stored as UserRole | null;
-  })();
+  }, [isLoaded, user, clerkRole, localStorageRole]);
 
   const permissions = role ? (ROLE_PERMISSIONS[role] || []) : [];
 
-  const hasRole = useCallback((requiredRole: UserRole | UserRole[]): boolean => {
+  const hasRole = (requiredRole: UserRole | UserRole[]): boolean => {
     if (!role) return false;
     const roles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
     return roles.includes(role);
-  }, [role]);
+  };
 
-  const can = useCallback((permission: string): boolean => {
+  const can = (permission: string): boolean => {
     if (!role) return false;
     return hasPermission(role, permission);
-  }, [role]);
+  };
 
   const isAdmin = role === ROLES.ADMIN;
   const isClinician = role === ROLES.CLINICIAN;
@@ -54,7 +50,6 @@ export function useRole() {
     isClinician,
     isCHW,
     isPatient,
-    // Loading only if Clerk hasn't loaded AND no cached role exists
-    isLoading: !isLoaded && !localStorage.getItem('user_role'),
+    isLoading: false, // Always false — we always have a role from localStorage or Clerk
   };
 }

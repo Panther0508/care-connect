@@ -2,7 +2,6 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { useRole } from '../../hooks/auth/useRole';
 import { UserRole } from '../../lib/roles';
-import { useEffect, useRef } from 'react';
 import LoadingFallback from '../LoadingFallback';
 
 interface GuardProps {
@@ -26,12 +25,11 @@ export function RequireAuth({ children }: GuardProps) {
   return <>{children}</>;
 }
 
-// Requires signed-in + specific role(s) + onboarding completed
+// Requires signed-in + specific role(s)
 export function ProtectedRoute({ children, allowedRoles }: GuardProps) {
-  const { isSignedIn, isLoaded, user } = useAuth();
+  const { isSignedIn, isLoaded } = useAuth();
   const location = useLocation();
-  const { role, isLoading } = useRole();
-  const loggedRef = useRef(false);
+  const { role } = useRole();
 
   if (!isLoaded) {
     return <LoadingFallback message="Loading..." />;
@@ -41,10 +39,7 @@ export function ProtectedRoute({ children, allowedRoles }: GuardProps) {
     return <Navigate to="/sign-in" state={{ from: location }} replace />;
   }
 
-  if (isLoading) {
-    return <LoadingFallback message="Loading profile..." />;
-  }
-
+  // If no role, go to onboarding (this should be instant now)
   if (!role) {
     return <Navigate to="/onboarding" state={{ from: location }} replace />;
   }
@@ -68,14 +63,6 @@ export function ProtectedRoute({ children, allowedRoles }: GuardProps) {
     };
     return <Navigate to={getDashboardForRole(role)} replace />;
   }
-
-  // Admin audit logging
-  useEffect(() => {
-    if (role !== 'admin') return;
-    if (loggedRef.current) return;
-    // Best-effort: we don't have userId easily here, would need useAuth hook
-    loggedRef.current = true;
-  }, [role, location.pathname]);
 
   return <>{children}</>;
 }
