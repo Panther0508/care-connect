@@ -8,8 +8,7 @@ import AppLayout from "./components/AppLayout";
 import LoadingFallback from "./components/LoadingFallback";
 import { useRole } from "./hooks/auth/useRole";
 import { ProtectedRoute } from "./components/role/RequireRole";
-import { useRole } from "./hooks/auth/useRole";
-import { ProtectedRoute } from "./components/role/RequireRole";
+import { RequireAuth } from "./components/role/RequireAuth";
 
 // Lazy-loaded pages for code splitting
 const Landing = lazy(() => import("./pages/Landing"));
@@ -93,21 +92,21 @@ const App = () => {
             <Route path="/sign-in" element={<SignInPage />} />
             <Route path="/sign-up" element={<SignUpPage />} />
 
-            {/* Onboarding — any signed-in user */}
+            {/* Onboarding — requires auth only, no role needed */}
             <Route path="/onboarding" element={
-              <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+              <RequireAuth>
                 <Onboarding />
-              </ProtectedRoute>
+              </RequireAuth>
             } />
 
-            {/* Dashboard — role-based */}
+            {/* Dashboard — requires auth + role */}
             <Route path="/dashboard" element={
               <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
                 <RoleBasedDashboard />
               </ProtectedRoute>
             } />
 
-            {/* Protected pages */}
+            {/* Protected pages — all require role */}
             <Route path="/health" element={
               <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw']}>
                 <PageWrapper><HealthGraph /></PageWrapper>
