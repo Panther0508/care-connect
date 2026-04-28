@@ -71,6 +71,7 @@ export default function Onboarding() {
     if (!user) return;
 
     try {
+      // Save locally for immediate offline access
       await updateUserMetadata(user.id, {
         role: data.role,
         language: data.language,
@@ -78,7 +79,19 @@ export default function Onboarding() {
         onboardingCompletedAt: new Date().toISOString(),
       });
 
-      // No step change; just complete
+      // Also persist role to Clerk's publicMetadata so it's available across sessions
+      try {
+        await user.update({
+          publicMetadata: {
+            role: data.role,
+            language: data.language,
+            hasCompletedOnboarding: true,
+          },
+        });
+      } catch (err) {
+        console.warn('Failed to update Clerk publicMetadata:', err);
+        // Continue anyway; localStorage fallback is sufficient
+      }
     } catch (error) {
       console.error('Failed to complete onboarding:', error);
     }
