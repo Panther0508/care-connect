@@ -53,7 +53,11 @@ const PageWrapper = ({ children }) => (
 
 // Role-based dashboard switcher
 function RoleBasedDashboard() {
-  const { role } = useRole();
+  const { role: hookRole } = useRole();
+
+  // Immediate fallback to localStorage if hook returns null
+  const storedRole = localStorage.getItem('user_role');
+  const role = hookRole || storedRole;
 
   if (!role) {
     return <Navigate to="/onboarding" replace />;

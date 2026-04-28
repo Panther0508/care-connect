@@ -12,8 +12,17 @@ if (!PUBLISHABLE_KEY) {
   console.warn("VITE_CLERK_PUBLISHABLE_KEY is not set. Clerk auth will be disabled.");
 }
 
-// Service worker disabled temporarily to fix caching issues
-// Uncomment after Vercel deployment stabilizes
+// URGENT: Force-unregister any existing service workers to break stale cache loop
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.getRegistrations().then((registrations) => {
+    for (const registration of registrations) {
+      registration.unregister();
+      console.log("Unregistered stale service worker:", registration.scope);
+    }
+  });
+}
+
+// Service worker disabled — do not register new one until caching strategy is finalized
 // if ("serviceWorker" in navigator) {
 //   navigator.serviceWorker.register("/serviceWorker.js", { updateViaCache: 'none' })
 //     .then((registration) => {
