@@ -1,11 +1,11 @@
 import { useAuth } from '@clerk/clerk-react';
-import { useMemo, useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { getRoleFromMetadata, ROLES, UserRole, hasPermission, ROLE_PERMISSIONS } from '../../lib/roles';
 
 export function useRole() {
   const { user, isLoaded } = useAuth();
 
-  // Sync Clerk metadata to localStorage when it arrives (for future sessions)
+  // Sync Clerk metadata to localStorage when it arrives
   useEffect(() => {
     if (isLoaded && user) {
       const clerkRole = getRoleFromMetadata(user.publicMetadata);
@@ -15,21 +15,19 @@ export function useRole() {
     }
   }, [isLoaded, user]);
 
-  const role = useMemo((): UserRole | null => {
+  // Compute role fresh on every render (no memo)
+  const role: UserRole | null = (() => {
     // If Clerk has loaded and has metadata, use that
     if (isLoaded && user) {
       const clerkRole = getRoleFromMetadata(user.publicMetadata);
       if (clerkRole) return clerkRole;
     }
     // Fallback to localStorage (works immediately after onboarding)
-    const stored = localStorage.getItem('user_role') as UserRole | null;
-    return stored;
-  }, [isLoaded, user?.publicMetadata]);
+    const stored = localStorage.getItem('user_role');
+    return stored as UserRole | null;
+  })();
 
-  const permissions = useMemo(() => {
-    if (!role) return [];
-    return ROLE_PERMISSIONS[role] || [];
-  }, [role]);
+  const permissions = role ? (ROLE_PERMISSIONS[role] || []) : [];
 
   const hasRole = useCallback((requiredRole: UserRole | UserRole[]): boolean => {
     if (!role) return false;
@@ -42,10 +40,10 @@ export function useRole() {
     return hasPermission(role, permission);
   }, [role]);
 
-  const isAdmin = useMemo(() => role === ROLES.ADMIN, [role]);
-  const isClinician = useMemo(() => role === ROLES.CLINICIAN, [role]);
-  const isCHW = useMemo(() => role === ROLES.CHW, [role]);
-  const isPatient = useMemo(() => role === ROLES.PATIENT, [role]);
+  const isAdmin = role === ROLES.ADMIN;
+  const isClinician = role === ROLES.CLINICIAN;
+  const isCHW = role === ROLES.CHW;
+  const isPatient = role === ROLES.PATIENT;
 
   return {
     role,

@@ -7,8 +7,7 @@ import { lazy, Suspense } from "react";
 import AppLayout from "./components/AppLayout";
 import LoadingFallback from "./components/LoadingFallback";
 import { useRole } from "./hooks/auth/useRole";
-import { ProtectedRoute } from "./components/role/RequireRole";
-import { RequireAuth } from "./components/role/RequireAuth";
+import { ProtectedRoute, RequireAuth } from "./components/role/RequireRole";
 
 // Lazy-loaded pages for code splitting
 const Landing = lazy(() => import("./pages/Landing"));

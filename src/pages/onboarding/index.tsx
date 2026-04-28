@@ -32,6 +32,7 @@ interface OnboardingData {
 export default function Onboarding() {
   const { user, isLoaded } = useAuth();
   const navigate = useNavigate();
+  const { role } = useRole();
   const [data, setData] = useState<OnboardingData>({
     step: 1,
     role: null,
