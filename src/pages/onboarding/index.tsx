@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useRole } from '../../hooks/auth/useRole';
 import StepWelcome from './steps/StepWelcome';
 import StepRoleSelection from './steps/StepRoleSelection';
 import StepHealthProfile from './steps/StepHealthProfile';
