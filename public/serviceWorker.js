@@ -1,17 +1,14 @@
-const CACHE_NAME = 'vitachain-v2';
-const ASSETS_TO_CACHE = [
+const CACHE_NAME = 'vitachain-v3';
+
+// Files that can be cached permanently (no content hash in name)
+const STATIC_ASSETS = [
   '/manifest.json',
   '/facilities_offline.json',
-  '/serviceWorker.js'
+  '/serviceWorker.js',
+  // Vite assets with content hash are safe to cache (fingerprinted)
 ];
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('Opened cache');
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
   self.skipWaiting();
 });
 
@@ -21,7 +18,6 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
           if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -39,128 +35,88 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // For HTML pages, use network-first to always get latest content
+  // For API calls and external resources, use network-first
+  if (url.pathname.includes('/api/') || url.hostname !== location.hostname) {
+    event.respondWith(networkFirst(event.request));
+    return;
+  }
+
+  // For HTML pages — always network-first to get fresh index.html
   if (event.request.headers.get('accept')?.includes('text/html')) {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        // If network fails, try cache
-        return caches.match(event.request);
-      })
-    );
+    event.respondWith(networkFirst(event.request));
     return;
   }
 
-  // Cache-first for huggingface.co (model files)
-  if (url.hostname === 'huggingface.co') {
-    event.respondWith(
-      caches.match(event.request).then((response) => {
-        if (response) return response;
-        return fetch(event.request).then((networkResponse) => {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-          return networkResponse;
-        });
-      })
-    );
+  // For Vite-built JS/CSS/assets with content hash — cache-first with network fallback
+  if (event.request.url.match(/[-](\w{8,})\./)) {
+    event.respondWith(cacheFirst(event.request));
     return;
   }
 
-  // Stale-while-revalidate for everything else (CSS, JS, assets)
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200 && event.request.method === 'GET') {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
-        }
-        return networkResponse;
-      }).catch(() => {
-        // network failed, return cached if available
-      });
-      return cachedResponse || fetchPromise;
-    })
-  );
+  // For static assets without hash — stale-while-revalidate
+  event.respondWith(staleWhileRevalidate(event.request));
 });
 
-// Listen for background sync events
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'mesh-gossip') {
-    event.waitUntil(
-      self.clients.matchAll({ includeUncontrolled: true }).then(clients => {
-        clients.forEach(client => {
-          client.postMessage({ type: 'TRIGGER_MESH_GOSSIP' });
-        });
-      })
-    );
+async function networkFirst(request) {
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse && networkResponse.status === 200 && request.method === 'GET') {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch (error) {
+    // Network failed, try cache
+    const cached = await caches.match(request);
+    if (cached) return cached;
+    // If it's a navigation request, return offline fallback
+    if (request.mode === 'navigate') {
+      return caches.match('/offline.html');
+    }
+    throw error;
+  }
+}
+
+async function cacheFirst(request) {
+  const cached = await caches.match(request);
+  if (cached) {
+    // Validate content type — don't serve HTML for JS module requests
+    const contentType = cached.headers.get('content-type');
+    if (contentType && (contentType.includes('application/javascript') || contentType.includes('application/wasm') || contentType.includes('text/css'))) {
+      return cached;
+    }
+    // Cached response is wrong type (e.g., HTML), skip it
   }
 
-  if (event.tag === 'satellite-upload') {
-    event.waitUntil(
-      // For satellite upload, we can attempt to fetch from our own endpoint
-      // Since we're simulating, we'll just make a POST request to our own site
-      fetch('/api/satellite-ingest', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        // In a real implementation, we would get the data from IndexedDB
-        // For now, we'll send empty data as this is a simulation
-        body: JSON.stringify({
-          facilities: [],
-          searches: {},
-          timestamp: new Date().toISOString()
-        })
-      }).then(response => {
-        console.log('Satellite upload completed via background sync:', response.status);
-        return response;
-      }).catch(error => {
-        console.error('Satellite upload failed in background sync:', error);
-        throw error;
-      })
-    );
+  try {
+    const networkResponse = await fetch(request);
+    if (networkResponse && networkResponse.status === 200 && request.method === 'GET') {
+      const cache = await caches.open(CACHE_NAME);
+      cache.put(request, networkResponse.clone());
+    }
+    return networkResponse;
+  } catch (error) {
+    // If network fails and we have a cached response (even wrong type), return it as last resort
+    if (cached) return cached;
+    throw error;
   }
-});
+}
 
-// Handle push notifications for alerts
-self.addEventListener('push', (event) => {
-  let data = {};
-  if (event.data) {
-    data = event.data.json();
-  }
-  const title = data.title || 'VitaChain Alert';
-   const options = {
-     body: data.body || 'A new care match has been found for your registered need.',
-     icon: '/icon-192.png',
-     badge: '/icon-192.png',
-     data: {
-       url: data.url || '/' // URL to open when notification is clicked
-     }
-   };
-
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
-});
-
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-
-  // Determine the URL to open
-  const url = event.notification.data.url || '/';
-
-  // Open the URL in a new window/tab
-  event.waitUntil(
-    clients.matchAll({ type: 'window' }).then(clientList => {
-      for (const client of clientList) {
-        if (client.url === url && 'focus' in client) {
-          return client.focus();
-        }
+async function staleWhileRevalidate(request) {
+  const cached = await caches.match(request);
+  const fetchPromise = fetch(request).then((networkResponse) => {
+    if (networkResponse && networkResponse.status === 200 && request.method === 'GET') {
+      const contentType = networkResponse.headers.get('content-type');
+      // Only cache correct MIME types
+      if (contentType && !contentType.includes('text/html')) {
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, networkResponse.clone()));
       }
-      if (clients.openWindow) {
-        return clients.openWindow(url);
-      }
-    })
-  );
-});
+    }
+    return networkResponse;
+  }).catch(() => {
+    // Network failed, return cached regardless of type (best effort)
+    return cached;
+  });
+
+  return cached || fetchPromise;
+}
