@@ -12,11 +12,27 @@ if (!PUBLISHABLE_KEY) {
   console.warn("VITE_CLERK_PUBLISHABLE_KEY is not set. Clerk auth will be disabled.");
 }
 
-// Register service worker
+// Register service worker with immediate update
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/serviceWorker.js").catch((err) =>
-    console.log("ServiceWorker registration failed:", err)
-  );
+  navigator.serviceWorker.register("/serviceWorker.js", { updateViaCache: 'none' })
+    .then((registration) => {
+      // Force update if a new service worker is available
+      if (registration.waiting) {
+        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
+              // Reload to use new service worker
+              window.location.reload();
+            }
+          });
+        }
+      });
+    })
+    .catch((err) => console.log("ServiceWorker registration failed:", err));
 }
 
 const clerkProviderProps = PUBLISHABLE_KEY
