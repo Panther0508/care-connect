@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import StepWelcome from './steps/StepWelcome';
 import StepRoleSelection from './steps/StepRoleSelection';
 import StepHealthProfile from './steps/StepHealthProfile';
@@ -30,6 +31,7 @@ interface OnboardingData {
 
 export default function Onboarding() {
   const { user, isLoaded } = useAuth();
+  const navigate = useNavigate();
   const [data, setData] = useState<OnboardingData>({
     step: 1,
     role: null,
@@ -74,10 +76,15 @@ export default function Onboarding() {
         onboardingCompletedAt: new Date().toISOString(),
       });
 
-      setData((prev) => ({ ...prev, step: 7 }));
+      // No step change; just complete
     } catch (error) {
       console.error('Failed to complete onboarding:', error);
     }
+  };
+
+  const handleFinish = async () => {
+    await completeOnboarding();
+    navigate('/dashboard');
   };
 
   if (!isLoaded) {

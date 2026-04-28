@@ -1,4 +1,4 @@
-import { User, api } from '@clerk/clerk-react';
+import { User } from '@clerk/clerk-react';
 import { getItem, setItem } from '../../lib/idb';
 
 const ROLE_CACHE_KEY = 'pending_user_role';
@@ -12,21 +12,26 @@ export async function updateUserMetadata(
     onboardingCompletedAt?: string;
   }
 ): Promise<void> {
-  // Store role locally for immediate use (optimistic update)
-  if (metadata.role) {
-    await setItem(ROLE_CACHE_KEY, metadata.role);
-  }
-
-  // Also store in localStorage as fallback
+  // Store role immediately in localStorage (synchronous, always works)
   if (metadata.role) {
     localStorage.setItem('user_role', metadata.role);
   }
 
-  console.log('User metadata cached locally:', userId, metadata);
+  // Also store onboarding completion flag
+  if (metadata.hasCompletedOnboarding) {
+    localStorage.setItem('onboarding_completed', 'true');
+  }
 
-  // In production, this would use Clerk's Admin API via a backend endpoint:
-  // POST /api/users/{userId}/metadata
-  // For now, we rely on the cached role until backend is connected
+  // Best-effort async cache to IndexedDB for offline use
+  if (metadata.role) {
+    try {
+      await setItem(ROLE_CACHE_KEY, metadata.role);
+    } catch (e) {
+      // IndexedDB might be unavailable; ignore
+    }
+  }
+
+  console.log('User metadata cached locally:', userId, metadata);
 }
 
 export async function getUserRole(user: User): Promise<string | null> {
