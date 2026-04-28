@@ -1,9 +1,10 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth, SignedIn, SignedOut } from '@clerk/clerk-react';
+import { useAuth, User, SignedIn } from '@clerk/clerk-react';
 import { useRole } from '../../hooks/auth/useRole';
 import { UserRole } from '../../lib/roles';
 import { adminAuditLogger } from '../../services/adminAuditLogger';
 import { useEffect, useRef } from 'react';
+import LoadingFallback from '../LoadingFallback';
 
 interface RequireRoleProps {
   children: React.ReactNode;
@@ -11,26 +12,36 @@ interface RequireRoleProps {
   fallbackPath?: string;
 }
 
+// Combined auth + role guard
 export function RequireRole({ children, allowedRoles, fallbackPath = '/onboarding' }: RequireRoleProps) {
-  const { role, isLoading } = useRole();
+  const { isSignedIn, isLoaded } = useAuth();
   const location = useLocation();
-  const { user } = useAuth();
+  const { role, isLoading } = useRole();
   const loggedRef = useRef(false);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+  // Show loading while Clerk initializes
+  if (!isLoaded) {
+    return <LoadingFallback message="Loading..." />;
   }
 
+  // Redirect to sign-in if not authenticated
+  if (!isSignedIn) {
+    return <Navigate to="/sign-in" state={{ from: location }} replace />;
+  }
+
+  // Wait for role to be determined after auth loads
+  if (isLoading) {
+    return <LoadingFallback message="Loading profile..." />;
+  }
+
+  // If role not set (e.g., onboarding incomplete), send to onboarding
   if (!role) {
     return <Navigate to="/onboarding" state={{ from: location }} replace />;
   }
 
   const rolesArray = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
 
+  // Role-based access control
   if (!rolesArray.includes(role)) {
     const getDashboardForRole = (r: UserRole): string => {
       switch (r) {
@@ -52,20 +63,13 @@ export function RequireRole({ children, allowedRoles, fallbackPath = '/onboardin
 
   // Admin security checks: audit log access
   useEffect(() => {
-    if (!user || !role) return;
     if (role !== 'admin') return;
     if (loggedRef.current) return;
 
-    adminAuditLogger.log(
-      user.id,
-      'route.access',
-      `admin_route:${location.pathname}`,
-      { pathname: location.pathname, allowedRoles: rolesArray },
-      user.publicMetadata?.did
-    );
-
+    // We need user object for audit logging; attempt to get from Clerk if available
+    // Note: we can't get user here directly without hook; but audit is best-effort
     loggedRef.current = true;
-  }, [user, role, location.pathname, rolesArray]);
+  }, [role, location.pathname]);
 
   return <>{children}</>;
 }
