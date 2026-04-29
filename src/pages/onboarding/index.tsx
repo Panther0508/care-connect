@@ -15,14 +15,36 @@ import { updateUserMetadata } from '../../services/auth/userMetadata';
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
+interface Condition {
+  id: string;
+  name: string;
+  diagnosedDate: string;
+  notes: string;
+}
+
+interface Medication {
+  id: string;
+  name: string;
+  dose: string;
+  frequency: string;
+  startDate: string;
+}
+
+interface Allergy {
+  id: string;
+  substance: string;
+  reaction: string;
+  severity: 'mild' | 'moderate' | 'severe';
+}
+
 interface OnboardingData {
   step: Step;
   role: string | null;
   language: string;
   healthProfile: {
-    conditions: string[];
-    medications: string[];
-    allergies: string[];
+    conditions: Condition[];
+    medications: Medication[];
+    allergies: Allergy[];
   };
   consentGiven: boolean;
   passphrase: string;
@@ -79,6 +101,42 @@ export default function Onboarding() {
         onboardingCompletedAt: new Date().toISOString(),
       });
 
+      // Also persist health profile to IndexedDB/healthGraph
+      try {
+        const { setActiveUser } = await import('../../services/healthGraph');
+        // Use passphrase if set, otherwise demo
+        const passphrase = data.passphrase || 'vita-demo-2026';
+        await setActiveUser(user.id, passphrase);
+
+        // Add health profile entries
+        const { addCondition, addMedication, addAllergy } = await import('../../services/healthGraph');
+        for (const condition of data.healthProfile.conditions) {
+          await addCondition(user.id, {
+            name: condition.name,
+            diagnosedAt: condition.diagnosedDate,
+            notes: condition.notes,
+          });
+        }
+        for (const medication of data.healthProfile.medications) {
+          await addMedication(user.id, {
+            name: medication.name,
+            dose: medication.dose,
+            frequency: medication.frequency,
+            startDate: medication.startDate,
+          });
+        }
+        for (const allergy of data.healthProfile.allergies) {
+          await addAllergy(user.id, {
+            substance: allergy.substance,
+            reaction: allergy.reaction,
+            severity: allergy.severity,
+          });
+        }
+      } catch (err) {
+        console.warn('Health graph persistence skipped (offline or unavailable):', err);
+        // Continue anyway; health data can sync later
+      }
+
       // Also persist role to Clerk's publicMetadata so it's available across sessions
       try {
         await user.update({
@@ -94,27 +152,28 @@ export default function Onboarding() {
       }
     } catch (error) {
       console.error('Failed to complete onboarding:', error);
+      throw error;
     }
   };
 
   const handleFinish = async () => {
-    // Ensure critical onboarding flags are persisted immediately,
-    // independent of any async errors in completeOnboarding.
-    if (data.role) {
-      try {
+    // Write critical flags immediately to localStorage before any async operations
+    // This guarantees they exist even if Clerk update fails or is delayed
+    try {
+      if (data.role) {
         localStorage.setItem('user_role', data.role);
-      } catch (e) {
-        console.warn('Failed to persist user_role to localStorage:', e);
       }
-      try {
-        localStorage.setItem('onboarding_completed', 'true');
-      } catch (e) {
-        console.warn('Failed to persist onboarding_completed to localStorage:', e);
-      }
+      localStorage.setItem('onboarding_completed', 'true');
+      localStorage.setItem('vitachain_onboarded', 'true');
+    } catch (e) {
+      console.warn('Failed to persist onboarding flags:', e);
     }
 
+    // Give Clerk metadata a moment to sync before navigating
     await completeOnboarding();
-    navigate('/dashboard');
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    navigate('/dashboard', { replace: true });
   };
 
   if (!isLoaded) {
@@ -123,6 +182,13 @@ export default function Onboarding() {
         <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
+  }
+
+  // If user is already onboarded (local fallback check), redirect to dashboard
+  // This prevents re-entering onboarding after completion
+  const isOnboarded = localStorage.getItem('onboarding_completed') === 'true';
+  if (isOnboarded) {
+    return <Navigate to="/dashboard" replace />;
   }
 
   const renderStep = () => {

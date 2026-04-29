@@ -21,12 +21,13 @@ export async function updateUserMetadata(
     }
   }
 
-  // Also store onboarding completion flag
+  // Also store onboarding completion flag (multiple keys for redundancy)
   if (metadata.hasCompletedOnboarding) {
     try {
       localStorage.setItem('onboarding_completed', 'true');
+      localStorage.setItem('vitachain_onboarded', 'true');
     } catch (e) {
-      console.warn('Failed to write onboarding_completed to localStorage:', e);
+      console.warn('Failed to write onboarding flags to localStorage:', e);
     }
   }
 

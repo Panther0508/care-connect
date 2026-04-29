@@ -63,6 +63,11 @@ export function ProtectedRoute({ children, allowedRoles }: GuardProps) {
   // Immediate synchronous read from localStorage — always up-to-date
   const storedRole = localStorage.getItem('user_role') as UserRole | null;
 
+  // If no storedRole, and we're already on onboarding, don't redirect (prevents loops)
+  if (!storedRole && location.pathname.startsWith('/onboarding')) {
+    return <>{children}</>;
+  }
+
   if (!storedRole) {
     return <Navigate to="/onboarding" state={{ from: location }} replace />;
   }

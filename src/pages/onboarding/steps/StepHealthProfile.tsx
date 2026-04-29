@@ -1,158 +1,397 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 
+interface Condition {
+  id: string;
+  name: string;
+  diagnosedDate: string;
+  notes: string;
+}
+
+interface Medication {
+  id: string;
+  name: string;
+  dose: string;
+  frequency: string;
+  startDate: string;
+}
+
+interface Allergy {
+  id: string;
+  substance: string;
+  reaction: string;
+  severity: 'mild' | 'moderate' | 'severe';
+}
+
 interface StepHealthProfileProps {
   onNext: () => void;
   onBack: () => void;
   profile: {
-    conditions: string[];
-    medications: string[];
-    allergies: string[];
+    conditions: Condition[];
+    medications: Medication[];
+    allergies: Allergy[];
   };
   onUpdate: (updates: any) => void;
 }
 
-const commonConditions = [
+const COMMON_CONDITIONS = [
   'Hypertension', 'Diabetes Type 2', 'Asthma', 'Arthritis', 'Depression',
   'Anxiety', 'Heart Disease', 'COPD', 'Thyroid Disorder', 'Migraine',
+  'Epilepsy', 'Cancer', 'Stroke', 'Osteoporosis', 'Glaucoma'
 ];
 
-const commonMedications = [
+const COMMON_MEDICATIONS = [
   'Aspirin', 'Metformin', 'Lisinopril', 'Atorvastatin', 'Levothyroxine',
   'Albuterol', 'Omeprazole', 'Amlodipine', 'Metoprolol', 'Sertraline',
-];
-
-const commonAllergies = [
-  'Penicillin', 'Sulfa Drugs', 'Peanuts', 'Tree Nuts', 'Shellfish',
-  'Latex', 'Eggs', 'Milk', 'Wheat', 'Dust Mites',
+  'Ibuprofen', 'Amoxicillin', 'Prednisone', 'Alprazolam', 'Gabapentin'
 ];
 
 export default function StepHealthProfile({ onNext, onBack, profile, onUpdate }: StepHealthProfileProps) {
-  const [newCondition, setNewCondition] = useState('');
-  const [newMed, setNewMed] = useState('');
-  const [newAllergy, setNewAllergy] = useState('');
+  // Form state for adding new entries
+  const [newCondition, setNewCondition] = useState<Omit<Condition, 'id'>>({
+    name: '', diagnosedDate: '', notes: ''
+  });
+  const [newMed, setNewMed] = useState<Omit<Medication, 'id'>>({
+    name: '', dose: '', frequency: '', startDate: ''
+  });
+  const [newAllergy, setNewAllergy] = useState<Omit<Allergy, 'id'>>({
+    substance: '', reaction: '', severity: 'mild'
+  });
 
-  const addItem = (type: 'conditions' | 'medications' | 'allergies', value: string) => {
-    if (value && !profile[type].includes(value)) {
-      onUpdate({
-        healthProfile: {
-          ...profile,
-          [type]: [...profile[type], value],
-        },
-      });
-    }
-  };
-
-  const removeItem = (type: 'conditions' | 'medications' | 'allergies', value: string) => {
+  // Add methods
+  const addCondition = () => {
+    if (!newCondition.name.trim()) return;
+    const condition: Condition = {
+      ...newCondition,
+      id: crypto.randomUUID(),
+    };
     onUpdate({
       healthProfile: {
         ...profile,
-        [type]: profile[type].filter((item) => item !== value),
+        conditions: [...profile.conditions, condition],
+      },
+    });
+    setNewCondition({ name: '', diagnosedDate: '', notes: '' });
+  };
+
+  const addMedication = () => {
+    if (!newMed.name.trim()) return;
+    const medication: Medication = {
+      ...newMed,
+      id: crypto.randomUUID(),
+    };
+    onUpdate({
+      healthProfile: {
+        ...profile,
+        medications: [...profile.medications, medication],
+      },
+    });
+    setNewMed({ name: '', dose: '', frequency: '', startDate: '' });
+  };
+
+  const addAllergy = () => {
+    if (!newAllergy.substance.trim()) return;
+    const allergy: Allergy = {
+      ...newAllergy,
+      id: crypto.randomUUID(),
+    };
+    onUpdate({
+      healthProfile: {
+        ...profile,
+        allergies: [...profile.allergies, allergy],
+      },
+    });
+    setNewAllergy({ substance: '', reaction: '', severity: 'mild' });
+  };
+
+  // Remove methods
+  const removeCondition = (id: string) => {
+    onUpdate({
+      healthProfile: {
+        ...profile,
+        conditions: profile.conditions.filter(c => c.id !== id),
       },
     });
   };
+
+  const removeMedication = (id: string) => {
+    onUpdate({
+      healthProfile: {
+        ...profile,
+        medications: profile.medications.filter(m => m.id !== id),
+      },
+    });
+  };
+
+  const removeAllergy = (id: string) => {
+    onUpdate({
+      healthProfile: {
+        ...profile,
+        allergies: profile.allergies.filter(a => a.id !== id),
+      },
+    });
+  };
+
+  // Check if can proceed (at least one entry in each section is optional? For now require at least 1 condition or medication or allergy)
+  const canProceed = profile.conditions.length > 0 || profile.medications.length > 0 || profile.allergies.length > 0;
 
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
-      className="space-y-6"
+      className="space-y-8"
     >
       <div className="text-center">
         <h2 className="text-2xl font-bold mb-2">Your Health Profile</h2>
         <p className="text-slate-400">
-          Add your current health information. This helps the AI provide accurate insights.
+          Add your health information. This helps the AI provide accurate insights. You can add as many entries as you need.
         </p>
       </div>
 
-      {/* Conditions */}
-      <div>
-        <label className="block text-sm font-medium mb-2">Chronic Conditions</label>
-        <div className="flex flex-wrap gap-2 mb-3">
-          {commonConditions.map((cond) => (
-            <button
-              key={cond}
-              onClick={() => addItem('conditions', cond)}
-              className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                profile.conditions.includes(cond)
-                  ? 'bg-teal-600 text-white'
-                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-              }`}
+      {/* Conditions Section */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Conditions</h3>
+          <span className="text-sm text-slate-400">{profile.conditions.length} added</span>
+        </div>
+
+        {/* Existing conditions as cards */}
+        <div className="grid gap-3 sm:grid-cols-2">
+          {profile.conditions.map((cond) => (
+            <div
+              key={cond.id}
+              className="group relative bg-slate-800/50 border border-slate-600 rounded-xl p-4 hover:border-teal-500/50 transition-all"
             >
-              {cond}
-            </button>
+              <button
+                onClick={() => removeCondition(cond.id)}
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-400 transition-all"
+                aria-label="Remove condition"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <div className="font-semibold text-teal-300">{cond.name}</div>
+              {cond.diagnosedDate && (
+                <div className="text-xs text-slate-400 mt-1">
+                  Diagnosed: {new Date(cond.diagnosedDate).toLocaleDateString()}
+                </div>
+              )}
+              {cond.notes && (
+                <div className="text-sm text-slate-300 mt-2">{cond.notes}</div>
+              )}
+            </div>
           ))}
         </div>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={newCondition}
-            onChange={(e) => setNewCondition(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && addItem('conditions', newCondition) && setNewCondition('')}
-            placeholder="Add custom condition..."
-            className="flex-1 bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 focus:outline-none focus:border-teal-500"
-          />
+
+        {/* Add condition form */}
+        <div className="bg-slate-800/30 border border-slate-700 rounded-xl p-4 space-y-3">
+          <div className="font-medium text-sm text-teal-300">+ Add Condition</div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="block text-xs text-slate-400 mb-1">Condition name *</label>
+              <input
+                type="text"
+                value={newCondition.name}
+                onChange={(e) => setNewCondition({ ...newCondition, name: e.target.value })}
+                placeholder="e.g., Hypertension"
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-slate-400 mb-1">Date diagnosed</label>
+              <input
+                type="date"
+                value={newCondition.diagnosedDate}
+                onChange={(e) => setNewCondition({ ...newCondition, diagnosedDate: e.target.value })}
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs text-slate-400 mb-1">Notes</label>
+            <input
+              type="text"
+              value={newCondition.notes}
+              onChange={(e) => setNewCondition({ ...newCondition, notes: e.target.value })}
+              placeholder="Optional: additional details"
+              className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            />
+          </div>
           <button
-            onClick={() => addItem('conditions', newCondition) && setNewCondition('')}
-            className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
+            onClick={addCondition}
+            disabled={!newCondition.name.trim()}
+            className="w-full py-2 bg-teal-600/20 hover:bg-teal-600/30 border border-teal-500/50 text-teal-300 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Add
+            Add Condition
           </button>
         </div>
-        {profile.conditions.length > 0 && (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {profile.conditions.map((c) => (
-              <span key={c} className="inline-flex items-center gap-1 px-2 py-1 bg-slate-700 rounded text-sm">
-                {c}
-                <button onClick={() => removeItem('conditions', c)} className="text-slate-400 hover:text-white">
-                  ×
-                </button>
-              </span>
-            ))}
+      </section>
+
+      {/* Medications Section */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Medications</h3>
+          <span className="text-sm text-slate-400">{profile.medications.length} added</span>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          {profile.medications.map((med) => (
+            <div
+              key={med.id}
+              className="group relative bg-slate-800/50 border border-slate-600 rounded-xl p-4 hover:border-teal-500/50 transition-all"
+            >
+              <button
+                onClick={() => removeMedication(med.id)}
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-400 transition-all"
+                aria-label="Remove medication"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <div className="font-semibold text-teal-300">{med.name}</div>
+              {med.dose && <div className="text-sm text-slate-300">Dose: {med.dose}</div>}
+              {med.frequency && <div className="text-sm text-slate-300">Frequency: {med.frequency}</div>}
+              {med.startDate && (
+                <div className="text-xs text-slate-400 mt-1">
+                  Started: {new Date(med.startDate).toLocaleDateString()}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-slate-800/30 border border-slate-700 rounded-xl p-4 space-y-3">
+          <div className="font-medium text-sm text-teal-300">+ Add Medication</div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="block text-xs text-slate-400 mb-1">Medication name *</label>
+              <input
+                type="text"
+                value={newMed.name}
+                onChange={(e) => setNewMed({ ...newMed, name: e.target.value })}
+                placeholder="e.g., Lisinopril"
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-slate-400 mb-1">Dose</label>
+              <input
+                type="text"
+                value={newMed.dose}
+                onChange={(e) => setNewMed({ ...newMed, dose: e.target.value })}
+                placeholder="e.g., 10mg"
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-slate-400 mb-1">Frequency</label>
+              <input
+                type="text"
+                value={newMed.frequency}
+                onChange={(e) => setNewMed({ ...newMed, frequency: e.target.value })}
+                placeholder="e.g., Once daily"
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-slate-400 mb-1">Start date</label>
+              <input
+                type="date"
+                value={newMed.startDate}
+                onChange={(e) => setNewMed({ ...newMed, startDate: e.target.value })}
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            </div>
           </div>
-        )}
-      </div>
+          <button
+            onClick={addMedication}
+            disabled={!newMed.name.trim()}
+            className="w-full py-2 bg-teal-600/20 hover:bg-teal-600/30 border border-teal-500/50 text-teal-300 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Add Medication
+          </button>
+        </div>
+      </section>
 
-      {/* Medications */}
-      <div>
-        <label className="block text-sm font-medium mb-2">Current Medications</label>
-        <div className="flex flex-wrap gap-2 mb-3">
-          {commonMedications.map((med) => (
-            <button
-              key={med}
-              onClick={() => addItem('medications', med)}
-              className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                profile.medications.includes(med)
-                  ? 'bg-teal-600 text-white'
-                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-              }`}
+      {/* Allergies Section */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold">Allergies</h3>
+          <span className="text-sm text-slate-400">{profile.allergies.length} added</span>
+        </div>
+
+        <div className="grid gap-3">
+          {profile.allergies.map((allergy) => (
+            <div
+              key={allergy.id}
+              className="group relative bg-slate-800/50 border border-slate-600 rounded-xl p-4 hover:border-teal-500/50 transition-all"
             >
-              {med}
-            </button>
+              <button
+                onClick={() => removeAllergy(allergy.id)}
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-400 transition-all"
+                aria-label="Remove allergy"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <div className="font-semibold text-teal-300">{allergy.substance}</div>
+              <div className="text-sm text-slate-300">Reaction: {allergy.reaction}</div>
+              <div className="text-xs text-slate-400 mt-1">
+                Severity: <span className="capitalize">{allergy.severity}</span>
+              </div>
+            </div>
           ))}
         </div>
-      </div>
 
-      {/* Allergies */}
-      <div>
-        <label className="block text-sm font-medium mb-2">Allergies</label>
-        <div className="flex flex-wrap gap-2 mb-3">
-          {commonAllergies.map((allergy) => (
-            <button
-              key={allergy}
-              onClick={() => addItem('allergies', allergy)}
-              className={`px-3 py-1 rounded-full text-sm transition-colors ${
-                profile.allergies.includes(allergy)
-                  ? 'bg-teal-600 text-white'
-                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
-              }`}
-            >
-              {allergy}
-            </button>
-          ))}
+        <div className="bg-slate-800/30 border border-slate-700 rounded-xl p-4 space-y-3">
+          <div className="font-medium text-sm text-teal-300">+ Add Allergy</div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div>
+              <label className="block text-xs text-slate-400 mb-1">Allergen *</label>
+              <input
+                type="text"
+                value={newAllergy.substance}
+                onChange={(e) => setNewAllergy({ ...newAllergy, substance: e.target.value })}
+                placeholder="e.g., Penicillin"
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-slate-400 mb-1">Reaction *</label>
+              <input
+                type="text"
+                value={newAllergy.reaction}
+                onChange={(e) => setNewAllergy({ ...newAllergy, reaction: e.target.value })}
+                placeholder="e.g., Rash, swelling"
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-slate-400 mb-1">Severity</label>
+              <select
+                value={newAllergy.severity}
+                onChange={(e) => setNewAllergy({ ...newAllergy, severity: e.target.value as any })}
+                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              >
+                <option value="mild">Mild</option>
+                <option value="moderate">Moderate</option>
+                <option value="severe">Severe</option>
+              </select>
+            </div>
+          </div>
+          <button
+            onClick={addAllergy}
+            disabled={!newAllergy.substance.trim() || !newAllergy.reaction.trim()}
+            className="w-full py-2 bg-teal-600/20 hover:bg-teal-600/30 border border-teal-500/50 text-teal-300 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Add Allergy
+          </button>
         </div>
-      </div>
+      </section>
 
       <div className="flex gap-3 pt-4">
         <button
@@ -163,7 +402,8 @@ export default function StepHealthProfile({ onNext, onBack, profile, onUpdate }:
         </button>
         <button
           onClick={onNext}
-          className="flex-1 py-3 bg-teal-600 hover:bg-teal-500 rounded-lg transition-colors font-semibold"
+          disabled={!canProceed}
+          className="flex-1 py-3 bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg hover:bg-teal-500 transition-colors font-semibold"
         >
           Continue
         </button>
