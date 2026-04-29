@@ -1,5 +1,5 @@
 import { ReactNode, useEffect, useState } from "react";
-import { BottomNav } from "./Navigation";
+import ModernBottomNav from "./ModernBottomNav";
 import { OnlineStatusPill } from "./OnlineStatusPill";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { AnimatePresence, motion } from "framer-motion";
@@ -59,12 +59,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
         </div>
       </main>
 
-      {/* Glassmorphism Bottom Navigation */}
-      <nav className="fixed bottom-0 inset-x-0 z-50 bg-slate-900/80 backdrop-blur-xl border-t border-white/5 shadow-lg">
-        <div className="max-w-5xl mx-auto">
-          <BottomNav />
-        </div>
-      </nav>
+      {/* Modern Bottom Navigation */}
+      <ModernBottomNav />
     </div>
   );
 }
