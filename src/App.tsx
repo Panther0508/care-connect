@@ -7,7 +7,7 @@ import { lazy, Suspense } from "react";
 import AppLayout from "./components/AppLayout";
 import LoadingFallback from "./components/LoadingFallback";
 import { useRole } from "./hooks/auth/useRole";
-import { ProtectedRoute, RequireAuth } from "./components/role/RequireRole";
+import { ProtectedRoute, RequireAuth, AuthSyncGate } from "./components/role/RequireRole";
 
 // Lazy-loaded pages for code splitting
 const Landing = lazy(() => import("./pages/Landing"));
@@ -104,117 +104,155 @@ const App = () => {
 
             {/* Dashboard — requires auth + role */}
             <Route path="/dashboard" element={
-              <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
-                <RoleBasedDashboard />
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                  <RoleBasedDashboard />
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
 
             {/* Protected pages — all require role */}
             <Route path="/health" element={
-              <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw']}>
-                <PageWrapper><HealthGraph /></PageWrapper>
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw']}>
+                  <PageWrapper><HealthGraph /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
             <Route path="/ai" element={
-              <ProtectedRoute allowedRoles={['patient', 'clinician']}>
-                <PageWrapper><AIAssistant /></PageWrapper>
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['patient', 'clinician']}>
+                  <PageWrapper><AIAssistant /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
             <Route path="/passport" element={
-              <ProtectedRoute allowedRoles={['patient', 'chw']}>
-                <PageWrapper><Passport /></PageWrapper>
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['patient', 'chw']}>
+                  <PageWrapper><Passport /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
             <Route path="/clinician-view" element={
-              <ProtectedRoute allowedRoles={['clinician']}>
-                <PageWrapper><ClinicianView /></PageWrapper>
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['clinician']}>
+                  <PageWrapper><ClinicianView /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
             <Route path="/outbreak" element={
-              <ProtectedRoute allowedRoles={['chw', 'admin']}>
-                <PageWrapper><OutbreakDashboard /></PageWrapper>
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['chw', 'admin']}>
+                  <PageWrapper><OutbreakDashboard /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
             <Route path="/register-need" element={
-              <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
-                <PageWrapper><RegisterNeedPage /></PageWrapper>
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                  <PageWrapper><RegisterNeedPage /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
             <Route path="/alerts" element={
-              <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw']}>
-                <PageWrapper><AlertsPage /></PageWrapper>
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw']}>
+                  <PageWrapper><AlertsPage /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
             <Route path="/reservation/:facilityId" element={
-              <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
-                <PageWrapper><ReservationPage /></PageWrapper>
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                  <PageWrapper><ReservationPage /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
             <Route path="/impact" element={
-              <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
-                <PageWrapper><ImpactPage /></PageWrapper>
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                  <PageWrapper><ImpactPage /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
             <Route path="/crisis-map" element={
-              <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
-                <PageWrapper><CrisisMapPage /></PageWrapper>
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                  <PageWrapper><CrisisMapPage /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
             <Route path="/facility/:id" element={
-              <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
-                <PageWrapper><FacilityDetailPage /></PageWrapper>
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                  <PageWrapper><FacilityDetailPage /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
 
             {/* Settings & support */}
             <Route path="/settings" element={
-              <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
-                <PageWrapper><Settings /></PageWrapper>
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                  <PageWrapper><Settings /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
             <Route path="/subscription" element={
-              <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
-                <PageWrapper><Subscription /></PageWrapper>
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                  <PageWrapper><Subscription /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
             <Route path="/referral" element={
-              <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
-                <PageWrapper><Referral /></PageWrapper>
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                  <PageWrapper><Referral /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
             <Route path="/support" element={
-              <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
-                <PageWrapper><Support /></PageWrapper>
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                  <PageWrapper><Support /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
             <Route path="/language" element={
-              <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
-                <PageWrapper><LanguageSelector /></PageWrapper>
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                  <PageWrapper><LanguageSelector /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
 
             {/* Admin routes with security layers */}
             <Route path="/admin" element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <Suspense fallback={<LoadingFallback />}>
-                  <AdminMFAGate>
-                    <AdminBiometricLock>
-                      <PageWrapper><AdminDashboard /></PageWrapper>
-                    </AdminBiometricLock>
-                  </AdminMFAGate>
-                </Suspense>
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <Suspense fallback={<LoadingFallback />}>
+                    <AdminMFAGate>
+                      <AdminBiometricLock>
+                        <PageWrapper><AdminDashboard /></PageWrapper>
+                      </AdminBiometricLock>
+                    </AdminMFAGate>
+                  </Suspense>
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
             <Route path="/audit-log" element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <Suspense fallback={<LoadingFallback />}>
-                  <AdminMFAGate>
-                    <AdminBiometricLock>
-                      <PageWrapper><AuditLog /></PageWrapper>
-                    </AdminBiometricLock>
-                  </AdminMFAGate>
-                </Suspense>
-              </ProtectedRoute>
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['admin']}>
+                  <Suspense fallback={<LoadingFallback />}>
+                    <AdminMFAGate>
+                      <AdminBiometricLock>
+                        <PageWrapper><AuditLog /></PageWrapper>
+                      </AdminBiometricLock>
+                    </AdminMFAGate>
+                  </Suspense>
+                </ProtectedRoute>
+              </AuthSyncGate>
             } />
 
             {/* Fallback */}
