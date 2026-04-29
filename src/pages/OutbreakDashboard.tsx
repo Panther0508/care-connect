@@ -6,9 +6,11 @@ import { motion } from "framer-motion";
 import { meshOrchestrator } from "../services/meshOrchestrator";
 import { getAllFacilities, getAllSearchLogs } from "../lib/idb";
 import type { Facility } from "../services/aiSearch";
-import { MapContainer, TileLayer, CircleMarker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, CircleMarker, Popup, HeatmapLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useStatus } from "../hooks/useStatus";
+import { getOutbreakAlerts, type OutbreakAlert } from "../services/meshOutbreakDetector";
+import { AlertTriangle, Activity, MapPin, Clock, CheckCircle } from "lucide-react";
 
 export default function OutbreakDashboard() {
   const { showStatus } = useStatus();
@@ -17,9 +19,10 @@ export default function OutbreakDashboard() {
     confirmedFacilities: string[];
     stockoutAlerts: any[];
   }>({ searchCounters: {}, confirmedFacilities: [], stockoutAlerts: [] });
-  
+
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [anomalies, setAnomalies] = useState<Array<{term: string, multiplier: number, count: number}>>([]);
+  const [outbreakAlerts, setOutbreakAlerts] = useState<OutbreakAlert[]>([]);
   const [isSimulating, setIsSimulating] = useState(false);
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -27,11 +30,14 @@ export default function OutbreakDashboard() {
 
   // Refresh data periodically
   useEffect(() => {
-    const refresh = () => {
+    const refresh = async () => {
       const data = meshOrchestrator.getAggregatedMeshData();
       setMeshData(data);
       computeAnomalies(data);
       loadFacilities();
+      // Load outbreak alerts
+      const alerts = await getOutbreakAlerts();
+      setOutbreakAlerts(alerts);
     };
 
     refresh();
@@ -89,6 +95,16 @@ export default function OutbreakDashboard() {
     meshData.confirmedFacilities.includes(f.id) && f.latitude && f.longitude
   );
 
+  // Outbreak alert markers for map (dummy coordinates for demo; in production, geocode region)
+  const outbreakMarkers = outbreakAlerts
+    .filter(a => a.status === 'active')
+    .map((alert, idx) => ({
+      ...alert,
+      // Placeholder: use a deterministic pseudo-random lat/lng based on term hash
+      lat: 9.0 + (idx * 0.5) % 5,   // somewhere in Nigeria/West Africa
+      lng: 7.0 + (idx * 0.7) % 5,
+    }));
+
   return (
     <div className="space-y-6">
       <header>
@@ -98,37 +114,70 @@ export default function OutbreakDashboard() {
         </p>
       </header>
 
-      {/* Anomaly Alerts */}
-      {anomalies.length > 0 && (
-        <section className="glass-card p-5 border-l-4 border-red-500">
-          <h2 className="text-lg font-semibold text-slate-100 mb-3 flex items-center gap-2">
-            <svg className="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            Anomaly Alerts
-          </h2>
-          <div className="space-y-3">
-            {anomalies.map((a) => (
-              <motion.div
-                key={a.term}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="bg-red-500/10 border border-red-500/20 rounded-lg p-3"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-slate-100 capitalize">{a.term}</span>
-                  <span className="text-xs bg-red-500/20 text-red-300 px-2 py-0.5 rounded-full">
-                    {(a.multiplier).toFixed(1)}x normal
-                  </span>
-                </div>
-                <div className="text-sm text-slate-400 mt-1">
-                  {a.count} searches detected (normally ~{Math.round(a.count / a.multiplier)})
-                </div>
-              </motion.div>
-            ))}
+      {/* Outbreak Alerts Table */}
+      <section className="glass-card p-5">
+        <h2 className="text-lg font-semibold text-slate-100 mb-3 flex items-center gap-2">
+          <AlertTriangle size={20} className="text-rose-400" />
+          Detected Outbreaks
+        </h2>
+        {outbreakAlerts.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-slate-400 border-b border-slate-700/50">
+                  <th className="text-left py-2 pr-4">Term</th>
+                  <th className="text-left py-2 pr-4">Region</th>
+                  <th className="text-left py-2 pr-4">Count</th>
+                  <th className="text-left py-2 pr-4">First Detected</th>
+                  <th className="text-left py-2 pr-4">Last Detected</th>
+                  <th className="text-left py-2">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {outbreakAlerts.map((alert) => (
+                  <motion.tr
+                    key={alert.id}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="border-b border-slate-700/30 last:border-0"
+                  >
+                    <td className="py-3 pr-4 text-slate-200 capitalize">{alert.term}</td>
+                    <td className="py-3 pr-4 text-slate-300">{alert.region}</td>
+                    <td className="py-3 pr-4 font-mono text-teal-300">{alert.count}</td>
+                    <td className="py-3 pr-4 text-slate-400 text-xs">
+                      {new Date(alert.firstDetectedAt).toLocaleDateString()}
+                    </td>
+                    <td className="py-3 pr-4 text-slate-400 text-xs">
+                      {new Date(alert.lastDetectedAt).toLocaleDateString()}
+                    </td>
+                    <td className="py-3">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${
+                          alert.status === 'active'
+                            ? 'bg-rose-500/20 text-rose-300'
+                            : alert.status === 'monitoring'
+                            ? 'bg-amber-500/20 text-amber-300'
+                            : 'bg-slate-500/20 text-slate-300'
+                        }`}
+                      >
+                        {alert.status}
+                      </span>
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="text-center py-8 text-slate-500">
+            <Activity size={32} className="mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No outbreaks detected yet.</p>
+            <p className="text-xs text-slate-600 mt-1">
+              When {OUTBREAK_THRESHOLD}+ people search the same term in your area, you'll see it here.
+            </p>
+          </div>
+        )}
+      </section>
 
       {/* Heatmap / Facility Confirmation Map */}
       <section className="glass-card p-5">
@@ -152,21 +201,47 @@ export default function OutbreakDashboard() {
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               />
-              {confirmedFacilityObjects.map((f) => (
-                <CircleMarker
-                  key={f.id}
-                  center={[f.latitude!, f.longitude!]}
-                  radius={8}
-                  pathOptions={{ color: '#10b981', fillColor: '#10b981', fillOpacity: 0.6 }}
-                >
-                  <Popup>
-                    <div>
-                      <div className="font-medium">{f.name}</div>
-                      <div className="text-xs text-slate-600">{f.address_city}, {f.address_stateOrRegion}</div>
-                    </div>
-                  </Popup>
-                </CircleMarker>
-              ))}
+               {confirmedFacilityObjects.map((f) => (
+                 <CircleMarker
+                   key={f.id}
+                   center={[f.latitude!, f.longitude!]}
+                   radius={8}
+                   pathOptions={{ color: '#10b981', fillColor: '#10b981', fillOpacity: 0.6 }}
+                 >
+                   <Popup>
+                     <div>
+                       <div className="font-medium">{f.name}</div>
+                       <div className="text-xs text-slate-600">{f.address_city}, {f.address_stateOrRegion}</div>
+                     </div>
+                   </Popup>
+                 </CircleMarker>
+               ))}
+               {/* Outbreak alert markers */}
+               {outbreakMarkers.map((alert) => (
+                 <CircleMarker
+                   key={alert.id}
+                   center={[alert.lat, alert.lng]}
+                   radius={Math.min(alert.count, 20) + 10}
+                   pathOptions={{
+                     color: '#ef4444',
+                     fillColor: '#ef4444',
+                     fillOpacity: 0.4,
+                     weight: 2,
+                   }}
+                 >
+                   <Popup>
+                     <div>
+                       <div className="font-medium text-red-600 capitalize">{alert.term}</div>
+                       <div className="text-xs text-slate-600">
+                         {alert.count} searches in {alert.region}
+                       </div>
+                       <div className="text-xs text-slate-500">
+                         Detected {new Date(alert.firstDetectedAt).toLocaleDateString()}
+                       </div>
+                     </div>
+                   </Popup>
+                 </CircleMarker>
+               ))}
             </MapContainer>
           </div>
         ) : (

@@ -20,6 +20,8 @@ import {
 } from '../lib/idb';
 import { startBluetoothMesh, stopBluetoothMesh, forceBroadcast, setOnUpdate } from './bluetoothTransport';
 import { initSatelliteSnitch } from './satelliteSnitch';
+import { evaluateOutbreak } from './meshOutbreakDetector';
+import { startSimulatedMesh, stopSimulatedMesh } from './simulatedMeshTransport';
 
 let meshDoc: MeshDoc = createMeshDoc();
 let persistTimeout: number | null = null;
@@ -42,19 +44,24 @@ export async function initMeshOrchestrator(): Promise<void> {
     meshDoc = createMeshDoc();
   }
 
-  // Register callback for incoming peer data
-  setOnUpdate((remoteMesh: MeshDoc) => {
-    meshDoc = mergeMeshes(meshDoc, remoteMesh);
-    schedulePersist();
-    // Periodic broadcast will propagate further
-  });
+   // Register callback for incoming peer data
+   setOnUpdate((remoteMesh: MeshDoc) => {
+     meshDoc = mergeMeshes(meshDoc, remoteMesh);
+     schedulePersist();
+     // Evaluate for outbreaks after merge
+     evaluateOutbreak(meshDoc);
+     // Periodic broadcast will propagate further
+   });
 
-  // Start transports
-  try {
-    await startBluetoothMesh();
-  } catch (err) {
-    // Bluetooth unavailable
-  }
+   // Start transports
+   try {
+     // Start simulated mesh (localStorage events) for PWA web use
+     startSimulatedMesh();
+     // Start Bluetooth mesh (real hardware) for Capacitor APK
+     await startBluetoothMesh();
+   } catch (err) {
+     // Bluetooth unavailable - continue with simulated mesh only
+   }
 
   // Start satellite snitch
   initSatelliteSnitch();
@@ -162,6 +169,7 @@ function scheduleBroadcast(): void {
  */
 export function stopMeshOrchestrator(): void {
   stopBluetoothMesh();
+  stopSimulatedMesh();
   if (persistTimeout) clearTimeout(persistTimeout);
   saveToStorage();
 }

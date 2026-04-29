@@ -22,26 +22,27 @@ if ("serviceWorker" in navigator) {
   });
 }
 
-// Service worker disabled — do not register new one until caching strategy is finalized
-// if ("serviceWorker" in navigator) {
-//   navigator.serviceWorker.register("/serviceWorker.js", { updateViaCache: 'none' })
-//     .then((registration) => {
-//       if (registration.waiting) {
-//         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-//       }
-//       registration.addEventListener('updatefound', () => {
-//         const newWorker = registration.installing;
-//         if (newWorker) {
-//           newWorker.addEventListener('statechange', () => {
-//             if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
-//               window.location.reload();
-//             }
-//           });
-//         }
-//       });
-//     })
-//     .catch((err) => console.log("ServiceWorker registration failed:", err));
-// }
+// Service Worker registration for offline AI model caching
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/serviceWorker.js", { updateViaCache: 'none' })
+    .then((registration) => {
+      if (registration.waiting) {
+        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+      registration.addEventListener('updatefound', () => {
+        const newWorker = registration.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
+              window.location.reload();
+            }
+          });
+        }
+      });
+      console.log('ServiceWorker registered:', registration);
+    })
+    .catch((err) => console.log("ServiceWorker registration failed:", err));
+}
 
 const clerkProviderProps = PUBLISHABLE_KEY
   ? { publishableKey: PUBLISHABLE_KEY, rethrowOfflineNetworkErrors: true }
