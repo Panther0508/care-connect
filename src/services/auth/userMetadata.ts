@@ -12,14 +12,22 @@ export async function updateUserMetadata(
     onboardingCompletedAt?: string;
   }
 ): Promise<void> {
-  // Store role immediately in localStorage (synchronous, always works)
+  // Store role immediately in localStorage (synchronous, best-effort)
   if (metadata.role) {
-    localStorage.setItem('user_role', metadata.role);
+    try {
+      localStorage.setItem('user_role', metadata.role);
+    } catch (e) {
+      console.warn('Failed to write user_role to localStorage:', e);
+    }
   }
 
   // Also store onboarding completion flag
   if (metadata.hasCompletedOnboarding) {
-    localStorage.setItem('onboarding_completed', 'true');
+    try {
+      localStorage.setItem('onboarding_completed', 'true');
+    } catch (e) {
+      console.warn('Failed to write onboarding_completed to localStorage:', e);
+    }
   }
 
   // Best-effort async cache to IndexedDB for offline use

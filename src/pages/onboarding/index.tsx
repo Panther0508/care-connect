@@ -98,6 +98,21 @@ export default function Onboarding() {
   };
 
   const handleFinish = async () => {
+    // Ensure critical onboarding flags are persisted immediately,
+    // independent of any async errors in completeOnboarding.
+    if (data.role) {
+      try {
+        localStorage.setItem('user_role', data.role);
+      } catch (e) {
+        console.warn('Failed to persist user_role to localStorage:', e);
+      }
+      try {
+        localStorage.setItem('onboarding_completed', 'true');
+      } catch (e) {
+        console.warn('Failed to persist onboarding_completed to localStorage:', e);
+      }
+    }
+
     await completeOnboarding();
     navigate('/dashboard');
   };
