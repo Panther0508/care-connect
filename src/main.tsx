@@ -5,6 +5,8 @@ import "./index.css";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { StatusProvider } from "./context/StatusContext";
 import { createRoot } from "react-dom/client";
+import { initFoodDatabase } from "./services/foodDatabase";
+import { initExerciseDatabase } from "./services/exerciseDatabase";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -43,6 +45,10 @@ if ("serviceWorker" in navigator) {
     })
     .catch((err) => console.log("ServiceWorker registration failed:", err));
 }
+
+// Initialize offline databases
+initFoodDatabase().catch(err => console.error('Failed to init food DB:', err));
+initExerciseDatabase().catch(err => console.error('Failed to init exercise DB:', err));
 
 const clerkProviderProps = PUBLISHABLE_KEY
   ? { publishableKey: PUBLISHABLE_KEY, rethrowOfflineNetworkErrors: true }

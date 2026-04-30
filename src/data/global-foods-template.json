@@ -1,0 +1,26 @@
+# VitaChain Global Foods Database (Curated ~500 items)
+
+This file contains a comprehensive list of common global food items with nutritional information per 100g.
+
+## Instructions
+This JSON will be processed by the download script to create `public/data/global-foods.json`.
+
+Schema per item:
+```json
+{
+  "id": "gf_001",
+  "name": "Food Name",
+  "category": "category",
+  "servingSize": "description",
+  "per100g": {
+    "calories": number,
+    "protein": number,
+    "carbs": number,
+    "fat": number,
+    "fiber": number,
+    "sodium": number
+  },
+  "region": "Region name",
+  "description": "Brief description"
+}
+```

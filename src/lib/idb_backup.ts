@@ -1,4 +1,4 @@
-export function openDB(): Promise<IDBDatabase> {
+﻿export function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open("vitachain", 3); // Incremented to version 3 for health graph
 
@@ -834,58 +834,4 @@ export async function getSleepLogs(userId: string, limit: number = 10): Promise<
 export async function getMedicationLogs(userId: string): Promise<MedicationLog[]> {
   return getMedicationLogsForDate(userId, new Date().toISOString().split('T')[0]);
 }
-  
-// Mental Health Logs 
 
-// ==================== Mental Health Logs ====================
-
-export interface MentalHealthLog {
-  id?: number;
-  userId: string;
-  type: 'phq9' | 'gad7';
-  score: number;
-  interpretation: string;
-  responses: Record<string, number>;
-  timestamp: number;
-  date: string;
-}
-
-export async function storeMentalHealthLog(log: Omit<MentalHealthLog, 'id'>): Promise<number> {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    if (!db.objectStoreNames.contains('mentalHealthLogs')) {
-      resolve(-1);
-      return;
-    }
-    const transaction = db.transaction('mentalHealthLogs', 'readwrite');
-    const store = transaction.objectStore('mentalHealthLogs');
-    const request = store.add(log);
-    request.onsuccess = () => resolve(request.result as number);
-    request.onerror = () => reject(request.error);
-  });
-}
-
-export async function getMentalHealthLogs(userId: string, limit: number = 10): Promise<MentalHealthLog[]> {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    if (!db.objectStoreNames.contains('mentalHealthLogs')) {
-      resolve([]);
-      return;
-    }
-    const transaction = db.transaction('mentalHealthLogs', 'readonly');
-    const store = transaction.objectStore('mentalHealthLogs');
-    const request = store.getAll();
-    request.onsuccess = () => {
-      const all = request.result as MentalHealthLog[];
-      const userLogs = all.filter(l => l.userId === userId);
-      userLogs.sort((a, b) => b.timestamp - a.timestamp);
-      resolve(userLogs.slice(0, limit));
-    };
-    request.onerror = () => reject(request.error);
-  });
-}
-
-// Alias
-export async function getDB(): Promise<IDBDatabase> {
-  return openDB();
-}

@@ -19,7 +19,15 @@ import {
   ChevronDown,
   Stethoscope,
   Building2,
-  UserPlus
+  UserPlus,
+  Apple,
+  Dumbbell,
+  Moon,
+  Droplets,
+  Pill,
+  Calculator,
+  Brain,
+  FirstAidKit
 } from "lucide-react";
 import { useState } from "react";
 import HamburgerDrawer from "./HamburgerDrawer";
@@ -40,15 +48,21 @@ const PATIENT_NAV: NavItem[] = [
     roles: ["patient"],
   },
   {
-    to: "/ai",
-    label: "AI",
-    icon: <Sparkles size={22} strokeWidth={2} />,
+    to: "/nutrition",
+    label: "Nutrition",
+    icon: <Apple size={22} strokeWidth={2} />,
     roles: ["patient"],
   },
   {
-    to: "/passport",
-    label: "Passport",
-    icon: <Heart size={22} strokeWidth={2} />,
+    to: "/workout",
+    label: "Workout",
+    icon: <Dumbbell size={22} strokeWidth={2} />,
+    roles: ["patient"],
+  },
+  {
+    to: "/ai",
+    label: "AI",
+    icon: <Sparkles size={22} strokeWidth={2} />,
     roles: ["patient"],
   },
   {

@@ -38,6 +38,18 @@ const AuditLog = lazy(() => import("./pages/AuditLog"));
 const AdminMFAGate = lazy(() => import("./components/AdminMFAGate"));
 const AdminBiometricLock = lazy(() => import("./components/AdminBiometricLock"));
 
+// New wellness pages
+const Nutrition = lazy(() => import("./pages/Nutrition"));
+const Workout = lazy(() => import("./pages/Workout"));
+const WorkoutHistory = lazy(() => import("./pages/WorkoutHistory"));
+const CycleTracker = lazy(() => import("./pages/CycleTracker"));
+const Hydration = lazy(() => import("./pages/Hydration"));
+const Sleep = lazy(() => import("./pages/Sleep"));
+const Medications = lazy(() => import("./pages/Medications"));
+const Calculators = lazy(() => import("./pages/Calculators"));
+const MentalHealth = lazy(() => import("./pages/MentalHealth"));
+const FirstAid = lazy(() => import("./pages/FirstAid"));
+
 // Page wrapper with animation
 const PageWrapper = ({ children }) => (
   <motion.div
@@ -125,13 +137,85 @@ const App = () => {
                 </ProtectedRoute>
               </AuthSyncGate>
             } />
-            <Route path="/ai" element={
-              <AuthSyncGate>
-                <ProtectedRoute allowedRoles={['patient', 'clinician']}>
-                  <PageWrapper><AIAssistant /></PageWrapper>
-                </ProtectedRoute>
-              </AuthSyncGate>
-            } />
+             <Route path="/ai" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['patient', 'clinician']}>
+                   <PageWrapper><AIAssistant /></PageWrapper>
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
+
+             {/* Patient wellness routes */}
+             <Route path="/nutrition" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['patient']}>
+                   <PageWrapper><Nutrition /></PageWrapper>
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
+             <Route path="/workout" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['patient']}>
+                   <PageWrapper><Workout /></PageWrapper>
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
+             <Route path="/workout-history" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['patient']}>
+                   <PageWrapper><WorkoutHistory /></PageWrapper>
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
+             <Route path="/cycle" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['patient']}>
+                   <PageWrapper><CycleTracker /></PageWrapper>
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
+             <Route path="/water" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['patient']}>
+                   <PageWrapper><Hydration /></PageWrapper>
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
+             <Route path="/sleep" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['patient']}>
+                   <PageWrapper><Sleep /></PageWrapper>
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
+             <Route path="/medications" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['patient']}>
+                   <PageWrapper><Medications /></PageWrapper>
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
+             <Route path="/calculators" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['patient']}>
+                   <PageWrapper><Calculators /></PageWrapper>
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
+             <Route path="/mental-health" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['patient']}>
+                   <PageWrapper><MentalHealth /></PageWrapper>
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
+             <Route path="/first-aid" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['patient']}>
+                   <PageWrapper><FirstAid /></PageWrapper>
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
             <Route path="/passport" element={
               <AuthSyncGate>
                 <ProtectedRoute allowedRoles={['patient', 'chw']}>

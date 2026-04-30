@@ -12,6 +12,7 @@
     "@automerge/automerge": "^2.2.8",
     "@capgo/capacitor-native-biometric": "^8.4.2",
     "@clerk/clerk-react": "^5.61.6",
+    "@finegym/fitness-calc": "^1.0.1",
     "@radix-ui/react-dialog": "^1.1.15",
     "@vercel/kv": "^1.0.1",
     "@xenova/transformers": "^2.17.2",

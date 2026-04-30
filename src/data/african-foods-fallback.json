@@ -1,0 +1,452 @@
+[
+  {
+    "id": "af_001",
+    "name": "Jollof Rice",
+    "category": "main",
+    "servingSize": "1 cup (approx 250g)",
+    "per100g": { "calories": 150, "protein": 3.2, "carbs": 26, "fat": 4, "fiber": 1.2, "sodium": 180 },
+    "region": "West Africa",
+    "description": "Rice cooked in a spicy tomato and pepper sauce."
+  },
+  {
+    "id": "af_002",
+    "name": "Egusi Soup",
+    "category": "soup",
+    "servingSize": "1 bowl (approx 250g)",
+    "per100g": { "calories": 180, "protein": 6.5, "carbs": 8, "fat": 14, "fiber": 2.1, "sodium": 320 },
+    "region": "West Africa",
+    "description": "Melon seed soup with vegetables and usually meat or fish."
+  },
+  {
+    "id": "af_003",
+    "name": "Pounded Yam",
+    "category": "main",
+    "servingSize": "1 serving (approx 200g)",
+    "per100g": { "calories": 125, "protein": 2.5, "carbs": 28, "fat": 0.5, "fiber": 1.0, "sodium": 5 },
+    "region": "West Africa",
+    "description": "Boiled yam pounded into a smooth, elastic dough."
+  },
+  {
+    "id": "af_004",
+    "name": "Fufu",
+    "category": "main",
+    "servingSize": "1 ball (approx 150g)",
+    "per100g": { "calories": 90, "protein": 0.8, "carbs": 22, "fat": 0.2, "fiber": 0.5, "sodium": 2 },
+    "region": "West Africa",
+    "description": "Starchy dough made from cassava, yams, or plantains."
+  },
+  {
+    "id": "af_005",
+    "name": "Eba (Garri)",
+    "category": "main",
+    "servingSize": "1 ball (approx 150g)",
+    "per100g": { "calories": 125, "protein": 1.2, "carbs": 30, "fat": 0.5, "fiber": 0.8, "sodium": 10 },
+    "region": "West Africa",
+    "description": "Swallow made from cassava granules."
+  },
+  {
+    "id": "af_006",
+    "name": "Suya",
+    "category": "snack",
+    "servingSize": "3 skewers (approx 120g)",
+    "per100g": { "calories": 280, "protein": 22, "carbs": 8, "fat": 18, "fiber": 1.0, "sodium": 550 },
+    "region": "West Africa",
+    "description": "Spicy grilled meat skewers (usually beef) with peanut seasoning."
+  },
+  {
+    "id": "af_007",
+    "name": "Moi-moi",
+    "category": "main",
+    "servingSize": "1 slice (approx 150g)",
+    "per100g": { "calories": 95, "protein": 5.5, "carbs": 12, "fat": 3.5, "fiber": 2.5, "sodium": 180 },
+    "region": "West Africa",
+    "description": "Steamed bean pudding made from blended cowpeas."
+  },
+  {
+    "id": "af_008",
+    "name": "Akara",
+    "category": "snack",
+    "servingSize": "3 fritters (approx 100g)",
+    "per100g": { "calories": 180, "protein": 8.5, "carbs": 15, "fat": 9, "fiber": 2.0, "sodium": 220 },
+    "region": "West Africa",
+    "description": "Fried bean cakes made from blended black-eyed peas."
+  },
+  {
+    "id": "af_009",
+    "name": "Jollof Spaghetti",
+    "category": "main",
+    "servingSize": "1 plate (approx 300g)",
+    "per100g": { "calories": 160, "protein": 5.5, "carbs": 30, "fat": 3.5, "fiber": 1.8, "sodium": 200 },
+    "region": "West Africa",
+    "description": "Spaghetti cooked in jollof-style tomato sauce."
+  },
+  {
+    "id": "af_010",
+    "name": "Pepper Soup",
+    "category": "soup",
+    "servingSize": "1 bowl (approx 300g)",
+    "per100g": { "calories": 75, "protein": 6.5, "carbs": 5, "fat": 4, "fiber": 1.0, "sodium": 280 },
+    "region": "West Africa",
+    "description": "Spicy, thin broth with meat/fish and aromatic spices."
+  },
+  {
+    "id": "af_011",
+    "name": "Okra Soup",
+    "category": "soup",
+    "servingSize": "1 bowl (approx 250g)",
+    "per100g": { "calories": 65, "protein": 2.8, "carbs": 8, "fat": 3, "fiber": 3.2, "sodium": 180 },
+    "region": "West Africa",
+    "description": "Thick soup made with okra, often with seafood or meat."
+  },
+  {
+    "id": "af_012",
+    "name": "Ogbono Soup",
+    "category": "soup",
+    "servingSize": "1 bowl (approx 250g)",
+    "per100g": { "calories": 110, "protein": 3.5, "carbs": 10, "fat": 7, "fiber": 2.5, "sodium": 150 },
+    "region": "West Africa",
+    "description": "Viscous soup made from ground ogbono seeds."
+  },
+  {
+    "id": "af_013",
+    "name": "Banga Soup",
+    "category": "soup",
+    "servingSize": "1 bowl (approx 250g)",
+    "per100g": { "calories": 130, "protein": 4.2, "carbs": 6, "fat": 11, "fiber": 1.5, "sodium": 200 },
+    "region": "West Africa",
+    "description": "Palm nut soup with assorted meats and fish."
+  },
+  {
+    "id": "af_014",
+    "name": "Tuwo Shinkafa",
+    "category": "main",
+    "servingSize": "1 serving (approx 200g)",
+    "per100g": { "calories": 130, "protein": 2.8, "carbs": 27, "fat": 0.8, "fiber": 0.8, "sodium": 3 },
+    "region": "West Africa",
+    "description": "Soft rice pudding from northern Nigeria."
+  },
+  {
+    "id": "af_015",
+    "name": "Amala",
+    "category": "main",
+    "servingSize": "1 ball (approx 150g)",
+    "per100g": { "calories": 85, "protein": 1.0, "carbs": 21, "fat": 0.3, "fiber": 1.2, "sodium": 2 },
+    "region": "West Africa",
+    "description": "Brown dough made from yam flour."
+  },
+  {
+    "id": "af_016",
+    "name": "Asun",
+    "category": "main",
+    "servingSize": "1 serving (approx 150g)",
+    "per100g": { "calories": 290, "protein": 26, "carbs": 5, "fat": 19, "fiber": 0.5, "sodium": 480 },
+    "region": "West Africa",
+    "description": "Spicy grilled goat meat."
+  },
+  {
+    "id": "af_017",
+    "name": "Nkwobi",
+    "category": "main",
+    "servingSize": "1 serving (approx 150g)",
+    "per100g": { "calories": 260, "protein": 22, "carbs": 4, "fat": 18, "fiber": 0.8, "sodium": 350 },
+    "region": "West Africa",
+    "description": "Cow legs cooked in spicy palm oil sauce."
+  },
+  {
+    "id": "af_018",
+    "name": "Samosa",
+    "category": "snack",
+    "servingSize": "2 pieces (approx 80g)",
+    "per100g": { "calories": 220, "protein": 5.0, "carbs": 24, "fat": 12, "fiber": 2.0, "sodium": 280 },
+    "region": "West Africa",
+    "description": "Deep-fried triangular pastries with spiced filling."
+  },
+  {
+    "id": "af_019",
+    "name": "Chin-chin",
+    "category": "snack",
+    "servingSize": "10 pieces (approx 60g)",
+    "per100g": { "calories": 420, "protein": 6.5, "carbs": 58, "fat": 18, "fiber": 1.5, "sodium": 150 },
+    "region": "West Africa",
+    "description": "Fried dough strips, crunchy and sweet."
+  },
+  {
+    "id": "af_020",
+    "name": "Puff-puff",
+    "category": "snack",
+    "servingSize": "4 balls (approx 80g)",
+    "per100g": { "calories": 210, "protein": 3.8, "carbs": 28, "fat": 9, "fiber": 1.0, "sodium": 80 },
+    "region": "West Africa",
+    "description": "Deep-fried sweet dough balls."
+  },
+  {
+    "id": "af_021",
+    "name": "Waakye",
+    "category": "main",
+    "servingSize": "1 plate (approx 300g)",
+    "per100g": { "calories": 120, "protein": 4.5, "carbs": 22, "fat": 2.2, "fiber": 4.5, "sodium": 120 },
+    "region": "West Africa",
+    "description": "Rice and beans cooked with sorghum leaves (Ghana)."
+  },
+  {
+    "id": "af_022",
+    "name": "Kenkey",
+    "category": "main",
+    "servingSize": "1 wrap (approx 200g)",
+    "per100g": { "calories": 110, "protein": 1.8, "carbs": 24, "fat": 0.5, "fiber": 1.2, "sodium": 5 },
+    "region": "West Africa",
+    "description": "Steamed corn dough, wrapped in leaves."
+  },
+  {
+    "id": "af_023",
+    "name": "Banku",
+    "category": "main",
+    "servingSize": "1 ball (approx 150g)",
+    "per100g": { "calories": 115, "protein": 2.0, "carbs": 25, "fat": 0.6, "fiber": 1.0, "sodium": 4 },
+    "region": "West Africa",
+    "description": "Fermented corn and cassava dough, steamed."
+  },
+  {
+    "id": "af_024",
+    "name": "Injera",
+    "category": "bread",
+    "servingSize": "1 large (approx 150g)",
+    "per100g": { "calories": 150, "protein": 4.5, "carbs": 30, "fat": 1.2, "fiber": 2.5, "sodium": 30 },
+    "region": "East Africa",
+    "description": "Sourdough flatbread made from teff flour (Ethiopia)."
+  },
+  {
+    "id": "af_025",
+    "name": "Kitfo",
+    "category": "main",
+    "servingSize": "1 plate (approx 150g)",
+    "per100g": { "calories": 220, "protein": 18, "carbs": 2, "fat": 16, "fiber": 0, "sodium": 60 },
+    "region": "East Africa",
+    "description": "Minced raw beef seasoned with clarified butter and spices (Ethiopia)."
+  },
+  {
+    "id": "af_026",
+    "name": "Biltong",
+    "category": "snack",
+    "servingSize": "50g",
+    "per100g": { "calories": 290, "protein": 45, "carbs": 5, "fat": 15, "fiber": 0, "sodium": 1500 },
+    "region": "Southern Africa",
+    "description": "Air-dried cured meat, similar to jerky."
+  },
+  {
+    "id": "af_027",
+    "name": "Bobotie",
+    "category": "main",
+    "servingSize": "1 serving (approx 200g)",
+    "per100g": { "calories": 165, "protein": 12, "carbs": 12, "fat": 8, "fiber": 1.5, "sodium": 280 },
+    "region": "Southern Africa",
+    "description": "Spiced minced meat bake with egg custard topping."
+  },
+  {
+    "id": "af_028",
+    "name": "Bunny chow",
+    "category": "main",
+    "servingSize": "1 half (approx 300g)",
+    "per100g": { "calories": 170, "protein": 6.0, "carbs": 25, "fat": 6, "fiber": 2.0, "sodium": 250 },
+    "region": "Southern Africa",
+    "description": "Hollowed-out bread filled with curry."
+  },
+  {
+    "id": "af_029",
+    "name": "Attiéké",
+    "category": "main",
+    "servingSize": "1 cup (approx 150g)",
+    "per100g": { "calories": 230, "protein": 2.5, "carbs": 52, "fat": 1.2, "fiber": 3.0, "sodium": 5 },
+    "region": "West Africa",
+    "description": "Cassava couscous from Ivory Coast."
+  },
+  {
+    "id": "af_030",
+    "name": "Ndolé",
+    "category": "main",
+    "servingSize": "1 bowl (approx 250g)",
+    "per100g": { "calories": 140, "protein": 7.2, "carbs": 8, "fat": 9, "fiber": 4.5, "sodium": 200 },
+    "region": "Central Africa",
+    "description": "Stew of bitter leaves with peanuts and meat/fish (Cameroon)."
+  },
+  {
+    "id": "af_031",
+    "name": "Thieboudienne",
+    "category": "main",
+    "servingSize": "1 plate (approx 350g)",
+    "per100g": { "calories": 110, "protein": 4.8, "carbs": 18, "fat": 3.5, "fiber": 2.2, "sodium": 180 },
+    "region": "West Africa",
+    "description": "Senegalese fish and rice dish (national dish)."
+  },
+  {
+    "id": "af_032",
+    "name": "Yassa",
+    "category": "main",
+    "servingSize": "1 serving (approx 200g)",
+    "per100g": { "calories": 145, "protein": 10, "carbs": 12, "fat": 7, "fiber": 2.5, "sodium": 220 },
+    "region": "West Africa",
+    "description": "Marinated chicken or fish with onions and lemons."
+  },
+  {
+    "id": "af_033",
+    "name": "Maafe",
+    "category": "main",
+    "servingSize": "1 bowl (approx 250g)",
+    "per100g": { "calories": 160, "protein": 8.5, "carbs": 10, "fat": 10, "fiber": 3.0, "sodium": 190 },
+    "region": "West Africa",
+    "description": "Groundnut stew with meat and vegetables."
+  },
+  {
+    "id": "af_034",
+    "name": "Couscous",
+    "category": "main",
+    "servingSize": "1 cup cooked (approx 150g)",
+    "per100g": { "calories": 112, "protein": 3.8, "carbs": 23, "fat": 0.2, "fiber": 1.4, "sodium": 10 },
+    "region": "North Africa",
+    "description": "Steamed semolina granules, staple across North Africa."
+  },
+  {
+    "id": "af_035",
+    "name": "Ugali (Pap)",
+    "category": "main",
+    "servingSize": "1 serving (approx 200g)",
+    "per100g": { "calories": 126, "protein": 3.5, "carbs": 27, "fat": 0.5, "fiber": 1.0, "sodium": 3 },
+    "region": "East/Central Africa",
+    "description": "Cornmeal porridge/staple (also called Sadza, Pap)."
+  },
+  {
+    "id": "af_036",
+    "name": "Sukuma Wiki",
+    "category": "side",
+    "servingSize": "1 cup (approx 150g)",
+    "per100g": { "calories": 45, "protein": 2.8, "carbs": 7, "fat": 1.5, "fiber": 4.0, "sodium": 45 },
+    "region": "East Africa",
+    "description": "Sautéed collard greens with onions."
+  },
+  {
+    "id": "af_037",
+    "name": "Nyama Choma",
+    "category": "main",
+    "servingSize": "1 serving (approx 200g)",
+    "per100g": { "calories": 245, "protein": 27, "carbs": 0, "fat": 15, "fiber": 0, "sodium": 80 },
+    "region": "East Africa",
+    "description": "Grilled roasted meat (Kenya, Tanzania)."
+  },
+  {
+    "id": "af_038",
+    "name": "Chapati",
+    "category": "bread",
+    "servingSize": "1 medium (approx 60g)",
+    "per100g": { "calories": 210, "protein": 4.5, "carbs": 34, "fat": 7, "fiber": 1.5, "sodium": 180 },
+    "region": "East Africa",
+    "description": "Layered flatbread, popular in East Africa."
+  },
+  {
+    "id": "af_039",
+    "name": "Mandazi",
+    "category": "snack",
+    "servingSize": "2 pieces (approx 60g)",
+    "per100g": { "calories": 310, "protein": 5.5, "carbs": 42, "fat": 14, "fiber": 1.0, "sodium": 120 },
+    "region": "East Africa",
+    "description": "Sweet fried doughnuts (East African)."
+  },
+  {
+    "id": "af_040",
+    "name": "Pilau Rice",
+    "category": "main",
+    "servingSize": "1 cup (approx 200g)",
+    "per100g": { "calories": 165, "protein": 4.5, "carbs": 30, "fat": 5, "fiber": 1.5, "sodium": 220 },
+    "region": "East Africa",
+    "description": "Spiced rice with meat, popular across East Africa."
+  },
+  {
+    "id": "af_041",
+    "name": "Matoke (Matooke)",
+    "category": "main",
+    "servingSize": "1 serving (approx 250g)",
+    "per100g": { "calories": 115, "protein": 1.2, "carbs": 27, "fat": 0.4, "fiber": 2.5, "sodium": 5 },
+    "region": "East Africa",
+    "description": "Steamed green bananas (Uganda)."
+  },
+  {
+    "id": "af_042",
+    "name": "In_pass",
+    "category": "main",
+    "servingSize": "1 serving (approx 200g)",
+    "per100g": { "calories": 140, "protein": 5.5, "carbs": 22, "fat": 4, "fiber": 3.5, "sodium": 180 },
+    "region": "West Africa",
+    "description": "Bean stew common across West Africa."
+  },
+  {
+    "id": "af_043",
+    "name": "Kelewele",
+    "category": "snack",
+    "servingSize": "1 cup (approx 120g)",
+    "per100g": { "calories": 195, "protein": 2.2, "carbs": 35, "fat": 8, "fiber": 2.5, "sodium": 180 },
+    "region": "West Africa",
+    "description": "Spicy fried plantain cubes (Ghana)."
+  },
+  {
+    "id": "af_044",
+    "name": "Fried Plantain (Dodo)",
+    "category": "side",
+    "servingSize": "1 cup (approx 120g)",
+    "per100g": { "calories": 205, "protein": 1.0, "carbs": 34, "fat": 10, "fiber": 2.3, "sodium": 15 },
+    "region": "West Africa",
+    "description": "Ripe plantains fried until golden."
+  },
+  {
+    "id": "af_045",
+    "name": "Groundnut Soup",
+    "category": "soup",
+    "servingSize": "1 bowl (approx 250g)",
+    "per100g": { "calories": 145, "protein": 6.0, "carbs": 9, "fat": 10, "fiber": 3.0, "sodium": 210 },
+    "region": "West Africa",
+    "description": "Rich soup made with groundnuts (peanuts)."
+  },
+  {
+    "id": "af_046",
+    "name": "Oha Soup",
+    "category": "soup",
+    "servingSize": "1 bowl (approx 250g)",
+    "per100g": { "calories": 95, "protein": 4.5, "carbs": 8, "fat": 5, "fiber": 2.5, "sodium": 180 },
+    "region": "West Africa",
+    "description": "Nigerian soup made with oha leaves and cocoyam."
+  },
+  {
+    "id": "af_047",
+    "name": "Edikang Ikong",
+    "category": "soup",
+    "servingSize": "1 bowl (approx 250g)",
+    "per100g": { "calories": 110, "protein": 6.2, "carbs": 7, "fat": 7, "fiber": 4.2, "sodium": 160 },
+    "region": "West Africa",
+    "description": "Nutritious vegetable soup with pumpkin leaves and meat (Nigeria)."
+  },
+  {
+    "id": "af_048",
+    "name": "Afang Soup",
+    "category": "soup",
+    "servingSize": "1 bowl (approx 250g)",
+    "per100g": { "calories": 100, "protein": 5.0, "carbs": 7, "fat": 6, "fiber": 3.8, "sodium": 150 },
+    "region": "West Africa",
+    "description": "Nutritious soup with afang leaves (Nigeria, Cameroon)."
+  },
+  {
+    "id": "af_049",
+    "name": "Banga Starch",
+    "category": "main",
+    "servingSize": "1 ball (approx 150g)",
+    "per100g": { "calories": 140, "protein": 1.5, "carbs": 32, "fat": 0.8, "fiber": 1.0, "sodium": 5 },
+    "region": "West Africa",
+    "description": "Starch extracted from cassava, eaten with banga soup."
+  },
+  {
+    "id": "af_050",
+    "name": "Tuwo Masara",
+    "category": "main",
+    "servingSize": "1 ball (approx 150g)",
+    "per100g": { "calories": 130, "protein": 2.8, "carbs": 28, "fat": 0.5, "fiber": 1.2, "sodium": 4 },
+    "region": "West Africa",
+    "description": "Corn flour swallow (Nigeria)."
+  }
+]
