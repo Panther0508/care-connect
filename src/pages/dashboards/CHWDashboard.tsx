@@ -2,7 +2,7 @@ import { useMesh } from '../../hooks/useMesh';
 import { useSavedNeeds } from '../../hooks/useSavedNeeds';
 import { useAuth } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useState, useEffect } from 'react-router-dom';
 import VitaAvatar from '../components/VitaAvatar';
 import {
   Wifi,
@@ -14,8 +14,11 @@ import {
   Activity,
   CheckCircle,
   Clock,
-  ChevronRight
+  ChevronRight,
+  RefreshCw,
+  Loader2
 } from 'lucide-react';
+import { getOutbreakAlerts, getNearbyFacilities, invalidateCache } from '../../services/realtimeData';
 
 export default function CHWDashboard() {
   const { user } = useAuth();

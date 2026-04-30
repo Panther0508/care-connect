@@ -1,0 +1,7010 @@
+﻿[
+    {
+        "code":  "A00",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  1
+    },
+    {
+        "code":  "A01",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  2
+    },
+    {
+        "code":  "A02",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  3
+    },
+    {
+        "code":  "A03",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  4
+    },
+    {
+        "code":  "A04",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  5
+    },
+    {
+        "code":  "A09",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  6
+    },
+    {
+        "code":  "A15",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  7
+    },
+    {
+        "code":  "A16",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  8
+    },
+    {
+        "code":  "A17",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  9
+    },
+    {
+        "code":  "A18",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  10
+    },
+    {
+        "code":  "A19",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  11
+    },
+    {
+        "code":  "A20",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  12
+    },
+    {
+        "code":  "A27",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  13
+    },
+    {
+        "code":  "A28",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  14
+    },
+    {
+        "code":  "A30",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  15
+    },
+    {
+        "code":  "A31",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  16
+    },
+    {
+        "code":  "A32",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  17
+    },
+    {
+        "code":  "A36",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  18
+    },
+    {
+        "code":  "A37",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  19
+    },
+    {
+        "code":  "A39",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  20
+    },
+    {
+        "code":  "A40",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  21
+    },
+    {
+        "code":  "A41",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  22
+    },
+    {
+        "code":  "A42",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  23
+    },
+    {
+        "code":  "A43",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  24
+    },
+    {
+        "code":  "A44",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  25
+    },
+    {
+        "code":  "A46",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  26
+    },
+    {
+        "code":  "A48",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  27
+    },
+    {
+        "code":  "A49",
+        "name":  "Certain infectious and parasitic diseases",
+        "category":  "A",
+        "order":  28
+    },
+    {
+        "code":  "B16",
+        "name":  "Other",
+        "category":  "B",
+        "order":  29
+    },
+    {
+        "code":  "B18",
+        "name":  "Other",
+        "category":  "B",
+        "order":  30
+    },
+    {
+        "code":  "B19",
+        "name":  "Other",
+        "category":  "B",
+        "order":  31
+    },
+    {
+        "code":  "B20",
+        "name":  "Other",
+        "category":  "B",
+        "order":  32
+    },
+    {
+        "code":  "B21",
+        "name":  "Other",
+        "category":  "B",
+        "order":  33
+    },
+    {
+        "code":  "B22",
+        "name":  "Other",
+        "category":  "B",
+        "order":  34
+    },
+    {
+        "code":  "B23",
+        "name":  "Other",
+        "category":  "B",
+        "order":  35
+    },
+    {
+        "code":  "B24",
+        "name":  "Other",
+        "category":  "B",
+        "order":  36
+    },
+    {
+        "code":  "B25",
+        "name":  "Other",
+        "category":  "B",
+        "order":  37
+    },
+    {
+        "code":  "B26",
+        "name":  "Other",
+        "category":  "B",
+        "order":  38
+    },
+    {
+        "code":  "B27",
+        "name":  "Other",
+        "category":  "B",
+        "order":  39
+    },
+    {
+        "code":  "B30",
+        "name":  "Other",
+        "category":  "B",
+        "order":  40
+    },
+    {
+        "code":  "B34",
+        "name":  "Other",
+        "category":  "B",
+        "order":  41
+    },
+    {
+        "code":  "B35",
+        "name":  "Other",
+        "category":  "B",
+        "order":  42
+    },
+    {
+        "code":  "B37",
+        "name":  "Other",
+        "category":  "B",
+        "order":  43
+    },
+    {
+        "code":  "B39",
+        "name":  "Other",
+        "category":  "B",
+        "order":  44
+    },
+    {
+        "code":  "B45",
+        "name":  "Other",
+        "category":  "B",
+        "order":  45
+    },
+    {
+        "code":  "B50",
+        "name":  "Other",
+        "category":  "B",
+        "order":  46
+    },
+    {
+        "code":  "B54",
+        "name":  "Other",
+        "category":  "B",
+        "order":  47
+    },
+    {
+        "code":  "B57",
+        "name":  "Other",
+        "category":  "B",
+        "order":  48
+    },
+    {
+        "code":  "B58",
+        "name":  "Other",
+        "category":  "B",
+        "order":  49
+    },
+    {
+        "code":  "B65",
+        "name":  "Other",
+        "category":  "B",
+        "order":  50
+    },
+    {
+        "code":  "B66",
+        "name":  "Other",
+        "category":  "B",
+        "order":  51
+    },
+    {
+        "code":  "B67",
+        "name":  "Other",
+        "category":  "B",
+        "order":  52
+    },
+    {
+        "code":  "B68",
+        "name":  "Other",
+        "category":  "B",
+        "order":  53
+    },
+    {
+        "code":  "B69",
+        "name":  "Other",
+        "category":  "B",
+        "order":  54
+    },
+    {
+        "code":  "B70",
+        "name":  "Other",
+        "category":  "B",
+        "order":  55
+    },
+    {
+        "code":  "B71",
+        "name":  "Other",
+        "category":  "B",
+        "order":  56
+    },
+    {
+        "code":  "B72",
+        "name":  "Other",
+        "category":  "B",
+        "order":  57
+    },
+    {
+        "code":  "B73",
+        "name":  "Other",
+        "category":  "B",
+        "order":  58
+    },
+    {
+        "code":  "B74",
+        "name":  "Other",
+        "category":  "B",
+        "order":  59
+    },
+    {
+        "code":  "B77",
+        "name":  "Other",
+        "category":  "B",
+        "order":  60
+    },
+    {
+        "code":  "B78",
+        "name":  "Other",
+        "category":  "B",
+        "order":  61
+    },
+    {
+        "code":  "B79",
+        "name":  "Other",
+        "category":  "B",
+        "order":  62
+    },
+    {
+        "code":  "B80",
+        "name":  "Other",
+        "category":  "B",
+        "order":  63
+    },
+    {
+        "code":  "B81",
+        "name":  "Other",
+        "category":  "B",
+        "order":  64
+    },
+    {
+        "code":  "B82",
+        "name":  "Other",
+        "category":  "B",
+        "order":  65
+    },
+    {
+        "code":  "B83",
+        "name":  "Other",
+        "category":  "B",
+        "order":  66
+    },
+    {
+        "code":  "B85",
+        "name":  "Other",
+        "category":  "B",
+        "order":  67
+    },
+    {
+        "code":  "B86",
+        "name":  "Other",
+        "category":  "B",
+        "order":  68
+    },
+    {
+        "code":  "B87",
+        "name":  "Other",
+        "category":  "B",
+        "order":  69
+    },
+    {
+        "code":  "B88",
+        "name":  "Other",
+        "category":  "B",
+        "order":  70
+    },
+    {
+        "code":  "B89",
+        "name":  "Other",
+        "category":  "B",
+        "order":  71
+    },
+    {
+        "code":  "B90",
+        "name":  "Other",
+        "category":  "B",
+        "order":  72
+    },
+    {
+        "code":  "B91",
+        "name":  "Other",
+        "category":  "B",
+        "order":  73
+    },
+    {
+        "code":  "B92",
+        "name":  "Other",
+        "category":  "B",
+        "order":  74
+    },
+    {
+        "code":  "B93",
+        "name":  "Other",
+        "category":  "B",
+        "order":  75
+    },
+    {
+        "code":  "B94",
+        "name":  "Other",
+        "category":  "B",
+        "order":  76
+    },
+    {
+        "code":  "B95",
+        "name":  "Other",
+        "category":  "B",
+        "order":  77
+    },
+    {
+        "code":  "B96",
+        "name":  "Other",
+        "category":  "B",
+        "order":  78
+    },
+    {
+        "code":  "B97",
+        "name":  "Other",
+        "category":  "B",
+        "order":  79
+    },
+    {
+        "code":  "B99",
+        "name":  "Other",
+        "category":  "B",
+        "order":  80
+    },
+    {
+        "code":  "C00",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  81
+    },
+    {
+        "code":  "C01",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  82
+    },
+    {
+        "code":  "C02",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  83
+    },
+    {
+        "code":  "C03",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  84
+    },
+    {
+        "code":  "C04",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  85
+    },
+    {
+        "code":  "C05",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  86
+    },
+    {
+        "code":  "C06",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  87
+    },
+    {
+        "code":  "C07",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  88
+    },
+    {
+        "code":  "C08",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  89
+    },
+    {
+        "code":  "C09",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  90
+    },
+    {
+        "code":  "C10",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  91
+    },
+    {
+        "code":  "C11",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  92
+    },
+    {
+        "code":  "C12",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  93
+    },
+    {
+        "code":  "C13",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  94
+    },
+    {
+        "code":  "C14",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  95
+    },
+    {
+        "code":  "C15",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  96
+    },
+    {
+        "code":  "C16",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  97
+    },
+    {
+        "code":  "C17",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  98
+    },
+    {
+        "code":  "C18",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  99
+    },
+    {
+        "code":  "C19",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  100
+    },
+    {
+        "code":  "C20",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  101
+    },
+    {
+        "code":  "C21",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  102
+    },
+    {
+        "code":  "C22",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  103
+    },
+    {
+        "code":  "C23",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  104
+    },
+    {
+        "code":  "C24",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  105
+    },
+    {
+        "code":  "C25",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  106
+    },
+    {
+        "code":  "C26",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  107
+    },
+    {
+        "code":  "C30",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  108
+    },
+    {
+        "code":  "C31",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  109
+    },
+    {
+        "code":  "C32",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  110
+    },
+    {
+        "code":  "C33",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  111
+    },
+    {
+        "code":  "C34",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  112
+    },
+    {
+        "code":  "C37",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  113
+    },
+    {
+        "code":  "C38",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  114
+    },
+    {
+        "code":  "C39",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  115
+    },
+    {
+        "code":  "C40",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  116
+    },
+    {
+        "code":  "C41",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  117
+    },
+    {
+        "code":  "C43",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  118
+    },
+    {
+        "code":  "C44",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  119
+    },
+    {
+        "code":  "C45",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  120
+    },
+    {
+        "code":  "C46",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  121
+    },
+    {
+        "code":  "C47",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  122
+    },
+    {
+        "code":  "C48",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  123
+    },
+    {
+        "code":  "C49",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  124
+    },
+    {
+        "code":  "C50",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  125
+    },
+    {
+        "code":  "C51",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  126
+    },
+    {
+        "code":  "C52",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  127
+    },
+    {
+        "code":  "C53",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  128
+    },
+    {
+        "code":  "C54",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  129
+    },
+    {
+        "code":  "C55",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  130
+    },
+    {
+        "code":  "C56",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  131
+    },
+    {
+        "code":  "C57",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  132
+    },
+    {
+        "code":  "C58",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  133
+    },
+    {
+        "code":  "C59",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  134
+    },
+    {
+        "code":  "C60",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  135
+    },
+    {
+        "code":  "C61",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  136
+    },
+    {
+        "code":  "C62",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  137
+    },
+    {
+        "code":  "C63",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  138
+    },
+    {
+        "code":  "C64",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  139
+    },
+    {
+        "code":  "C65",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  140
+    },
+    {
+        "code":  "C66",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  141
+    },
+    {
+        "code":  "C67",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  142
+    },
+    {
+        "code":  "C68",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  143
+    },
+    {
+        "code":  "C69",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  144
+    },
+    {
+        "code":  "C70",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  145
+    },
+    {
+        "code":  "C71",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  146
+    },
+    {
+        "code":  "C72",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  147
+    },
+    {
+        "code":  "C73",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  148
+    },
+    {
+        "code":  "C74",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  149
+    },
+    {
+        "code":  "C75",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  150
+    },
+    {
+        "code":  "C76",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  151
+    },
+    {
+        "code":  "C77",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  152
+    },
+    {
+        "code":  "C78",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  153
+    },
+    {
+        "code":  "C79",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  154
+    },
+    {
+        "code":  "C80",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  155
+    },
+    {
+        "code":  "C81",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  156
+    },
+    {
+        "code":  "C82",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  157
+    },
+    {
+        "code":  "C83",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  158
+    },
+    {
+        "code":  "C84",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  159
+    },
+    {
+        "code":  "C85",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  160
+    },
+    {
+        "code":  "C86",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  161
+    },
+    {
+        "code":  "C88",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  162
+    },
+    {
+        "code":  "C90",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  163
+    },
+    {
+        "code":  "C91",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  164
+    },
+    {
+        "code":  "C92",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  165
+    },
+    {
+        "code":  "C94",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  166
+    },
+    {
+        "code":  "C95",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  167
+    },
+    {
+        "code":  "C96",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  168
+    },
+    {
+        "code":  "C97",
+        "name":  "Neoplasms",
+        "category":  "C",
+        "order":  169
+    },
+    {
+        "code":  "D37",
+        "name":  "Diseases of the blood and blood-forming organs",
+        "category":  "D",
+        "order":  170
+    },
+    {
+        "code":  "D64",
+        "name":  "Diseases of the blood and blood-forming organs",
+        "category":  "D",
+        "order":  171
+    },
+    {
+        "code":  "D68",
+        "name":  "Diseases of the blood and blood-forming organs",
+        "category":  "D",
+        "order":  172
+    },
+    {
+        "code":  "E03",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  173
+    },
+    {
+        "code":  "E04",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  174
+    },
+    {
+        "code":  "E05",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  175
+    },
+    {
+        "code":  "E10",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  176
+    },
+    {
+        "code":  "E11",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  177
+    },
+    {
+        "code":  "E12",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  178
+    },
+    {
+        "code":  "E13",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  179
+    },
+    {
+        "code":  "E14",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  180
+    },
+    {
+        "code":  "E16",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  181
+    },
+    {
+        "code":  "E40",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  182
+    },
+    {
+        "code":  "E46",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  183
+    },
+    {
+        "code":  "E66",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  184
+    },
+    {
+        "code":  "E78",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  185
+    },
+    {
+        "code":  "E83",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  186
+    },
+    {
+        "code":  "E85",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  187
+    },
+    {
+        "code":  "E86",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  188
+    },
+    {
+        "code":  "E87",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  189
+    },
+    {
+        "code":  "E88",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  190
+    },
+    {
+        "code":  "E89",
+        "name":  "Endocrine, nutritional and metabolic diseases",
+        "category":  "E",
+        "order":  191
+    },
+    {
+        "code":  "F01",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  192
+    },
+    {
+        "code":  "F02",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  193
+    },
+    {
+        "code":  "F03",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  194
+    },
+    {
+        "code":  "F05",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  195
+    },
+    {
+        "code":  "F06",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  196
+    },
+    {
+        "code":  "F07",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  197
+    },
+    {
+        "code":  "F09",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  198
+    },
+    {
+        "code":  "F10",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  199
+    },
+    {
+        "code":  "F13",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  200
+    },
+    {
+        "code":  "F20",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  201
+    },
+    {
+        "code":  "F23",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  202
+    },
+    {
+        "code":  "F32",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  203
+    },
+    {
+        "code":  "F33",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  204
+    },
+    {
+        "code":  "F34",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  205
+    },
+    {
+        "code":  "F41",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  206
+    },
+    {
+        "code":  "F43",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  207
+    },
+    {
+        "code":  "F48",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  208
+    },
+    {
+        "code":  "F50",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  209
+    },
+    {
+        "code":  "F51",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  210
+    },
+    {
+        "code":  "F55",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  211
+    },
+    {
+        "code":  "F60",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  212
+    },
+    {
+        "code":  "F84",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  213
+    },
+    {
+        "code":  "F98",
+        "name":  "Mental, Behavioral and Neurodevelopmental disorders",
+        "category":  "F",
+        "order":  214
+    },
+    {
+        "code":  "G00",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  215
+    },
+    {
+        "code":  "G03",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  216
+    },
+    {
+        "code":  "G04",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  217
+    },
+    {
+        "code":  "G09",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  218
+    },
+    {
+        "code":  "G10",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  219
+    },
+    {
+        "code":  "G11",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  220
+    },
+    {
+        "code":  "G20",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  221
+    },
+    {
+        "code":  "G25",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  222
+    },
+    {
+        "code":  "G30",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  223
+    },
+    {
+        "code":  "G35",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  224
+    },
+    {
+        "code":  "G36",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  225
+    },
+    {
+        "code":  "G37",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  226
+    },
+    {
+        "code":  "G40",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  227
+    },
+    {
+        "code":  "G43",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  228
+    },
+    {
+        "code":  "G47",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  229
+    },
+    {
+        "code":  "G60",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  230
+    },
+    {
+        "code":  "G62",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  231
+    },
+    {
+        "code":  "G70",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  232
+    },
+    {
+        "code":  "G71",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  233
+    },
+    {
+        "code":  "G72",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  234
+    },
+    {
+        "code":  "G73",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  235
+    },
+    {
+        "code":  "G75",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  236
+    },
+    {
+        "code":  "G77",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  237
+    },
+    {
+        "code":  "G79",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  238
+    },
+    {
+        "code":  "G80",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  239
+    },
+    {
+        "code":  "G82",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  240
+    },
+    {
+        "code":  "G83",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  241
+    },
+    {
+        "code":  "G93",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  242
+    },
+    {
+        "code":  "G99",
+        "name":  "Diseases of the nervous system",
+        "category":  "G",
+        "order":  243
+    },
+    {
+        "code":  "H00",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  244
+    },
+    {
+        "code":  "H01",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  245
+    },
+    {
+        "code":  "H02",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  246
+    },
+    {
+        "code":  "H04",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  247
+    },
+    {
+        "code":  "H05",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  248
+    },
+    {
+        "code":  "H10",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  249
+    },
+    {
+        "code":  "H15",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  250
+    },
+    {
+        "code":  "H16",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  251
+    },
+    {
+        "code":  "H18",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  252
+    },
+    {
+        "code":  "H20",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  253
+    },
+    {
+        "code":  "H21",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  254
+    },
+    {
+        "code":  "H25",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  255
+    },
+    {
+        "code":  "H26",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  256
+    },
+    {
+        "code":  "H27",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  257
+    },
+    {
+        "code":  "H30",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  258
+    },
+    {
+        "code":  "H31",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  259
+    },
+    {
+        "code":  "H33",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  260
+    },
+    {
+        "code":  "H34",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  261
+    },
+    {
+        "code":  "H35",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  262
+    },
+    {
+        "code":  "H40",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  263
+    },
+    {
+        "code":  "H44",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  264
+    },
+    {
+        "code":  "H46",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  265
+    },
+    {
+        "code":  "H49",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  266
+    },
+    {
+        "code":  "H52",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  267
+    },
+    {
+        "code":  "H53",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  268
+    },
+    {
+        "code":  "H54",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  269
+    },
+    {
+        "code":  "H80",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  270
+    },
+    {
+        "code":  "H81",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  271
+    },
+    {
+        "code":  "H83",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  272
+    },
+    {
+        "code":  "H90",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  273
+    },
+    {
+        "code":  "H91",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  274
+    },
+    {
+        "code":  "H93",
+        "name":  "Diseases of the eye and adnexa",
+        "category":  "H",
+        "order":  275
+    },
+    {
+        "code":  "I00",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  276
+    },
+    {
+        "code":  "I01",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  277
+    },
+    {
+        "code":  "I02",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  278
+    },
+    {
+        "code":  "I05",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  279
+    },
+    {
+        "code":  "I06",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  280
+    },
+    {
+        "code":  "I07",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  281
+    },
+    {
+        "code":  "I08",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  282
+    },
+    {
+        "code":  "I09",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  283
+    },
+    {
+        "code":  "I10",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  284
+    },
+    {
+        "code":  "I11",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  285
+    },
+    {
+        "code":  "I12",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  286
+    },
+    {
+        "code":  "I13",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  287
+    },
+    {
+        "code":  "I14",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  288
+    },
+    {
+        "code":  "I15",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  289
+    },
+    {
+        "code":  "I20",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  290
+    },
+    {
+        "code":  "I21",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  291
+    },
+    {
+        "code":  "I25",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  292
+    },
+    {
+        "code":  "I26",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  293
+    },
+    {
+        "code":  "I27",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  294
+    },
+    {
+        "code":  "I28",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  295
+    },
+    {
+        "code":  "I29",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  296
+    },
+    {
+        "code":  "I30",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  297
+    },
+    {
+        "code":  "I31",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  298
+    },
+    {
+        "code":  "I34",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  299
+    },
+    {
+        "code":  "I35",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  300
+    },
+    {
+        "code":  "I36",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  301
+    },
+    {
+        "code":  "I38",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  302
+    },
+    {
+        "code":  "I42",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  303
+    },
+    {
+        "code":  "I44",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  304
+    },
+    {
+        "code":  "I45",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  305
+    },
+    {
+        "code":  "I46",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  306
+    },
+    {
+        "code":  "I47",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  307
+    },
+    {
+        "code":  "I48",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  308
+    },
+    {
+        "code":  "I49",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  309
+    },
+    {
+        "code":  "I50",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  310
+    },
+    {
+        "code":  "I51",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  311
+    },
+    {
+        "code":  "I60",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  312
+    },
+    {
+        "code":  "I61",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  313
+    },
+    {
+        "code":  "I63",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  314
+    },
+    {
+        "code":  "I67",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  315
+    },
+    {
+        "code":  "I69",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  316
+    },
+    {
+        "code":  "I70",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  317
+    },
+    {
+        "code":  "I71",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  318
+    },
+    {
+        "code":  "I73",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  319
+    },
+    {
+        "code":  "I77",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  320
+    },
+    {
+        "code":  "I78",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  321
+    },
+    {
+        "code":  "I79",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  322
+    },
+    {
+        "code":  "I80",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  323
+    },
+    {
+        "code":  "I81",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  324
+    },
+    {
+        "code":  "I82",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  325
+    },
+    {
+        "code":  "I83",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  326
+    },
+    {
+        "code":  "I85",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  327
+    },
+    {
+        "code":  "I86",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  328
+    },
+    {
+        "code":  "I87",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  329
+    },
+    {
+        "code":  "I88",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  330
+    },
+    {
+        "code":  "I89",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  331
+    },
+    {
+        "code":  "I95",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  332
+    },
+    {
+        "code":  "I97",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  333
+    },
+    {
+        "code":  "I98",
+        "name":  "Diseases of the circulatory system",
+        "category":  "I",
+        "order":  334
+    },
+    {
+        "code":  "J00",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  335
+    },
+    {
+        "code":  "J02",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  336
+    },
+    {
+        "code":  "J03",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  337
+    },
+    {
+        "code":  "J04",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  338
+    },
+    {
+        "code":  "J06",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  339
+    },
+    {
+        "code":  "J11",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  340
+    },
+    {
+        "code":  "J12",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  341
+    },
+    {
+        "code":  "J15",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  342
+    },
+    {
+        "code":  "J18",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  343
+    },
+    {
+        "code":  "J20",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  344
+    },
+    {
+        "code":  "J21",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  345
+    },
+    {
+        "code":  "J22",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  346
+    },
+    {
+        "code":  "J23",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  347
+    },
+    {
+        "code":  "J25",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  348
+    },
+    {
+        "code":  "J26",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  349
+    },
+    {
+        "code":  "J30",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  350
+    },
+    {
+        "code":  "J31",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  351
+    },
+    {
+        "code":  "J32",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  352
+    },
+    {
+        "code":  "J33",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  353
+    },
+    {
+        "code":  "J34",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  354
+    },
+    {
+        "code":  "J39",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  355
+    },
+    {
+        "code":  "J40",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  356
+    },
+    {
+        "code":  "J41",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  357
+    },
+    {
+        "code":  "J42",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  358
+    },
+    {
+        "code":  "J44",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  359
+    },
+    {
+        "code":  "J45",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  360
+    },
+    {
+        "code":  "J46",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  361
+    },
+    {
+        "code":  "J47",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  362
+    },
+    {
+        "code":  "J60",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  363
+    },
+    {
+        "code":  "J65",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  364
+    },
+    {
+        "code":  "J68",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  365
+    },
+    {
+        "code":  "J69",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  366
+    },
+    {
+        "code":  "J70",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  367
+    },
+    {
+        "code":  "J80",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  368
+    },
+    {
+        "code":  "J81",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  369
+    },
+    {
+        "code":  "J84",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  370
+    },
+    {
+        "code":  "J98",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  371
+    },
+    {
+        "code":  "J99",
+        "name":  "Diseases of the respiratory system",
+        "category":  "J",
+        "order":  372
+    },
+    {
+        "code":  "K21",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  373
+    },
+    {
+        "code":  "K25",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  374
+    },
+    {
+        "code":  "K26",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  375
+    },
+    {
+        "code":  "K27",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  376
+    },
+    {
+        "code":  "K29",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  377
+    },
+    {
+        "code":  "K35",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  378
+    },
+    {
+        "code":  "K36",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  379
+    },
+    {
+        "code":  "K37",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  380
+    },
+    {
+        "code":  "K38",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  381
+    },
+    {
+        "code":  "K39",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  382
+    },
+    {
+        "code":  "K40",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  383
+    },
+    {
+        "code":  "K41",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  384
+    },
+    {
+        "code":  "K43",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  385
+    },
+    {
+        "code":  "K44",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  386
+    },
+    {
+        "code":  "K45",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  387
+    },
+    {
+        "code":  "K50",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  388
+    },
+    {
+        "code":  "K51",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  389
+    },
+    {
+        "code":  "K52",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  390
+    },
+    {
+        "code":  "K55",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  391
+    },
+    {
+        "code":  "K56",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  392
+    },
+    {
+        "code":  "K57",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  393
+    },
+    {
+        "code":  "K58",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  394
+    },
+    {
+        "code":  "K63",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  395
+    },
+    {
+        "code":  "K65",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  396
+    },
+    {
+        "code":  "K70",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  397
+    },
+    {
+        "code":  "K71",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  398
+    },
+    {
+        "code":  "K72",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  399
+    },
+    {
+        "code":  "K73",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  400
+    },
+    {
+        "code":  "K74",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  401
+    },
+    {
+        "code":  "K75",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  402
+    },
+    {
+        "code":  "K76",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  403
+    },
+    {
+        "code":  "K80",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  404
+    },
+    {
+        "code":  "K81",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  405
+    },
+    {
+        "code":  "K82",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  406
+    },
+    {
+        "code":  "K85",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  407
+    },
+    {
+        "code":  "K92",
+        "name":  "Diseases of the digestive system",
+        "category":  "K",
+        "order":  408
+    },
+    {
+        "code":  "L03",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  409
+    },
+    {
+        "code":  "L08",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  410
+    },
+    {
+        "code":  "L20",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  411
+    },
+    {
+        "code":  "L23",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  412
+    },
+    {
+        "code":  "L25",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  413
+    },
+    {
+        "code":  "L27",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  414
+    },
+    {
+        "code":  "L30",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  415
+    },
+    {
+        "code":  "L40",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  416
+    },
+    {
+        "code":  "L42",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  417
+    },
+    {
+        "code":  "L44",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  418
+    },
+    {
+        "code":  "L55",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  419
+    },
+    {
+        "code":  "L57",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  420
+    },
+    {
+        "code":  "L70",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  421
+    },
+    {
+        "code":  "L75",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  422
+    },
+    {
+        "code":  "L80",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  423
+    },
+    {
+        "code":  "L82",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  424
+    },
+    {
+        "code":  "L85",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  425
+    },
+    {
+        "code":  "L86",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  426
+    },
+    {
+        "code":  "L89",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  427
+    },
+    {
+        "code":  "L97",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  428
+    },
+    {
+        "code":  "L98",
+        "name":  "Diseases of the skin and subcutaneous tissue",
+        "category":  "L",
+        "order":  429
+    },
+    {
+        "code":  "M00",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  430
+    },
+    {
+        "code":  "M05",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  431
+    },
+    {
+        "code":  "M06",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  432
+    },
+    {
+        "code":  "M08",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  433
+    },
+    {
+        "code":  "M13",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  434
+    },
+    {
+        "code":  "M15",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  435
+    },
+    {
+        "code":  "M16",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  436
+    },
+    {
+        "code":  "M17",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  437
+    },
+    {
+        "code":  "M19",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  438
+    },
+    {
+        "code":  "M23",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  439
+    },
+    {
+        "code":  "M25",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  440
+    },
+    {
+        "code":  "M30",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  441
+    },
+    {
+        "code":  "M32",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  442
+    },
+    {
+        "code":  "M35",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  443
+    },
+    {
+        "code":  "M36",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  444
+    },
+    {
+        "code":  "M40",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  445
+    },
+    {
+        "code":  "M45",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  446
+    },
+    {
+        "code":  "M48",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  447
+    },
+    {
+        "code":  "M49",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  448
+    },
+    {
+        "code":  "M50",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  449
+    },
+    {
+        "code":  "M51",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  450
+    },
+    {
+        "code":  "M53",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  451
+    },
+    {
+        "code":  "M54",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  452
+    },
+    {
+        "code":  "M60",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  453
+    },
+    {
+        "code":  "M61",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  454
+    },
+    {
+        "code":  "M62",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  455
+    },
+    {
+        "code":  "M67",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  456
+    },
+    {
+        "code":  "M70",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  457
+    },
+    {
+        "code":  "M71",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  458
+    },
+    {
+        "code":  "M72",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  459
+    },
+    {
+        "code":  "M73",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  460
+    },
+    {
+        "code":  "M75",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  461
+    },
+    {
+        "code":  "M77",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  462
+    },
+    {
+        "code":  "M79",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  463
+    },
+    {
+        "code":  "M80",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  464
+    },
+    {
+        "code":  "M81",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  465
+    },
+    {
+        "code":  "M85",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  466
+    },
+    {
+        "code":  "M86",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  467
+    },
+    {
+        "code":  "M89",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  468
+    },
+    {
+        "code":  "M90",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  469
+    },
+    {
+        "code":  "M91",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  470
+    },
+    {
+        "code":  "M92",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  471
+    },
+    {
+        "code":  "M95",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  472
+    },
+    {
+        "code":  "M96",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  473
+    },
+    {
+        "code":  "M97",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  474
+    },
+    {
+        "code":  "M98",
+        "name":  "Diseases of the musculoskeletal system and connective tissue",
+        "category":  "M",
+        "order":  475
+    },
+    {
+        "code":  "N03",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  476
+    },
+    {
+        "code":  "N04",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  477
+    },
+    {
+        "code":  "N05",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  478
+    },
+    {
+        "code":  "N10",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  479
+    },
+    {
+        "code":  "N11",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  480
+    },
+    {
+        "code":  "N13",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  481
+    },
+    {
+        "code":  "N17",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  482
+    },
+    {
+        "code":  "N18",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  483
+    },
+    {
+        "code":  "N19",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  484
+    },
+    {
+        "code":  "N20",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  485
+    },
+    {
+        "code":  "N25",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  486
+    },
+    {
+        "code":  "N27",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  487
+    },
+    {
+        "code":  "N30",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  488
+    },
+    {
+        "code":  "N31",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  489
+    },
+    {
+        "code":  "N32",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  490
+    },
+    {
+        "code":  "N33",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  491
+    },
+    {
+        "code":  "N34",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  492
+    },
+    {
+        "code":  "N35",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  493
+    },
+    {
+        "code":  "N36",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  494
+    },
+    {
+        "code":  "N39",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  495
+    },
+    {
+        "code":  "N40",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  496
+    },
+    {
+        "code":  "N41",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  497
+    },
+    {
+        "code":  "N60",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  498
+    },
+    {
+        "code":  "N80",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  499
+    },
+    {
+        "code":  "N81",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  500
+    },
+    {
+        "code":  "N82",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  501
+    },
+    {
+        "code":  "N83",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  502
+    },
+    {
+        "code":  "N85",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  503
+    },
+    {
+        "code":  "N86",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  504
+    },
+    {
+        "code":  "N87",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  505
+    },
+    {
+        "code":  "N88",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  506
+    },
+    {
+        "code":  "N89",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  507
+    },
+    {
+        "code":  "N90",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  508
+    },
+    {
+        "code":  "N91",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  509
+    },
+    {
+        "code":  "N92",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  510
+    },
+    {
+        "code":  "N93",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  511
+    },
+    {
+        "code":  "N94",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  512
+    },
+    {
+        "code":  "N95",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  513
+    },
+    {
+        "code":  "N97",
+        "name":  "Diseases of the genitourinary system",
+        "category":  "N",
+        "order":  514
+    },
+    {
+        "code":  "O00",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  515
+    },
+    {
+        "code":  "O01",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  516
+    },
+    {
+        "code":  "O02",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  517
+    },
+    {
+        "code":  "O03",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  518
+    },
+    {
+        "code":  "O04",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  519
+    },
+    {
+        "code":  "O05",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  520
+    },
+    {
+        "code":  "O08",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  521
+    },
+    {
+        "code":  "O09",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  522
+    },
+    {
+        "code":  "O10",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  523
+    },
+    {
+        "code":  "O11",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  524
+    },
+    {
+        "code":  "O12",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  525
+    },
+    {
+        "code":  "O13",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  526
+    },
+    {
+        "code":  "O14",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  527
+    },
+    {
+        "code":  "O15",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  528
+    },
+    {
+        "code":  "O16",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  529
+    },
+    {
+        "code":  "O20",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  530
+    },
+    {
+        "code":  "O21",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  531
+    },
+    {
+        "code":  "O22",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  532
+    },
+    {
+        "code":  "O23",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  533
+    },
+    {
+        "code":  "O24",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  534
+    },
+    {
+        "code":  "O25",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  535
+    },
+    {
+        "code":  "O26",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  536
+    },
+    {
+        "code":  "O28",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  537
+    },
+    {
+        "code":  "O30",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  538
+    },
+    {
+        "code":  "O31",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  539
+    },
+    {
+        "code":  "O32",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  540
+    },
+    {
+        "code":  "O33",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  541
+    },
+    {
+        "code":  "O34",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  542
+    },
+    {
+        "code":  "O35",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  543
+    },
+    {
+        "code":  "O36",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  544
+    },
+    {
+        "code":  "O40",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  545
+    },
+    {
+        "code":  "O41",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  546
+    },
+    {
+        "code":  "O42",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  547
+    },
+    {
+        "code":  "O43",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  548
+    },
+    {
+        "code":  "O44",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  549
+    },
+    {
+        "code":  "O45",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  550
+    },
+    {
+        "code":  "O46",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  551
+    },
+    {
+        "code":  "O60",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  552
+    },
+    {
+        "code":  "O61",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  553
+    },
+    {
+        "code":  "O62",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  554
+    },
+    {
+        "code":  "O63",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  555
+    },
+    {
+        "code":  "O64",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  556
+    },
+    {
+        "code":  "O65",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  557
+    },
+    {
+        "code":  "O66",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  558
+    },
+    {
+        "code":  "O67",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  559
+    },
+    {
+        "code":  "O68",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  560
+    },
+    {
+        "code":  "O70",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  561
+    },
+    {
+        "code":  "O71",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  562
+    },
+    {
+        "code":  "O72",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  563
+    },
+    {
+        "code":  "O73",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  564
+    },
+    {
+        "code":  "O74",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  565
+    },
+    {
+        "code":  "O75",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  566
+    },
+    {
+        "code":  "O80",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  567
+    },
+    {
+        "code":  "O85",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  568
+    },
+    {
+        "code":  "O89",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  569
+    },
+    {
+        "code":  "O92",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  570
+    },
+    {
+        "code":  "O94",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  571
+    },
+    {
+        "code":  "O98",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  572
+    },
+    {
+        "code":  "O99",
+        "name":  "Pregnancy, childbirth and the puerperium",
+        "category":  "O",
+        "order":  573
+    },
+    {
+        "code":  "P04",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  574
+    },
+    {
+        "code":  "P07",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  575
+    },
+    {
+        "code":  "P22",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  576
+    },
+    {
+        "code":  "P23",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  577
+    },
+    {
+        "code":  "P24",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  578
+    },
+    {
+        "code":  "P25",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  579
+    },
+    {
+        "code":  "P26",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  580
+    },
+    {
+        "code":  "P27",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  581
+    },
+    {
+        "code":  "P28",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  582
+    },
+    {
+        "code":  "P29",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  583
+    },
+    {
+        "code":  "P35",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  584
+    },
+    {
+        "code":  "P36",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  585
+    },
+    {
+        "code":  "P37",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  586
+    },
+    {
+        "code":  "P38",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  587
+    },
+    {
+        "code":  "P59",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  588
+    },
+    {
+        "code":  "P70",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  589
+    },
+    {
+        "code":  "P74",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  590
+    },
+    {
+        "code":  "P77",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  591
+    },
+    {
+        "code":  "P78",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  592
+    },
+    {
+        "code":  "P79",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  593
+    },
+    {
+        "code":  "P90",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  594
+    },
+    {
+        "code":  "P91",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  595
+    },
+    {
+        "code":  "P93",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  596
+    },
+    {
+        "code":  "P94",
+        "name":  "Certain conditions originating in the perinatal period",
+        "category":  "P",
+        "order":  597
+    },
+    {
+        "code":  "Q21",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  598
+    },
+    {
+        "code":  "Q22",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  599
+    },
+    {
+        "code":  "Q23",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  600
+    },
+    {
+        "code":  "Q24",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  601
+    },
+    {
+        "code":  "Q25",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  602
+    },
+    {
+        "code":  "Q26",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  603
+    },
+    {
+        "code":  "Q27",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  604
+    },
+    {
+        "code":  "Q28",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  605
+    },
+    {
+        "code":  "Q29",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  606
+    },
+    {
+        "code":  "Q40",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  607
+    },
+    {
+        "code":  "Q41",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  608
+    },
+    {
+        "code":  "Q42",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  609
+    },
+    {
+        "code":  "Q43",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  610
+    },
+    {
+        "code":  "Q44",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  611
+    },
+    {
+        "code":  "Q45",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  612
+    },
+    {
+        "code":  "Q46",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  613
+    },
+    {
+        "code":  "Q47",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  614
+    },
+    {
+        "code":  "Q48",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  615
+    },
+    {
+        "code":  "Q49",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  616
+    },
+    {
+        "code":  "Q50",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  617
+    },
+    {
+        "code":  "Q51",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  618
+    },
+    {
+        "code":  "Q52",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  619
+    },
+    {
+        "code":  "Q53",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  620
+    },
+    {
+        "code":  "Q54",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  621
+    },
+    {
+        "code":  "Q55",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  622
+    },
+    {
+        "code":  "Q56",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  623
+    },
+    {
+        "code":  "Q57",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  624
+    },
+    {
+        "code":  "Q58",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  625
+    },
+    {
+        "code":  "Q59",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  626
+    },
+    {
+        "code":  "Q60",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  627
+    },
+    {
+        "code":  "Q61",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  628
+    },
+    {
+        "code":  "Q62",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  629
+    },
+    {
+        "code":  "Q63",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  630
+    },
+    {
+        "code":  "Q64",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  631
+    },
+    {
+        "code":  "Q65",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  632
+    },
+    {
+        "code":  "Q66",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  633
+    },
+    {
+        "code":  "Q67",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  634
+    },
+    {
+        "code":  "Q68",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  635
+    },
+    {
+        "code":  "Q69",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  636
+    },
+    {
+        "code":  "Q70",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  637
+    },
+    {
+        "code":  "Q71",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  638
+    },
+    {
+        "code":  "Q72",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  639
+    },
+    {
+        "code":  "Q73",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  640
+    },
+    {
+        "code":  "Q74",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  641
+    },
+    {
+        "code":  "Q75",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  642
+    },
+    {
+        "code":  "Q76",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  643
+    },
+    {
+        "code":  "Q77",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  644
+    },
+    {
+        "code":  "Q78",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  645
+    },
+    {
+        "code":  "Q79",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  646
+    },
+    {
+        "code":  "Q80",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  647
+    },
+    {
+        "code":  "Q81",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  648
+    },
+    {
+        "code":  "Q82",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  649
+    },
+    {
+        "code":  "Q83",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  650
+    },
+    {
+        "code":  "Q84",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  651
+    },
+    {
+        "code":  "Q85",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  652
+    },
+    {
+        "code":  "Q86",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  653
+    },
+    {
+        "code":  "Q87",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  654
+    },
+    {
+        "code":  "Q89",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  655
+    },
+    {
+        "code":  "Q90",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  656
+    },
+    {
+        "code":  "Q91",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  657
+    },
+    {
+        "code":  "Q92",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  658
+    },
+    {
+        "code":  "Q93",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  659
+    },
+    {
+        "code":  "Q94",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  660
+    },
+    {
+        "code":  "Q95",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  661
+    },
+    {
+        "code":  "Q96",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  662
+    },
+    {
+        "code":  "Q97",
+        "name":  "Congenital malformations, deformations and chromosomal abnormalities",
+        "category":  "Q",
+        "order":  663
+    },
+    {
+        "code":  "R00",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  664
+    },
+    {
+        "code":  "R01",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  665
+    },
+    {
+        "code":  "R03",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  666
+    },
+    {
+        "code":  "R05",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  667
+    },
+    {
+        "code":  "R06",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  668
+    },
+    {
+        "code":  "R07",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  669
+    },
+    {
+        "code":  "R10",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  670
+    },
+    {
+        "code":  "R11",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  671
+    },
+    {
+        "code":  "R12",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  672
+    },
+    {
+        "code":  "R13",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  673
+    },
+    {
+        "code":  "R16",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  674
+    },
+    {
+        "code":  "R17",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  675
+    },
+    {
+        "code":  "R18",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  676
+    },
+    {
+        "code":  "R19",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  677
+    },
+    {
+        "code":  "R21",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  678
+    },
+    {
+        "code":  "R22",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  679
+    },
+    {
+        "code":  "R40",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  680
+    },
+    {
+        "code":  "R41",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  681
+    },
+    {
+        "code":  "R50",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  682
+    },
+    {
+        "code":  "R54",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  683
+    },
+    {
+        "code":  "R55",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  684
+    },
+    {
+        "code":  "R56",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  685
+    },
+    {
+        "code":  "R57",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  686
+    },
+    {
+        "code":  "R58",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  687
+    },
+    {
+        "code":  "R59",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  688
+    },
+    {
+        "code":  "R94",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  689
+    },
+    {
+        "code":  "R95",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  690
+    },
+    {
+        "code":  "R96",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  691
+    },
+    {
+        "code":  "R97",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  692
+    },
+    {
+        "code":  "R98",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  693
+    },
+    {
+        "code":  "R99",
+        "name":  "Symptoms, signs and abnormal clinical and laboratory findings",
+        "category":  "R",
+        "order":  694
+    },
+    {
+        "code":  "S00",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  695
+    },
+    {
+        "code":  "S01",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  696
+    },
+    {
+        "code":  "S02",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  697
+    },
+    {
+        "code":  "S03",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  698
+    },
+    {
+        "code":  "S04",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  699
+    },
+    {
+        "code":  "S06",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  700
+    },
+    {
+        "code":  "S07",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  701
+    },
+    {
+        "code":  "S08",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  702
+    },
+    {
+        "code":  "S09",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  703
+    },
+    {
+        "code":  "S10",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  704
+    },
+    {
+        "code":  "S11",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  705
+    },
+    {
+        "code":  "S12",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  706
+    },
+    {
+        "code":  "S13",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  707
+    },
+    {
+        "code":  "S14",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  708
+    },
+    {
+        "code":  "S15",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  709
+    },
+    {
+        "code":  "S16",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  710
+    },
+    {
+        "code":  "S17",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  711
+    },
+    {
+        "code":  "S18",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  712
+    },
+    {
+        "code":  "S19",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  713
+    },
+    {
+        "code":  "S20",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  714
+    },
+    {
+        "code":  "S21",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  715
+    },
+    {
+        "code":  "S22",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  716
+    },
+    {
+        "code":  "S23",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  717
+    },
+    {
+        "code":  "S24",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  718
+    },
+    {
+        "code":  "S25",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  719
+    },
+    {
+        "code":  "S27",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  720
+    },
+    {
+        "code":  "S28",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  721
+    },
+    {
+        "code":  "S30",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  722
+    },
+    {
+        "code":  "S31",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  723
+    },
+    {
+        "code":  "S32",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  724
+    },
+    {
+        "code":  "S33",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  725
+    },
+    {
+        "code":  "S34",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  726
+    },
+    {
+        "code":  "S35",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  727
+    },
+    {
+        "code":  "S36",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  728
+    },
+    {
+        "code":  "S37",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  729
+    },
+    {
+        "code":  "S38",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  730
+    },
+    {
+        "code":  "S39",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  731
+    },
+    {
+        "code":  "S40",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  732
+    },
+    {
+        "code":  "S41",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  733
+    },
+    {
+        "code":  "S42",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  734
+    },
+    {
+        "code":  "S43",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  735
+    },
+    {
+        "code":  "S44",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  736
+    },
+    {
+        "code":  "S45",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  737
+    },
+    {
+        "code":  "S46",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  738
+    },
+    {
+        "code":  "S47",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  739
+    },
+    {
+        "code":  "S48",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  740
+    },
+    {
+        "code":  "S49",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  741
+    },
+    {
+        "code":  "S50",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  742
+    },
+    {
+        "code":  "S51",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  743
+    },
+    {
+        "code":  "S52",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  744
+    },
+    {
+        "code":  "S53",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  745
+    },
+    {
+        "code":  "S54",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  746
+    },
+    {
+        "code":  "S55",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  747
+    },
+    {
+        "code":  "S56",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  748
+    },
+    {
+        "code":  "S57",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  749
+    },
+    {
+        "code":  "S58",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  750
+    },
+    {
+        "code":  "S59",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  751
+    },
+    {
+        "code":  "S60",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  752
+    },
+    {
+        "code":  "S61",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  753
+    },
+    {
+        "code":  "S62",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  754
+    },
+    {
+        "code":  "S63",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  755
+    },
+    {
+        "code":  "S64",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  756
+    },
+    {
+        "code":  "S65",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  757
+    },
+    {
+        "code":  "S66",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  758
+    },
+    {
+        "code":  "S67",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  759
+    },
+    {
+        "code":  "S68",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  760
+    },
+    {
+        "code":  "S69",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  761
+    },
+    {
+        "code":  "S70",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  762
+    },
+    {
+        "code":  "S71",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  763
+    },
+    {
+        "code":  "S72",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  764
+    },
+    {
+        "code":  "S73",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  765
+    },
+    {
+        "code":  "S74",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  766
+    },
+    {
+        "code":  "S75",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  767
+    },
+    {
+        "code":  "S76",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  768
+    },
+    {
+        "code":  "S77",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  769
+    },
+    {
+        "code":  "S78",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  770
+    },
+    {
+        "code":  "S79",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  771
+    },
+    {
+        "code":  "S80",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  772
+    },
+    {
+        "code":  "S81",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  773
+    },
+    {
+        "code":  "S82",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  774
+    },
+    {
+        "code":  "S83",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  775
+    },
+    {
+        "code":  "S84",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  776
+    },
+    {
+        "code":  "S85",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  777
+    },
+    {
+        "code":  "S86",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  778
+    },
+    {
+        "code":  "S87",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  779
+    },
+    {
+        "code":  "S88",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  780
+    },
+    {
+        "code":  "S89",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  781
+    },
+    {
+        "code":  "S90",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  782
+    },
+    {
+        "code":  "S91",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  783
+    },
+    {
+        "code":  "S92",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  784
+    },
+    {
+        "code":  "S93",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  785
+    },
+    {
+        "code":  "S94",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  786
+    },
+    {
+        "code":  "S95",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  787
+    },
+    {
+        "code":  "S96",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  788
+    },
+    {
+        "code":  "S97",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  789
+    },
+    {
+        "code":  "S98",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  790
+    },
+    {
+        "code":  "S99",
+        "name":  "Injury, poisoning and certain other consequences of external causes",
+        "category":  "S",
+        "order":  791
+    },
+    {
+        "code":  "T00",
+        "name":  "Other",
+        "category":  "T",
+        "order":  792
+    },
+    {
+        "code":  "T01",
+        "name":  "Other",
+        "category":  "T",
+        "order":  793
+    },
+    {
+        "code":  "T02",
+        "name":  "Other",
+        "category":  "T",
+        "order":  794
+    },
+    {
+        "code":  "T03",
+        "name":  "Other",
+        "category":  "T",
+        "order":  795
+    },
+    {
+        "code":  "T04",
+        "name":  "Other",
+        "category":  "T",
+        "order":  796
+    },
+    {
+        "code":  "T05",
+        "name":  "Other",
+        "category":  "T",
+        "order":  797
+    },
+    {
+        "code":  "T06",
+        "name":  "Other",
+        "category":  "T",
+        "order":  798
+    },
+    {
+        "code":  "T07",
+        "name":  "Other",
+        "category":  "T",
+        "order":  799
+    },
+    {
+        "code":  "T08",
+        "name":  "Other",
+        "category":  "T",
+        "order":  800
+    },
+    {
+        "code":  "T09",
+        "name":  "Other",
+        "category":  "T",
+        "order":  801
+    },
+    {
+        "code":  "T10",
+        "name":  "Other",
+        "category":  "T",
+        "order":  802
+    },
+    {
+        "code":  "T11",
+        "name":  "Other",
+        "category":  "T",
+        "order":  803
+    },
+    {
+        "code":  "T12",
+        "name":  "Other",
+        "category":  "T",
+        "order":  804
+    },
+    {
+        "code":  "T13",
+        "name":  "Other",
+        "category":  "T",
+        "order":  805
+    },
+    {
+        "code":  "T14",
+        "name":  "Other",
+        "category":  "T",
+        "order":  806
+    },
+    {
+        "code":  "T15",
+        "name":  "Other",
+        "category":  "T",
+        "order":  807
+    },
+    {
+        "code":  "T16",
+        "name":  "Other",
+        "category":  "T",
+        "order":  808
+    },
+    {
+        "code":  "T17",
+        "name":  "Other",
+        "category":  "T",
+        "order":  809
+    },
+    {
+        "code":  "T18",
+        "name":  "Other",
+        "category":  "T",
+        "order":  810
+    },
+    {
+        "code":  "T19",
+        "name":  "Other",
+        "category":  "T",
+        "order":  811
+    },
+    {
+        "code":  "T20",
+        "name":  "Other",
+        "category":  "T",
+        "order":  812
+    },
+    {
+        "code":  "T21",
+        "name":  "Other",
+        "category":  "T",
+        "order":  813
+    },
+    {
+        "code":  "T22",
+        "name":  "Other",
+        "category":  "T",
+        "order":  814
+    },
+    {
+        "code":  "T23",
+        "name":  "Other",
+        "category":  "T",
+        "order":  815
+    },
+    {
+        "code":  "T24",
+        "name":  "Other",
+        "category":  "T",
+        "order":  816
+    },
+    {
+        "code":  "T25",
+        "name":  "Other",
+        "category":  "T",
+        "order":  817
+    },
+    {
+        "code":  "T26",
+        "name":  "Other",
+        "category":  "T",
+        "order":  818
+    },
+    {
+        "code":  "T27",
+        "name":  "Other",
+        "category":  "T",
+        "order":  819
+    },
+    {
+        "code":  "T28",
+        "name":  "Other",
+        "category":  "T",
+        "order":  820
+    },
+    {
+        "code":  "T30",
+        "name":  "Other",
+        "category":  "T",
+        "order":  821
+    },
+    {
+        "code":  "T31",
+        "name":  "Other",
+        "category":  "T",
+        "order":  822
+    },
+    {
+        "code":  "T32",
+        "name":  "Other",
+        "category":  "T",
+        "order":  823
+    },
+    {
+        "code":  "T33",
+        "name":  "Other",
+        "category":  "T",
+        "order":  824
+    },
+    {
+        "code":  "T34",
+        "name":  "Other",
+        "category":  "T",
+        "order":  825
+    },
+    {
+        "code":  "T35",
+        "name":  "Other",
+        "category":  "T",
+        "order":  826
+    },
+    {
+        "code":  "T36",
+        "name":  "Other",
+        "category":  "T",
+        "order":  827
+    },
+    {
+        "code":  "T38",
+        "name":  "Other",
+        "category":  "T",
+        "order":  828
+    },
+    {
+        "code":  "T39",
+        "name":  "Other",
+        "category":  "T",
+        "order":  829
+    },
+    {
+        "code":  "T40",
+        "name":  "Other",
+        "category":  "T",
+        "order":  830
+    },
+    {
+        "code":  "T41",
+        "name":  "Other",
+        "category":  "T",
+        "order":  831
+    },
+    {
+        "code":  "T42",
+        "name":  "Other",
+        "category":  "T",
+        "order":  832
+    },
+    {
+        "code":  "T43",
+        "name":  "Other",
+        "category":  "T",
+        "order":  833
+    },
+    {
+        "code":  "T44",
+        "name":  "Other",
+        "category":  "T",
+        "order":  834
+    },
+    {
+        "code":  "T45",
+        "name":  "Other",
+        "category":  "T",
+        "order":  835
+    },
+    {
+        "code":  "T46",
+        "name":  "Other",
+        "category":  "T",
+        "order":  836
+    },
+    {
+        "code":  "T47",
+        "name":  "Other",
+        "category":  "T",
+        "order":  837
+    },
+    {
+        "code":  "T48",
+        "name":  "Other",
+        "category":  "T",
+        "order":  838
+    },
+    {
+        "code":  "T49",
+        "name":  "Other",
+        "category":  "T",
+        "order":  839
+    },
+    {
+        "code":  "T50",
+        "name":  "Other",
+        "category":  "T",
+        "order":  840
+    },
+    {
+        "code":  "T51",
+        "name":  "Other",
+        "category":  "T",
+        "order":  841
+    },
+    {
+        "code":  "T52",
+        "name":  "Other",
+        "category":  "T",
+        "order":  842
+    },
+    {
+        "code":  "T53",
+        "name":  "Other",
+        "category":  "T",
+        "order":  843
+    },
+    {
+        "code":  "T54",
+        "name":  "Other",
+        "category":  "T",
+        "order":  844
+    },
+    {
+        "code":  "T55",
+        "name":  "Other",
+        "category":  "T",
+        "order":  845
+    },
+    {
+        "code":  "T56",
+        "name":  "Other",
+        "category":  "T",
+        "order":  846
+    },
+    {
+        "code":  "T57",
+        "name":  "Other",
+        "category":  "T",
+        "order":  847
+    },
+    {
+        "code":  "T58",
+        "name":  "Other",
+        "category":  "T",
+        "order":  848
+    },
+    {
+        "code":  "T59",
+        "name":  "Other",
+        "category":  "T",
+        "order":  849
+    },
+    {
+        "code":  "T60",
+        "name":  "Other",
+        "category":  "T",
+        "order":  850
+    },
+    {
+        "code":  "T61",
+        "name":  "Other",
+        "category":  "T",
+        "order":  851
+    },
+    {
+        "code":  "T62",
+        "name":  "Other",
+        "category":  "T",
+        "order":  852
+    },
+    {
+        "code":  "T63",
+        "name":  "Other",
+        "category":  "T",
+        "order":  853
+    },
+    {
+        "code":  "T64",
+        "name":  "Other",
+        "category":  "T",
+        "order":  854
+    },
+    {
+        "code":  "T65",
+        "name":  "Other",
+        "category":  "T",
+        "order":  855
+    },
+    {
+        "code":  "T66",
+        "name":  "Other",
+        "category":  "T",
+        "order":  856
+    },
+    {
+        "code":  "T67",
+        "name":  "Other",
+        "category":  "T",
+        "order":  857
+    },
+    {
+        "code":  "T68",
+        "name":  "Other",
+        "category":  "T",
+        "order":  858
+    },
+    {
+        "code":  "T69",
+        "name":  "Other",
+        "category":  "T",
+        "order":  859
+    },
+    {
+        "code":  "T70",
+        "name":  "Other",
+        "category":  "T",
+        "order":  860
+    },
+    {
+        "code":  "T71",
+        "name":  "Other",
+        "category":  "T",
+        "order":  861
+    },
+    {
+        "code":  "T72",
+        "name":  "Other",
+        "category":  "T",
+        "order":  862
+    },
+    {
+        "code":  "T73",
+        "name":  "Other",
+        "category":  "T",
+        "order":  863
+    },
+    {
+        "code":  "T74",
+        "name":  "Other",
+        "category":  "T",
+        "order":  864
+    },
+    {
+        "code":  "T75",
+        "name":  "Other",
+        "category":  "T",
+        "order":  865
+    },
+    {
+        "code":  "T76",
+        "name":  "Other",
+        "category":  "T",
+        "order":  866
+    },
+    {
+        "code":  "T77",
+        "name":  "Other",
+        "category":  "T",
+        "order":  867
+    },
+    {
+        "code":  "T78",
+        "name":  "Other",
+        "category":  "T",
+        "order":  868
+    },
+    {
+        "code":  "T79",
+        "name":  "Other",
+        "category":  "T",
+        "order":  869
+    },
+    {
+        "code":  "T80",
+        "name":  "Other",
+        "category":  "T",
+        "order":  870
+    },
+    {
+        "code":  "T81",
+        "name":  "Other",
+        "category":  "T",
+        "order":  871
+    },
+    {
+        "code":  "T82",
+        "name":  "Other",
+        "category":  "T",
+        "order":  872
+    },
+    {
+        "code":  "T83",
+        "name":  "Other",
+        "category":  "T",
+        "order":  873
+    },
+    {
+        "code":  "T84",
+        "name":  "Other",
+        "category":  "T",
+        "order":  874
+    },
+    {
+        "code":  "T85",
+        "name":  "Other",
+        "category":  "T",
+        "order":  875
+    },
+    {
+        "code":  "T86",
+        "name":  "Other",
+        "category":  "T",
+        "order":  876
+    },
+    {
+        "code":  "T87",
+        "name":  "Other",
+        "category":  "T",
+        "order":  877
+    },
+    {
+        "code":  "T88",
+        "name":  "Other",
+        "category":  "T",
+        "order":  878
+    },
+    {
+        "code":  "V01",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  879
+    },
+    {
+        "code":  "V02",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  880
+    },
+    {
+        "code":  "V03",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  881
+    },
+    {
+        "code":  "V04",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  882
+    },
+    {
+        "code":  "V05",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  883
+    },
+    {
+        "code":  "V06",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  884
+    },
+    {
+        "code":  "V07",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  885
+    },
+    {
+        "code":  "V08",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  886
+    },
+    {
+        "code":  "V09",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  887
+    },
+    {
+        "code":  "V10",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  888
+    },
+    {
+        "code":  "V12",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  889
+    },
+    {
+        "code":  "V13",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  890
+    },
+    {
+        "code":  "V14",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  891
+    },
+    {
+        "code":  "V15",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  892
+    },
+    {
+        "code":  "V16",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  893
+    },
+    {
+        "code":  "V17",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  894
+    },
+    {
+        "code":  "V18",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  895
+    },
+    {
+        "code":  "V19",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  896
+    },
+    {
+        "code":  "V20",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  897
+    },
+    {
+        "code":  "V21",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  898
+    },
+    {
+        "code":  "V22",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  899
+    },
+    {
+        "code":  "V23",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  900
+    },
+    {
+        "code":  "V24",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  901
+    },
+    {
+        "code":  "V25",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  902
+    },
+    {
+        "code":  "V26",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  903
+    },
+    {
+        "code":  "V27",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  904
+    },
+    {
+        "code":  "V28",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  905
+    },
+    {
+        "code":  "V29",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  906
+    },
+    {
+        "code":  "V30",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  907
+    },
+    {
+        "code":  "V31",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  908
+    },
+    {
+        "code":  "V32",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  909
+    },
+    {
+        "code":  "V33",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  910
+    },
+    {
+        "code":  "V35",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  911
+    },
+    {
+        "code":  "V36",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  912
+    },
+    {
+        "code":  "V37",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  913
+    },
+    {
+        "code":  "V38",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  914
+    },
+    {
+        "code":  "V39",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  915
+    },
+    {
+        "code":  "V40",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  916
+    },
+    {
+        "code":  "V41",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  917
+    },
+    {
+        "code":  "V42",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  918
+    },
+    {
+        "code":  "V43",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  919
+    },
+    {
+        "code":  "V44",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  920
+    },
+    {
+        "code":  "V45",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  921
+    },
+    {
+        "code":  "V46",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  922
+    },
+    {
+        "code":  "V47",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  923
+    },
+    {
+        "code":  "V48",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  924
+    },
+    {
+        "code":  "V49",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  925
+    },
+    {
+        "code":  "V50",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  926
+    },
+    {
+        "code":  "V51",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  927
+    },
+    {
+        "code":  "V52",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  928
+    },
+    {
+        "code":  "V53",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  929
+    },
+    {
+        "code":  "V54",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  930
+    },
+    {
+        "code":  "V55",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  931
+    },
+    {
+        "code":  "V56",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  932
+    },
+    {
+        "code":  "V57",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  933
+    },
+    {
+        "code":  "V58",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  934
+    },
+    {
+        "code":  "V59",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  935
+    },
+    {
+        "code":  "V60",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  936
+    },
+    {
+        "code":  "V61",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  937
+    },
+    {
+        "code":  "V62",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  938
+    },
+    {
+        "code":  "V63",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  939
+    },
+    {
+        "code":  "V64",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  940
+    },
+    {
+        "code":  "V65",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  941
+    },
+    {
+        "code":  "V66",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  942
+    },
+    {
+        "code":  "V67",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  943
+    },
+    {
+        "code":  "V68",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  944
+    },
+    {
+        "code":  "V69",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  945
+    },
+    {
+        "code":  "V70",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  946
+    },
+    {
+        "code":  "V71",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  947
+    },
+    {
+        "code":  "V72",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  948
+    },
+    {
+        "code":  "V73",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  949
+    },
+    {
+        "code":  "V74",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  950
+    },
+    {
+        "code":  "V75",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  951
+    },
+    {
+        "code":  "V76",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  952
+    },
+    {
+        "code":  "V77",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  953
+    },
+    {
+        "code":  "V78",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  954
+    },
+    {
+        "code":  "V79",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  955
+    },
+    {
+        "code":  "V80",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  956
+    },
+    {
+        "code":  "V81",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  957
+    },
+    {
+        "code":  "V82",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  958
+    },
+    {
+        "code":  "V83",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  959
+    },
+    {
+        "code":  "V84",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  960
+    },
+    {
+        "code":  "V85",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  961
+    },
+    {
+        "code":  "V86",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  962
+    },
+    {
+        "code":  "V87",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  963
+    },
+    {
+        "code":  "V88",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  964
+    },
+    {
+        "code":  "V89",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  965
+    },
+    {
+        "code":  "V90",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  966
+    },
+    {
+        "code":  "V91",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  967
+    },
+    {
+        "code":  "V92",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  968
+    },
+    {
+        "code":  "V93",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  969
+    },
+    {
+        "code":  "V94",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  970
+    },
+    {
+        "code":  "V95",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  971
+    },
+    {
+        "code":  "V96",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  972
+    },
+    {
+        "code":  "V97",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  973
+    },
+    {
+        "code":  "V98",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  974
+    },
+    {
+        "code":  "V99",
+        "name":  "External causes of morbidity and mortality",
+        "category":  "V",
+        "order":  975
+    },
+    {
+        "code":  "W00",
+        "name":  "Other",
+        "category":  "W",
+        "order":  976
+    },
+    {
+        "code":  "W01",
+        "name":  "Other",
+        "category":  "W",
+        "order":  977
+    },
+    {
+        "code":  "W02",
+        "name":  "Other",
+        "category":  "W",
+        "order":  978
+    },
+    {
+        "code":  "W03",
+        "name":  "Other",
+        "category":  "W",
+        "order":  979
+    },
+    {
+        "code":  "W04",
+        "name":  "Other",
+        "category":  "W",
+        "order":  980
+    },
+    {
+        "code":  "W05",
+        "name":  "Other",
+        "category":  "W",
+        "order":  981
+    },
+    {
+        "code":  "W06",
+        "name":  "Other",
+        "category":  "W",
+        "order":  982
+    },
+    {
+        "code":  "W07",
+        "name":  "Other",
+        "category":  "W",
+        "order":  983
+    },
+    {
+        "code":  "W08",
+        "name":  "Other",
+        "category":  "W",
+        "order":  984
+    },
+    {
+        "code":  "W09",
+        "name":  "Other",
+        "category":  "W",
+        "order":  985
+    },
+    {
+        "code":  "W10",
+        "name":  "Other",
+        "category":  "W",
+        "order":  986
+    },
+    {
+        "code":  "W11",
+        "name":  "Other",
+        "category":  "W",
+        "order":  987
+    },
+    {
+        "code":  "W12",
+        "name":  "Other",
+        "category":  "W",
+        "order":  988
+    },
+    {
+        "code":  "W13",
+        "name":  "Other",
+        "category":  "W",
+        "order":  989
+    },
+    {
+        "code":  "W14",
+        "name":  "Other",
+        "category":  "W",
+        "order":  990
+    },
+    {
+        "code":  "W15",
+        "name":  "Other",
+        "category":  "W",
+        "order":  991
+    },
+    {
+        "code":  "W16",
+        "name":  "Other",
+        "category":  "W",
+        "order":  992
+    },
+    {
+        "code":  "W17",
+        "name":  "Other",
+        "category":  "W",
+        "order":  993
+    },
+    {
+        "code":  "W18",
+        "name":  "Other",
+        "category":  "W",
+        "order":  994
+    },
+    {
+        "code":  "W19",
+        "name":  "Other",
+        "category":  "W",
+        "order":  995
+    },
+    {
+        "code":  "W20",
+        "name":  "Other",
+        "category":  "W",
+        "order":  996
+    },
+    {
+        "code":  "W21",
+        "name":  "Other",
+        "category":  "W",
+        "order":  997
+    },
+    {
+        "code":  "W22",
+        "name":  "Other",
+        "category":  "W",
+        "order":  998
+    },
+    {
+        "code":  "W23",
+        "name":  "Other",
+        "category":  "W",
+        "order":  999
+    },
+    {
+        "code":  "W24",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1000
+    },
+    {
+        "code":  "W25",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1001
+    },
+    {
+        "code":  "W26",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1002
+    },
+    {
+        "code":  "W27",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1003
+    },
+    {
+        "code":  "W28",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1004
+    },
+    {
+        "code":  "W29",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1005
+    },
+    {
+        "code":  "W30",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1006
+    },
+    {
+        "code":  "W31",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1007
+    },
+    {
+        "code":  "W32",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1008
+    },
+    {
+        "code":  "W33",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1009
+    },
+    {
+        "code":  "W34",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1010
+    },
+    {
+        "code":  "W35",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1011
+    },
+    {
+        "code":  "W36",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1012
+    },
+    {
+        "code":  "W37",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1013
+    },
+    {
+        "code":  "W38",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1014
+    },
+    {
+        "code":  "W39",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1015
+    },
+    {
+        "code":  "W40",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1016
+    },
+    {
+        "code":  "W41",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1017
+    },
+    {
+        "code":  "W42",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1018
+    },
+    {
+        "code":  "W43",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1019
+    },
+    {
+        "code":  "W44",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1020
+    },
+    {
+        "code":  "W45",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1021
+    },
+    {
+        "code":  "W46",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1022
+    },
+    {
+        "code":  "W47",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1023
+    },
+    {
+        "code":  "W48",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1024
+    },
+    {
+        "code":  "W49",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1025
+    },
+    {
+        "code":  "W50",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1026
+    },
+    {
+        "code":  "W51",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1027
+    },
+    {
+        "code":  "W52",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1028
+    },
+    {
+        "code":  "W53",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1029
+    },
+    {
+        "code":  "W54",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1030
+    },
+    {
+        "code":  "W55",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1031
+    },
+    {
+        "code":  "W56",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1032
+    },
+    {
+        "code":  "W57",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1033
+    },
+    {
+        "code":  "W58",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1034
+    },
+    {
+        "code":  "W59",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1035
+    },
+    {
+        "code":  "W60",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1036
+    },
+    {
+        "code":  "W61",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1037
+    },
+    {
+        "code":  "W62",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1038
+    },
+    {
+        "code":  "W63",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1039
+    },
+    {
+        "code":  "W64",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1040
+    },
+    {
+        "code":  "W65",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1041
+    },
+    {
+        "code":  "W66",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1042
+    },
+    {
+        "code":  "W67",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1043
+    },
+    {
+        "code":  "W68",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1044
+    },
+    {
+        "code":  "W69",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1045
+    },
+    {
+        "code":  "W70",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1046
+    },
+    {
+        "code":  "W71",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1047
+    },
+    {
+        "code":  "W72",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1048
+    },
+    {
+        "code":  "W73",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1049
+    },
+    {
+        "code":  "W74",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1050
+    },
+    {
+        "code":  "W75",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1051
+    },
+    {
+        "code":  "W76",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1052
+    },
+    {
+        "code":  "W77",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1053
+    },
+    {
+        "code":  "W78",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1054
+    },
+    {
+        "code":  "W79",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1055
+    },
+    {
+        "code":  "W80",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1056
+    },
+    {
+        "code":  "W81",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1057
+    },
+    {
+        "code":  "W82",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1058
+    },
+    {
+        "code":  "W83",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1059
+    },
+    {
+        "code":  "W84",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1060
+    },
+    {
+        "code":  "W85",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1061
+    },
+    {
+        "code":  "W86",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1062
+    },
+    {
+        "code":  "W87",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1063
+    },
+    {
+        "code":  "W88",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1064
+    },
+    {
+        "code":  "W89",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1065
+    },
+    {
+        "code":  "W90",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1066
+    },
+    {
+        "code":  "W91",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1067
+    },
+    {
+        "code":  "W92",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1068
+    },
+    {
+        "code":  "W93",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1069
+    },
+    {
+        "code":  "W94",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1070
+    },
+    {
+        "code":  "W95",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1071
+    },
+    {
+        "code":  "W96",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1072
+    },
+    {
+        "code":  "W97",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1073
+    },
+    {
+        "code":  "W98",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1074
+    },
+    {
+        "code":  "W99",
+        "name":  "Other",
+        "category":  "W",
+        "order":  1075
+    },
+    {
+        "code":  "X03",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1076
+    },
+    {
+        "code":  "X04",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1077
+    },
+    {
+        "code":  "X05",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1078
+    },
+    {
+        "code":  "X06",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1079
+    },
+    {
+        "code":  "X08",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1080
+    },
+    {
+        "code":  "X30",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1081
+    },
+    {
+        "code":  "X31",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1082
+    },
+    {
+        "code":  "X32",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1083
+    },
+    {
+        "code":  "X33",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1084
+    },
+    {
+        "code":  "X34",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1085
+    },
+    {
+        "code":  "X35",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1086
+    },
+    {
+        "code":  "X36",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1087
+    },
+    {
+        "code":  "X37",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1088
+    },
+    {
+        "code":  "X38",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1089
+    },
+    {
+        "code":  "X39",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1090
+    },
+    {
+        "code":  "X40",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1091
+    },
+    {
+        "code":  "X41",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1092
+    },
+    {
+        "code":  "X42",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1093
+    },
+    {
+        "code":  "X43",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1094
+    },
+    {
+        "code":  "X44",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1095
+    },
+    {
+        "code":  "X45",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1096
+    },
+    {
+        "code":  "X46",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1097
+    },
+    {
+        "code":  "X47",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1098
+    },
+    {
+        "code":  "X48",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1099
+    },
+    {
+        "code":  "X49",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1100
+    },
+    {
+        "code":  "X50",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1101
+    },
+    {
+        "code":  "X51",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1102
+    },
+    {
+        "code":  "X52",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1103
+    },
+    {
+        "code":  "X53",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1104
+    },
+    {
+        "code":  "X54",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1105
+    },
+    {
+        "code":  "X55",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1106
+    },
+    {
+        "code":  "X56",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1107
+    },
+    {
+        "code":  "X57",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1108
+    },
+    {
+        "code":  "X58",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1109
+    },
+    {
+        "code":  "X59",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1110
+    },
+    {
+        "code":  "X85",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1111
+    },
+    {
+        "code":  "X98",
+        "name":  "Other",
+        "category":  "X",
+        "order":  1112
+    },
+    {
+        "code":  "Y06",
+        "name":  "Other",
+        "category":  "Y",
+        "order":  1113
+    },
+    {
+        "code":  "Y07",
+        "name":  "Other",
+        "category":  "Y",
+        "order":  1114
+    },
+    {
+        "code":  "Y08",
+        "name":  "Other",
+        "category":  "Y",
+        "order":  1115
+    },
+    {
+        "code":  "Y09",
+        "name":  "Other",
+        "category":  "Y",
+        "order":  1116
+    },
+    {
+        "code":  "Y83",
+        "name":  "Other",
+        "category":  "Y",
+        "order":  1117
+    },
+    {
+        "code":  "Z00",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1118
+    },
+    {
+        "code":  "Z01",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1119
+    },
+    {
+        "code":  "Z02",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1120
+    },
+    {
+        "code":  "Z03",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1121
+    },
+    {
+        "code":  "Z04",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1122
+    },
+    {
+        "code":  "Z05",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1123
+    },
+    {
+        "code":  "Z06",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1124
+    },
+    {
+        "code":  "Z07",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1125
+    },
+    {
+        "code":  "Z08",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1126
+    },
+    {
+        "code":  "Z09",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1127
+    },
+    {
+        "code":  "Z10",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1128
+    },
+    {
+        "code":  "Z11",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1129
+    },
+    {
+        "code":  "Z12",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1130
+    },
+    {
+        "code":  "Z13",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1131
+    },
+    {
+        "code":  "Z14",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1132
+    },
+    {
+        "code":  "Z15",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1133
+    },
+    {
+        "code":  "Z16",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1134
+    },
+    {
+        "code":  "Z17",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1135
+    },
+    {
+        "code":  "Z22",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1136
+    },
+    {
+        "code":  "Z23",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1137
+    },
+    {
+        "code":  "Z29",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1138
+    },
+    {
+        "code":  "Z31",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1139
+    },
+    {
+        "code":  "Z32",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1140
+    },
+    {
+        "code":  "Z33",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1141
+    },
+    {
+        "code":  "Z36",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1142
+    },
+    {
+        "code":  "Z51",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1143
+    },
+    {
+        "code":  "Z55",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1144
+    },
+    {
+        "code":  "Z56",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1145
+    },
+    {
+        "code":  "Z57",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1146
+    },
+    {
+        "code":  "Z59",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1147
+    },
+    {
+        "code":  "Z60",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1148
+    },
+    {
+        "code":  "Z61",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1149
+    },
+    {
+        "code":  "Z62",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1150
+    },
+    {
+        "code":  "Z63",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1151
+    },
+    {
+        "code":  "Z65",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1152
+    },
+    {
+        "code":  "Z66",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1153
+    },
+    {
+        "code":  "Z67",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1154
+    },
+    {
+        "code":  "Z68",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1155
+    },
+    {
+        "code":  "Z69",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1156
+    },
+    {
+        "code":  "Z70",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1157
+    },
+    {
+        "code":  "Z71",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1158
+    },
+    {
+        "code":  "Z72",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1159
+    },
+    {
+        "code":  "Z73",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1160
+    },
+    {
+        "code":  "Z74",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1161
+    },
+    {
+        "code":  "Z75",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1162
+    },
+    {
+        "code":  "Z76",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1163
+    },
+    {
+        "code":  "Z91",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1164
+    },
+    {
+        "code":  "Z92",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1165
+    },
+    {
+        "code":  "Z94",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1166
+    },
+    {
+        "code":  "Z95",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1167
+    },
+    {
+        "code":  "Z98",
+        "name":  "Factors influencing health status and contact with health services",
+        "category":  "Z",
+        "order":  1168
+    }
+]

@@ -54,17 +54,17 @@ export default function AIAssistant() {
       try {
         setLoadingModel(true);
         loaderToastRef.current = showStatus(
-          'loading',
-          'Initializing AI Engine',
-          'This only happens once. The model will work offline after download.',
+          "loading",
+          "Initialising AI Engine",
+          "This only happens once. The model will work offline after download.",
           { duration: 0 }
         );
         await loadModel();
         setModelLoaded(true);
-        showStatus('success', 'AI Engine Ready', 'You can now use the assistant offline.');
+        showStatus("success", "AI Engine Ready", "You can now use the assistant offline.");
       } catch (err) {
         console.error("Failed to load Gemma model:", err);
-        showStatus('error', 'AI Load Failed', 'Could not initialize the engine. Check your storage.');
+        showStatus("error", "AI Load Failed", "Could not initialise the engine. Check your storage.");
       } finally {
         setLoadingModel(false);
         if (loaderToastRef.current) {
@@ -195,18 +195,21 @@ export default function AIAssistant() {
   return (
     <div className="flex flex-col h-full min-h-screen bg-slate-900">
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-slate-900/80 backdrop-blur-xl border-b border-white/5 px-4 py-3">
-        <div className="flex items-center gap-3">
+      <header className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-2xl border-b border-white/5 px-4 py-4">
+        <div className="flex items-center gap-4">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 -ml-2 rounded-xl hover:bg-white/5 transition-colors text-slate-300"
+            className="p-2.5 -ml-2 rounded-xl hover:bg-white/5 transition-colors text-slate-300 hover:text-slate-100"
           >
             <ArrowLeft size={22} />
           </button>
-          <VitaAvatar state="online" size={36} />
-          <div className="flex-1">
-            <h1 className="text-white font-semibold leading-tight">Vita AI</h1>
-            <p className="text-xs text-slate-400">On-device medical assistant</p>
+          <div className="relative">
+            <VitaAvatar state="online" size={44} />
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-slate-900 bg-teal-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-white font-bold text-lg leading-tight">Vita AI</h1>
+            <p className="text-slate-400 text-xs">On-device medical assistant</p>
           </div>
         </div>
       </header>
@@ -214,73 +217,120 @@ export default function AIAssistant() {
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {messages.length === 0 && modelLoaded && (
-          <div className="flex flex-col items-center justify-center py-16 text-center px-6">
-            <VitaAvatar state="online" size={80} />
-            <h2 className="text-xl font-semibold text-white mt-4">Hello, I'm Vita</h2>
-            <p className="text-slate-400 text-sm mt-2 max-w-xs">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col items-center justify-center py-16 text-center px-6"
+          >
+            <div className="relative mb-6">
+              <VitaAvatar state="online" size={96} />
+              <motion.div
+                className="absolute -inset-4 rounded-full border-2 border-teal-400 opacity-20"
+                animate={{
+                  scale: [1, 1.15, 1],
+                  opacity: [0.2, 0.1, 0.2],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-100 text-center tracking-tight">
+              Hello, it's Vita
+            </h2>
+            <p className="text-slate-400 text-sm mt-3 max-w-md leading-relaxed">
               I'm your on-device health assistant. Ask me anything about your health records or get quick medical insights.
             </p>
-            <div className="flex flex-wrap justify-center gap-2 mt-6">
-              {QUICK_PROMPTS.map((prompt) => (
-                <button
+            <div className="flex flex-wrap justify-center gap-2.5 mt-8">
+              {QUICK_PROMPTS.map((prompt, idx) => (
+                <motion.button
                   key={prompt.label}
                   onClick={() => handleQuickPrompt(prompt.label)}
                   disabled={isProcessing || !modelLoaded}
-                  className="px-3 py-1.5 bg-slate-800/60 border border-slate-700/30 text-slate-200 rounded-full text-xs hover:bg-slate-700/60 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 + idx * 0.05 }}
+                  className="px-4 py-2.5 glass-card text-slate-200 rounded-xl text-sm font-medium transition-all hover:border-teal-400/30 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {prompt.label}
-                </button>
+                </motion.button>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
 
         {!modelLoaded && (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <VitaAvatar state="loading" size={80} />
-            <p className="mt-4 text-amber-400 font-medium">Loading AI model, please wait…</p>
-            <p className="text-xs text-slate-500 mt-2">First load may take a few minutes</p>
-          </div>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col items-center justify-center py-24 text-center px-6"
+          >
+            <div className="relative mb-6">
+              <VitaAvatar state="loading" size={96} />
+              <motion.div
+                className="absolute -inset-4 rounded-full border border-teal-500/30"
+                animate={{
+                  rotate: 360,
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+              />
+            </div>
+            <p className="text-amber-400 font-semibold text-lg mb-2">Loading AI Engine</p>
+            <p className="text-slate-500 text-sm">First load may take a few minutes. You'll be able to use this offline afterwards.</p>
+          </motion.div>
         )}
 
-        <AnimatePresence>
+        <AnimatePresence mode="popLayout">
           {messages.map((msg, idx) => {
             const isUser = msg.role === "user";
             const isSystem = msg.role === "system";
             return (
               <motion.div
                 key={idx}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
+                initial={{ opacity: 0, y: 15, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.2 }}
                 className={`flex ${isUser ? "justify-end" : "justify-start"}`}
               >
-                <div className={`flex gap-2 max-w-[85%] ${isUser ? "flex-row-reverse" : "flex-row"}`}>
+                <div className={`flex gap-3 max-w-[88%] ${isUser ? "flex-row-reverse" : "flex-row"}`}>
                   {!isUser && !isSystem && (
-                    <div className="flex-shrink-0 mt-1">
-                      <VitaAvatar state="online" size={28} />
+                    <div className="flex-shrink-0 mt-0.5">
+                      <div className="w-8 h-8 rounded-xl bg-slate-800/70 border border-slate-700/50 flex items-center justify-center">
+                        <span className="text-xs">AI</span>
+                      </div>
                     </div>
                   )}
                   <div
-                    className={`rounded-2xl px-4 py-3 ${
-                      isUser
-                        ? "bg-gradient-to-br from-teal-500/30 to-cyan-500/20 text-teal-100 border border-teal-500/30"
+                    className={`rounded-2xl px-4 py-3 ${isUser
+                        ? "bg-gradient-to-r from-teal-500/30 to-cyan-500/20 text-slate-100 border border-teal-500/20"
                         : isSystem
-                        ? "bg-amber-500/10 text-amber-200 border border-amber-500/20 text-sm"
-                        : "bg-slate-800/70 text-slate-200 border border-slate-700/40"
-                    }`}
+                          ? "bg-amber-500/10 text-amber-200 border border-amber-500/20 text-sm"
+                          : "glass-card text-slate-200"
+                      }`}
                   >
                     {isUser ? (
-                      <div className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</div>
+                      <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</div>
                     ) : (
-                      <div className="text-sm leading-relaxed whitespace-pre-wrap prose-prose prose-invert max-w-none">
+                      <div className="text-sm leading-relaxed whitespace-pre-wrap prose prose-invert max-w-none">
                         {msg.content.split('\n').map((line, i) => {
-                          // Simple markdown-like rendering
                           if (line.startsWith('**') && line.endsWith('**')) {
-                            return <strong key={i} className="text-teal-300">{line.replace(/\*\*/g, '')}</strong>;
+                            return <strong key={i} className="text-teal-300 font-semibold">{line.replace(/\*\*/g, '')}</strong>;
                           }
                           if (line.startsWith('* ') || line.startsWith('- ')) {
-                            return <div key={i} className="ml-2 flex items-start gap-2"><span className="text-slate-500">•</span><span>{line.substring(2)}</span></div>;
+                            return <div key={i} className="ml-3 flex items-start gap-2">
+                              <span className="text-teal-400 mt-1.5 flex-shrink-0">•</span>
+                              <span>{line.substring(2)}</span>
+                            </div>;
+                          }
+                          if (line.trim() === '') {
+                            return <div key={i} className="h-2" />;
                           }
                           return <div key={i}>{line}</div>;
                         })}
@@ -294,9 +344,20 @@ export default function AIAssistant() {
         </AnimatePresence>
 
         {isProcessing && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-slate-500 text-sm">
-            <VitaAvatar state="loading" size={20} />
-            Vita is thinking...
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-start gap-3"
+          >
+            <div className="w-8 h-8 rounded-xl bg-slate-800/70 border border-slate-700/50 flex items-center justify-center flex-shrink-0">
+              <div className="w-4 h-4 border border-teal-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+            <div className="glass-card px-4 py-3">
+              <div className="flex items-center gap-2 text-slate-400 text-sm">
+                <span className="w-2 h-2 bg-teal-400 rounded-full animate-pulse" />
+                Vita is thinking...
+              </div>
+            </div>
           </motion.div>
         )}
 
@@ -305,24 +366,28 @@ export default function AIAssistant() {
 
       {/* Quick prompt chips */}
       {messages.length === 0 && modelLoaded && (
-        <div className="px-4 pb-2 flex flex-wrap gap-2">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="px-4 pb-4 flex flex-wrap gap-2"
+        >
           {QUICK_PROMPTS.map((prompt) => (
             <button
               key={prompt.label}
               onClick={() => handleQuickPrompt(prompt.label)}
               disabled={isProcessing}
-              className="px-3 py-1.5 bg-slate-800/60 border border-slate-700/30 text-slate-200 rounded-full text-xs hover:border-teal-500/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="glass-card px-4 py-2.5 text-slate-200 rounded-xl text-xs font-medium transition-all hover:border-teal-400/30 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {prompt.label}
             </button>
           ))}
-        </div>
+        </motion.div>
       )}
 
       {/* Input area */}
-      <div className="sticky bottom-0 bg-slate-900/90 backdrop-blur-xl border-t border-white/5 p-4">
-        <form onSubmit={handleSend} className="flex items-end gap-2">
-          <div className="flex-1 relative">
+      <div className="sticky bottom-0 bg-slate-900/90 backdrop-blur-2xl border-t border-white/5 p-4">
+        <form onSubmit={handleSend} className="flex items-end gap-3">
+          <div className="flex-1 relative group">
             <textarea
               value={currentInput}
               onChange={(e) => setCurrentInput(e.target.value)}
@@ -332,30 +397,36 @@ export default function AIAssistant() {
                   handleSend(currentInput);
                 }
               }}
-              placeholder="Ask me anything about your health..."
+              placeholder="Ask me anything about your health records..."
               disabled={isProcessing || !modelLoaded}
-              rows={2}
-              className="w-full bg-slate-800/50 border border-slate-700/30 rounded-2xl px-4 py-3 text-sm text-white placeholder:text-slate-500 focus:border-teal-400 focus:outline-none resize-none disabled:opacity-50 leading-relaxed"
+              rows={1}
+              className="glass-input w-full py-2.5 pr-12 text-sm resize-none min-h-[44px] max-h-32"
             />
-            <button
+            <motion.button
               type="button"
-              className="absolute right-3 bottom-3 p-1.5 rounded-lg bg-slate-700/50 hover:bg-slate-600/50 text-slate-400 transition-colors"
-              title="Voice input (coming soon)"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+              className="absolute right-2 bottom-2 p-1.5 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Send message"
+              onClick={() => handleSend(currentInput)}
+              disabled={isProcessing || !currentInput.trim() || !modelLoaded}
             >
-              <Mic size={16} />
-            </button>
+              <Send size={16} />
+            </motion.button>
           </div>
-          <button
-            type="submit"
-            onClick={() => handleSend(currentInput)}
-            disabled={isProcessing || !currentInput.trim() || !modelLoaded}
-            className="px-4 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-teal-500/10"
+          <motion.button
+            type="button"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            className="p-2.5 rounded-xl bg-slate-800/70 border border-slate-700/50 text-slate-400 hover:text-slate-300 transition-colors disabled:opacity-50"
+            title="Voice input"
+            disabled
           >
-            <Send size={18} />
-          </button>
+            <Mic size={18} />
+          </motion.button>
         </form>
-        <p className="text-[10px] text-slate-500 text-center mt-2 leading-relaxed">
-          Vita provides general health information only and does not substitute professional medical advice.
+        <p className="text-[10px] text-slate-500 text-center mt-3 leading-relaxed">
+          Vita provides general health information and does not substitute professional medical advice.
         </p>
       </div>
     </div>

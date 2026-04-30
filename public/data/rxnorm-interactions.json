@@ -1,0 +1,52 @@
+[
+  {
+    "drugA": "Warfarin",
+    "drugB": "Aspirin",
+    "severity": "Major"
+  },
+  {
+    "drugA": "Warfarin",
+    "drugB": "Ibuprofen",
+    "severity": "Major"
+  },
+  {
+    "drugA": "Lisinopril",
+    "drugB": "Potassium",
+    "severity": "Moderate"
+  },
+  {
+    "drugA": "Metformin",
+    "drugB": "Iodinated Contrast",
+    "severity": "Major"
+  },
+  {
+    "drugA": "Amoxicillin",
+    "drugB": "Methotrexate",
+    "severity": "Major"
+  },
+  {
+    "drugA": "Clopidogrel",
+    "drugB": "Omeprazole",
+    "severity": "Moderate"
+  },
+  {
+    "drugA": "Simvastatin",
+    "drugB": "Amiodarone",
+    "severity": "Major"
+  },
+  {
+    "drugA": "Digoxin",
+    "drugB": "Amiodarone",
+    "severity": "Moderate"
+  },
+  {
+    "drugA": "Lithium",
+    "drugB": "NSAIDs",
+    "severity": "Moderate"
+  },
+  {
+    "drugA": "MAOIs",
+    "drugB": "SSRIs",
+    "severity": "Major"
+  }
+]

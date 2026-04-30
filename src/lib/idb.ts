@@ -1,6 +1,6 @@
 export function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("vitachain", 3); // Incremented to version 3 for health graph
+    const request = indexedDB.open("vitachain", 4); // Incremented to version 4 for realtimeCache
 
     request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
       const db = (event.target as IDBOpenDBRequest).result;
@@ -35,10 +35,15 @@ export function openDB(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains("passportScans")) {
         db.createObjectStore("passportScans", { keyPath: "id", autoIncrement: true });
       }
-      // Generic KV store for tokens, settings, etc.
-      if (!db.objectStoreNames.contains("kv")) {
-        db.createObjectStore("kv", { keyPath: "key" });
-      }
+        // Generic KV store for tokens, settings, etc.
+        if (!db.objectStoreNames.contains("kv")) {
+          db.createObjectStore("kv", { keyPath: "key" });
+        }
+        
+        // Realtime cache for API responses with TTL
+        if (!db.objectStoreNames.contains("realtimeCache")) {
+          db.createObjectStore("realtimeCache", { keyPath: "key" });
+        }
     };
 
     request.onsuccess = (event: Event) => {
@@ -314,6 +319,74 @@ export async function removeItem(key: string): Promise<void> {
     store.delete(key);
     transaction.oncomplete = () => resolve();
     transaction.onerror = () => reject(transaction.error);
+  });
+}
+
+// ==================== Real-time Cache with TTL ====================
+
+export interface RealtimeCacheEntry {
+  key: string;
+  data: any;
+  timestamp: number;
+  ttlMs: number;
+}
+
+export async function storeRealtimeCache(key: string, data: any, ttlMs: number): Promise<void> {
+  const db = await openDB();
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction("realtimeCache", "readwrite");
+    const store = transaction.objectStore("realtimeCache");
+    store.put({ key, data, timestamp: Date.now(), ttlMs });
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+
+export async function getRealtimeCache(key: string): Promise<RealtimeCacheEntry | null> {
+  const db = await openDB();
+  return new Promise<RealtimeCacheEntry | null>((resolve, reject) => {
+    const transaction = db.transaction("realtimeCache", "readonly");
+    const store = transaction.objectStore("realtimeCache");
+    const request = store.get(key);
+    request.onsuccess = () => resolve(request.result || null);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function clearRealtimeCache(): Promise<void> {
+  const db = await openDB();
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction("realtimeCache", "readwrite");
+    const store = transaction.objectStore("realtimeCache");
+    store.clear();
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+
+export async function cleanupExpiredCache(): Promise<number> {
+  const db = await openDB();
+  return new Promise<number>((resolve, reject) => {
+    const transaction = db.transaction("realtimeCache", "readwrite");
+    const store = transaction.objectStore("realtimeCache");
+    let deletedCount = 0;
+    
+    const request = store.openCursor();
+    request.onsuccess = (event) => {
+      const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
+      if (cursor) {
+        const entry = cursor.value as RealtimeCacheEntry;
+        const now = Date.now();
+        if (now - entry.timestamp > entry.ttlMs) {
+          cursor.delete();
+          deletedCount++;
+        }
+        cursor.continue();
+      } else {
+        resolve(deletedCount);
+      }
+    };
+    request.onerror = () => reject(request.error);
   });
 }
 
