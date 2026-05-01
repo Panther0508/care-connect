@@ -325,24 +325,25 @@ export default function PatientDashboard() {
     .sort((a, b) => 0)
     .slice(0, 4);
 
-  // Handle AI submit
-  const handleAiSubmit = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (!aiQuery.trim()) return;
-    setAiLoading(true);
-    setAiResponse(null);
-    try {
-      const healthState = getCurrentHealthState();
-      const answer = await askMedicalQuestion(healthState, aiQuery.trim());
-      setAiResponse(answer);
-      setAiQuery("");
-    } catch (err) {
-      console.error(err);
-      setAiResponse("Sorry, I couldn't process that question right now.");
-    } finally {
-      setAiLoading(false);
-    }
-  };
+   // Handle AI submit
+   const handleAiSubmit = async (e?: React.FormEvent) => {
+     e?.preventDefault();
+     if (!aiQuery.trim()) return;
+     setAiLoading(true);
+     setAiResponse(null);
+     try {
+       const healthState = getCurrentHealthState();
+       const userId = user?.id || 'guest';
+       const result = await askMedicalQuestion(healthState, aiQuery.trim(), undefined, 'patient', userId);
+       setAiResponse(result.text);
+       setAiQuery("");
+     } catch (err) {
+       console.error(err);
+       setAiResponse("Sorry, I couldn't process that question right now.");
+     } finally {
+       setAiLoading(false);
+     }
+   };
 
   // Wellness Ring component
   const WellnessRing = () => {

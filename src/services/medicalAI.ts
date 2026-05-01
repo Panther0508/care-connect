@@ -189,44 +189,50 @@ function buildReferralSummaryPrompt(healthState, specialistType) {
  * Generate a clinical summary using the hybrid AI
  * @param healthState - Patient health data
  * @param personaSystemPrompt - Optional persona system prompt (defaults to patient persona)
+ * @param userId - User ID for emotional threading (default: 'guest')
+ * @returns Full result { text, reasoning, citations, emotionalState, model, source }
  */
-export async function generateClinicalSummary(healthState, personaSystemPrompt = null) {
-  const userProfile = null; // Will use default persona
+export async function generateClinicalSummary(healthState, personaSystemPrompt = null, userId = 'guest') {
+  const userProfile = null;
   const persona = getPersona('patient', userProfile);
   const systemPrompt = personaSystemPrompt || buildSystemPrompt(persona);
 
   const prompt = buildClinicalSummaryPrompt(healthState, systemPrompt);
-  const result = await routeQuery(prompt, 'patient', systemPrompt);
-  return result.text;
+  const result = await routeQuery(prompt, 'patient', systemPrompt, userId);
+  return result;
 }
 
 /**
  * Generate a pre-visit summary for a specialist
  * @param healthState - Patient health data
  * @param specialistType - Type of specialist (e.g., "cardiologist")
+ * @param userId - User ID for emotional threading (default: 'guest')
+ * @returns Full result { text, reasoning, citations, emotionalState, model, source }
  */
-export async function generatePreVisitSummary(healthState, specialistType) {
+export async function generatePreVisitSummary(healthState, specialistType, userId = 'guest') {
   const userProfile = null;
   const persona = getPersona('patient', userProfile);
   const systemPrompt = buildSystemPrompt(persona);
 
   const prompt = buildReferralSummaryPrompt(healthState, specialistType);
-  const result = await routeQuery(prompt, 'patient', systemPrompt);
-  return result.text;
+  const result = await routeQuery(prompt, 'patient', systemPrompt, userId);
+  return result;
 }
 
 /**
  * Use LLM to check medication interactions
  * @param medications - Array of medication names
+ * @param userId - User ID for emotional threading (default: 'guest')
+ * @returns Full result { text, reasoning, citations, emotionalState, model, source }
  */
-export async function checkMedicationInteractionLLM(medications) {
+export async function checkMedicationInteractionLLM(medications, userId = 'guest') {
   const userProfile = null;
   const persona = getPersona('patient', userProfile);
   const systemPrompt = buildSystemPrompt(persona);
 
   const prompt = buildDrugInteractionPrompt(medications);
-  const result = await routeQuery(prompt, 'patient', systemPrompt);
-  return result.text;
+  const result = await routeQuery(prompt, 'patient', systemPrompt, userId);
+  return result;
 }
 
 /**
@@ -235,8 +241,10 @@ export async function checkMedicationInteractionLLM(medications) {
  * @param question - User's question
  * @param personaSystemPrompt - Optional persona system prompt (RAG-augmented queries pass augmented prompt here)
  * @param role - User role: 'patient' | 'clinician' | 'chw' (default: 'patient')
+ * @param userId - User ID for emotional threading (default: 'guest')
+ * @returns Full result object: { text, reasoning, citations, emotionalState, model, source }
  */
-export async function askMedicalQuestion(healthState, question, personaSystemPrompt = null, role = 'patient') {
+export async function askMedicalQuestion(healthState, question, personaSystemPrompt = null, role = 'patient', userId = 'guest') {
   const userProfile = null;
   const persona = getPersona(role, userProfile);
   const systemPrompt = personaSystemPrompt || buildSystemPrompt(persona);
@@ -247,8 +255,8 @@ export async function askMedicalQuestion(healthState, question, personaSystemPro
                   `Allergies: ${(healthState.allergies || []).map(a => a.substance).join(', ') || 'None'}.`;
 
   const prompt = `${context}\n\nQuestion: ${question}`;
-  const result = await routeQuery(prompt, role, systemPrompt);
-  return result.text;
+  const result = await routeQuery(prompt, role, systemPrompt, userId);
+  return result;
 }
 
 /**

@@ -131,8 +131,51 @@ export function generateGreeting(persona: Persona, userName: string): string {
 }
 
 /**
- * Build full system prompt for the AI
+ * Build full system prompt for the AI with emotional context
+ * @param {Persona} persona - Base persona
+ * @param {Object} emotionalAdjustment - Optional emotional tuning
+ * @returns {string} Full system prompt
  */
-export function buildSystemPrompt(persona: Persona): string {
-  return persona.systemPrompt;
+export function buildSystemPrompt(persona: Persona, emotionalAdjustment = null): string {
+  let prompt = persona.systemPrompt;
+
+  if (emotionalAdjustment) {
+    prompt += `\n\n--- EMOTIONAL SUPPORT CONTEXT ---\n`;
+    prompt += `Detected user emotional state: ${emotionalAdjustment.emotionalState} (confidence: ${Math.round(emotionalAdjustment.confidence * 100)}%)\n`;
+    prompt += `Guidance: ${emotionalAdjustment.instruction}\n`;
+    if (emotionalAdjustment.trend) {
+      prompt += `Trend: ${emotionalAdjustment.trendSummary}\n`;
+    }
+    prompt += `--- End emotional context ---`;
+  }
+
+  return prompt;
+}
+
+/**
+ * Build emotional adjustment object from emotion detector
+ */
+export function buildEmotionalAdjustment(state, confidence, trend = null, trendSummary = null) {
+  return {
+    emotionalState: state,
+    confidence,
+    instruction: getEmotionalInstruction(state),
+    trend,
+    trendSummary
+  };
+}
+
+function getEmotionalInstruction(state) {
+  const instructions = {
+    crisis: 'Prioritize safety and immediate resources. Do not leave the user alone. Provide crisis helpline numbers (988 in US, 116 123 UK, 91 9820466726 India). Validate their pain but gently guide toward professional help.',
+    distressed: 'Be extra gentle and supportive. Validate their feelings. Use calming language. Avoid overwhelming detail. Check if they need to take a break.',
+    anxious: 'Be calm and grounding. Use steady, predictable language. Avoid uncertain phrasing. Offer concrete next steps. Teach a simple breathing technique if appropriate.',
+    sad: 'Show compassion and validation. Acknowledge their pain. Avoid toxic positivity. Offer hope in small doses. Suggest professional support if patterns suggest depression.',
+    frustrated: 'Acknowledge their frustration. Validate that the situation is difficult. Apologize for any system issues. Focus on solutions.',
+    neutral: 'Provide balanced, helpful information.',
+    curious: 'Be engaging and thorough. Satisfy curiosity with detailed, accurate information.',
+    grateful: 'Acknowledge their gratitude warmly. Reinforce positive coping. Celebrate progress.',
+    happy: 'Match their positive tone. Encourage continued progress. Reinforce good habits.'
+  };
+  return instructions[state] || instructions.neutral;
 }

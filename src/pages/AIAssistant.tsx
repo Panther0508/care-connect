@@ -1,8 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@clerk/clerk-react";
 import VitaAvatar from "../components/VitaAvatar";
 import CrisisPopup from "../components/CrisisPopup";
+import ReasoningPanel from "../components/ReasoningPanel";
+import CitationBadge from "../components/CitationBadge";
 import {
   loadModel,
   isModelReady,
@@ -48,6 +51,10 @@ type MessageRole = "user" | "assistant" | "system";
 interface Message {
   role: MessageRole;
   content: string;
+  reasoning?: Array<{ type: string; title: string; description: string; sources?: string[] }>;
+  citations?: Array<{ type: string; title: string; url: string; snippet?: string; source: string }>;
+  emotionalState?: string;
+  model?: string;
 }
 
 const QUICK_PROMPTS = [
@@ -60,8 +67,15 @@ const QUICK_PROMPTS = [
 export default function AIAssistant() {
   const navigate = useNavigate();
   const { showStatus, dismissStatus } = useStatus();
+  const { user } = useAuth();
   const { role: userRole } = useRole();
   const loaderToastRef = useRef<string | null>(null);
+
+  // Emoji indicators for emotional state
+  const EMOJI_MAP: Record<string, string> = {
+    crisis: '🔴', distressed: '🟠', sad: '😢', anxious: '😰',
+    frustrated: '😤', neutral: '⚪', curious: '🤔', grateful: '💙', happy: '😊'
+  };
   const [modelLoaded, setModelLoaded] = useState(false);
   const [loadingModel, setLoadingModel] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -211,8 +225,8 @@ export default function AIAssistant() {
     initializeReminders();
   }, []);
 
-  const addMessage = (role: MessageRole, content: string) => {
-    setMessages((prev) => [...prev, { role, content }]);
+  const addMessage = (role: MessageRole, content: string, extra?: Partial<Omit<Message, 'role' | 'content'>>) => {
+    setMessages((prev) => [...prev, { role, content, ...extra }]);
   };
 
   const handleTranslation = async (text: string) => {
@@ -316,18 +330,40 @@ export default function AIAssistant() {
 
     addMessage("user", text);
 
-    try {
-      const healthState = getCurrentHealthState();
-      const lowerText = text.toLowerCase();
-      const systemPrompt = persona ? buildSystemPrompt(persona) : undefined;
+     try {
+       const healthState = getCurrentHealthState();
+       const lowerText = text.toLowerCase();
+       const systemPrompt = persona ? buildSystemPrompt(persona) : undefined;
+       const userId = user?.id || 'guest';
 
-      // Check for quick prompt handlers
-      if (text.includes("summary") || lowerText.includes("summarise my health") || lowerText.includes("summarize")) {
-        if (!healthState.conditions.length && !healthState.medications.length && !healthState.allergies.length) {
-          addMessage("assistant", "No health data available. Please add some records in the Health section first.");
-          setIsProcessing(false);
-          return;
-        }
+       // Check for quick prompt handlers
+       if (text.includes("summary") || lowerText.includes("summarise my health") || lowerText.includes("summarize")) {
+         if (!healthState.conditions.length && !healthState.medications.length && !healthState.allergies.length) {
+           addMessage("assistant", "No health data available. Please add some records in the Health section first.");
+           setIsProcessing(false);
+           return;
+         }
+         const summaryResult = await generateClinicalSummary(healthState, systemPrompt, userId);
+         const summary = summaryResult.text;
+         const responseDetection = scanAIResponse(summary);
+         if (responseDetection.requiresImmediatePopup) {
+           setCrisisVisible(true);
+           setCrisisState({ riskLevel: responseDetection.riskLevel, matchedPattern: responseDetection.matchedPatterns?.[0] });
+         }
+         addMessage("assistant", summary, {
+           reasoning: summaryResult.reasoning,
+           citations: summaryResult.citations,
+           emotionalState: summaryResult.emotionalState,
+           model: summaryResult.model
+         });
+         // Update model status from last route result
+         const lastRes = getLastRouteResult();
+         if (lastRes?.source === 'online') setActiveModel('online');
+         else if (lastRes?.source === 'cached-gemma') setActiveModel('cached');
+         else if (lastRes?.source === 'offline') setActiveModel('offline');
+         setIsProcessing(false);
+         return;
+       }
         const summary = await generateClinicalSummary(healthState, systemPrompt);
         const responseDetection = scanAIResponse(summary);
         if (responseDetection.requiresImmediatePopup) {
@@ -383,50 +419,75 @@ export default function AIAssistant() {
         return;
       }
 
-       // RAG-Augmented queries
-       const datasetMatch = isDatasetQuery(text);
-       if (datasetMatch) {
-         loadEmbeddingModel().then(async () => {
-           const retrieved = await retrieveRagContext(text, datasetMatch.dataset, 5);
-           if (retrieved && retrieved.length > 0) {
-              const augmentedMessages = buildAugmentedPrompt(text, retrieved.slice(0, 3), systemPrompt || "");
-              const answer = await askMedicalQuestion(healthState, text, augmentedMessages[0].content, userRole);
-             addMessage("assistant", answer);
-             const lastRes = getLastRouteResult();
-             if (lastRes?.source === 'online') setActiveModel('online');
-             else if (lastRes?.source === 'cached-gemma') setActiveModel('cached');
-             else setActiveModel('offline');
-            } else {
-              const answer = await askMedicalQuestion(healthState, text, systemPrompt, userRole);
-              addMessage("assistant", answer);
-             const lastRes = getLastRouteResult();
-             if (lastRes?.source === 'online') setActiveModel('online');
-             else if (lastRes?.source === 'cached-gemma') setActiveModel('cached');
-             else setActiveModel('offline');
-           }
-           setIsProcessing(false);
-          }).catch(() => {
-            const answer = await askMedicalQuestion(healthState, text, systemPrompt, userRole);
-            addMessage("assistant", answer);
-           setActiveModel('offline');
-           setIsProcessing(false);
-         });
-         return;
-       }
+        // RAG-Augmented queries
+        const datasetMatch = isDatasetQuery(text);
+        if (datasetMatch) {
+          loadEmbeddingModel().then(async () => {
+            try {
+              const retrieved = await retrieveRagContext(text, datasetMatch.dataset, 5);
+              let aiResult;
+              if (retrieved && retrieved.length > 0) {
+                const augmentedMessages = buildAugmentedPrompt(text, retrieved.slice(0, 3), systemPrompt || "");
+                aiResult = await askMedicalQuestion(healthState, text, augmentedMessages[0].content, userRole, userId);
+              } else {
+                aiResult = await askMedicalQuestion(healthState, text, systemPrompt, userRole, userId);
+              }
+              addMessage("assistant", aiResult.text, {
+                reasoning: aiResult.reasoning,
+                citations: aiResult.citations,
+                emotionalState: aiResult.emotionalState,
+                model: aiResult.model
+              });
+              const lastRes = getLastRouteResult();
+              if (lastRes?.source === 'online') setActiveModel('online');
+              else if (lastRes?.source === 'cached-gemma') setActiveModel('cached');
+              else setActiveModel('offline');
+            } catch (innerErr) {
+              console.error('RAG path error:', innerErr);
+              const aiResult = await askMedicalQuestion(healthState, text, systemPrompt, userRole, userId);
+              addMessage("assistant", aiResult.text, {
+                reasoning: aiResult.reasoning,
+                citations: aiResult.citations,
+                emotionalState: aiResult.emotionalState,
+                model: aiResult.model
+              });
+              setActiveModel('offline');
+            } finally {
+              setIsProcessing(false);
+            }
+          }).catch(async () => {
+            // Fallback if loadEmbeddingModel fails
+            const aiResult = await askMedicalQuestion(healthState, text, systemPrompt, userRole, userId);
+            addMessage("assistant", aiResult.text, {
+              reasoning: aiResult.reasoning,
+              citations: aiResult.citations,
+              emotionalState: aiResult.emotionalState,
+              model: aiResult.model
+            });
+            setActiveModel('offline');
+            setIsProcessing(false);
+          });
+          return;
+        }
 
-        // Default: free-form question
-        const answer = await askMedicalQuestion(healthState, text, systemPrompt, userRole);
-       const responseDetection = scanAIResponse(answer);
-       if (responseDetection.requiresImmediatePopup) {
-         setCrisisVisible(true);
-         setCrisisState({ riskLevel: responseDetection.riskLevel, matchedPattern: responseDetection.matchedPatterns?.[0] });
-       }
-       addMessage("assistant", answer);
-       // Update model status from last route result
-       const lastRes = getLastRouteResult();
-       if (lastRes?.source === 'online') setActiveModel('online');
-       else if (lastRes?.source === 'cached-gemma') setActiveModel('cached');
-       else if (lastRes?.source === 'offline') setActiveModel('offline');
+         // Default: free-form question
+         const aiResult = await askMedicalQuestion(healthState, text, systemPrompt, userRole, userId);
+         const responseDetection = scanAIResponse(aiResult.text);
+         if (responseDetection.requiresImmediatePopup) {
+           setCrisisVisible(true);
+           setCrisisState({ riskLevel: responseDetection.riskLevel, matchedPattern: responseDetection.matchedPatterns?.[0] });
+         }
+         addMessage("assistant", aiResult.text, {
+           reasoning: aiResult.reasoning,
+           citations: aiResult.citations,
+           emotionalState: aiResult.emotionalState,
+           model: aiResult.model
+         });
+         // Update model status from last route result
+         const lastRes = getLastRouteResult();
+         if (lastRes?.source === 'online') setActiveModel('online');
+         else if (lastRes?.source === 'cached-gemma') setActiveModel('cached');
+         else if (lastRes?.source === 'offline') setActiveModel('offline');
     } catch (err) {
       console.error(err);
       addMessage("assistant", "Sorry, I couldn't process that. Please try again.");
@@ -498,14 +559,64 @@ export default function AIAssistant() {
           {messages.map((msg, idx) => {
             const isUser = msg.role === "user";
             const isSystem = msg.role === "system";
+            const isAssistant = msg.role === "assistant";
             return (
               <motion.div key={idx} initial={{ opacity: 0, y: 15, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
                 <div className={`flex gap-3 max-w-[88%] ${isUser ? "flex-row-reverse" : "flex-row"}`}>
                   {!isUser && !isSystem && (
-                    <div className="flex-shrink-0 mt-0.5"><div className="w-8 h-8 rounded-xl bg-slate-800/70 border border-slate-700/50 flex items-center justify-center"><span className="text-xs">AI</span></div></div>
+                    <div className="flex-shrink-0 mt-0.5">
+                      <div className="w-8 h-8 rounded-xl bg-slate-800/70 border border-slate-700/50 flex items-center justify-center">
+                        <span className="text-xs">AI</span>
+                      </div>
+                    </div>
                   )}
-                  <div className={`rounded-2xl px-4 py-3 ${isUser ? "bg-gradient-to-r from-teal-500/30 to-cyan-500/20 text-slate-100 border border-teal-500/20" : isSystem ? "bg-amber-500/10 text-amber-200 border border-amber-500/20 text-sm" : "glass-card text-slate-200"}`}>
-                    {isUser ? <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</div> : <div className="text-sm leading-relaxed whitespace-pre-wrap prose prose-invert max-w-none">{msg.content.split("\n").map((line, i) => line.startsWith("**") && line.endsWith("**") ? <strong key={i} className="text-teal-300 font-semibold">{line.replace(/\*\*/g, "")}</strong> : line.startsWith("* ") ? <div key={i} className="ml-3 flex items-start gap-2"><span className="text-teal-400 mt-1.5 flex-shrink-0">•</span><span>{line.substring(2)}</span></div> : line.trim() === "" ? <div key={i} className="h-2" /> : <div key={i}>{line}</div>)}</div>}
+                  <div>
+                    {/* Main message bubble */}
+                    <div className={`rounded-2xl px-4 py-3 ${isUser ? "bg-gradient-to-r from-teal-500/30 to-cyan-500/20 text-slate-100 border border-teal-500/20" : isSystem ? "bg-amber-500/10 text-amber-200 border border-amber-500/20 text-sm" : "glass-card text-slate-200"}`}>
+                      {isUser ? (
+                        <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</div>
+                      ) : (
+                        <div className="text-sm leading-relaxed whitespace-pre-wrap prose prose-invert max-w-none">
+                          {msg.content.split("\n").map((line, i) =>
+                            line.startsWith("**") && line.endsWith("**") ? (
+                              <strong key={i} className="text-teal-300 font-semibold">{line.replace(/\*\*/g, "")}</strong>
+                            ) : line.startsWith("* ") ? (
+                              <div key={i} className="ml-3 flex items-start gap-2"><span className="text-teal-400 mt-1.5 flex-shrink-0">•</span><span>{line.substring(2)}</span></div>
+                            ) : line.trim() === "" ? (
+                              <div key={i} className="h-2" />
+                            ) : (
+                              <div key={i}>{line}</div>
+                            )
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Emotional state indicator for assistant */}
+                    {isAssistant && msg.emotionalState && (
+                      <div className="mt-1.5 ml-2 flex items-center gap-1.5">
+                        <span title={`Emotional state: ${msg.emotionalState}`}>{EMOJI_MAP[msg.emotionalState] || '⚪'}</span>
+                        {msg.emotionalState !== 'neutral' && (
+                          <span className="text-xs text-slate-400 capitalize">{msg.emotionalState}</span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Reasoning panel */}
+                    {isAssistant && msg.reasoning && msg.reasoning.length > 0 && (
+                      <div className="mt-2 ml-2">
+                        <ReasoningPanel reasoningSteps={msg.reasoning} />
+                      </div>
+                    )}
+
+                    {/* Citations */}
+                    {isAssistant && msg.citations && msg.citations.length > 0 && (
+                      <div className="mt-2 ml-2 flex flex-wrap items-center gap-2">
+                        {msg.citations.map((c, i) => (
+                          <CitationBadge key={i} citation={c} index={i} />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </motion.div>
