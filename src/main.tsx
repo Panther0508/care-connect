@@ -7,6 +7,7 @@ import { StatusProvider } from "./context/StatusContext";
 import { createRoot } from "react-dom/client";
 import { initFoodDatabase } from "./services/foodDatabase";
 import { initExerciseDatabase } from "./services/exerciseDatabase";
+import { ensureAllIndexed } from "./services/advancedRAG";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -49,6 +50,9 @@ if ("serviceWorker" in navigator) {
 // Initialize offline databases
 initFoodDatabase().catch(err => console.error('Failed to init food DB:', err));
 initExerciseDatabase().catch(err => console.error('Failed to init exercise DB:', err));
+
+// Index RAG datasets on first startup (non-blocking)
+ensureAllIndexed().catch(err => console.error('RAG indexing failed:', err));
 
 const clerkProviderProps = PUBLISHABLE_KEY
   ? { publishableKey: PUBLISHABLE_KEY, rethrowOfflineNetworkErrors: true }

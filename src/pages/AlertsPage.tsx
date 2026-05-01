@@ -78,40 +78,40 @@ export default function AlertsPage() {
             </motion.div>
           ) : (
             <motion.div key="alerts" initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }} className="flex flex-col gap-4">
-              {/* Outbreak alerts section */}
-              {outbreakAlerts.length > 0 && (
-                <div className="space-y-3">
-                  <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                    <AlertTriangle className="text-rose-500" size={20} />
-                    Community Health Alerts
-                  </h2>
-                  {outbreakAlerts.map((alert) => (
-                    <motion.div
-                      key={alert.id}
-                      whileHover={{ x: 2 }}
-                      className="bg-gradient-to-r from-rose-900/30 to-amber-900/20 p-4 rounded-xl border border-rose-700/30"
-                    >
-                      <div className="flex items-start gap-3">
-                        <div className="p-2 rounded-lg bg-rose-500/10 text-rose-400">
-                          <AlertTriangle size={20} />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-white capitalize">{alert.term}</h3>
-                          <p className="text-sm text-slate-300 mt-1">
-                            {alert.count} people in {alert.region} recently searched for this term.
-                          </p>
-                          <p className="text-xs text-slate-500 mt-1">
-                            Detected {new Date(alert.firstDetectedAt).toLocaleDateString()}
-                          </p>
-                        </div>
-                        <span className={`px-2 py-1 rounded text-xs ${alert.status === 'active' ? 'bg-rose-600/50 text-rose-100' : 'bg-slate-600/50 text-slate-300'}`}>
-                          {alert.status}
-                        </span>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
+               {/* Outbreak alerts section */}
+               {outbreakAlerts.length > 0 && (
+                 <div className="space-y-3">
+                   <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                     <AlertTriangle className="text-rose-500" size={20} />
+                     Community Health Alerts
+                   </h2>
+                   {outbreakAlerts.map((alert) => (
+                     <motion.div
+                       key={alert.id}
+                       whileHover={{ x: 2 }}
+                       className="glass-card"
+                     >
+                       <div className="flex items-start gap-3">
+                         <div className="p-2 rounded-lg bg-rose-500/10 text-rose-400">
+                           <AlertTriangle size={20} />
+                         </div>
+                         <div className="flex-1">
+                           <h3 className="font-semibold text-white capitalize">{alert.term}</h3>
+                           <p className="text-sm text-slate-300 mt-1">
+                             {alert.count} people in {alert.region} recently searched for this term.
+                           </p>
+                           <p className="text-xs text-slate-500 mt-1">
+                             Detected {new Date(alert.firstDetectedAt).toLocaleDateString()}
+                           </p>
+                         </div>
+                         <span className={`px-2 py-1 rounded text-xs ${alert.status === 'active' ? 'bg-rose-600/50 text-rose-100' : 'bg-slate-600/50 text-slate-300'}`}>
+                           {alert.status}
+                         </span>
+                       </div>
+                     </motion.div>
+                   ))}
+                 </div>
+               )}
 
               {/* Facility match alerts */}
               {facilityAlerts.length > 0 && (

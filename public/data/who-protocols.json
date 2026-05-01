@@ -1,25 +1,180 @@
-﻿{
-  "version": 2026,
-  "protocols": {
-    "anc": {
-      "name": "Antenatal Care",
-      "steps": ["confirm_pregnancy", "assess_risk", "schedule_visits"]
+﻿// public/data/who-protocols.json
+// WHO Treatment Protocols - Phase 3 Dataset
+// Essential medicines and treatment guidelines
+
+{
+  "version": "2026.1",
+  "source": "World Health Organization - Essential Medicines and Health Products",
+  "description": "WHO treatment protocols for common conditions in resource-limited settings",
+  "protocols": [
+    {
+      "id": "malaria_uncomplicated_who",
+      "condition": "Uncomplicated Malaria",
+      "guidelines": "WHO Guidelines for malaria treatment 2021",
+      "confirmation": "Test before treat when possible (RDT or microscopy)",
+      "treatment": {
+        "artemisinin_based_combination_therapy": {
+          "adults": "Artemether-lumefantrine (AL) or Artesunate-amodiaquine or Artesunate-mefloquine or Dihydroartemisinin-piperaquine",
+          "children": "Same as adults, dosed by weight",
+          "pregnant_women": "First trimester: Quinine + Clindamycin. Second/third trimester: ACT recommended"
+        },
+        "dosing": {
+          "artemether_lumefantrine": "Tablets: 20mg/120mg - 4 tablets at 0,8,24,36,48,60 hours (6 doses over 3 days)",
+          "artesunate_amodiaquine": "4mg/kg/day artesunate + 10mg/kg/day amodiaquine for 3 days",
+          "weight_bands": {
+            "5-14kg": "1 tablet daily",
+            "15-24kg": "2 tablets daily",
+            "25-34kg": "4 tablets daily",
+            ">=35kg": "4 tablets twice daily"
+          }
+        },
+        "severe_malaria": {
+          "treatment": "Parenteral artesunate preferred (IV/IM). Alternative: Artemether IM or Quinine IV",
+          "artesunate_dosing": "2.4mg/kg at 0,12,24 hours then daily",
+          "quinine_dosing": "20mg/kg loading dose IV over 4 hours, then 10mg/kg every 8 hours",
+          "when_to_switch": "When patient can tolerate oral medication, complete with 3-day ACT course"
+        }
+      },
+      "prevention": {
+        "itns": "Insecticide-treated bed nets for all at-risk persons",
+        "irs": "Indoor residual spraying in high-transmission areas",
+        "iptp": "Intermittent preventive treatment in pregnancy: Sulfadoxine-pyrimethamine (SP) at each scheduled antenatal visit after quickening",
+        "smc": "Seasonal malaria chemoprevention in Sahel sub-region: Sulfadoxine-pyrimethamine + Amodiaquine monthly during rainy season for children 3-59 months"
+      }
     },
-    "imci": {
-      "name": "IMCI",
-      "steps": ["assess", "classify", "treat"]
+    {
+      "id": "hiv_who",
+      "condition": "HIV Infection",
+      "guidelines": "WHO Consolidated guidelines on HIV 2021",
+      "treatment_initiation": "All adults and adolescents living with HIV should start ART as soon as possible after diagnosis, regardless of CD4 count, clinical stage, or WHO clinical criteria",
+      "preferred_regimens": [
+        {
+          "adults_adolescents": {
+            "first_line": "Tenofovir (TDF or TAF) + Lamivudine (3TC) or Emtricitabine (FTC) + Dolutegravir (DTG)",
+            "alternatives": [
+              "TDF + 3TC/FTC + Efavirenz (EFV)",
+              "TDF + 3TC/FTC + Nevirapine (NVP)",
+              "ABC + 3TC/FTC + DTG (if TDF contraindicated)"
+            ],
+            "note": "DTG-based regimens recommended as first-line"
+          },
+          "children": {
+            "<10kg": "ABC + 3TC + Lopinavir/ritonavir (LPV/r) solution",
+            "10-14kg": "ABC + 3TC + LPV/r pellets",
+            "14-25kg": "TDF + 3TC + DTG or ABC + 3TC + DTG or LPV/r",
+            ">=25kg": "Adult formulation"
+          }
+        }
+      ],
+      "monitoring": {
+        "baseline": "CD4 count, HIV viral load (if available), Hemoglobin, ALT/AST, Cr, Hepatitis B/C serology, STI screening, Cervical cancer screening (women)",
+        "follow_up": "Clinical assessment every 3-6 months, Viral load at 6 months after starting ART then annually",
+        "success_criteria": "Viral suppression (<1000 copies/mL) by 6 months on ART"
+      },
+      "prevention": {
+        "prep": "Daily oral PrEP for people at substantial risk of HIV infection",
+        "pmtct": "Option B+: All pregnant and breastfeeding women with HIV receive lifelong ART with Tenofovir + 3TC/FTC + DTG or EFV",
+        "pep": "28-day course of TDF + 3TC (or FTC) + DTG (or boosted PI) started as soon as possible after exposure, ideally within 72 hours"
+      }
     },
-    "malaria": {
-      "name": "Malaria Management",
-      "steps": ["test", "classify", "treat", "followup"]
+    {
+      "id": "tb_who",
+      "condition": "Tuberculosis",
+      "guidelines": "WHO consolidated guidelines on TB 2022",
+      "drug_sensitive_tb": {
+        "new_patients": {
+          "regimen": "2HRZE/4HR (6 months total)",
+          "intensive_phase": "2 months: Isoniazid (H) 5mg/kg (max 300mg) + Rifampicin (R) 10mg/kg (max 600mg) + Pyrazinamide (Z) 25mg/kg (max 2g) + Ethambutol (E) 15mg/kg daily under DOT",
+          "continuation_phase": "4 months: INH + RIF daily or 3 times weekly under DOT",
+          "adjustments": {
+            "extrapulmonary": "Extend continuation phase to 7 months (9 months total)",
+            "cavitary_pulmonary": "Consider extending continuation phase to 7 months if sputum positive at 2 months"
+          }
+        },
+        "previously_treated": {
+          "regimen": "8 months: 2SHRZE/1HRZE/5HRE or shorter regimens based on DST",
+          "note": "Use rapid molecular DST to guide regimen selection"
+        }
+      },
+      "drug_resistant_tb": {
+        "rif_resistant": {
+          "regimen": "6-9 months all-oral BPaLM/BPaL regimen",
+          "drugs": "Bedaquiline (B) + Pretomanid (Pa) + Linezolid (L) + Moxifloxacin (M)",
+          "duration": "6 months (extend to 9 months for extensive disease)"
+        },
+        "multidrug_resistant": "Individualized regimens based on DST, include Group A (Levofloxacin/Moxifloxacin, Bedaquiline, Linezolid) plus Group B and C drugs"
+      },
+      "latent_tb_infection": {
+        "regimens": [
+          "6 or 9 months isoniazid (300mg daily or twice weekly)",
+          "3 months weekly isoniazid + rifapentine (3HP) - not in all countries",
+          "3-4 months isoniazid + rifampicin (3HR or 4HR)",
+          "3-4 months rifampicin alone (3R or 4R)"
+        ]
+      },
+      "infection_control": [
+        "Early diagnosis and prompt treatment",
+        "Cough etiquette and respiratory hygiene",
+        "Adequate ventilation in congregate settings",
+        "Use of particulate respirators in high-risk settings"
+      ]
     },
-    "tb": {
-      "name": "TB Screening",
-      "steps": ["screen", "collect", "refer"]
+    {
+      "id": "ntds_who",
+      "condition": "Neglected Tropical Diseases",
+      "diseases": [
+        {
+          "name": "Soil-transmitted helminths",
+          "treatment": "Albendazole 400mg single dose or Mebendazole 500mg single dose",
+          "preventive_chemotherapy": "Annual or biannual mass drug administration in endemic areas"
+        },
+        {
+          "name": "Schistosomiasis",
+          "treatment": "Praziquantel 40-60mg/kg single dose (split into 2-3 doses)",
+          "target_population": "School-age children in endemic areas"
+        },
+        {
+          "name": "Lymphatic filariasis",
+          "treatment": "Annual mass drug administration: Albendazole 400mg + Ivermectin 150-200mcg/kg or DEC 6mg/kg",
+          "morbidity_management": "Lymphedema management and hydrocele surgery"
+        },
+        {
+          "name": "Onchocerciasis",
+          "treatment": "Ivermectin 150-200mcg/kg single dose every 6-12 months",
+          "note": "Contraindicated in children <5 years or <15kg, pregnant women, and severely ill patients"
+        },
+        {
+          "name": "Trachoma",
+          "treatment": "Annual mass drug administration: Azithromycin 20mg/kg (max 1g) single oral dose for 3 years",
+          "surgery": "Trachomatous trichiasis surgery (bilamellar tarsal rotation)"
+        }
+      ]
     },
-    "emergency": {
-      "triage": ["unresponsive", "not_breathing"],
-      "referral_indicators": ["severe_dehydration", "respiratory_distress"]
+    {
+      "id": "vaccination_who",
+      "condition": "Immunization",
+      "priority_diseases": [
+        {
+          "disease": "Measles",
+          "schedule": "First dose at 9 months, second dose at 15-18 months (or before school entry)"
+        },
+        {
+          "disease": "Polio",
+          "schedule": "Birth (OPV0), 6 weeks (OPV1 + Pentavalent 1 + PCV 1 + IPV), 10 weeks (OPV2 + Pentavalent 2 + PCV 2 + RV 2), 14 weeks (OPV3 + Pentavalent 3 + PCV 3 + IPV + RV 3), 9 months (Measles R1 + Yellow fever), 18 months (Measles R2 + DPT booster)"
+        },
+        {
+          "disease": "Yellow Fever",
+          "schedule": "Single dose at 9 months (endemic countries), provides lifelong immunity"
+        },
+        {
+          "disease": "Meningococcal A",
+          "schedule": "Single dose 1-29 years in meningitis belt countries during campaigns"
+        }
+      ],
+      "supplementation": [
+        "Vitamin A every 4-6 months for children 6-59 months",
+        "Iron and folic acid supplementation for pregnant women and children as per national policy"
+      ]
     }
-  }
+  ]
 }

@@ -1,0 +1,297 @@
+// public/data/ddx-cards.json
+// Differential Diagnosis Cards - Phase 3 Dataset
+// Common chief complaints with differential diagnoses
+
+{
+  "version": "2026.1",
+  "description": "Differential diagnosis cards for common chief complaints - Phase 3 RAG",
+  "cards": [
+    {
+      "chiefComplaint": "Chest pain",
+      "differentials": [
+        {
+          "condition": "Acute Coronary Syndrome (MI)",
+          "keyFeatures": ["Crushing substernal pain", "Radiation to arm/jaw", "Diaphoresis", "Nausea"],
+          "redFlags": ["SBP <90", "HR >120 or <50", "O2 sat <90%", "Altered mental status"],
+          "urgency": "IMMEDIATE - Emergency"
+        },
+        {
+          "condition": "Pulmonary Embolism",
+          "keyFeatures": ["Pleuritic chest pain", "Dyspnea", "Tachycardia", "Risk factors: immobility, recent surgery"],
+          "redFlags": ["Hypotension", "Hypoxia", "Syncope", "Signs of DVT"],
+          "urgency": "URGENT"
+        },
+        {
+          "condition": "Pneumonia/Pleurisy",
+          "keyFeatures": ["Pleuritic pain", "Fever", "Cough", "Localized chest wall tenderness"],
+          "redFlags": ["Hypoxia", "High fever", "Altered mental status"],
+          "urgency": "URGENT"
+        },
+        {
+          "condition": "Pericarditis",
+          "keyFeatures": ["Sharp pleuritic pain", "Worse with inspiration", "Relieved by sitting forward", "Pericardial friction rub"],
+          "redFlags": ["Pulsus paradoxus", "Hypotension", "Dyspnea"],
+          "urgency": "URGENT"
+        },
+        {
+          "condition": "GERD/Esophageal Spasm",
+          "keyFeatures": ["Burning retrosternal pain", "Relation to meals", "Relief with antacids", "No exertional component"],
+          "redFlags": [],
+          "urgency": "ROUTINE"
+        },
+        {
+          "condition": "Costochondritis/Musculoskeletal",
+          "keyFeatures": ["Sharp localized pain", "Reproducible with palpation", "No systemic symptoms"],
+          "redFlags": [],
+          "urgency": "ROUTINE"
+        }
+      ]
+    },
+    {
+      "chiefComplaint": "Shortness of breath",
+      "differentials": [
+        {
+          "condition": "Acute Asthma/COPD exacerbation",
+          "keyFeatures": ["Wheezing", "Prolonged expiration", "Accessory muscle use", "History of lung disease"],
+          "redFlags": ["Silent chest", "Altered mental status", "Hypoxia", "Fatigue"],
+          "urgency": "URGENT"
+        },
+        {
+          "condition": "Pneumonia",
+          "keyFeatures": ["Fever", "Productive cough", "Crackles on exam", "Consolidation on imaging"],
+          "redFlags": ["Hypoxia", "Sepsis signs", "Altered mental status"],
+          "urgency": "URGENT"
+        },
+        {
+          "condition": "Acute Heart Failure",
+          "keyFeatures": ["Orthopnea", "Paroxysmal nocturnal dyspnea", "Bilateral crackles", "Peripheral edema", "Elevated JVP"],
+          "redFlags": ["Hypoxia", "Hypotension", "Altered mental status"],
+          "urgency": "URGENT"
+        },
+        {
+          "condition": "Pulmonary Embolism",
+          "keyFeatures": ["Sudden onset", "Pleuritic pain", "Tachycardia", "Risk factors present"],
+          "redFlags": ["Hypotension", "Hypoxia", "Syncope"],
+          "urgency": "IMMEDIATE"
+        },
+        {
+          "condition": "Anemia",
+          "keyFeatures": ["Progressive dyspnea", "Fatigue", "Pallor", "Tachycardia"],
+          "redFlags": ["Chest pain", "Syncope", "Hemodynamic instability"],
+          "urgency": "ROUTINE"
+        },
+        {
+          "condition": "Anxiety/Panic Attack",
+          "keyFeatures": ["Hyperventilation", "Tingling", "Palpitations", "Anxiety symptoms"],
+          "redFlags": [],
+          "urgency": "ROUTINE"
+        }
+      ]
+    },
+    {
+      "chiefComplaint": "Abdominal pain",
+      "differentials": [
+        {
+          "condition": "Acute Appendicitis",
+          "keyFeatures": ["Periumbilical pain migrating to RLQ", "Nausea/vomiting", "Anorexia", "McBurney point tenderness"],
+          "redFlags": ["Rigidity", "Guarding", "Fever >38.5", "Leukocytosis"],
+          "urgency": "URGENT - Surgical emergency"
+        },
+        {
+          "condition": "Cholecystitis/Biliary colic",
+          "keyFeatures": ["RUQ pain", "Radiation to right scapula", "Postprandial", "Murphy sign positive"],
+          "redFlags": ["Fever", "Jaundice", "Signs of sepsis"],
+          "urgency": "URGENT"
+        },
+        {
+          "condition": "Pancreatitis",
+          "keyFeatures": ["Epigastric pain radiating to back", "Nausea/vomiting", "History of alcohol/gallstones", "Elevated lipase"],
+          "redFlags": ["Hypotension", "Hypoxia", "Oliguria", "Signs of severe pancreatitis"],
+          "urgency": "URGENT"
+        },
+        {
+          "condition": "Peptic Ulcer Disease/Gastritis",
+          "keyFeatures": ["Epigastric burning pain", "Relation to meals", "Relief with food/antacids"],
+          "redFlags": ["Hematemesis", "Melena", "Signs of perforation"],
+          "urgency": "ROUTINE"
+        },
+        {
+          "condition": "Gastroenteritis",
+          "keyFeatures": ["Nausea/vomiting", "Diarrhea", "Crampy abdominal pain", "Fever"],
+          "redFlags": ["Signs of dehydration", "Bloody diarrhea", "Severe pain"],
+          "urgency": "ROUTINE"
+        },
+        {
+          "condition": "Kidney Stones",
+          "keyFeatures": ["Flank pain radiating to groin", "Colicky pain", "Hematuria", "Nausea/vomiting"],
+          "redFlags": ["Signs of obstruction with infection", "Anuria"],
+          "urgency": "URGENT"
+        }
+      ]
+    },
+    {
+      "chiefComplaint": "Headache",
+      "differentials": [
+        {
+          "condition": "Migraine",
+          "keyFeatures": ["Unilateral throbbing pain", "Photophobia/phonophobia", "Nausea/vomiting", "Aura possible", "Duration 4-72 hours"],
+          "redFlags": [],
+          "urgency": "ROUTINE"
+        },
+        {
+          "condition": "Tension-Type Headache",
+          "keyFeatures": ["Bilateral pressure/tightening", "Mild-moderate intensity", "No nausea/vomiting", "No aggravation with routine activity"],
+          "redFlags": [],
+          "urgency": "ROUTINE"
+        },
+        {
+          "condition": "Subarachnoid Hemorrhage",
+          "keyFeatures": ["Thunderclap headache", "Worst headache of life", "Neck stiffness", "Nausea/vomiting", "Possible LOC"],
+          "redFlags": ["Focal neurologic deficits", "Altered mental status", "Neck stiffness", "Seizure"],
+          "urgency": "IMMEDIATE - Emergency"
+        },
+        {
+          "condition": "Meningitis/Encephalitis",
+          "keyFeatures": ["Fever", "Neck stiffness", "Altered mental status", "Headache", "Photophobia"],
+          "redFlags": ["Fever with headache", "Neck stiffness", "Altered mental status", "Rash (meningococcemia)"],
+          "urgency": "IMMEDIATE - Emergency"
+        },
+        {
+          "condition": "Idiopathic Intracranial Hypertension",
+          "keyFeatures": ["Daily headache", "Worse in morning", "Transient visual obscurations", "Papilledema"],
+          "redFlags": ["Visual changes", "Papilledema"],
+          "urgency": "URGENT"
+        },
+        {
+          "condition": "Medication Overuse Headache",
+          "keyFeatures": ["Chronic daily headache", "History of frequent analgesic use", "Worse in morning"],
+          "redFlags": [],
+          "urgency": "ROUTINE"
+        }
+      ]
+    },
+    {
+      "chiefComplaint": "Fever",
+      "differentials": [
+        {
+          "condition": "Viral Upper Respiratory Infection",
+          "keyFeatures": ["Rhinorrhea", "Sore throat", "Cough", "Mild fever", "Myalgias"],
+          "redFlags": ["Difficulty breathing", "Altered mental status", "Signs of sepsis"],
+          "urgency": "ROUTINE"
+        },
+        {
+          "condition": "Community-Acquired Pneumonia",
+          "keyFeatures": ["Fever", "Cough", "Dyspnea", "Pleuritic chest pain", "Crackles on exam"],
+          "redFlags": ["Hypoxia", "Tachypnea", "Hypotension", "Altered mental status"],
+          "urgency": "URGENT"
+        },
+        {
+          "condition": "Urinary Tract Infection/Pyelonephritis",
+          "keyFeatures": ["Dysuria", "Frequency", "Flank pain (pyelonephritis)", "Fever", "CVA tenderness"],
+          "redFlags": ["Hypotension", "Signs of sepsis", "Altered mental status (elderly)"],
+          "urgency": "URGENT"
+        },
+        {
+          "condition": "Malaria (in endemic areas)",
+          "keyFeatures": ["Cyclical fevers", "Chills/sweats", "Headache", "Myalgias", "Splenomegaly possible"],
+          "redFlags": ["Altered consciousness", "Severe anemia", "Hypoglycemia", "Signs of severe malaria"],
+          "urgency": "URGENT"
+        },
+        {
+          "condition": "Typhoid Fever",
+          "keyFeatures": ["Prolonged fever", "Headache", "Abdominal pain", "Constipation or diarrhea", "Rose spots", "Relative bradycardia"],
+          "redFlags": ["Altered mental status", "GI bleeding", "Perforation"],
+          "urgency": "URGENT"
+        },
+        {
+          "condition": "Meningitis",
+          "keyFeatures": ["Fever", "Headache", "Neck stiffness", "Altered mental status", "Photophobia"],
+          "redFlags": ["Altered mental status", "Seizures", "Signs of sepsis", "Petechial/purpuric rash"],
+          "urgency": "IMMEDIATE"
+        }
+      ]
+    },
+    {
+      "chiefComplaint": "Weakness/Fatigue",
+      "differentials": [
+        {
+          "condition": "Anemia",
+          "keyFeatures": ["Fatigue", "Pallor", "Dyspnea on exertion", "Dizziness"],
+          "redFlags": ["Chest pain", "Syncope", "Tachycardia out of proportion"],
+          "urgency": "ROUTINE"
+        },
+        {
+          "condition": "Depression/Anxiety",
+          "keyFeatures": ["Fatigue", "Low mood", "Anhedonia", "Sleep changes", "Appetite changes"],
+          "redFlags": ["Suicidal ideation", "Psychosis"],
+          "urgency": "ROUTINE"
+        },
+        {
+          "condition": "Hypothyroidism",
+          "keyFeatures": ["Fatigue", "Weight gain", "Cold intolerance", "Constipation", "Dry skin", "Bradycardia"],
+          "redFlags": ["Myxedema coma signs (hypothermia, AMS)"],
+          "urgency": "ROUTINE"
+        },
+        {
+          "condition": "Diabetes Mellitus",
+          "keyFeatures": ["Polyuria", "Polydipsia", "Weight loss", "Fatigue", "Blurred vision"],
+          "redFlags": ["Altered mental status (DKA/HHS)", "Dehydration", "Kussmaul respirations"],
+          "urgency": "ROUTINE"
+        },
+        {
+          "condition": "Chronic Fatigue Syndrome",
+          "keyFeatures": ["Persistent fatigue >6 months", "Post-exertional malaise", "Unrefreshing sleep", "Cognitive difficulties"],
+          "redFlags": [],
+          "urgency": "ROUTINE"
+        },
+        {
+          "condition": "Cardiac (Heart Failure)",
+          "keyFeatures": ["Fatigue", "Dyspnea", "Orthopnea", "Peripheral edema", "Elevated JVP"],
+          "redFlags": ["Acute decompensation", "Hypoxia", "Hypotension"],
+          "urgency": "URGENT"
+        }
+      ]
+    },
+    {
+      "chiefComplaint": "Back pain",
+      "differentials": [
+        {
+          "condition": "Musculoskeletal strain",
+          "keyFeatures": ["Localized pain", "Worse with movement", "Relieved by rest", "Tenderness on exam"],
+          "redFlags": [],
+          "urgency": "ROUTINE"
+        },
+        {
+          "condition": "Herniated Disc/Radiculopathy",
+          "keyFeatures": ["Radicular pain", "Numbness/weakness in distribution", "Positive straight leg raise", "Reflex changes"],
+          "redFlags": ["Progressive weakness", "Bowel/bladder dysfunction"],
+          "urgency": "ROUTINE"
+        },
+        {
+          "condition": "Kidney Stones",
+          "keyFeatures": ["Flank pain", "Radiation to groin", "Colicky pain", "Hematuria"],
+          "redFlags": ["Signs of obstruction with infection", "Anuria"],
+          "urgency": "URGENT"
+        },
+        {
+          "condition": "Spinal Infection (Osteomyelitis/Discitis)",
+          "keyFeatures": ["Constant pain", "Fever", "Night pain", "Tenderness over spinous process"],
+          "redFlags": ["Fever", "Immunocompromised", "IV drug use", "Recent UTI/skin infection"],
+          "urgency": "URGENT"
+        },
+        {
+          "condition": "Abdominal Aortic Aneurysm (AAA)",
+          "keyFeatures": ["Abdominal/back pain", "Pulsatile abdominal mass", "Hypotension"],
+          "redFlags": ["Hypotension", "Pulsatile mass", "Syncope"],
+          "urgency": "IMMEDIATE - Emergency"
+        },
+        {
+          "condition": "Metastatic Cancer",
+          "keyFeatures": ["Constant pain", "Worse at night", "Weight loss", "History of cancer"],
+          "redFlags": ["History of cancer", "Unexplained weight loss", "Neurologic deficits"],
+          "urgency": "URGENT"
+        }
+      ]
+    }
+  ]
+}

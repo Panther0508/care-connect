@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '../services/translation/useTranslation';
+import SquadPaymentModal from '../components/SquadPaymentModal';
 
 export default function Subscription() {
   const { t } = useTranslation();
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   return (
     <motion.div
@@ -19,7 +22,7 @@ export default function Subscription() {
       <div className="bg-slate-800/40 p-6 rounded-xl border border-slate-700/50 text-center">
         <h3 className="text-lg font-semibold mb-2">Current Plan: Free</h3>
         <p className="text-slate-300 mb-4">You are on the Free plan. Upgrade to Premium for unlimited features.</p>
-        <button className="px-8 py-3 bg-teal-600 hover:bg-teal-500 rounded-lg font-semibold transition-colors">
+        <button onClick={() => setShowPaymentModal(true)} className="px-8 py-3 bg-teal-600 hover:bg-teal-500 rounded-lg font-semibold transition-colors">
           Upgrade to Premium
         </button>
       </div>
@@ -46,6 +49,8 @@ export default function Subscription() {
           </ul>
         </div>
       </div>
+
+      <SquadPaymentModal open={showPaymentModal} onClose={() => setShowPaymentModal(false)} />
     </motion.div>
   );
 }

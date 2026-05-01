@@ -18,6 +18,7 @@ const PatientDashboard = lazy(() => import("./pages/dashboards/PatientDashboard"
 const ClinicianDashboard = lazy(() => import("./pages/dashboards/ClinicianDashboard"));
 const CHWDashboard = lazy(() => import("./pages/dashboards/CHWDashboard"));
 const AdminDashboard = lazy(() => import("./pages/dashboards/AdminDashboard"));
+const ClinicianProfile = lazy(() => import("./pages/ClinicianProfile"));
 const HealthGraph = lazy(() => import("./pages/HealthGraph"));
 const AIAssistant = lazy(() => import("./pages/AIAssistant"));
 const Passport = lazy(() => import("./pages/Passport"));
@@ -48,7 +49,13 @@ const Sleep = lazy(() => import("./pages/Sleep"));
 const Medications = lazy(() => import("./pages/Medications"));
 const Calculators = lazy(() => import("./pages/Calculators"));
 const MentalHealth = lazy(() => import("./pages/MentalHealth"));
+const EducationPage = lazy(() => import("./pages/EducationPage"));
+const EducationModule = lazy(() => import("./components/EducationModule"));
 const FirstAid = lazy(() => import("./pages/FirstAid"));
+// Community pages
+const CommunityPage = lazy(() => import("./pages/CommunityPage"));
+const TopicFeed = lazy(() => import("./pages/TopicFeed"));
+const PostDetail = lazy(() => import("./pages/PostDetail"));
 
 // Page wrapper with animation
 const PageWrapper = ({ children }) => (
@@ -120,14 +127,23 @@ const App = () => {
               </RequireAuth>
             } />
 
-            {/* Dashboard — requires auth + role */}
-            <Route path="/dashboard" element={
-              <AuthSyncGate>
-                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
-                  <RoleBasedDashboard />
-                </ProtectedRoute>
-              </AuthSyncGate>
-            } />
+             {/* Dashboard — requires auth + role */}
+             <Route path="/dashboard" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                   <RoleBasedDashboard />
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
+
+             {/* Clinician Professional Profile */}
+             <Route path="/clinician/profile" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['clinician']}>
+                   <PageWrapper><ClinicianProfile /></PageWrapper>
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
 
             {/* Protected pages — all require role */}
             <Route path="/health" element={
@@ -202,14 +218,63 @@ const App = () => {
                  </ProtectedRoute>
                </AuthSyncGate>
              } />
-             <Route path="/mental-health" element={
-               <AuthSyncGate>
-                 <ProtectedRoute allowedRoles={['patient']}>
-                   <PageWrapper><MentalHealth /></PageWrapper>
-                 </ProtectedRoute>
-               </AuthSyncGate>
-             } />
-             <Route path="/first-aid" element={
+              <Route path="/mental-health" element={
+                <AuthSyncGate>
+                  <ProtectedRoute allowedRoles={['patient']}>
+                    <PageWrapper><MentalHealth /></PageWrapper>
+                  </ProtectedRoute>
+                </AuthSyncGate>
+              } />
+              
+              {/* Education routes */}
+              <Route path="/education" element={
+                <AuthSyncGate>
+                  <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                    <PageWrapper><EducationPage /></PageWrapper>
+                  </ProtectedRoute>
+                </AuthSyncGate>
+              } />
+              <Route path="/education/:moduleId" element={
+                <AuthSyncGate>
+                  <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                    <PageWrapper><EducationModule /></PageWrapper>
+                  </ProtectedRoute>
+                </AuthSyncGate>
+              } />
+              
+               {/* Care Locator route */}
+               <Route path="/care-locator" element={
+                 <AuthSyncGate>
+                   <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                     <PageWrapper><CareLocator /></PageWrapper>
+                   </ProtectedRoute>
+                 </AuthSyncGate>
+               } />
+
+               {/* Community Health routes - patient only */}
+               <Route path="/community" element={
+                 <AuthSyncGate>
+                   <ProtectedRoute allowedRoles={['patient']}>
+                     <PageWrapper><CommunityPage /></PageWrapper>
+                   </ProtectedRoute>
+                 </AuthSyncGate>
+               } />
+               <Route path="/topic/:topicId" element={
+                 <AuthSyncGate>
+                   <ProtectedRoute allowedRoles={['patient']}>
+                     <PageWrapper><TopicFeed /></PageWrapper>
+                   </ProtectedRoute>
+                 </AuthSyncGate>
+               } />
+               <Route path="/post/:postId" element={
+                 <AuthSyncGate>
+                   <ProtectedRoute allowedRoles={['patient']}>
+                     <PageWrapper><PostDetail /></PageWrapper>
+                   </ProtectedRoute>
+                 </AuthSyncGate>
+               } />
+
+               <Route path="/first-aid" element={
                <AuthSyncGate>
                  <ProtectedRoute allowedRoles={['patient']}>
                    <PageWrapper><FirstAid /></PageWrapper>

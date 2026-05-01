@@ -1,0 +1,220 @@
+// public/data/tccc-protocols.json
+// Tactical Combat Casualty Care Protocols - Phase 3 Dataset
+// Military/law enforcement trauma protocols adapted for civilian first responders
+
+{
+  "version": "2026.1",
+  "source": "Committee on Tactical Combat Casualty Care (CoTCCC)",
+  "description": "TCCC protocols for trauma management in high-threat environments",
+  "protocols": [
+    {
+      "id": "care_under_fire",
+      "phase": "Care Under Fire",
+      "threat": "Active hostile fire",
+      "principles": [
+        "Return fire as directed",
+        "Take cover",
+        "Casualty care is limited"
+      ],
+      "actions": [
+        "Move casualty to cover if possible",
+        "Apply tourniquet for life-threatening hemorrhage (massive extremity bleeding)",
+        "Immediate tourniquet application only",
+        "Move to Tactical Field Care when safe"
+      ],
+      "equipment": ["Tourniquet"],
+      "contraindications": ["Non-life-threatening injuries", "Airway management under fire", "Needle decompression under fire"]
+    },
+    {
+      "id": "tactical_field_care",
+      "phase": "Tactical Field Care",
+      "threat": "No active hostile fire or reduced threat",
+      "location": "In or near incident site",
+      "assessment": "MARCH algorithm",
+      "interventions": {
+        "massive_hemorrhage": {
+          "step": "M - Massive Hemorrhage",
+          "actions": [
+            "Apply tourniquet 2-3 inches above bleeding site (not over joints)",
+            "Tighten until bleeding stops",
+            "Mark with 'T' and time",
+            "If junctional (groin/axilla/neck): use hemostatic gauze with pressure"
+          ],
+          "hemostatic_agents": ["QuikClot", "Celox", "ChitoSam"]
+        },
+        "airway": {
+          "step": "A - Airway",
+          "actions": [
+            "Open airway with jaw thrust",
+            "Clear visible obstructions",
+            "Advanced airway only if trained and equipment available",
+            "Consider nasopharyngeal airway (9.0-9.5 French for adults, 6.0 for children)",
+            "Do NOT attempt surgical cricothyrotomy unless trained"
+          ],
+          "contraindications": ["Suspected skull base fracture - use oropharyngeal only"]
+        },
+        "respiration": {
+          "step": "R - Respiration",
+          "actions": [
+            "Needle decompression for tension pneumothorax (2nd intercostal, midclavicular line)",
+            "Seal open/sucking chest wounds with vented chest seal",
+            "Consider chest tube if trained and equipment available",
+            "Monitor for respiratory distress"
+          ],
+          "needle_decompression_size": "14-16 gauge, 3.25 inch catheter preferred"
+        },
+        "circulation": {
+          "step": "C - Circulation",
+          "actions": [
+            "Establish IV/IO access if hypovolemic shock present",
+            "Fluid resuscitation: Hypotensive resuscitation (SBP ~90mmHg)",
+            "Preferred: 1-2L Normal Saline or Lactated Ringer's wide open",
+            "Avoid over-resuscitation (can dislodge clots)",
+            "Consider whole blood if available (preferred)"
+          ],
+          "hypotensive_resuscitation": "Permissive hypotension until surgical control"
+        },
+        "disability": {
+          "step": "D - Disability/Neurological Status",
+          "assessments": [
+            "AVPU scale (Alert, Voice, Pain, Unresponsive)",
+            "Pupil response",
+            "Glasgow Coma Scale",
+            "Check for hypoglycemia"
+          ],
+          "interventions": [
+            "Treat hypoglycemia if present (oral glucose or IV D50)",
+            "Consider HTX if seizures present"
+          ]
+        },
+        "exposure": {
+          "step": "E - Exposure/Environment",
+          "actions": [
+            "Fully expose casualty (cut clothes)",
+            "Prevent hypothermia",
+            "Use warm blankets/heating devices",
+            "Minimize time on cold ground"
+          ],
+          "lethal_triads": ["Hypothermia", "Acidosis", "Coagulopathy"]
+        }
+      },
+      "medications": {
+        "tranexamic_acid": {
+          "indication": "Hemorrhagic shock or at risk",
+          "dose": "1g IV/IO over 10 minutes, then 1g over 8 hours",
+          "contraindications": ["History of thromboembolism", "DIC"]
+        },
+        "analgesia": {
+          "options": ["Fentanyl 50mcg IV/IO/IM", "Ketamine 20mg IV/IO/IM", "Morphine if available"],
+          "avoid": ["NSAIDs in hemorrhagic shock"]
+        },
+        "antibiotics": {
+          "indication": "Open fractures, penetrating trauma",
+          "choice": "Cefazolin 2g IV or Ceftriaxone 1g IV"
+        }
+      }
+    },
+    {
+      "id": "tactical_evacuation_care",
+      "phase": "Tactical Evacuation Care (TACEVAC)",
+      "setting": "During evacuation to higher echelon care",
+      "monitoring": [
+        "Continuous EtCO2 if intubated",
+        "Serial vital signs every 5 minutes",
+        "Repeat primary/secondary survey"
+      ],
+      "interventions": [
+        "Blood product transfusion if available (preferred 1:1:1 ratio)",
+        "Continue vasopressor if needed (norepinephrine preferred)",
+        "Correct coagulopathy (FFP, platelets, cryoprecipitate)",
+        "Maintain permissive hypotension (SBP 80-90mmHg) until surgical control",
+        "Consider REBOA if available and trained"
+      ],
+      "surgical_options": ["Damage control surgery", "Damage control resuscitation"],
+      "transfer_criteria": "Transfer to trauma center with surgical capabilities"
+    },
+    {
+      "id": "mass_casualty",
+      "scenario": "Mass Casualty Incident",
+      "principles": [
+        "Do the greatest good for the greatest number",
+        "Minimal care to save most lives",
+        "Triage and prioritize"
+      ],
+      "triage_categories": {
+        "immediate": {
+          "color": "Red",
+          "priority": "1 (highest)",
+          "criteria": "Life-threatening injuries, salvageable with immediate care",
+          "interventions": "Airway control, tourniquet, needle decompression, rapid transport"
+        },
+        "delayed": {
+          "color": "Yellow",
+          "priority": "2",
+          "criteria": "Serious injuries, can wait for care",
+          "interventions": "Standard trauma care when resources available"
+        },
+        "minimal": {
+          "color": "Green",
+          "priority": "3",
+          "criteria": "Minor injuries, walking wounded",
+          "interventions": "Self-care or delayed care"
+        },
+        "expectant": {
+          "color": "Black/White",
+          "priority": "4 (lowest)",
+          "criteria": "Deceased or mortally injured, not salvageable",
+          "interventions": "Comfort care only, may be used as last resort for resources"
+        }
+      },
+      "triage_algorithm": "SALT Triage - Sort, Assess, Lifesaving interventions, Treatment/transport"
+    }
+  ],
+  "equipment_list": {
+    "individual_first_aid_kit": {
+      "items": [
+        "Tourniquet (CAT or SOFTT-W)",
+        "Hemostatic dressing (12x12 cm)",
+        "Pressure dressing",
+        "Nasopharyngeal airway (multiple sizes)",
+        "Needle decompression kit (14g x 3.25")",
+        "Chest seal (vented)",
+        "Trauma shears",
+        "Tape",
+        "Nitrile gloves"
+      ]
+    },
+    "enhanced_first_aid_kit": {
+      "items": [
+        "All IFAK items",
+        "IV starter kit",
+        "Crystalloid fluids (500ml-1L)",
+        "Intraosseous access kit",
+        "ET tube (various sizes)",
+        "Laryngoscope",
+        "BVM with PEEP valve",
+        "Pulse oximeter",
+        "Capnography",
+        "Cardiac monitor"
+      ]
+    }
+  },
+  "special_considerations": {
+    "pediatric": {
+      "tourniquet": "Use pediatric-specific tourniquets when available",
+      "airway": "Smaller equipment, higher risk of obstruction",
+      "fluids": "Weight-based calculations (20ml/kg bolus)",
+      "medications": "Weight-based dosing"
+    },
+    "pregnant": {
+      "positioning": "Left lateral tilt if >20 weeks gestation",
+      "airway": "High risk of rapid desaturation",
+      "fetus": "Monitor fetal wellbeing after 24 weeks"
+    },
+    "geriatric": {
+      "medications": "Reduced dosing, monitor for side effects",
+      "comorbidities": "Consider baseline health status",
+      "anticoagulants": "Higher bleeding risk"
+    }
+  }
+}

@@ -13,15 +13,14 @@ export default function QRScanner({ onCredentialScanned, onBack }) {
   const [result, setResult] = useState(null);
   const scannerRef = useRef(null);
 
-  useEffect(() => {
-    return () => {
-      // Cleanup on unmount
-      if (scannerRef.current) {
-        const html5Qr = new Html5Qrcode(SCANNER_ID);
-        html5Qr.stop().catch(() => {});
-      }
-    };
-  }, []);
+   useEffect(() => {
+     return () => {
+       // Cleanup on unmount: stop scanner if running
+       if (scannerRef.current) {
+         scannerRef.current.stop().catch(() => {});
+       }
+     };
+   }, []);
 
   const startScan = async () => {
     setError(null);

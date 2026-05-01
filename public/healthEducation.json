@@ -1,0 +1,189 @@
+{
+  "modules": [
+    {
+      "id": "nutrition-basics",
+      "title": "Nutrition Fundamentals",
+      "description": "Learn the basics of healthy eating and balanced nutrition",
+      "icon": "Heart",
+      "color": "bg-green-500/20",
+      "difficulty": "Beginner",
+      "duration": "15 min",
+      "lessons": [
+        {
+          "id": "macronutrients",
+          "title": "Understanding Macronutrients",
+          "content": "Macronutrients are the nutrients that provide calories or energy. They include carbohydrates, proteins, and fats. Each plays a vital role in maintaining health and supporting bodily functions.",
+          "type": "text",
+          "quiz": [
+            {
+              "question": "Which macronutrient provides the most energy per gram?",
+              "options": ["Carbohydrates", "Proteins", "Fats", "Vitamins"],
+              "correctAnswer": 2
+            }
+          ]
+        },
+        {
+          "id": "micronutrients",
+          "title": "Essential Vitamins and Minerals",
+          "content": "Micronutrients are vitamins and minerals that your body needs in small amounts to function properly. They support immune function, bone health, and many other vital processes.",
+          "type": "text",
+          "quiz": [
+            {
+              "question": "Which vitamin is known as the 'sunshine vitamin'?",
+              "options": ["Vitamin A", "Vitamin B12", "Vitamin C", "Vitamin D"],
+              "correctAnswer": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "exercise-guide",
+      "title": "Exercise and Physical Activity",
+      "description": "Discover how to incorporate safe, effective exercise into your routine",
+      "icon": "Activity",
+      "color": "bg-blue-500/20",
+      "difficulty": "Beginner",
+      "duration": "20 min",
+      "lessons": [
+        {
+          "id": "cardio-basics",
+          "title": "Cardiovascular Exercise",
+          "content": "Cardiovascular exercise, also known as cardio or aerobic exercise, is essential for heart health. It helps strengthen your heart and lungs, improves circulation, and can help manage weight.",
+          "type": "text",
+          "quiz": [
+            {
+              "question": "What is the recommended minimum amount of cardio exercise per week?",
+              "options": ["60 minutes", "90 minutes", "150 minutes", "300 minutes"],
+              "correctAnswer": 2
+            }
+          ]
+        },
+        {
+          "id": "strength-training",
+          "title": "Strength Training Basics",
+          "content": "Strength training helps build and maintain muscle mass, which is important for metabolism, bone density, and overall functional strength. It can be done with weights, resistance bands, or bodyweight exercises.",
+          "type": "text",
+          "quiz": [
+            {
+              "question": "How often should you strength train major muscle groups?",
+              "options": ["Once a week", "Twice a week", "Every day", "Only when sore"],
+              "correctAnswer": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mental-wellness",
+      "title": "Mental Health and Wellbeing",
+      "description": "Explore strategies for managing stress and promoting mental wellness",
+      "icon": "Sparkles",
+      "color": "bg-purple-500/20",
+      "difficulty": "Beginner",
+      "duration": "18 min",
+      "lessons": [
+        {
+          "id": "stress-management",
+          "title": "Understanding Stress",
+          "content": "Stress is a natural response to challenges or demands. While some stress can be motivating, chronic stress can negatively impact both physical and mental health. Learning to manage stress is key to overall wellbeing.",
+          "type": "text",
+          "quiz": [
+            {
+              "question": "Which of these is a healthy way to manage stress?",
+              "options": ["Isolating yourself", "Excessive caffeine", "Deep breathing exercises", "Ignoring problems"],
+              "correctAnswer": 2
+            }
+          ]
+        },
+        {
+          "id": "mindfulness",
+          "title": "Introduction to Mindfulness",
+          "content": "Mindfulness is the practice of being present and fully engaged in the current moment. It can help reduce anxiety, improve focus, and enhance emotional regulation.",
+          "type": "text",
+          "quiz": [
+            {
+              "question": "What is a key component of mindfulness practice?",
+              "options": ["Judging your thoughts", "Focusing on the past", "Paying attention to the present", "Multitasking"],
+              "correctAnswer": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chronic-condition-management",
+      "title": "Managing Chronic Conditions",
+      "description": "Learn strategies for living well with diabetes, hypertension, and other chronic conditions",
+      "icon": "Shield",
+      "color": "bg-orange-500/20",
+      "difficulty": "Intermediate",
+      "duration": "25 min",
+      "lessons": [
+        {
+          "id": "diabetes-basics",
+          "title": "Understanding Diabetes",
+          "content": "Diabetes is a chronic condition that affects how your body processes blood sugar (glucose). There are two main types: Type 1, where the body doesn't produce insulin, and Type 2, where the body doesn't use insulin effectively.",
+          "type": "text",
+          "quiz": [
+            {
+              "question": "What is the primary hormone that regulates blood sugar?",
+              "options": ["Adrenaline", "Insulin", "Cortisol", "Thyroxine"],
+              "correctAnswer": 1
+            }
+          ]
+        },
+        {
+          "id": "blood-pressure",
+          "title": "Understanding Blood Pressure",
+          "content": "Blood pressure is the force of blood pushing against the walls of your arteries. High blood pressure (hypertension) can damage your blood vessels and lead to serious health problems like heart disease and stroke.",
+          "type": "text",
+          "quiz": [
+            {
+              "question": "What is considered a normal blood pressure reading?",
+              "options": ["90/60 mmHg", "120/80 mmHg", "140/90 mmHg", "160/100 mmHg"],
+              "correctAnswer": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "healthy-habits",
+      "title": "Building Healthy Habits",
+      "description": "Discover how to create lasting lifestyle changes for better health",
+      "icon": "CheckCircle",
+      "color": "bg-teal-500/20",
+      "difficulty": "Beginner",
+      "duration": "12 min",
+      "lessons": [
+        {
+          "id": "sleep-hygiene",
+          "title": "The Importance of Sleep",
+          "content": "Quality sleep is essential for physical health, mental clarity, and emotional wellbeing. During sleep, your body repairs tissues, consolidates memories, and regulates hormones.",
+          "type": "text",
+          "quiz": [
+            {
+              "question": "How many hours of sleep do most adults need per night?",
+              "options": ["4-5 hours", "6-7 hours", "7-9 hours", "10-12 hours"],
+              "correctAnswer": 2
+            }
+          ]
+        },
+        {
+          "id": "hydration",
+          "title": "Staying Hydrated",
+          "content": "Water is essential for nearly every bodily function, including temperature regulation, nutrient transport, and waste removal. Proper hydration supports energy levels, cognitive function, and physical performance.",
+          "type": "text",
+          "quiz": [
+            {
+              "question": "What percentage of the human body is made up of water?",
+              "options": ["30%", "50%", "60%", "80%"],
+              "correctAnswer": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

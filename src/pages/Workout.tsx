@@ -1,386 +1,451 @@
-import { useAuth } from "@clerk/clerk-react";
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { useMemo, useState, useEffect, useCallback } from "react";
-import {
-  Timer,
-  Play,
-  Pause,
-  X,
-  Check,
-  Dumbbell,
-  Target,
-  Clock,
-  ChevronLeft,
-  ChevronRight,
-  Calendar,
-  Award
-} from "lucide-react";
-import { getAllExercises, addWorkoutLog } from "../lib/idb";
-import type { Exercise } from "../lib/idb";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Dumbbell, Plus, Trash2, Edit2, Save, X, Play, CheckCircle, Target, Flame, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { getAllExercises, searchExercises, addWorkoutLog, getWorkoutLogsForUser, addExercise, storeExercises } from "../lib/idb";
+import { useStatus } from "../hooks/useStatus";
+import { format } from "date-fns";
 
-export default function WorkoutPage() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
-  const [exercisesList, setExercisesList] = useState<Exercise[]>([]);
-  const [search, setSearch] = useState("");
-  const [selectedExercises, setSelectedExercises] = useState<Exercise[]>([]);
-  const [workoutName, setWorkoutName] = useState("My Workout");
-  const [started, setStarted] = useState(false);
-  const [currentExerciseIdx, setCurrentExerciseIdx] = useState(0);
-  const [sets, setSets] = useState<Array<{ reps: number; weight: number; rpe?: number }>>([]);
-  const [timer, setTimer] = useState(0);
-  const [running, setRunning] = useState(false);
-  const [notes, setNotes] = useState("");
-  const [showCompleteModal, setShowCompleteModal] = useState(false);
+export default function Workout() {
+  const { showStatus, dismissStatus } = useStatus();
+  const [exercises, setExercises] = useState([]);
+  const [workoutLogs, setWorkoutLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedExercises, setSelectedExercises] = useState([]);
+  const [showingHistory, setShowingHistory] = useState(false);
+  const [expandedExercise, setExpandedExercise] = useState(null);
+  const [editingExercise, setEditingExercise] = useState(null);
+  const [isLogging, setIsLogging] = useState(false);
 
   useEffect(() => {
-    getAllExercises().then(setExercisesList);
+    loadExercises();
+    loadWorkoutHistory();
   }, []);
 
-  const filtered = useMemo(() => {
-    if (!search) return exercisesList;
-    const q = search.toLowerCase();
-    return exercisesList.filter(e => e.name.toLowerCase().includes(q) || e.category.toLowerCase().includes(q));
-  }, [exercisesList, search]);
-
-  const addExercise = (ex: Exercise) => {
-    setSelectedExercises(prev => [...prev, ex]);
+  const loadExercises = async () => {
+    try {
+      const ex = await getAllExercises();
+      setExercises(ex);
+    } catch (err) {
+      console.error('Failed to load exercises:', err);
+      showStatus('error', 'Failed to load exercises');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const removeExercise = (idx: number) => {
-    setSelectedExercises(prev => prev.filter((_, i) => i !== idx));
-    if (currentExerciseIdx >= idx) setCurrentExerciseIdx(prev => Math.max(prev - 1, 0));
+  const loadWorkoutHistory = async () => {
+    try {
+      const logs = await getWorkoutLogsForUser('current-user', 20);
+      setWorkoutLogs(logs);
+    } catch (err) {
+      console.error('Failed to load workout history:', err);
+    }
   };
 
-  const beginWorkout = () => {
-    if (selectedExercises.length === 0) return;
-    setStarted(true);
-    setCurrentExerciseIdx(0);
-    setSets([{ reps: 0, weight: 0 }]);
-    setTimer(0);
-    setRunning(false);
-    setNotes("");
+  const handleSearch = async (e) => {
+    const q = e.target.value;
+    setSearchQuery(q);
+    if (q.length > 2) {
+      try {
+        const results = await searchExercises(q);
+        setExercises(results);
+      } catch (err) {
+        console.error('Search failed:', err);
+      }
+    } else if (q.length === 0) {
+      loadExercises();
+    }
   };
 
-  const addSet = () => {
-    setSets(prev => [...prev, { reps: 0, weight: 0 }]);
-  };
-
-  const updateSet = (idx: number, field: "reps" | "weight" | "rpe", value: number) => {
-    setSets(prev => prev.map((s, i) => (i === idx ? { ...s, [field]: value } : s)));
-  };
-
-  const removeSet = (idx: number) => {
-    setSets(prev => prev.filter((_, i) => i !== idx));
-  };
-
-  const nextExercise = useCallback(() => {
-    if (currentExerciseIdx < selectedExercises.length - 1) {
-      setCurrentExerciseIdx(prev => prev + 1);
-      setSets([{ reps: 0, weight: 0 }]);
+  const toggleExercise = (exercise) => {
+    const exists = selectedExercises.find(e => e.id === exercise.id);
+    if (exists) {
+      setSelectedExercises(prev => prev.filter(e => e.id !== exercise.id));
     } else {
-      completeWorkout();
+      setSelectedExercises(prev => [...prev, {
+        ...exercise,
+        sets: [{ reps: 10, weight: 0 }],
+        notes: ''
+      }]);
     }
-  }, [currentExerciseIdx, selectedExercises.length]);
+  };
 
-  // Timer effect
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-    if (running) {
-      interval = setInterval(() => setTimer(t => t + 1), 1000);
+  const updateExerciseSets = (exerciseId, newSets) => {
+    setSelectedExercises(prev => prev.map(ex => 
+      ex.id === exerciseId ? { ...ex, sets: newSets } : ex
+    ));
+  };
+
+  const addSet = (exerciseId) => {
+    setSelectedExercises(prev => prev.map(ex => {
+      if (ex.id === exerciseId) {
+        return { ...ex, sets: [...ex.sets, { reps: 10, weight: 0 }] };
+      }
+      return ex;
+    }));
+  };
+
+  const removeSet = (exerciseId, setIndex) => {
+    setSelectedExercises(prev => prev.map(ex => {
+      if (ex.id === exerciseId) {
+        const newSets = ex.sets.filter((_, i) => i !== setIndex);
+        return { ...ex, sets: newSets };
+      }
+      return ex;
+    }));
+  };
+
+  const updateSet = (exerciseId, setIndex, field, value) => {
+    setSelectedExercises(prev => prev.map(ex => {
+      if (ex.id === exerciseId) {
+        const newSets = [...ex.sets];
+        newSets[setIndex] = { ...newSets[setIndex], [field]: value };
+        return { ...ex, sets: newSets };
+      }
+      return ex;
+    }));
+  };
+
+  const calculateTotalVolume = (sets) => {
+    return sets.reduce((total, set) => total + (set.weight * set.reps), 0);
+  };
+
+  const handleSaveWorkout = async () => {
+    if (selectedExercises.length === 0) {
+      showStatus('warning', 'Please select at least one exercise');
+      return;
     }
-    return () => clearInterval(interval!);
-  }, [running]);
 
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+    setIsLogging(true);
+    try {
+      const workout = {
+        userId: 'current-user',
+        date: new Date().toISOString().split('T')[0],
+        workoutName: 'Custom Workout',
+        totalDuration: 45,
+        totalVolume: selectedExercises.reduce((sum, ex) => sum + calculateTotalVolume(ex.sets), 0),
+        exercises: selectedExercises.map(ex => ({
+          name: ex.name,
+          sets: ex.sets
+        })),
+        notes: selectedExercises.map(ex => `${ex.name}: ${ex.sets.length} sets`).join(' | '),
+        timestamp: Date.now()
+      };
+
+      await addWorkoutLog(workout);
+      await loadWorkoutHistory();
+      setSelectedExercises([]);
+      showStatus('success', 'Workout saved successfully!');
+    } catch (err) {
+      console.error('Failed to save workout:', err);
+      showStatus('error', 'Failed to save workout');
+    } finally {
+      setIsLogging(false);
+    }
   };
 
-  const completeWorkout = async () => {
-    if (!user) return;
-    const log = {
-      userId: user.id,
-      date: new Date().toISOString().split("T")[0],
-      name: workoutName,
-      exercises: selectedExercises.map((ex, idx) => ({
-        exerciseId: ex.id,
-        exerciseName: ex.name,
-        sets: sets,
-      })),
-      duration: Math.floor(timer / 60),
-      notes,
-      timestamp: Date.now(),
-    };
-    await addWorkoutLog(log);
-    setShowCompleteModal(true);
+  const toggleHistory = () => {
+    setShowingHistory(!showingHistory);
   };
 
-  const handleFinishModal = () => {
-    setShowCompleteModal(false);
-    navigate("/workout-history");
+  const toggleExerciseDetails = (exId) => {
+    setExpandedExercise(expandedExercise === exId ? null : exId);
   };
-
-  if (!started) {
-    return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6 p-4 pb-24">
-        <div>
-          <h1 className="text-2xl font-bold text-white">Workout</h1>
-          <p className="text-slate-400 text-sm">Select exercises to build your routine</p>
-        </div>
-
-        <input
-          type="text"
-          value={workoutName}
-          onChange={e => setWorkoutName(e.target.value)}
-          className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100"
-          placeholder="Workout Name"
-        />
-
-        <div>
-          <input
-            type="text"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100"
-            placeholder="Search exercises..."
-          />
-          <div className="mt-2 max-h-60 overflow-y-auto space-y-1">
-            {filtered.map(ex => (
-              <button
-                key={ex.id}
-                onClick={() => addExercise(ex)}
-                disabled={selectedExercises.find(e => e.id === ex.id)}
-                className="w-full text-left px-3 py-2 bg-slate-800/40 hover:bg-slate-700/60 disabled:opacity-50 text-slate-200 rounded-lg text-sm"
-              >
-                <span className="font-medium">{ex.name}</span>
-                <span className="text-xs text-slate-500 block">{ex.category}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {selectedExercises.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="font-semibold text-white">Routine ({selectedExercises.length})</h3>
-            {selectedExercises.map((ex, idx) => (
-              <div key={idx} className="flex items-center justify-between bg-slate-800/40 p-3 rounded-xl">
-                <div>
-                  <div className="font-medium text-slate-200">{ex.name}</div>
-                  <div className="text-xs text-slate-400">{ex.category}</div>
-                </div>
-                <button onClick={() => removeExercise(idx)} className="text-red-400 text-sm px-2 py-1 rounded bg-red-500/10">Remove</button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <button
-          onClick={beginWorkout}
-          disabled={selectedExercises.length === 0}
-          className="w-full py-3 bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white rounded-xl font-semibold flex items-center justify-center gap-2"
-        >
-          <Dumbbell size={20} />
-          Start Workout
-        </button>
-      </motion.div>
-    );
-  }
-
-  const currentEx = selectedExercises[currentExerciseIdx];
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col h-full pt-2">
+    <div className="flex flex-col h-full min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4 px-1">
-        <div>
-          <h1 className="text-2xl font-bold text-white truncate max-w-[200px]">{workoutName}</h1>
-          <p className="text-slate-400 text-sm">
-            Exercise {currentExerciseIdx + 1} of {selectedExercises.length}
-          </p>
-        </div>
-        <div className="flex items-center gap-2 rounded-xl bg-slate-800/50 px-3 py-2">
-          <Timer size={16} className="text-teal-400" />
-          <span className="font-mono text-slate-200">{formatTime(timer)}</span>
-          <button onClick={() => setRunning(!running)} className="text-slate-400 hover:text-white">
-            {running ? <Pause size={16} /> : <Play size={16} />}
-          </button>
-        </div>
-      </div>
-
-      {/* Progress dots */}
-      <div className="flex justify-center gap-1 mb-4">
-        {selectedExercises.map((_, idx) => (
-          <div
-            key={idx}
-            className={`w-2 h-2 rounded-full transition-all ${idx === currentExerciseIdx ? "bg-teal-400 w-4" : "bg-slate-600"}`}
-          />
-        ))}
-      </div>
-
-      {/* Current Exercise Card */}
-      <div className="flex-1 bg-slate-800/40 rounded-2xl p-6 border border-slate-700/50 mb-4 overflow-y-auto">
-        <div className="mb-4">
-          <h2 className="text-xl font-bold text-white">{currentEx?.name}</h2>
-          <p className="text-slate-400 text-sm">{currentEx?.category}</p>
-        </div>
-
-        {currentEx?.instructions && (
-          <div className="mb-6">
-            <h3 className="text-sm font-semibold text-slate-300 mb-2 flex items-center gap-2">
-              <Target size={14} />
-              Instructions
-            </h3>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-slate-400">
-              {currentEx.instructions.map((inst, i) => (
-                <li key={i}>{inst}</li>
-              ))}
-            </ol>
+      <div className="sticky top-0 z-20 bg-slate-900/80 backdrop-blur-xl border-b border-white/5 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500/30 to-cyan-500/20 flex items-center justify-center">
+              <Dumbbell size={20} className="text-teal-400" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-slate-100">Workout Tracker</h1>
+              <p className="text-sm text-slate-400">Track your fitness progress</p>
+            </div>
           </div>
-        )}
-
-        {/* Sets */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-semibold text-slate-300 flex items-center gap-2">
-            <Dumbbell size={14} />
-            Sets
-          </h3>
-          {sets.map((set, idx) => (
-            <div key={idx} className="flex items-center gap-3 p-3 bg-slate-900/30 rounded-xl border border-slate-700/30">
-              <div className="w-8 text-center text-slate-400 text-sm font-mono">#{idx + 1}</div>
-              <div className="flex-1 grid grid-cols-3 gap-2">
-                <div>
-                  <label className="text-xs text-slate-500 block mb-1">Reps</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={set.reps}
-                    onChange={e => updateSet(idx, "reps", parseInt(e.target.value) || 0)}
-                    className="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-200 text-sm text-center"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-slate-500 block mb-1">Weight (kg)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.5"
-                    value={set.weight}
-                    onChange={e => updateSet(idx, "weight", parseFloat(e.target.value) || 0)}
-                    className="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-200 text-sm text-center"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-slate-500 block mb-1">RPE (1-10)</label>
-                  <input
-                    type="number"
-                    min="1"
-                    max="10"
-                    value={set.rpe || ""}
-                    onChange={e => updateSet(idx, "rpe", parseInt(e.target.value) || undefined)}
-                    placeholder="-"
-                    className="w-full px-2 py-1 bg-slate-800 border border-slate-700 rounded text-slate-200 text-sm text-center"
-                  />
-                </div>
-              </div>
-              <button
-                onClick={() => removeSet(idx)}
-                disabled={sets.length <= 1}
-                className="text-slate-500 hover:text-red-400 disabled:opacity-30"
-              >
-                <X size={18} />
-              </button>
-            </div>
-          ))}
-          <button
-            onClick={addSet}
-            className="w-full py-2 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 rounded-lg text-sm transition-colors"
-          >
-            + Add Set
-          </button>
-        </div>
-
-        {/* Notes */}
-        <div className="mt-4">
-          <label className="text-sm text-slate-300 mb-1 block">Notes for this exercise</label>
-          <textarea
-            value={notes}
-            onChange={e => setNotes(e.target.value)}
-            rows={2}
-            className="w-full px-3 py-2 bg-slate-900/50 border border-slate-700/30 rounded-lg text-sm text-slate-200 resize-none"
-            placeholder="How did it feel? Any modifications?"
-          />
         </div>
       </div>
 
-      {/* Footer buttons */}
-      <div className="flex gap-3">
-        <button
-          onClick={() => setCurrentExerciseIdx(Math.max(0, currentExerciseIdx - 1))}
-          disabled={currentExerciseIdx === 0}
-          className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 disabled:opacity-50 text-white rounded-xl font-medium flex items-center justify-center gap-2"
-        >
-          <ChevronLeft size={18} />
-          Previous
-        </button>
-        <button
-          onClick={nextExercise}
-          className="flex-1 py-3 bg-teal-600 hover:bg-teal-500 text-white rounded-xl font-medium flex items-center justify-center gap-2"
-        >
-          {currentExerciseIdx === selectedExercises.length - 1 ? (
-            <>
-              <Check size={18} />
-              Finish
-            </>
-          ) : (
-            <>
-              <ChevronRight size={18} />
-              Next
-            </>
-          )}
-        </button>
-      </div>
+      {/* Main Content */}
+      <div className="flex-1 overflow-y-auto p-4 md:p-6">
+        <div className="max-w-4xl mx-auto space-y-6">
 
-      {/* Completion Modal */}
-      {showCompleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          {/* Workout Builder */}
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="glass-card rounded-2xl p-6"
           >
-            <div className="text-center mb-4">
-              <div className="w-16 h-16 bg-teal-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Award size={32} className="text-teal-400" />
-              </div>
-              <h2 className="text-xl font-bold text-white">Workout Complete!</h2>
-              <p className="text-slate-400 text-sm mt-1">Great job! Your workout has been saved.</p>
+            <h2 className="text-lg font-semibold text-slate-100 mb-4 flex items-center gap-2">
+              <Plus size={20} className="text-teal-400" />
+              Build Your Workout
+            </h2>
+
+            {/* Search Exercises */}
+            <div className="mb-4">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={handleSearch}
+                placeholder="Search exercises..."
+                className="glass-input w-full px-4 py-3 rounded-xl text-slate-100 placeholder-slate-500 focus:border-teal-400/50 transition-colors"
+              />
             </div>
-            <div className="space-y-2 text-sm text-slate-300 mb-6">
-              <div className="flex justify-between">
-                <span>Duration</span>
-                <span className="font-mono">{formatTime(timer)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Exercises</span>
-                <span>{selectedExercises.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Total Sets</span>
-                <span>{sets.reduce((sum, s) => sum + 1, 0)}</span>
-              </div>
+
+            {/* Exercise List */}
+            <div className="max-h-80 overflow-y-auto space-y-2 mb-6 pr-2">
+              <AnimatePresence>
+                {exercises.map((exercise) => {
+                  const isSelected = selectedExercises.find(e => e.id === exercise.id);
+                  return (
+                    <motion.div
+                      key={exercise.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      className={`p-4 rounded-xl cursor-pointer transition-all flex items-center justify-between ${
+                        isSelected 
+                          ? 'bg-teal-500/20 border border-teal-500/30' 
+                          : 'glass-card hover:border-teal-400/20'
+                      }`}
+                      onClick={() => toggleExercise(exercise)}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-slate-100 truncate">{exercise.name}</h3>
+                        <p className="text-sm text-slate-400">{exercise.category} • {exercise.equipment || 'Bodyweight'}</p>
+                        <p className="text-xs text-slate-500 line-clamp-2 mt-1">{exercise.instructions?.[0] || ''}</p>
+                      </div>
+                      <div className="ml-4">
+                        {isSelected ? (
+                          <CheckCircle size={24} className="text-teal-400" />
+                        ) : (
+                          <div className="w-6 h-6 rounded-lg border border-slate-600" />
+                        )}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
+              {exercises.length === 0 && (
+                <p className="text-center text-slate-400 py-8">No exercises found</p>
+              )}
             </div>
-            <button
-              onClick={handleFinishModal}
-              className="w-full py-3 bg-teal-600 hover:bg-teal-500 text-white rounded-xl font-semibold"
-            >
-              View History
-            </button>
+
+            {/* Selected Exercises */}
+            <AnimatePresence>
+              {selectedExercises.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-4"
+                >
+                  <h3 className="text-md font-semibold text-slate-100">Your Workout Plan</h3>
+                  {selectedExercises.map((exercise) => (
+                    <motion.div
+                      key={exercise.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="glass-card rounded-xl p-4"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <h4 className="font-medium text-slate-100">{exercise.name}</h4>
+                          <p className="text-sm text-slate-400">{exercise.category}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => toggleExerciseDetails(exercise.id)}
+                            className="p-1 hover:bg-slate-700/50 rounded transition-colors"
+                          >
+                            {expandedExercise === exercise.id ? (
+                              <ChevronUp size={16} className="text-slate-400" />
+                            ) : (
+                              <ChevronDown size={16} className="text-slate-400" />
+                            )}
+                          </button>
+                          <button
+                            onClick={() => setSelectedExercises(prev => prev.filter(e => e.id !== exercise.id))}
+                            className="p-1 hover:bg-red-500/20 rounded transition-colors text-red-400"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Sets */}
+                      <div className="space-y-2 mb-3">
+                        {exercise.sets.map((set, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <span className="text-sm text-slate-400 w-12">Set {index + 1}</span>
+                            <input
+                              type="number"
+                              value={set.reps}
+                              onChange={(e) => updateSet(exercise.id, index, 'reps', Math.max(1, parseInt(e.target.value) || 1))}
+                              className="w-20 glass-input rounded-lg px-2 py-1 text-sm text-center"
+                              placeholder="Reps"
+                            />
+                            <input
+                              type="number"
+                              value={set.weight}
+                              onChange={(e) => updateSet(exercise.id, index, 'weight', Math.max(0, parseFloat(e.target.value) || 0))}
+                              className="w-20 glass-input rounded-lg px-2 py-1 text-sm text-center"
+                              placeholder="Weight"
+                            />
+                            <span className="text-sm text-slate-400">kg</span>
+                            <button
+                              onClick={() => removeSet(exercise.id, index)}
+                              className="p-1 hover:bg-red-500/20 rounded text-red-400"
+                            >
+                              <X size={14} />
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          onClick={() => addSet(exercise.id)}
+                          className="text-sm text-teal-400 hover:text-teal-300 flex items-center gap-1"
+                        >
+                          <Plus size={14} />
+                          Add Set
+                        </button>
+                      </div>
+
+                      {/* Expanded Details */}
+                      <AnimatePresence>
+                        {expandedExercise === exercise.id && exercise.instructions && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="border-t border-slate-700 pt-3 mt-3"
+                          >
+                            <p className="text-sm text-slate-300 leading-relaxed">
+                              <strong className="text-slate-200">How to:</strong>{' '}
+                              {exercise.instructions.join(' ')}
+                            </p>
+                            {exercise.musclesPrimary && (
+                              <p className="text-sm text-slate-400 mt-2">
+                                <strong>Targets:</strong> {exercise.musclesPrimary.join(', ')}
+                              </p>
+                            )}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Set Stats */}
+                      <div className="flex items-center gap-4 mt-3 pt-3 border-t border-slate-700">
+                        <div className="flex items-center gap-1 text-sm text-slate-400">
+                          <Target size={14} className="text-teal-400" />
+                          <span>{exercise.sets.length} sets</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-sm text-slate-400">
+                          <Flame size={14} className="text-orange-400" />
+                          <span>{calculateTotalVolume(exercise.sets)} kg</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-sm text-slate-400">
+                          <Clock size={14} className="text-blue-400" />
+                          <span>~{exercise.sets.length * 3} min</span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+
+                  {/* Save Button */}
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleSaveWorkout}
+                    disabled={isLogging}
+                    className="w-full py-4 px-6 rounded-xl font-medium text-white text-sm transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isLogging ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={18} />
+                        Save Workout ({selectedExercises.reduce((sum, ex) => sum + calculateTotalVolume(ex.sets), 0)} kg total)
+                      </>
+                    )}
+                  </motion.button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
+
+          {/* Workout History Toggle */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="glass-card rounded-2xl p-6"
+          >
+            <button
+              onClick={toggleHistory}
+              className="w-full flex items-center justify-between text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500/30 to-teal-500/20 flex items-center justify-center">
+                  <Clock size={20} className="text-cyan-400" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-slate-100">Workout History</h2>
+                  <p className="text-sm text-slate-400">{workoutLogs.length} workouts completed</p>
+                </div>
+              </div>
+              {showingHistory ? (
+                <ChevronUp size={20} className="text-slate-400" />
+              ) : (
+                <ChevronDown size={20} className="text-slate-400" />
+              )}
+            </button>
+
+            <AnimatePresence>
+              {showingHistory && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="mt-4 space-y-3"
+                >
+                  {workoutLogs.length === 0 ? (
+                    <p className="text-center text-slate-400 py-4">No workout history yet</p>
+                  ) : (
+                    workoutLogs.map((log) => (
+                      <motion.div
+                        key={log.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="glass-card rounded-xl p-4"
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-slate-100">{log.workoutName}</h4>
+                          <span className="text-sm text-slate-400">
+                            {format(new Date(log.date), 'MMM d, yyyy')}
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-400 mb-2">
+                          {log.exercises.length} exercises • {log.totalVolume} kg total volume
+                        </p>
+                        {log.notes && (
+                          <p className="text-sm text-slate-500">{log.notes}</p>
+                        )}
+                      </motion.div>
+                    ))
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
         </div>
-      )}
-    </motion.div>
+      </div>
+    </div>
   );
 }

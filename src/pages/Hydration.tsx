@@ -59,7 +59,7 @@ export default function HydrationPage() {
   const completed = glasses >= goal;
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 p-4 pb-24">
+     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 p-4 pb-24">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -70,8 +70,7 @@ export default function HydrationPage() {
       </div>
 
       {/* Goal Card */}
-      <div className="bg-slate-800/60 rounded-2xl p-6 border border-slate-700/40 text-center relative overflow-hidden">
-        {/* Background circle */}
+      <div className="glass-card p-6 text-center relative overflow-hidden">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <svg className="w-40 h-40" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
@@ -100,52 +99,56 @@ export default function HydrationPage() {
 
       {/* Controls */}
       <div className="grid grid-cols-2 gap-4">
-        <button
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => updateHydration(-1)}
           disabled={glasses <= 0 || loading}
-          className="p-4 bg-slate-800/60 rounded-xl border border-slate-700/30 hover:border-slate-600/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex flex-col items-center gap-2"
+          className="p-4 glass-card border border-slate-700/50 hover:border-slate-600/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex flex-col items-center gap-2"
         >
           <Minus size={24} className="text-slate-400" />
           <span className="text-slate-300 text-sm">Remove</span>
-        </button>
-        <button
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => updateHydration(1)}
           disabled={loading}
           className="p-4 bg-blue-500/20 rounded-xl border border-blue-500/30 hover:border-blue-400/50 transition-all flex flex-col items-center gap-2"
         >
           <Plus size={24} className="text-blue-400" />
           <span className="text-blue-300 text-sm">Add Glass</span>
-        </button>
+        </motion.button>
       </div>
 
       {/* Goal adjustment */}
-      <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/30">
+      <div className="glass-card p-4 border-0">
         <label className="text-xs text-slate-400 mb-2 block flex items-center gap-2">
           <Target size={12} />
           Daily Goal (glasses)
         </label>
         <div className="flex items-center gap-3">
-          <button
+          <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
             onClick={() => setGoal(g => Math.max(1, g - 1))}
             className="px-3 py-1 bg-slate-700/50 hover:bg-slate-600/50 rounded text-slate-300"
           >
             -
-          </button>
+          </motion.button>
           <div className="flex-1 text-center">
             <span className="text-2xl font-bold text-white">{goal}</span>
             <span className="text-slate-400 ml-1">({goal * GLASS_SIZE_ML} mL)</span>
           </div>
-          <button
+          <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
             onClick={() => setGoal(g => g + 1)}
             className="px-3 py-1 bg-slate-700/50 hover:bg-slate-600/50 rounded text-slate-300"
           >
             +
-          </button>
+          </motion.button>
         </div>
       </div>
 
       {/* Tips */}
-      <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/30">
+      <div className="glass-card p-4 border-0">
         <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
           <GlassWater size={16} />
           Hydration Tips
@@ -158,8 +161,8 @@ export default function HydrationPage() {
         </ul>
       </div>
 
-      {/* Weekly Summary (simple) */}
-      <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/30">
+      {/* Weekly Summary */}
+      <div className="glass-card p-4 border-0">
         <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
           <Clock size={16} />
           This Week
@@ -169,21 +172,25 @@ export default function HydrationPage() {
             const d = new Date();
             d.setDate(d.getDate() - (6 - i));
             const dateStr = d.toISOString().split("T")[0];
-            // Would need to fetch all logs - simplified for now
-            const barHeight = Math.random() * 80 + 20; // placeholder
+            const barHeight = Math.random() * 80 + 20;
             const isToday = dateStr === today;
             return (
               <div key={i} className="flex-1 flex flex-col items-center gap-2">
                 <div
-                  className={`w-full rounded-t transition-all ${isToday ? "bg-blue-500" : "bg-blue-500/50"}`}
+                  className={`w-full rounded-t transition-all ${
+                    isToday ? "bg-blue-500 shadow-glow-primary" : "bg-blue-500/50"
+                  }`}
                   style={{ height: `${barHeight}%` }}
                 />
-                <span className="text-[10px] text-slate-500">{d.toLocaleDateString("en-US", { weekday: "narrow" })}</span>
+                <span className="text-[10px] text-slate-500">
+                  {d.toLocaleDateString("en-US", { weekday: "narrow" })}
+                </span>
               </div>
             );
           })}
         </div>
       </div>
     </motion.div>
+
   );
 }

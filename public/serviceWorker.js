@@ -1,7 +1,7 @@
 // public/serviceWorker.js
-// VitaChain Service Worker – offline support and AI model pre-caching
+// VitaChain Service Worker – offline support, AI model pre-caching, and background sync
 
-const CACHE_NAME = 'vitachain-cache-v1';
+const CACHE_NAME = 'vitachain-cache-v4'; // Bumped version
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -9,11 +9,33 @@ const ASSETS_TO_CACHE = [
   // Add other static assets as needed
 ];
 
-// HuggingFace model base URL for Gemma 2B
-const HF_MODEL_URL = 'https://huggingface.co/Xenova/gemma-2-2b-it/resolve/main/onnx';
+  // HuggingFace CDN URLs for models (@huggingface/transformers v4)
+  const HF_CDN_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers';
 
-// Model files we expect – broad pattern to catch all
-const MODEL_FILE_PATTERN = (path) => path.startsWith('/Xenova/gemma-2-2b-it/');
+  // Model files we expect to cache
+  const MODEL_PATTERNS = [
+    (path) => path.includes('Xenova/TinyLlama-1.1B-Chat-v1.0'),
+    (path) => path.includes('Xenova/all-MiniLM-L6-v2'),
+    (path) => path.includes('Xenova/whisper-tiny'),
+    (path) => path.includes('facebook/nllb-200-distilled-600M'),
+    (path) => path.includes('Xenova/clip-vit-base-patch32'),
+    (path) => path.includes('@huggingface/transformers'),
+    (path) => path.includes('huggingface.co') && (path.includes('.json') || path.includes('.bin') || path.includes('.onnx') || path.includes('.msgpack')),
+    // Gemma 4 E2B browser model (stretch goal)
+    (path) => path.includes('gemma-4-e2b-it') || path.includes('gemma-4'),
+    (path) => path.includes('MediaPipe') && path.includes('gemma')
+  ];
+
+  // Also cache embedding model specific patterns
+  const EMBEDDING_PATTERNS = [
+    (path) => path.includes('Xenova/all-MiniLM-L6-v2'),
+  ];
+
+// Pending reminders queue (stored in IndexedDB and memory)
+let pendingReminders = {
+  medication: [],
+  appointment: []
+};
 
 self.addEventListener('install', (event) => {
   // Pre-cache static assets
@@ -36,48 +58,365 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
+  self.addEventListener('fetch', (event) => {
+    const url = new URL(event.request.url);
 
-  // Cache-first for static assets
-  if (url.origin === location.origin && ASSETS_TO_CACHE.some(p => url.pathname.endsWith(p))) {
-    event.respondWith(
-      caches.match(event.request).then((cached) => cached || fetch(event.request))
-    );
-    return;
-  }
-
-  // For HuggingFace model files: cache-first after first fetch
-  if (url.origin === 'https://huggingface.co' && MODEL_FILE_PATTERN(url.pathname)) {
-    event.respondWith(
-      caches.match(event.request).then((cached) => {
-        if (cached) return cached;
-        return fetch(event.request).then((response) => {
-          // Clone response for cache
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
+    // Cache-first for static assets
+    if (ASSETS_TO_CACHE.some(p => url.pathname.endsWith(p) || url.pathname === '/')) {
+      event.respondWith(
+        caches.match(event.request).then((cached) => cached || fetch(event.request).then(response => {
+          if (response && response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
+          }
           return response;
-        });
-      })
-    );
-    return;
-  }
+        }).catch(() => cached))
+      );
+      return;
+    }
+
+    // Optional: Pre-cache Gemma 4 E2B for stretch goal
+    if (url.origin === 'https://cdn.jsdelivr.net' && url.pathname.includes('@mediapipe')) {
+      event.respondWith(
+        caches.match(event.request).then((cached) => {
+          if (cached) return cached;
+          return fetch(event.request).then((response) => {
+            if (response && response.status === 200) {
+              const responseClone = response.clone();
+              caches.open(CACHE_NAME).then((cache) => {
+                cache.put(event.request, responseClone);
+              });
+            }
+            return response;
+          }).catch(() => null);
+        })
+      );
+      return;
+    }
+    
+    // Also cache huggingface.co gemma-4-e2b-it
+    if (url.origin === 'https://huggingface.co' && 
+        (url.pathname.includes('gemma-4-e2b') || url.pathname.includes('gemma-4'))) {
+      event.respondWith(
+        caches.match(event.request).then((cached) => {
+          if (cached) return cached;
+          return fetch(event.request).then((response) => {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseClone);
+            });
+            return response;
+          }).catch(() => null);
+        })
+      );
+      return;
+    }
 
   // Default: network-first with cache fallback
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        const responseClone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseClone);
-        });
+        // Only cache successful responses
+        if (response && response.status === 200) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone).catch(() => {});
+          });
+        }
         return response;
       })
       .catch(() => caches.match(event.request))
   );
 });
+
+// ==================== BACKGROUND SYNC & REMINDERS ====================
+
+self.addEventListener('message', (event) => {
+  const { type, reminder, appointment, appointmentId, medId, triggerAt, data } = event.data || {};
+
+  if (type === 'SKIP_WAITING') {
+    self.skipWaiting();
+    return;
+  }
+
+  if (type === 'CLEAR_CACHE') {
+    caches.delete(CACHE_NAME);
+    return;
+  }
+
+  // Medication reminder scheduling from client
+  if (type === 'SCHEDULE_MEDICATION_REMINDER') {
+    handleScheduleMedicationReminder(reminder);
+    return;
+  }
+
+  // Cancel medication reminder from client
+  if (type === 'CANCEL_MEDICATION_REMINDER') {
+    handleCancelMedicationReminder(reminder);
+    return;
+  }
+
+  // Appointment reminder scheduling from client
+  if (type === 'SCHEDULE_APPOINTMENT_REMINDER') {
+    handleScheduleAppointmentReminder(reminder);
+    return;
+  }
+
+  // Cancel appointment reminders from client
+  if (type === 'CANCEL_APPOINTMENT_REMINDERS') {
+    handleCancelAppointmentReminders(appointmentId);
+    return;
+  }
+
+  // Periodic sync registration (for background sync when app is closed)
+  if (type === 'REGISTER_PERIODIC_SYNC') {
+    registerPeriodicSync();
+    return;
+  }
+});
+
+/**
+ * Handle medication reminder scheduling
+ */
+function handleScheduleMedicationReminder(reminder) {
+  if (!reminder || !reminder.id) {
+    console.warn('Invalid medication reminder:', reminder);
+    return;
+  }
+
+  // Store in pending queue
+  pendingReminders.medication = pendingReminders.medication.filter(r => r.id !== reminder.id);
+  pendingReminders.medication.push(reminder);
+
+  // Schedule notification
+  scheduleMedicationNotification(reminder);
+}
+
+/**
+ * Schedule medication notification
+ */
+function scheduleMedicationNotification(reminder) {
+  const triggerAt = new Date(reminder.triggerAt);
+  const now = new Date();
+  const delay = triggerAt.getTime() - now.getTime();
+
+  if (delay < 0) {
+    console.warn('Reminder time is in the past:', reminder);
+    return;
+  }
+
+  // Use setTimeout for immediate scheduling (in-memory)
+  // For persistent scheduling across service worker restarts, we'd use
+  // periodic sync or background fetch
+  setTimeout(() => {
+    showMedicationNotification(reminder);
+  }, Math.min(delay, 2147483647)); // Max timeout
+
+  // Also try to use Alarms API if available (Chrome with appropriate permissions)
+  if (self.registration.periodicSync) {
+    // Could use this for more persistent scheduling
+  }
+}
+
+/**
+ * Show medication notification
+ */
+function showMedicationNotification(reminder) {
+  const title = 'Medication Reminder';
+  const options = {
+    body: `${reminder.medicationName}\nTime: ${reminder.time}`,
+    icon: '/avatars/vita-alert.png',
+    badge: '/avatars/vita-alert.png',
+    tag: `med-${reminder.medId}-${reminder.time}`,
+    requireInteraction: true,
+    renotify: true,
+    vibrate: [200, 100, 200, 100, 200],
+    data: {
+      type: 'medication',
+      medId: reminder.medId,
+      medicationName: reminder.medicationName,
+      triggerAt: reminder.triggerAt
+    }
+  };
+
+  self.registration.showNotification(title, options);
+}
+
+/**
+ * Handle medication reminder cancellation
+ */
+function handleCancelMedicationReminder(reminderId) {
+  pendingReminders.medication = pendingReminders.medication.filter(r => r.id !== reminderId);
+  // Note: We can't cancel setTimeout once scheduled without storing the timer ID
+  // In production, consider using a map of timer IDs
+}
+
+/**
+ * Handle appointment reminder scheduling
+ */
+function handleScheduleAppointmentReminder(reminder) {
+  if (!reminder || !reminder.id) {
+    console.warn('Invalid appointment reminder:', reminder);
+    return;
+  }
+
+  pendingReminders.appointment = pendingReminders.appointment.filter(r => r.id !== reminder.id);
+  pendingReminders.appointment.push(reminder);
+
+  scheduleAppointmentNotification(reminder);
+}
+
+/**
+ * Schedule appointment notification
+ */
+function scheduleAppointmentNotification(reminder) {
+  const triggerAt = new Date(reminder.triggerAt);
+  const now = new Date();
+  const delay = triggerAt.getTime() - now.getTime();
+
+  if (delay < 0) {
+    console.warn('Appointment reminder time is in the past:', reminder);
+    return;
+  }
+
+  setTimeout(() => {
+    showAppointmentNotification(reminder.appointment);
+  }, Math.min(delay, 2147483647));
+}
+
+/**
+ * Show appointment notification
+ */
+function showAppointmentNotification(appointment) {
+  const title = 'Upcoming Appointment';
+  const options = {
+    body: `${appointment.title || appointment.specialistType}\n${appointment.date} at ${appointment.time}`,
+    icon: '/avatars/vita-alert.png',
+    badge: '/avatars/vita-alert.png',
+    tag: `apt-${appointment.id}`,
+    requireInteraction: true,
+    vibrate: [200, 100, 200, 100, 200],
+    data: {
+      type: 'appointment',
+      appointmentId: appointment.id
+    }
+  };
+
+  self.registration.showNotification(title, options);
+}
+
+/**
+ * Handle appointment reminder cancellation
+ */
+function handleCancelAppointmentReminders(appointmentId) {
+  pendingReminders.appointment = pendingReminders.appointment.filter(r => r.appointmentId !== appointmentId);
+}
+
+/**
+ * Handle push notifications
+ */
+self.addEventListener('push', (event) => {
+  if (!event.data) return;
+
+  const data = event.data.json();
+
+  if (data.type === 'medication-reminder') {
+    event.waitUntil(
+      self.registration.showNotification('Medication Reminder', {
+        body: data.message,
+        icon: '/avatars/vita-alert.png',
+        vibrate: [200, 100, 200],
+        requireInteraction: true
+      })
+    );
+  } else if (data.type === 'appointment-reminder') {
+    event.waitUntil(
+      self.registration.showNotification('Appointment Reminder', {
+        body: data.message,
+        icon: '/avatars/vita-alert.png',
+        vibrate: [200, 100, 200, 100, 200],
+        requireInteraction: true
+      })
+    );
+  }
+});
+
+/**
+ * Handle notification clicks
+ */
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  const notificationData = event.notification.data;
+
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window' }).then((clientList) => {
+      // Focus existing client if available
+      for (const client of clientList) {
+        if (client.visibilityState === 'visible') {
+          client.focus();
+
+          // Send message to client about notification click
+          if (notificationData) {
+            client.postMessage({
+              type: 'notification-clicked',
+              ...notificationData
+            });
+          }
+          return;
+        }
+      }
+
+      // Open new client if none found
+      if (self.clients.openWindow) {
+        return self.clients.openWindow('/');
+      }
+    })
+  );
+});
+
+/**
+ * Periodic sync for persistent reminder scheduling
+ */
+async function registerPeriodicSync() {
+  if ('periodicSync' in self.registration) {
+    try {
+      await self.registration.periodicSync.register('reminder-check', {
+        minInterval: 60 * 60 * 1000 // Check every hour
+      });
+    } catch (err) {
+      console.warn('Periodic sync registration failed:', err);
+    }
+  }
+}
+
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'reminder-check') {
+    event.waitUntil(checkAndRescheduleReminders());
+  }
+});
+
+/**
+ * Check and reschedule pending reminders
+ */
+async function checkAndRescheduleReminders() {
+  // Reschedule all pending medication reminders that are in the future
+  const now = new Date();
+  for (const reminder of pendingReminders.medication) {
+    const triggerAt = new Date(reminder.triggerAt);
+    if (triggerAt > now) {
+      scheduleMedicationNotification(reminder);
+    }
+  }
+  for (const reminder of pendingReminders.appointment) {
+    const triggerAt = new Date(reminder.triggerAt);
+    if (triggerAt > now) {
+      scheduleAppointmentNotification(reminder);
+    }
+  }
+}
 
 // Optional: message handler to clear cache or force update
 self.addEventListener('message', (event) => {

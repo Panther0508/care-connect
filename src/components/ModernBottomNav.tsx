@@ -1,162 +1,82 @@
 import { NavLink } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useRole } from "../hooks/auth/useRole";
 import { useAuth } from "@clerk/clerk-react";
 import {
   Home,
-  Heart,
   Sparkles,
+  Apple,
+  Dumbbell,
   Bell,
-  Settings,
-  Scan,
   AlertTriangle,
   Users,
   Shield,
   BarChart3,
-  ClipboardList,
   Map,
   LogOut,
   ChevronDown,
   Stethoscope,
   Building2,
   UserPlus,
-  Apple,
-  Dumbbell,
   Moon,
   Droplets,
   Pill,
   Calculator,
   Brain,
-  FirstAidKit
+  FirstAidKit,
+  Scan,
+  Heart,
+  Settings,
 } from "lucide-react";
 import { useState } from "react";
 import HamburgerDrawer from "./HamburgerDrawer";
 
-type NavItem = {
+// Navigation item type
+interface NavItem {
   to: string;
   label: string;
-  icon: React.ReactNode;
-  roles: string[];
-};
+  icon: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number; strokeLinecap?: string; strokeLinejoin?: string }>;
+}
 
-// Primary navigation items (always visible)
+// Patient navigation items
 const PATIENT_NAV: NavItem[] = [
-  {
-    to: "/dashboard",
-    label: "Dashboard",
-    icon: <Home size={22} strokeWidth={2} />,
-    roles: ["patient"],
-  },
-  {
-    to: "/nutrition",
-    label: "Nutrition",
-    icon: <Apple size={22} strokeWidth={2} />,
-    roles: ["patient"],
-  },
-  {
-    to: "/workout",
-    label: "Workout",
-    icon: <Dumbbell size={22} strokeWidth={2} />,
-    roles: ["patient"],
-  },
-  {
-    to: "/ai",
-    label: "AI",
-    icon: <Sparkles size={22} strokeWidth={2} />,
-    roles: ["patient"],
-  },
-  {
-    to: "/alerts",
-    label: "Alerts",
-    icon: <Bell size={22} strokeWidth={2} />,
-    roles: ["patient", "clinician", "chw"],
-  },
+  { to: "/", label: "Dashboard", icon: Home },
+  { to: "/ai", label: "AI", icon: Sparkles },
+  { to: "/nutrition", label: "Nutrition", icon: Apple },
+  { to: "/workout", label: "Workout", icon: Dumbbell },
+  { to: "/passport", label: "Passport", icon: Scanner },
 ];
 
+// Clinician navigation items
 const CLINICIAN_NAV: NavItem[] = [
-  {
-    to: "/dashboard",
-    label: "Dashboard",
-    icon: <Home size={22} strokeWidth={2} />,
-    roles: ["clinician"],
-  },
-  {
-    to: "/clinician-view",
-    label: "Scan",
-    icon: <Scan size={22} strokeWidth={2} />,
-    roles: ["clinician"],
-  },
-  {
-    to: "/ai",
-    label: "AI",
-    icon: <Sparkles size={22} strokeWidth={2} />,
-    roles: ["clinician"],
-  },
-  {
-    to: "/alerts",
-    label: "Alerts",
-    icon: <Bell size={22} strokeWidth={2} />,
-    roles: ["clinician", "chw", "admin"],
-  },
+  { to: "/clinician/dashboard", label: "Dashboard", icon: Home },
+  { to: "/clinician/patients", label: "Patients", icon: Users },
+  { to: "/clinician/calendar", label: "Calendar", icon: Bell },
+  { to: "/clinician/records", label: "Records", icon: FilePlus },
+  { to: "/clinician/settings", label: "Settings", icon: Settings },
 ];
 
+// CHW navigation items
 const CHW_NAV: NavItem[] = [
-  {
-    to: "/dashboard",
-    label: "Dashboard",
-    icon: <Home size={22} strokeWidth={2} />,
-    roles: ["chw"],
-  },
-  {
-    to: "/outbreak",
-    label: "Outbreak",
-    icon: <AlertTriangle size={22} strokeWidth={2} />,
-    roles: ["chw", "admin"],
-  },
-  {
-    to: "/register-need",
-    label: "Needs",
-    icon: <UserPlus size={22} strokeWidth={2} />,
-    roles: ["chw", "patient"],
-  },
-  {
-    to: "/alerts",
-    label: "Alerts",
-    icon: <Bell size={22} strokeWidth={2} />,
-    roles: ["clinician", "chw", "admin"],
-  },
+  { to: "/chw/dashboard", label: "Dashboard", icon: Home },
+  { to: "/chw/visits", label: "Visits", icon: Map },
+  { to: "/chw/resources", label: "Resources", icon: BookOpen },
+  { to: "/chw/referrals", label: "Referrals", icon: Share2 },
+  { to: "/chw/settings", label: "Settings", icon: Settings },
 ];
 
+// Admin navigation items
 const ADMIN_NAV: NavItem[] = [
-  {
-    to: "/dashboard",
-    label: "Dashboard",
-    icon: <BarChart3 size={22} strokeWidth={2} />,
-    roles: ["admin"],
-  },
-  {
-    to: "/admin",
-    label: "Admin",
-    icon: <Shield size={22} strokeWidth={2} />,
-    roles: ["admin"],
-  },
-  {
-    to: "/audit-log",
-    label: "Audit",
-    icon: <ClipboardList size={22} strokeWidth={2} />,
-    roles: ["admin"],
-  },
-  {
-    to: "/alerts",
-    label: "Alerts",
-    icon: <Bell size={22} strokeWidth={2} />,
-    roles: ["clinician", "chw", "admin"],
-  },
+  { to: "/admin/dashboard", label: "Dashboard", icon: Home },
+  { to: "/admin/users", label: "Users", icon: Users },
+  { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { to: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 export default function ModernBottomNav() {
   const { role } = useRole();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const isReducedMotion = useReducedMotion();
 
   const getNavItems = (): NavItem[] => {
     if (!role) return PATIENT_NAV;
@@ -179,46 +99,53 @@ export default function ModernBottomNav() {
 
   return (
     <>
-      {/* Modern Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 inset-x-0 z-50 bg-slate-900/70 backdrop-blur-xl border-t border-white/5 shadow-2xl">
-        <div className="max-w-5xl mx-auto">
-          <ul className="flex items-center justify-around h-16">
+      {/* Modern Bottom Navigation Bar - Premium Treatment */}
+      <nav className="fixed bottom-0 inset-x-0 z-50 h-16 bg-slate-900/85 backdrop-blur-2xl border-t border-slate-800/50 backdrop-filter backdrop-saturate-150">
+        <div className="max-w-5xl mx-auto px-4">
+          <ul className="flex items-center justify-between h-full">
             {navItems.map(({ to, label, icon }) => (
               <li key={to} className="flex-1 h-full">
                 <NavLink
                   to={to}
                   className={({ isActive }) =>
-                    `flex flex-col items-center justify-center h-full gap-1 transition-all duration-200 relative ${
-                      isActive ? "text-teal-400" : "text-slate-500 hover:text-slate-300"
+                    `flex flex-col items-center justify-center h-full gap-1.5 transition-all duration-300 relative ${
+                      isActive 
+                        ? "text-teal-400 font-medium" 
+                        : "text-slate-500 hover:text-slate-300"
                     }`
                   }
+                  aria-label={label}
                 >
                   {({ isActive }) => (
                     <>
                       <motion.div
-                        className="h-6 w-6"
-                        animate={
-                          isActive
-                            ? {
-                                y: [0, -3, 0],
-                                scale: [1, 1.1, 1],
-                              }
-                            : {}
-                        }
-                        transition={{ duration: 0.3 }}
+                        className="flex-shrink-0"
+                        animate={{
+                          scale: isActive ? [0.95, 1.15, 1] : 1,
+                          y: isActive ? [-2, 2, 0] : 0,
+                        }}
+                        transition={{
+                          type: isReducedMotion ? false : "spring",
+                          duration: 0.3,
+                          bounce: 0.2,
+                        }}
                       >
                         {icon}
                       </motion.div>
-                      <span className="text-[10px] font-medium leading-none tracking-tight">
+                      <span className="text-xs font-medium leading-none tracking-tight">
                         {label}
                       </span>
                       {isActive && (
-                        <motion.div
-                          layoutId="activeIndicator"
-                          className="absolute -top-0.5 w-12 h-0.5 bg-teal-400 rounded-full"
-                          initial={false}
-                          transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                        />
+                        <>
+                          <motion.div
+                            layoutId="activeIndicator"
+                            className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 rounded-full bg-teal-400"
+                            initial={false}
+                            transition={{ type: isReducedMotion ? false : "spring", stiffness: 500, damping: 30 }}
+                          />
+                          {/* Glow effect */}
+                          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-14 h-1.5 rounded-full bg-teal-400/20 animate-pulse-glow pointer-events-none" />
+                        </>
                       )}
                     </>
                   )}
@@ -229,22 +156,27 @@ export default function ModernBottomNav() {
             <li className="flex-1 h-full">
               <button
                 onClick={() => setDrawerOpen(true)}
-                className="flex flex-col items-center justify-center h-full gap-1 transition-all duration-200 text-slate-500 hover:text-slate-300"
+                className="flex flex-col items-center justify-center h-full gap-1.5 transition-all duration-300 text-slate-500 hover:text-slate-300"
                 aria-label="Open menu"
               >
                 <motion.div
-                  className="h-6 w-6"
-                  animate={{ rotate: drawerOpen ? 90 : 0 }}
-                  transition={{ duration: 0.2 }}
+                  className="flex-shrink-0"
+                  animate={{
+                    rotate: drawerOpen ? [0, 90, 0] : [0, 0, 0],
+                  }}
+                  transition={{
+                    type: isReducedMotion ? false : "spring",
+                    duration: 0.3,
+                  }}
                 >
                   {/* Hamburger icon (3 lines) */}
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="3" y1="6" x2="21" y2="6" />
                     <line x1="3" y1="12" x2="21" y2="12" />
                     <line x1="3" y1="18" x2="21" y2="18" />
                   </svg>
                 </motion.div>
-                <span className="text-[10px] font-medium leading-none tracking-tight">More</span>
+                <span className="text-xs font-medium leading-none tracking-tight">More</span>
               </button>
             </li>
           </ul>

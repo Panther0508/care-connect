@@ -130,14 +130,14 @@ export default function ClinicianView() {
             </div>
 
             {/* Verifier Info */}
-            <div className="text-center">
+            <div className="glass-card p-4 text-center">
               <p className="text-xs text-slate-500">
                 Issuer (Patient DID): <span className="font-mono text-slate-600">{scannedCredential.vc?.issuer}</span>
               </p>
             </div>
 
             {/* Actions */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="glass-card p-4 grid grid-cols-2 gap-3">
               <button onClick={handleReset} className="btn-secondary py-3">
                 Scan Another
               </button>

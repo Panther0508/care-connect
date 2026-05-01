@@ -1,0 +1,574 @@
+// public/data/nigeria-treatment-guidelines.json
+// Nigeria Federal Ministry of Health - Standard Treatment Guidelines
+// Key protocols for common conditions (Phase 3 dataset)
+
+{
+  "version": "2026.1",
+  "country": "Nigeria",
+  "source": "Federal Ministry of Health Nigeria - Standard Treatment Guidelines",
+  "protocols": [
+    {
+      "id": "malaria_uncomplicated",
+      "condition": "Uncomplicated Malaria",
+      "ageGroups": [
+        {
+          "group": "<5 years",
+          "recommended": "Artemisinin-based Combination Therapy (ACT)",
+          "firstLine": "Artemether-Lumefantrine (AL)",
+          "dosing": "By weight bands: AL 20mg/120mg for 5-14kg, AL 40mg/240mg for 15-24kg, AL 80mg/480mg for 25-34kg",
+          "duration": "3 days",
+          "alternatives": ["Artesunate-Amodiaquine", "Dihydroartemisinin-Piperaquine"]
+        },
+        {
+          "group": "5-14 years",
+          "recommended": "Artemether-Lumefantrine",
+          "dosing": "Adult dose: 4 tablets twice daily for 3 days",
+          "duration": "3 days"
+        },
+        {
+          "group": ">=15 years (adults)",
+          "recommended": "Artemether-Lumefantrine or Artesunate-Amodiaquine",
+          "dosing": "4 tablets twice daily for 3 days",
+          "duration": "3 days"
+        }
+      ],
+      "prevention": [
+        "Insecticide-treated bed nets (ITNs)",
+        "Intermittent preventive treatment in pregnancy (IPTp-SP)",
+        "Indoor residual spraying (IRS) in endemic areas"
+      ],
+      "referralCriteria": [
+        "Severe malaria (impaired consciousness, convulsions, severe anemia)",
+        "Treatment failure after 3 days",
+        "Complicated or mixed infections",
+        "Pregnant women in first trimester"
+      ]
+    },
+    {
+      "id": "hypertension",
+      "condition": "Hypertension (Essential)",
+      "classification": {
+        "normal": "<120/<80 mmHg",
+        "elevated": "120-129/<80 mmHg",
+        "stage1": "130-139/80-89 mmHg",
+        "stage2": ">=140/>=90 mmHg"
+      },
+      "steppedCare": [
+        {
+          "step": 1,
+          "for": "Stage 1 hypertension or elevated",
+          "intervention": "Lifestyle modification (DASH diet, exercise, salt restriction, weight loss)",
+          "monitoring": "Recheck in 3-6 months"
+        },
+        {
+          "step": 2,
+          "for": "Stage 2 or Stage 1 with CVD risk >10%",
+          "intervention": "Initiate pharmacotherapy + lifestyle",
+          "firstLine": "ACE inhibitor (e.g., Lisinopril 10mg daily) OR ARB (e.g., Losartan 50mg daily) OR Calcium channel blocker (e.g., Amlodipine 5mg daily) OR Thiazide diuretic (e.g., Hydrochlorothiazide 12.5mg daily)",
+          "monitoring": "Recheck in 1 month, adjust to BP goal <130/80 mmHg"
+        },
+        {
+          "step": 3,
+          "for": "Inadequate control on 1 drug",
+          "intervention": "Add second drug from different class",
+          "monitoring": "Recheck in 1 month"
+        },
+        {
+          "step": 4,
+          "for": "Resistant hypertension",
+          "intervention": "Consider spironolactone or refer to specialist"
+        }
+      ],
+      "lifestyleModifications": [
+        "Reduce sodium intake to <2.3g/day",
+        "Increase potassium-rich foods",
+        "Weight reduction (target BMI <25)",
+        "Physical activity: 150 min/week moderate intensity",
+        "Limit alcohol: ≤2 drinks/day men, ≤1 drink/day women",
+        "Smoking cessation"
+      ],
+      "referralCriteria": [
+        "Resistant hypertension despite 3 drugs",
+        "Suspected secondary hypertension",
+        "Hypertensive emergency (BP >180/120 with end-organ damage)",
+        "Pregnancy with severe hypertension"
+      ]
+    },
+    {
+      "id": "diabetes_type2",
+      "condition": "Type 2 Diabetes Mellitus",
+      "diagnosisCriteria": "Fasting glucose >=126 mg/dL OR HbA1c >=6.5% OR random glucose >=200 with symptoms",
+      "management": {
+        "lifestyleFoundation": "Medical nutrition therapy, physical activity 150 min/week, weight loss 5-10%",
+        "monitoring": "Self-monitoring blood glucose, HbA1c every 3-6 months"
+      },
+      "pharmacotherapy": [
+        {
+          "line": "First-line",
+          "drug": "Metformin",
+          "dosing": "Start 500mg daily with evening meal, titrate to 500mg twice daily after 1-2 weeks, max 2000mg/day",
+          "contraindications": "eGFR <30, severe hepatic impairment, metabolic acidosis"
+        },
+        {
+          "line": "Second-line",
+          "options": [
+            "SGLT2 inhibitor (e.g., Empagliflozin 10mg daily) - if CVD or CKD",
+            "GLP-1 RA (e.g., Liraglutide) - if CVD or weight loss needed",
+            "DPP-4 inhibitor (e.g., Sitagliptin 100mg daily)",
+            "Sulfonylurea (e.g., Glibenclamide)"
+          ]
+        },
+        {
+          "line": "Third-line",
+          "options": "Add basal insulin or triple oral therapy"
+        }
+      ],
+      "targets": {
+        "hba1c": "<7% (individualize 6.5-8%)",
+        "fastingGlucose": "80-130 mg/dL",
+        "postPrandial": "<180 mg/dL"
+      },
+      "complicationsScreening": [
+        "Annual urine albumin/creatinine ratio",
+        "Annual serum creatinine/eGFR",
+        "Annual lipid profile",
+        "Annual comprehensive foot exam",
+        "Annual dilated eye exam",
+        "Blood pressure control <130/80 mmHg"
+      ]
+    },
+    {
+      "id": "tb_drug_sensitive",
+      "condition": "Drug-Sensitive Pulmonary Tuberculosis",
+      "regimen": "Category I (New Patients)",
+      "phases": [
+        {
+          "phase": "Intensive (2 months)",
+          "drugs": [
+            "Isoniazid 300mg daily",
+            "Rifampicin 600mg daily",
+            "Pyrazinamide 1500-2000mg daily",
+            "Ethambutol 1200mg daily"
+          ],
+          "administration": "Directly Observed Therapy (DOT)"
+        },
+        {
+          "phase": "Continuation (4 months)",
+          "drugs": [
+            "Isoniazid 300mg daily",
+            "Rifampicin 600mg daily"
+          ],
+          "administration": "DOT or self-administered"
+        }
+      ],
+      "monitoring": [
+        "Sputum AFB at 2 months and 5 months",
+        "Liver function tests baseline, 2 weeks, then monthly if symptoms",
+        "Visual acuity/color vision if Ethambutol >2 months",
+        "Weight monitoring weekly"
+      ],
+      "adverseEffects": [
+        "Hepatotoxicity (INH, RIF, PZA)",
+        "Orange/red body fluids (RIF - normal)",
+        "Hyperuricemia (PZA)",
+        "Optic neuritis (EMB)",
+        "Peripheral neuropathy (INH - give pyridoxine)"
+      ],
+      "referralCriteria": [
+        "Sputum positive at 2 months",
+        "Treatment interruption >2 weeks",
+        "Adverse drug reactions",
+        "Pregnancy",
+        "HIV co-infection",
+        "Suspected drug-resistant TB"
+      ]
+    },
+    {
+      "id": "art_initiation",
+      "condition": "HIV - Antiretroviral Therapy Initiation",
+      "guidelines": "Nigeria National ART Guidelines",
+      "eligibility": "All persons living with HIV regardless of CD4 count or clinical stage",
+      "firstLineRegimens": [
+        {
+          "name": "TDF+3TC+DTG (Preferred)",
+          "drugs": [
+            "Tenofovir disoproxil fumarate 300mg daily",
+            "Lamivudine 300mg daily",
+            "Dolutegravir 50mg daily"
+          ],
+          "advantages": "High barrier to resistance, well-tolerated, rapid viral suppression"
+        },
+        {
+          "name": "AZT+3TC+EFV (Alternative)",
+          "drugs": [
+            "Zidovudine 300mg twice daily",
+            "Lamivudine 150mg twice daily",
+            "Efavirenz 600mg daily"
+          ],
+          "note": "Use if DTG unavailable or contraindicated"
+        },
+        {
+          "name": "ABC+3TC+EFV (Alternative)",
+          "drugs": [
+            "Abacavir 600mg twice daily",
+            "Lamivudine 300mg twice daily",
+            "Efavirenz 600mg daily"
+          ],
+          "note": "Use if TDF contraindicated; requires HLA-B*5701 testing"
+        }
+      ],
+      "monitoring": [
+        "Viral load at 6 months, then annually if suppressed",
+        "CD4 count baseline, 6 months, then annually",
+        "Clinical assessment every 3-6 months",
+        "Adherence counseling at every visit",
+        "Baseline labs: LFTs, Cr, FBC, hepatitis B/C screen, pregnancy test"
+      ],
+      "referralCriteria": [
+        "Treatment failure (confirmed)",
+        "Suspected IRIS",
+        "Complex drug interactions",
+        "Pregnancy with complications",
+        "Opportunistic infections requiring specialist care"
+      ]
+    },
+    {
+      "id": "diarrhea_management",
+      "condition": "Acute Diarrhea (Adults and Children >5 years)",
+      "assessment": [
+        "Assess dehydration (mild, moderate, severe)",
+        "Check for bloody diarrhea (dysentery)",
+        "Assess for cholera outbreak area"
+      ],
+      "management": {
+        "mildDehydration": {
+          "treatment": "Oral Rehydration Solution (ORS)",
+          "dosing": "50-100ml after each loose stool (children), 200-400ml after each stool (adults)",
+          "homeInstructions": "Continue feeding, give ORS, return if worsens"
+        },
+        "moderateDehydration": {
+          "treatment": "ORS + IV fluids if unable to drink",
+          "fluidType": "Ringer's Lactate or Normal Saline",
+          "rate": "30ml/kg over 30 minutes, then 70ml/kg over 2.5 hours (children)"
+        },
+        "severeDehydration": {
+          "treatment": "Emergency IV fluids",
+          "fluidType": "RL or NS",
+          "rate": "30ml/kg over 30 minutes (rapid bolus)",
+          "referral": "Immediate referral to hospital"
+        }
+      },
+      "medications": {
+        "zincSupplementation": {
+          "for": "Children 2-59 months",
+          "dosing": "20mg daily for 10-14 days (10mg for infants <6 months)"
+        },
+        "antibiotics": {
+          "indication": "Dysentery (bloody diarrhea) or suspected cholera",
+          "drugs": ["Ciprofloxacin 500mg twice daily x 3 days", "Azithromycin 500mg daily x 3 days"]
+        },
+        "antidiarrheals": {
+          "recommendation": "Avoid loperamide in children and dysentery"
+        }
+      }
+    },
+    {
+      "id": "pneumonia_management",
+      "condition": "Community-Acquired Pneumonia",
+      "classification": {
+        "nonSevere": "Cough or difficulty breathing, fast breathing, no chest indrawing, no danger signs",
+        "severe": "Chest indrawing, danger signs (unable to drink, convulsions, lethargy)",
+        "verySevere": "Central cyanosis, severe respiratory distress, shock"
+      },
+      "treatment": {
+        "nonSevere": {
+          "outpatient": true,
+          "firstLine": "Oral Amoxicillin",
+          "dosing": "Children: 45mg/kg/day divided BID x 5 days; Adults: 500mg TID x 5 days",
+          "alternatives": "Oral Azithromycin if penicillin allergic"
+        },
+        "severe": {
+          "outpatient": false,
+          "firstInjection": "Intramuscular/IV Benzylpenicillin or Ampicillin",
+          "alternatives": "Ceftriaxone IV/IM",
+          "oralStepDown": "Switch to oral Amoxicillin when improving",
+          "duration": "Total 5 days"
+        },
+        "verySevere": {
+          "management": "Emergency referral, oxygen, IV antibiotics",
+          "antibiotics": "IV Benzylpenicillin + Gentamicin OR Ceftriaxone",
+          "admission": "Immediate"
+        }
+      },
+      "referralCriteria": [
+        "Severe or very severe pneumonia",
+        "Non-severe not improving after 48 hours",
+        "Complications (empyema, abscess)",
+        "Immunocompromised host",
+        "Elderly >65 years with comorbidities"
+      ]
+    },
+    {
+      "id": "family_planning",
+      "condition": "Family Planning Methods",
+      "methods": [
+        {
+          "type": "Long-Acting Reversible Contraception (LARC)",
+          "methods": [
+            {
+              "name": "Copper IUD",
+              "effectiveness": ">99%",
+              "duration": "10-12 years",
+              "advantages": "No hormones, immediate return to fertility",
+              "contraindications": "Current PID, unexplained bleeding, uterine anomalies"
+            },
+            {
+              "name": "Levonorgestrel IUD (Mirena)",
+              "effectiveness": ">99%",
+              "duration": "5 years",
+              "advantages": "Reduces menstrual bleeding, treats menorrhagia",
+              "contraindications": "Current PID, uterine anomalies"
+            },
+            {
+              "name": "Implant (Implanon)",
+              "effectiveness": ">99%",
+              "duration": "3 years",
+              "advantages": "Highly effective, rapid return to fertility",
+              "sideEffects": "Irregular bleeding common"
+            }
+          ]
+        },
+        {
+          "type": "Short-Acting Hormonal",
+          "methods": [
+            {
+              "name": "Combined Oral Contraceptives (COCs)",
+              "effectiveness": "91% typical use",
+              "regimen": "Daily",
+              "contraindications": "Age ≥35 and smoking, history of VTE, migraine with aura, uncontrolled hypertension"
+            },
+            {
+              "name": "Progestin-Only Pills (POPs)",
+              "effectiveness": "91% typical use",
+              "regimen": "Daily, same time",
+              "advantages": "Suitable for breastfeeding women",
+              "contraindications": "Current breast cancer"
+            },
+            {
+              "name": "DMPA Injection",
+              "effectiveness": "94% typical use",
+              "regimen": "Every 3 months",
+              "considerations": "Delay in return to fertility (~10 months), monitor bone density"
+            }
+          ]
+        },
+        {
+          "type": "Barrier Methods",
+          "methods": [
+            {
+              "name": "Male Condoms",
+              "effectiveness": "82% typical use",
+              "advantages": "STI protection, widely available"
+            },
+            {
+              "name": "Female Condoms",
+              "effectiveness": "79% typical use",
+              "advantages": "Female-controlled, STI protection"
+            }
+          ]
+        },
+        {
+          "type": "Emergency Contraception",
+          "methods": [
+            {
+              "name": "Levonorgestrel 1.5mg",
+              "effectiveness": "95% if taken within 24 hours",
+              "timeFrame": "Up to 72 hours (more effective sooner)"
+            },
+            {
+              "name": "Ulipristal Acetate 30mg",
+              "effectiveness": "More effective than LNG in 72-120 hours",
+              "timeFrame": "Up to 120 hours"
+            },
+            {
+              "name": "Copper IUD insertion",
+              "effectiveness": ">99%",
+              "timeFrame": "Up to 5 days after unprotected intercourse",
+              "advantages": "Provides ongoing contraception"
+            }
+          ]
+        }
+      ],
+      "counselingPoints": [
+        "Respect client choice and autonomy",
+        "Discuss effectiveness, side effects, and correct use",
+        "Address myths and misconceptions",
+        "Provide dual protection (pregnancy + STI prevention)",
+        "Ensure access to removal/switching services"
+      ]
+    },
+    {
+      "id": "antenatal_care",
+      "condition": "Routine Antenatal Care (ANC)",
+      "schedule": [
+        {
+          "visit": "First visit (by 12 weeks)",
+          "activities": [
+            "Confirm pregnancy and gestational age",
+            "Complete history and physical exam",
+            "Baseline labs: Hb, blood type, HIV, syphilis, rubella, HBV, urine analysis",
+            "Start iron/folic acid supplementation",
+            "Provide ITNs and IPTp-SP if in endemic area",
+            "Counsel on nutrition, exercise, danger signs",
+            "Schedule next visit in 4 weeks"
+          ]
+        },
+        {
+          "visit": "Second visit (20 weeks)",
+          "activities": [
+            "Check symptoms, BP, weight, urine protein",
+            "Fundal height measurement",
+            "Fetal heart rate auscultation",
+            "Administer Tetanus toxoid if not immune",
+            "Malaria prophylaxis in endemic areas",
+            "Counsel on nutrition, birth planning"
+          ]
+        },
+        {
+          "visit": "Third visit (28 weeks)",
+          "activities": [
+            "Repeat Hb, glucose screening if indicated",
+            "Administer second dose Tetanus toxoid",
+            "Start IPTp-SP (if not already started)",
+            "Monitor for PIH/pre-eclampsia",
+            "Counsel on danger signs, birth planning"
+          ]
+        },
+        {
+          "visit": "Fourth visit (32 weeks)",
+          "activities": [
+            "BP, weight, urine protein",
+            "Fundal height, fetal lie/presentation",
+            "Counsel on birth plan, breastfeeding"
+          ]
+        },
+        {
+          "visit": "Fifth visit (36 weeks)",
+          "activities": [
+            "Screen for GBS if indicated",
+            "Review birth plan",
+            "Discuss warning signs",
+            "Confirm delivery location"
+          ]
+        },
+        {
+          "visit": "Weekly visits (37 weeks to delivery)",
+          "activities": [
+            "Monitor BP, fetal wellbeing",
+            "Assess for labor"
+          ]
+        }
+      ],
+      "dangerSigns": [
+        "Vaginal bleeding",
+        "Severe headache/visual disturbances",
+        "Sudden swelling of face/hands",
+        "Fever",
+        "Reduced/absent fetal movements",
+        "Leaking fluid per vaginum",
+        "Persistent vomiting",
+        "Epigastric pain"
+      ],
+      "supplements": {
+        "ironFolicAcid": "60mg elemental iron + 400mcg folic acid daily",
+        "calcium": "1.5-2g daily if low dietary intake",
+        "deworming": "Single dose albendazole/mebendazole in 2nd/3rd trimester in endemic areas"
+      }
+    },
+    {
+      "id": "immunization_schedules",
+      "condition": "Routine Immunization Schedule - Nigeria",
+      "schedules": [
+        {
+          "age": "At birth",
+          "vaccines": [
+            {"name": "BCG", "dose": "0.1ml intradermal", "site": "Upper arm/deltoid"},
+            {"name": "OPV", "dose": "2 drops oral", "note": "Zero dose"},
+            {"name": "Hepatitis B", "dose": "0.5ml IM", "note": "Within 24 hours"}
+          ]
+        },
+        {
+          "age": "6 weeks",
+          "vaccines": [
+            {"name": "Pentavalent 1", "dose": "0.5ml IM", "components": "DPT-HepB-Hib"},
+            {"name": "OPV 1", "dose": "2 drops oral"},
+            {"name": "PCV 1", "dose": "0.5ml IM"},
+            {"name": "IPV", "dose": "0.5ml IM"},
+            {"name": "Rotavirus 1", "dose": "2ml oral"}
+          ]
+        },
+        {
+          "age": "10 weeks",
+          "vaccines": [
+            {"name": "Pentavalent 2", "dose": "0.5ml IM"},
+            {"name": "OPV 2", "dose": "2 drops oral"},
+            {"name": "PCV 2", "dose": "0.5ml IM"},
+            {"name": "Rotavirus 2", "dose": "2ml oral"}
+          ]
+        },
+        {
+          "age": "14 weeks",
+          "vaccines": [
+            {"name": "Pentavalent 3", "dose": "0.5ml IM"},
+            {"name": "OPV 3", "dose": "2 drops oral"},
+            {"name": "PCV 3", "dose": "0.5ml IM"},
+            {"name": "IPV 2", "dose": "0.5ml IM"},
+            {"name": "Rotavirus 3", "dose": "2ml oral"}
+          ]
+        },
+        {
+          "age": "9 months",
+          "vaccines": [
+            {"name": "Measles 1", "dose": "0.5ml SC"},
+            {"name": "Yellow Fever", "dose": "0.5ml SC", "note": "In endemic areas"},
+            {"name": "Meningococcal A", "dose": "0.5ml IM", "campaign": "Supplementary immunization activities"}
+          ]
+        },
+        {
+          "age": "18 months",
+          "vaccines": [
+            {"name": "Measles 2", "dose": "0.5ml SC"},
+            {"name": "DPT Booster", "dose": "0.5ml IM"}
+          ]
+        },
+        {
+          "age": "5-6 years",
+          "vaccines": [
+            {"name": "Vitamin A", "dose": "100,000 IU oral", "schedule": "Every 6 months"}
+          ]
+        },
+        {
+          "age": "9-15 years",
+          "vaccines": [
+            {"name": "HPV", "dose": "0.5ml IM", "schedule": "2 doses 0, 6 months (girls)"}
+          ]
+        },
+        {
+          "age": "15-49 years",
+          "vaccines": [
+            {"name": "Tetanus Toxoid", "dose": "0.5ml IM", "schedule": "TT1-TT5 during pregnancy"}
+          ]
+        },
+        {
+          "age": "Adults",
+          "vaccines": [
+            {"name": "COVID-19", "dose": "As per current guidelines", "schedule": "Primary series + boosters"},
+            {"name": "Hepatitis B", "dose": "0,1,6 months schedule", "target": "High-risk groups"},
+            {"name": "Meningococcal", "dose": "As indicated", "target": "Outbreak response"}
+          ]
+        }
+      ]
+    }
+  ],
+  "disclaimer": "These guidelines are simplified for quick reference. Always consult official FMOH guidelines and use clinical judgment. Individualize care based on patient circumstances."
+}

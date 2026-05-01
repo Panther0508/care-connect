@@ -1,0 +1,318 @@
+// public/data/who-imci.json
+// WHO Integrated Management of Childhood Illness (IMCI) - Phase 3 Dataset
+// Guidelines for managing common childhood illnesses in resource-limited settings
+
+{
+  "version": "2026.1",
+  "source": "World Health Organization - IMCI Guidelines",
+  "description": "IMCI guidelines for children 2 months up to 5 years",
+  "assessment_steps": [
+    "Check for general danger signs",
+    "Assess main symptoms",
+    "Check for nutritional status and anemia",
+    "Check immunization status and other problems",
+    "Classify illnesses",
+    "Identify treatment",
+    "Counsel the mother",
+    "Follow up"
+  ],
+  "general_danger_signs": {
+    "unable_to_drink": {
+      "sign": "Unable to drink or breastfeed",
+      "action": "URGENT REFERRAL to hospital"
+    },
+    "vomits_everything": {
+      "sign": "Vomits everything",
+      "action": "URGENT REFERRAL to hospital"
+    },
+    "convulsions": {
+      "sign": "Convulsions (now or in past)",
+      "action": "URGENT REFERRAL to hospital"
+    },
+    "lethargic_unconscious": {
+      "sign": "Lethargic or unconscious",
+      "action": "URGENT REFERRAL to hospital"
+    }
+  },
+  "main_symptoms": {
+    "cough_or_difficult_breathing": {
+      "assessment": {
+        "fast_breathing_tachypnea": {
+          "2_months_to_12_months": ">=50 breaths/minute",
+          "12_months_to_5_years": ">=40 breaths/minute"
+        },
+        "chest_indrawing": "Lower chest wall indrawing",
+        "stridor_in_calm_child": "Stridor when calm"
+      },
+      "classifications": {
+        "severe_pneumonia_or_very_severe_disease": {
+          "signs": ["Chest indrawing", "Stridor in calm child", "Any general danger sign"],
+          "treatment": [
+            "Give first dose of appropriate antibiotic (Inj. Benzylpenicillin or Ampicillin)",
+            "Give first dose of appropriate antibiotic (Ceftriaxone if available)",
+            "Treat fever if present (Paracetamol)",
+            "Keep warm",
+            "URGENT REFERRAL to hospital"
+          ]
+        },
+        "pneumonia": {
+          "signs": ["Fast breathing", "No chest indrawing", "No general danger signs"],
+          "treatment": [
+            "Oral Amoxicillin",
+            "Dosing: 45mg/kg/day divided BID x 5 days",
+            "Soothe throat, relieve cough with safe remedy",
+            "Treat fever if present",
+            "Advise mother when to return immediately"
+          ],
+          "follow_up": "2 days"
+        },
+        "no_pneumonia_cough_or_cold": {
+          "signs": ["No fast breathing", "No chest indrawing", "No general danger signs"],
+          "treatment": [
+            "No antibiotic needed",
+            "Home care advice",
+            "Soothe throat, relieve cough with safe remedy",
+            "Feed and give fluids",
+            "Follow up in 5 days if not improving"
+          ]
+        }
+      }
+    },
+    "diarrhea": {
+      "assessment": {
+        "duration": "Diarrhea for how long?",
+        "blood_in_stool": "Blood in stool?",
+        "signs_of_dehydration": {
+          "general_appearance": ["Well and alert", "Restless/irritable", "Lethargic/unconscious"],
+          "thirst": ["Drinks eagerly", "Drinks poorly", "Unable to drink"],
+          "skin_turgor": ["Pinch goes back quickly (<2 seconds)", "Pinch goes back slowly (≥2 seconds)", "Pinch goes back very slowly"]
+        }
+      },
+      "classifications": {
+        "severe_dehydration": {
+          "signs": ["Lethargic/unconscious", "Unable to drink", "Skin pinch goes back very slowly"],
+          "treatment": [
+            "IV fluids - Ringer's Lactate (or Normal Saline)",
+            "30ml/kg over 30 minutes, then 70ml/kg over 2.5 hours",
+            "When child can drink, give ORS",
+            "URGENT REFERRAL to hospital"
+          ]
+        },
+        "some_dehydration": {
+          "signs": ["Restless/irritable", "Drinks poorly", "Skin pinch goes back slowly"],
+          "treatment": [
+            "ORS",
+            "75ml/kg over 4 hours",
+            "Also give: Zinc 20mg daily x 10-14 days (10mg if <6 months)",
+            "Continue feeding",
+            "Follow up in 2 days"
+          ]
+        },
+        "no_dehydration": {
+          "signs": ["Well and alert", "Drinks eagerly", "Skin pinch goes back quickly"],
+          "treatment": [
+            "Home treatment to prevent dehydration",
+            "Give extra fluids",
+            "Zinc 20mg daily x 10-14 days (10mg if <6 months)",
+            "Continue feeding",
+            "Return if danger signs or no improvement in 3 days"
+          ]
+        },
+        "dysentery": {
+          "signs": ["Blood in stool"],
+          "treatment": [
+            "Ciprofloxacin 500mg BD x 3 days (if child >12 years)",
+            "Or Azithromycin 500mg OD x 3 days (if child <12 years)",
+            "Reassess in 2 days",
+            "Refer if no improvement"
+          ]
+        }
+      }
+    },
+    "fever": {
+      "assessment": {
+        "duration": "Fever for how long?",
+        "measured_temperature": "Temperature?"
+      },
+      "classifications": {
+        "severe_febrile_disease_or_malaria": {
+          "general_danger_signs": "Present",
+          "in_malaria_area": "In endemic area",
+          "treatment": [
+            "Give first dose of appropriate antimalarial if malaria suspected",
+            "Give Chloramphenicol or Ampicillin/Amoxicillin",
+            "URGENT REFERRAL to hospital"
+          ]
+        },
+        "measles": {
+          "signs": ["Fever with rash or history of fever with cough/coryza/conjunctivitis"],
+          "treatment": [
+            "Vitamin A immediately (200,000 IU)",
+            "Treat fever",
+            "Refer to hospital if severe complications"
+          ]
+        },
+        "localized_bacterial_infection": {
+          "signs": ["Pus draining from eye, mouth ulcers (with fever), ear discharge (with fever)"],
+          "treatment": [
+            "Antibiotic appropriate for infection",
+            "Teach mother how to clean away discharge"
+          ]
+        },
+        "likely_malaria_in_high_transmission_area": {
+          "signs": ["In malarial area", "Fever or history of fever without other cause"],
+          "treatment": [
+            "Give appropriate antimalarial",
+            "Find and treat other cause if present"
+          ]
+        },
+        "likely_bacteremia_or_urinary_tract_infection": {
+          "signs": ["Fever 5 days or more without other cause"],
+          "treatment": [
+            "Give intramuscular Benzathine Penicillin (or Procaine Penicillin)",
+            "Refer urgently if not improving in 2 days"
+          ]
+        },
+        "viral": {
+          "signs": ["Fever <5 days without other cause"],
+          "treatment": [
+            "Paracetamol if high fever",
+            "Dress child lightly",
+            "Give fluids",
+            "Follow up in 2 days"
+          ]
+        }
+      }
+    },
+    "ear_problems": {
+      "assessment": {
+        "ear_pain": "Does child have ear pain?",
+        "ear_discharge": "Is there ear discharge?",
+        "duration": "If discharge, how long?"
+      },
+      "classifications": {
+        "mastoiditis": {
+          "signs": ["Tender swelling behind ear"],
+          "treatment": ["URGENT REFERRAL to hospital"]
+        },
+        "chronic_ear_infection": {
+          "signs": ["Ear discharge for 14 days or longer"],
+          "treatment": [
+            "Dry ear by wicking",
+            "Ciprofloxacin ear drops",
+            "Amoxicillin if fails"
+          ]
+        },
+        "acute_ear_infection": {
+          "signs": ["Ear discharge for less than 14 days or ear pain"],
+          "treatment": [
+            "Paracetamol for pain",
+            "If discharge: Give first dose of antibiotic (Amoxicillin or Cotrimoxazole)",
+            "Dry ear by wicking"
+          ]
+        },
+        "no_ear_infection": {
+          "treatment": ["No antibiotic needed"]
+        }
+      }
+    },
+    "malnutrition_and_anemia": {
+      "assessment": {
+        "weight_for_age": "Weight-for-age",
+        "visible_severe_wasting": "Visible severe wasting?",
+        "bipedal_edema": "Bipedal edema?",
+        "palmar_pallor": "Palmar pallor?"
+      },
+      "classifications": {
+        "severe_malnutrition_or_severe_anemia": {
+          "signs": ["Visible severe wasting", "Bipedal edema", "Severe palmar pallor", "Weight-for-age <60%"],
+          "treatment": [
+            "URGENT REFERRAL to hospital",
+            "If child is breastfeeding, continue",
+            "Treat hypoglycemia if present (give 50ml 10% glucose or breastfeed)"
+          ]
+        },
+        "moderate_malnutrition_or_anemia": {
+          "signs": ["Weight-for-age 60-80%", "Some palmar pallor"],
+          "treatment": [
+            "Vitamin A",
+            "Anthelmintic after diarrhea stops, or at follow up",
+            "Advise mother about feeding",
+            "Follow up in 30 days"
+          ]
+        },
+        "no_malnutrition_no_anemia": {
+          "treatment": [
+            "Vitamin A (if indicated by national policy)",
+            "Advise mother about feeding"
+          ]
+        }
+      }
+    },
+    "immunization_status": {
+      "assessment": "Check immunization card",
+      "actions": [
+        "Give vaccines indicated for age",
+        "Give Vitamin A if 6 months or older"  
+      ]
+    }
+  },
+  "treatment_charts": {
+    "oral_drugs_for_children": {
+      "age_dosages": {
+        "2_months_up_to_1_year": ["Fraction of tablet or liquid formulation", "1/6 to 1/2 tablet or 2-5ml liquid"],
+        "1_year_up_to_5_years": ["Fraction of tablet or liquid formulation", "1/2 to 1 tablet or 5-10ml liquid"]
+      }
+    },
+    "antibiotics_commonly_used": {
+      "amoxicillin": {
+        "indication": "Pneumonia, Otitis media",
+        "dose_2_12_months": "250mg (2.5ml of 100mg/5ml) BID x 5 days",
+        "dose_12_59_months": "500mg (5ml of 250mg/5ml) BID x 5 days"
+      },
+      "cotrimoxazole": {
+        "indication": "Severe pneumonia alternative",
+        "dose": "8mg/kg (TMP component) BD x 5 days"
+      },
+      "ampicillin": {
+        "indication": "Severe pneumonia, Neonatal infections",
+        "dose_iv": "50mg/kg QID"
+      },
+      "chloramphenicol": {
+        "indication": "Severe pneumonia when other antibiotics not available",
+        "dose": "25mg/kg QID"
+      }
+    }
+  },
+  "counseling_topics": [
+    {
+      "topic": "Feeding during and after illness",
+      "key_points": [
+        "Breastfeeding: More often and longer at each feed",
+        "Older children: Give soft, mashed foods frequently",
+        "After illness: Extra meal daily for 1-2 weeks to regain weight"
+      ]
+    },
+    {
+      "topic": "When to return immediately",
+      "key_points": [
+        "Unable to drink or breastfeed",
+        "Vomits everything",
+        "Convulsions",
+        "Lethargic or unconscious",
+        "Fast or difficult breathing",
+        "Fever",
+        "Blood in stool"
+      ]
+    },
+    {
+      "topic": "Home care",
+      "key_points": [
+        "Give plenty of fluids",
+        "Continue feeding",
+        "Keep child warm",
+        "Give recommended treatments on time"
+      ]
+    }
+  ]
+}

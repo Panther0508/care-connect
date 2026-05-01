@@ -1,0 +1,67 @@
+      {/* PHASE 2 FEATURE PANELS */}
+      <AnimatePresence>
+        {showTranslation && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">
+            <div className="flex items-center gap-2 text-sm">
+              <svg className="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" /></svg>
+              <span className="text-slate-300">Translate to:</span>
+              <select value={targetLanguage} onChange={e => setTargetLanguage(e.target.value)} className="bg-slate-900 text-slate-100 text-xs rounded px-2 py-1 border border-slate-700">
+                <option value="auto">Auto</option>
+                <option value="ha">Hausa</option>
+                <option value="yo">Yoruba</option>
+              </select>
+              {isTranslating && <span className="text-amber-400 text-xs">Translating...</span>}
+            </div>
+          </motion.div>
+        )}
+
+        {showSpeech && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <svg className={"w-4 h-4 " + (isRecording ? "text-red-400 animate-pulse" : "text-teal-400")} fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M7 4a3 3 0 016 0v6a3 3 0 11-6 0V4z" clipRule="evenodd" /></svg>
+              <button onClick={handleSpeechInput} className={"text-xs px-3 py-1.5 rounded-lg " + (isRecording ? "bg-red-500/20 text-red-300" : "bg-teal-500/20 text-teal-300") + " transition-all"}>
+                {isRecording ? "Listening" : "Click to speak"}
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {showImageUpload && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handleImageUpload} className="hidden" />
+              <button onClick={() => fileInputRef.current?.click()} className={"text-xs px-3 py-1.5 rounded-lg " + (isAnalyzingImage ? "bg-slate-500/20" : "bg-teal-500/20 text-teal-300") + " transition-all"} disabled={isAnalyzingImage}>
+                {isAnalyzingImage ? "Analyzing" : "Upload Image"}
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {showReminders && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">
+            <div className="flex items-center gap-2 text-sm">
+              <svg className="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              <input value={reminderForm.medicationName} onChange={e => setReminderForm({ ...reminderForm, medicationName: e.target.value })} placeholder="Medication" className="flex-1 bg-slate-900 text-slate-100 text-xs rounded px-2 py-1 border border-slate-700" />
+              <input type="time" value={reminderForm.time} onChange={e => setReminderForm({ ...reminderForm, time: e.target.value })} className="bg-slate-900 text-slate-100 text-xs rounded px-2 py-1 border border-slate-700" />
+              <button onClick={handleQuickReminder} className="text-xs px-3 py-1.5 rounded-lg bg-teal-500/20 text-teal-300 transition-all hover:bg-teal-500/30">Set Reminder</button>
+            </div>
+          </motion.div>
+        )}
+
+        {showAppointments && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">
+            <div className="flex items-center gap-2 text-sm">
+              <svg className="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              <select value={appointmentForm.specialistType} onChange={e => setAppointmentForm({ ...appointmentForm, specialistType: e.target.value })} className="bg-slate-900 text-slate-100 text-xs rounded px-2 py-1 border border-slate-700">
+                <option value="general">General</option>
+                <option value="cardiologist">Cardiologist</option>
+                <option value="endocrinologist">Endocrinologist</option>
+              </select>
+              <input type="date" value={appointmentForm.date} onChange={e => setAppointmentForm({ ...appointmentForm, date: e.target.value })} className="bg-slate-900 text-slate-100 text-xs rounded px-2 py-1 border border-slate-700" />
+              <input type="time" value={appointmentForm.time} onChange={e => setAppointmentForm({ ...appointmentForm, time: e.target.value })} className="bg-slate-900 text-slate-100 text-xs rounded px-2 py-1 border border-slate-700" />
+              <button onClick={handleQuickAppointment} className="text-xs px-3 py-1.5 rounded-lg bg-teal-500/20 text-teal-300 transition-all hover:bg-teal-500/30">Schedule</button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>

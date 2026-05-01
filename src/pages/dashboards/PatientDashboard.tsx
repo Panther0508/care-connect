@@ -1,10 +1,13 @@
 import { useHealthGraph } from '../../hooks/useHealthGraph';
 import { usePassport } from '../../hooks/usePassport';
 import { useAuth } from '@clerk/clerk-react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import VitaAvatar from '../../components/VitaAvatar';
+import CustomizableVitaAvatar from '../../components/CustomizableVitaAvatar';
+import { LiquidGlassCard } from '../../components/LiquidGlassCard';
+import RewardsPanel from '../../components/RewardsPanel';
 import {
   Sparkles,
   AlertCircle,
@@ -409,47 +412,64 @@ export default function PatientDashboard() {
       exit={{ opacity: 0 }}
       className="space-y-6 p-4 pb-24"
     >
-       {/* Greeting Section - Premium */}
-       <motion.div
-         initial={{ opacity: 0, y: 20 }}
-         animate={{ opacity: 1, y: 0 }}
-         transition={{ duration: 0.5 }}
-         className="flex items-center gap-4"
-       >
-         <div className="relative">
-           <VitaAvatar state="online" size={64} />
-           {/* Pulsing readiness ring */}
-           <motion.div
-             className="absolute -inset-2 rounded-full border-2 border-teal-400 opacity-50"
-             animate={{
-               scale: [1, 1.15, 1],
-               opacity: [0.5, 0.2, 0.5],
-             }}
-             transition={{
-               duration: 2,
-               repeat: Infinity,
-               ease: "easeInOut",
-             }}
-           />
-         </div>
-         <div>
-           <h1 className="text-2xl md:text-3xl font-bold text-slate-100 leading-tight tracking-tight">
-             {timeGreeting},
-             <span className="gradient-text-teal-amber ml-2">{userName}</span>
-           </h1>
-           <p className="text-slate-400 text-sm md:text-base">Your health command center</p>
-         </div>
-       </motion.div>
+        {/* Greeting Section - Premium */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex items-center gap-4"
+        >
+          <div className="relative">
+            <CustomizableVitaAvatar size={64} />
+            {/* Pulsing readiness ring */}
+            <motion.div
+              className="absolute -inset-2 rounded-full border-2 border-teal-400 opacity-50"
+              animate={{
+                scale: [1, 1.15, 1],
+                opacity: [0.5, 0.2, 0.5],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          </div>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-100 leading-tight tracking-tight">
+              {timeGreeting},
+              <span className="gradient-text-teal-amber ml-2">{userName}</span>
+            </h1>
+            <p className="text-slate-400 text-sm md:text-base">Your health command center</p>
+          </div>
+          {/* Customise button */}
+          <button 
+            onClick={() => navigate("/avatar")}
+            className="ml-4 flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-teal-500/20 text-teal-400 rounded hover:bg-teal-500/30 transition-colors"
+          >
+            ✨ Customise
+          </button>
+        </motion.div>
 
-       {/* Live Health Alerts - New Section */}
-       <motion.div
-         initial={{ opacity: 0, y: 20 }}
-         animate={{ opacity: 1, y: 0 }}
-         transition={{ duration: 0.5, delay: 0.1 }}
-         className="space-y-3"
-       >
-         <LiveHealthAlerts />
-       </motion.div>
+        {/* Rewards Panel */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="space-y-3"
+        >
+          <RewardsPanel />
+        </motion.div>
+
+        {/* Live Health Alerts - New Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="space-y-3"
+        >
+          <LiveHealthAlerts />
+        </motion.div>
 
        {/* Live Health Alerts - New Component */}
        {/* LiveHealthAlerts component will be rendered where the placeholder is */}

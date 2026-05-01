@@ -1,6 +1,6 @@
 export function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("vitachain", 4); // Incremented to version 4 for realtimeCache
+    const request = indexedDB.open("vitachain", 6); // Incremented to version 6 for gemmaCache store
 
     request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
       const db = (event.target as IDBOpenDBRequest).result;
@@ -44,6 +44,30 @@ export function openDB(): Promise<IDBDatabase> {
         if (!db.objectStoreNames.contains("realtimeCache")) {
           db.createObjectStore("realtimeCache", { keyPath: "key" });
         }
+      // Phase 2: Dataset vectors for RAG
+      if (!db.objectStoreNames.contains("datasetVectors")) {
+        db.createObjectStore("datasetVectors", { keyPath: "id" });
+      }
+      // Phase 2: Medication reminders
+      if (!db.objectStoreNames.contains("medicationReminders")) {
+        db.createObjectStore("medicationReminders", { keyPath: "id" });
+      }
+      // Phase 2: Appointments
+      if (!db.objectStoreNames.contains("appointments")) {
+        db.createObjectStore("appointments", { keyPath: "id" });
+      }
+      // Phase 2: Translation cache
+      if (!db.objectStoreNames.contains("translationCache")) {
+        db.createObjectStore("translationCache", { keyPath: "key" });
+      }
+      // Phase 2: User profile (migrate from old kv)
+      if (!db.objectStoreNames.contains("userProfile")) {
+        db.createObjectStore("userProfile", { keyPath: "userId" });
+      }
+      // Phase 3: Gemma 4 cache store for hybrid AI engine
+      if (!db.objectStoreNames.contains("gemmaCache")) {
+        db.createObjectStore("gemmaCache", { keyPath: "id" });
+      }
     };
 
     request.onsuccess = (event: Event) => {

@@ -53,7 +53,7 @@ export default function CycleTrackerPage() {
     const log = {
       userId: user.id,
       date: dateStr,
-      periodStart: flow !== "none" && (logs.length === 0 || !logs.some(l => l.date < dateStr && l.flow !== "none")), // simple heuristics
+      periodStart: flow !== "none" && (logs.length === 0 || !logs.some(l => l.date < dateStr && l.flow !== "none")),
       periodEnd: flow === "none" && logs.some(l => l.date < dateStr && l.flow !== "none"),
       flow,
       pain,
@@ -61,13 +61,11 @@ export default function CycleTrackerPage() {
       notes: notes || undefined,
       timestamp: Date.now(),
     };
-    // Note: addCycleLog will create new; for updates we'd need update function. We'll just add new for simplicity.
     await addCycleLog(log as any);
     await loadLogs();
     setLoading(false);
   };
 
-  // Stats
   const cycleStats = useMemo(() => {
     const periodLogs = logs.filter(l => l.flow !== "none");
     if (periodLogs.length < 2) return null;
@@ -85,12 +83,11 @@ export default function CycleTrackerPage() {
     return { averageCycle: Math.round(avg), periodLogs: sorted.length, lastPeriodStart, predictedNext };
   }, [logs]);
 
-  // Calendar helpers
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const getDaysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = (date: Date) => {
     const d = new Date(date.getFullYear(), date.getMonth(), 1);
-    return d.getDay() === 0 ? 6 : d.getDay() - 1; // Monday = 0
+    return d.getDay() === 0 ? 6 : d.getDay() - 1;
   };
 
   const daysInMonth = getDaysInMonth(selectedDate);
@@ -115,7 +112,6 @@ export default function CycleTrackerPage() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 p-4 pb-24">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -129,18 +125,17 @@ export default function CycleTrackerPage() {
         )}
       </div>
 
-      {/* Stats */}
       {cycleStats && (
         <div className="grid grid-cols-3 gap-3">
-          <div className="bg-slate-800/40 rounded-xl p-3 border border-slate-700/30 text-center">
+          <div className="glass-card p-3 text-center accent-border-l">
             <div className="text-xl font-bold text-white">{cycleStats.averageCycle}</div>
             <div className="text-[10px] text-slate-400 uppercase tracking-wide">Avg Cycle (d)</div>
           </div>
-          <div className="bg-slate-800/40 rounded-xl p-3 border border-slate-700/30 text-center">
+          <div className="glass-card p-3 text-center accent-border-l">
             <div className="text-xl font-bold text-white">{cycleStats.periodLogs}</div>
             <div className="text-[10px] text-slate-400 uppercase tracking-wide">Periods Logged</div>
           </div>
-          <div className="bg-slate-800/40 rounded-xl p-3 border border-slate-700/30 text-center">
+          <div className="glass-card p-3 text-center accent-border-l">
             <div className="text-xl font-bold text-rose-400 truncate">
               {cycleStats.predictedNext ? new Date(cycleStats.predictedNext).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—"}
             </div>
@@ -149,26 +144,21 @@ export default function CycleTrackerPage() {
         </div>
       )}
 
-      {/* Calendar */}
-      <div className="bg-slate-800/40 rounded-2xl p-4 border border-slate-700/30">
+      <div className="glass-card p-4 border-0">
         <div className="flex items-center justify-between mb-4">
-          <button onClick={goToPrevMonth} className="p-1 hover:bg-slate-700/50 rounded-lg text-slate-400">
+          <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={goToPrevMonth} className="p-1 hover:bg-slate-700/50 rounded-lg text-slate-400">
             <ChevronLeft size={20} />
-          </button>
-          <h2 className="text-lg font-semibold text-white">
-            {monthNames[selectedDate.getMonth()]} {selectedDate.getFullYear()}
-          </h2>
-          <button onClick={goToNextMonth} className="p-1 hover:bg-slate-700/50 rounded-lg text-slate-400">
+          </motion.button>
+          <h2 className="text-lg font-semibold text-white">{monthNames[selectedDate.getMonth()]} {selectedDate.getFullYear()}</h2>
+          <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={goToNextMonth} className="p-1 hover:bg-slate-700/50 rounded-lg text-slate-400">
             <ChevronRight size={20} />
-          </button>
+          </motion.button>
         </div>
-        {/* Weekday headers */}
         <div className="grid grid-cols-7 gap-1 mb-2">
           {["M", "T", "W", "T", "F", "S", "S"].map(d => (
             <div key={d} className="text-center text-xs text-slate-500 py-1">{d}</div>
           ))}
         </div>
-        {/* Days */}
         <div className="grid grid-cols-7 gap-1">
           {Array.from({ length: startWeekday }).map((_, i) => (
             <div key={`empty-${i}`} className="aspect-square" />
@@ -179,112 +169,83 @@ export default function CycleTrackerPage() {
             const hasLog = isLogged(day);
             const flowColor = getFlowColor(day);
             return (
-              <button
-                key={day}
+              <motion.button key={day} whileHover={{ scale: 1.15 }} whileTap={{ scale: 0.95 }}
                 onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth(), day))}
                 className={`aspect-square flex items-center justify-center rounded-lg text-sm relative ${
                   isSelected ? "bg-teal-500 text-white font-bold" : "text-slate-300 hover:bg-slate-700/50"
                 }`}
               >
                 {day}
-                {hasLog && (
-                  <span className={`absolute bottom-1 w-1.5 h-1.5 rounded-full ${flowColor || "bg-teal-400"}`} />
-                )}
-              </button>
+                {hasLog && <span className={`absolute bottom-1 w-1.5 h-1.5 rounded-full ${flowColor || "bg-teal-400"}`} />}
+              </motion.button>
             );
           })}
         </div>
       </div>
 
-      {/* Daily Log */}
-      <div className="bg-slate-800/60 rounded-2xl p-5 border border-slate-700/40">
+      <div className="glass-card p-5 border-0">
         <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
           <Calendar size={16} />
           Log for {selectedDate.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
         </h3>
 
-        {/* Flow */}
         <div className="mb-4">
           <label className="text-xs text-slate-400 mb-2 block">Flow</label>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             {FLOW_LEVELS.map(level => (
-              <button
-                key={level.value}
-                onClick={() => setFlow(level.value)}
-                className={`flex-1 py-2 rounded-lg text-xs font-medium transition-all flex flex-col items-center gap-1.5 ${
-                  flow === level.value
-                    ? `${level.color} text-white ring-2 ring-white/20`
-                    : "bg-slate-700/50 text-slate-400 hover:bg-slate-600/50"
-                }`}
-              >
-                {level.icon}
-                {level.label}
+              <button key={level.value} onClick={() => setFlow(level.value)}
+                className={`flex-1 py-2 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1 ${
+                  flow === level.value ? `${level.color} text-white ring-2 ring-white/20` : "glass-card text-slate-400 hover:border-teal-500/25 hover:text-slate-200"
+                }`}>
+                {level.icon} {level.label}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Pain */}
         <div className="mb-4">
           <label className="text-xs text-slate-400 mb-2 block">Pain Level (0-10)</label>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
             {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(p => (
-              <button
-                key={p}
+              <motion.button key={p} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
                 onClick={() => setPain(p)}
-                className={`w-8 h-8 rounded-lg text-xs font-medium transition-all ${
-                  pain === p ? "bg-rose-500 text-white" : "bg-slate-700/50 text-slate-400 hover:bg-slate-600/50"
-                }`}
-              >
-                {p}
-              </button>
+                className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
+                  pain === p ? "bg-rose-500 text-white" : "glass-card text-slate-400 hover:border-teal-500/25"
+                }`}>{p}</motion.button>
             ))}
           </div>
         </div>
 
-        {/* Mood */}
         <div className="mb-4">
           <label className="text-xs text-slate-400 mb-2 block">Mood</label>
           <div className="flex gap-2 flex-wrap">
             {MOODS.map(m => (
-              <button
-                key={m}
+              <motion.button key={m} whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}
                 onClick={() => setMood(m)}
-                className={`text-2xl p-2 rounded-lg transition-all ${
-                  mood === m ? "bg-teal-500/20 ring-2 ring-teal-500" : "bg-slate-700/50 hover:bg-slate-600/50"
-                }`}
-              >
-                {m}
-              </button>
+                className={`text-xl p-2 rounded-xl transition-all ${
+                  mood === m ? "bg-teal-500/20 ring-2 ring-teal-500" : "glass-card hover:border-teal-500/25"
+                }`}>{m}</motion.button>
             ))}
           </div>
         </div>
 
-        {/* Notes */}
         <div className="mb-4">
           <label className="text-xs text-slate-400 mb-2 block">Notes (optional)</label>
-          <textarea
-            value={notes}
-            onChange={e => setNotes(e.target.value)}
-            rows={2}
+          <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
             placeholder="Any symptoms, cravings, or observations..."
-            className="w-full px-3 py-2 bg-slate-900/50 border border-slate-700/30 rounded-lg text-sm text-slate-200 resize-none"
-          />
+            className="w-full px-3 py-2 bg-slate-900/50 border border-slate-700/30 rounded-xl text-sm text-slate-200 resize-none glass-input" />
         </div>
 
-        <button
-          onClick={saveLog}
-          disabled={loading}
-          className="w-full py-3 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white rounded-xl font-semibold flex items-center justify-center gap-2"
-        >
+        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+          onClick={saveLog} disabled={loading}
+          className="w-full py-3 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white rounded-xl font-semibold flex items-center justify-center gap-2">
           <Flame size={18} />
           {loading ? "Saving..." : "Save Entry"}
-        </button>
+        </motion.button>
       </div>
 
-      {/* Insights */}
       {logs.length > 0 && (
-        <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/30">
+        <div className="glass-card p-4 border-0">
           <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
             <Activity size={16} />
             Insights

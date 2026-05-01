@@ -1,4 +1,4 @@
-import { pipeline } from '@xenova/transformers';
+import { pipeline } from '@huggingface/transformers';
 import { getAllFacilities, getAllVectors } from '../lib/idb';
 import { searchOnline } from './onlineSearch';
 import { meshOrchestrator } from './meshOrchestrator';
