@@ -11,23 +11,11 @@ export function QuestCard({ quest, onProgressUpdate, onAbandon }) {
   const handleProgress = async () => {
     setLoading(true);
     try {
-      // In a real app, we would determine what action constitutes progress
-      // For demonstration, we'll increment by 10% when the card is clicked
-      const result = await updateQuestProgress(
-        'current-user', // Placeholder userId
-        quest.id,
-        10 // Increment by 10%
-      );
-      
+      const result = await updateQuestProgress('current-user', quest.id, 10);
       if (result.success) {
         setProgress(result.progress);
-        if (onProgressUpdate) {
-          onProgressUpdate(result);
-        }
-        
-        // Show celebration if completed
+        if (onProgressUpdate) onProgressUpdate(result);
         if (result.completed) {
-          // In a real app, we would trigger a celebration
           alert(`Quest completed! You earned ${result.reward} VitaPoints`);
         }
       }
@@ -40,22 +28,12 @@ export function QuestCard({ quest, onProgressUpdate, onAbandon }) {
   };
 
   const handleAbandon = async () => {
-    if (!window.confirm('Are you sure you want to abandon this quest?')) {
-      return;
-    }
-    
+    if (!window.confirm('Are you sure you want to abandon this quest?')) return;
     setLoading(true);
     try {
-      const result = await abandonQuest(
-        'current-user', // Placeholder userId
-        quest.id
-      );
-      
+      const result = await abandonQuest('current-user', quest.id);
       if (result.success) {
-        if (onAbandon) {
-          onAbandon(quest.id);
-        }
-        // In a real app, we would refresh the quests list
+        if (onAbandon) onAbandon(quest.id);
         alert('Quest abandoned');
       } else {
         alert(result.error || 'Failed to abandon quest');
@@ -68,6 +46,24 @@ export function QuestCard({ quest, onProgressUpdate, onAbandon }) {
     }
   };
 
+  const getDifficultyColor = () => {
+    switch (quest.difficulty) {
+      case 'easy': return 'bg-green-500/20 text-green-400';
+      case 'medium': return 'bg-yellow-500/20 text-yellow-400';
+      case 'hard': return 'bg-red-500/20 text-red-400';
+      default: return 'bg-slate-500/20 text-slate-400';
+    }
+  };
+
+  const getDotColor = () => {
+    switch (quest.difficulty) {
+      case 'easy': return 'bg-green-500';
+      case 'medium': return 'bg-yellow-500';
+      case 'hard': return 'bg-red-500';
+      default: return 'bg-slate-500';
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -75,92 +71,55 @@ export function QuestCard({ quest, onProgressUpdate, onAbandon }) {
       className="glass-card p-4 hover:scale-105 transition-transform duration-300 cursor-pointer"
     >
       <div className="flex items-start gap-4">
-        {/* Quest Icon - based on difficulty */}
-        <div className="w-10 h-10 flex-shrink-0 
-          ${quest.difficulty === 'easy' 
-            ? 'bg-green-500/20 text-green-400' 
-            : quest.difficulty === 'medium' 
-              ? 'bg-yellow-500/20 text-yellow-400' 
-              : 'bg-red-500/20 text-red-400'}"
-          className="flex items-center justify-center rounded-lg">
-          {/* Difficulty indicator */}
-          <div className="w-4 h-4 rounded-full 
-            ${quest.difficulty === 'easy' 
-              ? 'bg-green-500' 
-              : quest.difficulty === 'medium' 
-                ? 'bg-yellow-500' 
-                : 'bg-red-500'}">
-          </div>
+        <div className={`w-10 h-10 flex-shrink-0 ${getDifficultyColor()} flex items-center justify-center rounded-lg`}>
+          <div className={`w-4 h-4 rounded-full ${getDotColor()}`} />
         </div>
-        
         <div className="flex-1">
           <div className="flex justify-between items-start mb-2">
             <h3 className="font-medium text-slate-100">{quest.title}</h3>
-            <span className="text-xs 
-              ${quest.difficulty === 'easy' 
-                ? 'text-green-500' 
-                : quest.difficulty === 'medium' 
-                  ? 'text-yellow-500' 
-                  : 'text-red-500'} 
-              font-medium">
-              {quest.difficulty}
+            <span className="text-xs text-slate-400">
+              {quest.completedAt ? new Date(quest.completedAt).toLocaleDateString() : `${quest.duration || 7}d`}
             </span>
           </div>
-          
-          <p className="text-slate-400 text-sm mb-3 line-clamp-2">
-            {quest.description}
-          </p>
-          
-          <div className="flex items-center gap-3 mb-3">
-            <div className="flex items-center gap-2 text-sm">
-              <div className="w-2 h-2 rounded-full bg-teal-500" />
-              <span>{quest.rewardPoints} pts</span>
+          <p className="text-slate-400 text-sm mb-3">{quest.description}</p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-teal-400 font-medium">{quest.rewardPoints} pts</span>
+              {quest.badgeUnlock && (
+                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300">
+                  🏆 {quest.badgeUnlock.replace('_', ' ')}
+                </span>
+              )}
             </div>
-            {quest.badgeUnlock && (
-              <div className="flex items-center gap-2 text-sm">
-                <div className="w-2 h-2 rounded-full bg-teal-500" />
-                <span>Badge</span>
+            {quest.completed ? (
+              <span className="text-xs text-green-400 font-medium">Completed</span>
+            ) : (
+              <div className="flex gap-2">
+                <button
+                  onClick={handleProgress}
+                  disabled={loading}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 disabled:opacity-50"
+                >
+                  Progress
+                </button>
+                <button
+                  onClick={handleAbandon}
+                  disabled={loading}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-red-500/20 text-red-300 hover:bg-red-500/30 disabled:opacity-50"
+                >
+                  Abandon
+                </button>
               </div>
             )}
           </div>
-          
-          {/* Progress Bar */}
-          <div className="w-full bg-slate-700/20 rounded-full h-2.5 overflow-hidden">
-            <div 
-              className="h-full bg-teal-500 rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${progress}%` }}
-            />
-          </div>
-          <div className="flex justify-between text-xs text-slate-400 mt-1">
-            <span>{progress}%</span>
-            <span>{quest.daysRemaining} days left</span>
-          </div>
-          
-          {/* Action Buttons */}
-          <div className="mt-4 flex flex-col sm:flex-row sm:space-x-2">
-            <button 
-              onClick={handleProgress}
-              disabled={loading || progress >= 100}
-              className="w-full sm:w-auto px-4 py-2 
-                ${loading 
-                  ? 'bg-slate-600/20 text-slate-400' 
-                  : 'bg-teal-500 text-white'} 
-                rounded hover:bg-teal-600 disabled:cursor-not-allowed
-                transition-all duration-200"
-            >
-              {loading ? 'Updating...' : progress >= 100 ? 'Completed' : 'Progress'}
-            </button>
-            {progress < 100 && (
-              <button 
-                onClick={handleAbandon}
-                className="w-full sm:w-auto px-4 py-2 
-                  bg-slate-600/20 text-slate-400 rounded hover:bg-slate-600/30
-                  transition-all duration-200"
-              >
-                Abandon
-              </button>
-            )}
-          </div>
+          {quest.progress !== undefined && (
+            <div className="mt-3 w-full bg-slate-700/30 rounded-full h-2">
+              <div
+                className="bg-teal-500 h-2 rounded-full transition-all"
+                style={{ width: `${Math.min(progress, 100)}%` }}
+              />
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

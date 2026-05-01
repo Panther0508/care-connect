@@ -5,7 +5,7 @@ import { QuestCard } from '../components/QuestCard';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
-export function QuestsPage() {
+export default function QuestsPage() {
   const [activeQuests, setActiveQuests] = useState([]);
   const [availableQuests, setAvailableQuests] = useState([]);
   const [questHistory, setQuestHistory] = useState([]);
@@ -232,7 +232,7 @@ export function QuestsPage() {
                           <span className="text-xs text-slate-400">
                             {new Date(quest.completedAt).toLocaleDateString()}
                           </span>
-                        </span>
+                        </div>
                         <p className="text-slate-400 text-sm">
                           Completed! Earned {quest.rewardPoints} VitaPoints
                           {quest.badgeUnlock && ` + ${quest.badgeUnlock.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} badge`}

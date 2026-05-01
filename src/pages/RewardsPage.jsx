@@ -7,12 +7,12 @@ import {
   getLeaderboard,
   redeemPoints
 } from '../services/rewardsEngine';
-import { RewardsPanel } from '../components/RewardsPanel';
+import RewardsPanel from '../components/RewardsPanel';
 import { BadgeGrid } from '../components/BadgeGrid';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
-export function RewardsPage() {
+export default function RewardsPage() {
   const [points, setPoints] = useState(0);
   const [streaks, setStreaks] = useState({
     login: { current: 0, longest: 0 },
@@ -218,9 +218,9 @@ export function RewardsPage() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-6"
-        >
-          <BadgeGrid userId={userId} showAll={true} />
-        </div>
+         >
+           <BadgeGrid userId={userId} showAll={true} />
+         </motion.div>
 
         {/* Leaderboard Section */}
         <motion.div

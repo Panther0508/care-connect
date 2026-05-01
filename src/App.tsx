@@ -56,6 +56,15 @@ const FirstAid = lazy(() => import("./pages/FirstAid"));
 const CommunityPage = lazy(() => import("./pages/CommunityPage"));
 const TopicFeed = lazy(() => import("./pages/TopicFeed"));
 const PostDetail = lazy(() => import("./pages/PostDetail"));
+const PatientHistory = lazy(() => import("./pages/PatientHistory"));
+const ReferralGenerator = lazy(() => import("./pages/ReferralGenerator"));
+const CHWTriage = lazy(() => import("./pages/CHWTriage"));
+const ProtocolNavigator = lazy(() => import("./pages/ProtocolNavigator"));
+const EncounterLogger = lazy(() => import("./pages/EncounterLogger"));
+const EmergencyID = lazy(() => import("./pages/EmergencyID"));
+const RewardsPage = lazy(() => import("./pages/RewardsPage"));
+const QuestsPage = lazy(() => import("./pages/QuestsPage"));
+const TrainingDashboard = lazy(() => import("./pages/TrainingDashboard"));
 
 // Page wrapper with animation
 const PageWrapper = ({ children }) => (
@@ -143,10 +152,19 @@ const App = () => {
                    <PageWrapper><ClinicianProfile /></PageWrapper>
                  </ProtectedRoute>
                </AuthSyncGate>
-             } />
+              } />
 
-            {/* Protected pages — all require role */}
-            <Route path="/health" element={
+              {/* Referral Generator for Clinicians */}
+              <Route path="/referral-generator" element={
+                <AuthSyncGate>
+                  <ProtectedRoute allowedRoles={['clinician']}>
+                    <PageWrapper><ReferralGenerator /></PageWrapper>
+                  </ProtectedRoute>
+                </AuthSyncGate>
+              } />
+
+             {/* Protected pages — all require role */}
+             <Route path="/health" element={
               <AuthSyncGate>
                 <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw']}>
                   <PageWrapper><HealthGraph /></PageWrapper>
@@ -224,10 +242,26 @@ const App = () => {
                     <PageWrapper><MentalHealth /></PageWrapper>
                   </ProtectedRoute>
                 </AuthSyncGate>
-              } />
-              
-              {/* Education routes */}
-              <Route path="/education" element={
+               } />
+               
+               {/* Patient engagement: Rewards & Quests */}
+               <Route path="/rewards" element={
+                 <AuthSyncGate>
+                   <ProtectedRoute allowedRoles={['patient']}>
+                     <PageWrapper><RewardsPage /></PageWrapper>
+                   </ProtectedRoute>
+                 </AuthSyncGate>
+               } />
+               <Route path="/quests" element={
+                 <AuthSyncGate>
+                   <ProtectedRoute allowedRoles={['patient']}>
+                     <PageWrapper><QuestsPage /></PageWrapper>
+                   </ProtectedRoute>
+                 </AuthSyncGate>
+               } />
+               
+               {/* Education routes */}
+               <Route path="/education" element={
                 <AuthSyncGate>
                   <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
                     <PageWrapper><EducationPage /></PageWrapper>
@@ -240,10 +274,19 @@ const App = () => {
                     <PageWrapper><EducationModule /></PageWrapper>
                   </ProtectedRoute>
                 </AuthSyncGate>
-              } />
-              
-               {/* Care Locator route */}
-               <Route path="/care-locator" element={
+               } />
+               
+               {/* Patient health history */}
+               <Route path="/patient-history" element={
+                 <AuthSyncGate>
+                   <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                     <PageWrapper><PatientHistory /></PageWrapper>
+                   </ProtectedRoute>
+                 </AuthSyncGate>
+               } />
+               
+                {/* Care Locator route */}
+                <Route path="/care-locator" element={
                  <AuthSyncGate>
                    <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
                      <PageWrapper><CareLocator /></PageWrapper>
@@ -280,8 +323,18 @@ const App = () => {
                    <PageWrapper><FirstAid /></PageWrapper>
                  </ProtectedRoute>
                </AuthSyncGate>
+              } />
+              
+              {/* Emergency Medical ID - accessible to all roles */}
+             <Route path="/emergency" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                   <PageWrapper><EmergencyID /></PageWrapper>
+                 </ProtectedRoute>
+               </AuthSyncGate>
              } />
-            <Route path="/passport" element={
+             
+             <Route path="/passport" element={
               <AuthSyncGate>
                 <ProtectedRoute allowedRoles={['patient', 'chw']}>
                   <PageWrapper><Passport /></PageWrapper>
@@ -315,8 +368,32 @@ const App = () => {
                   <PageWrapper><AlertsPage /></PageWrapper>
                 </ProtectedRoute>
               </AuthSyncGate>
-            } />
-            <Route path="/reservation/:facilityId" element={
+             } />
+             
+             {/* CHW specific routes */}
+             <Route path="/chw-triage" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['chw']}>
+                   <PageWrapper><CHWTriage /></PageWrapper>
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
+             <Route path="/protocol-navigator" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['chw']}>
+                   <PageWrapper><ProtocolNavigator /></PageWrapper>
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
+             <Route path="/encounter-logger" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['chw']}>
+                   <PageWrapper><EncounterLogger /></PageWrapper>
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
+             
+             <Route path="/reservation/:facilityId" element={
               <AuthSyncGate>
                 <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
                   <PageWrapper><ReservationPage /></PageWrapper>
@@ -408,9 +485,22 @@ const App = () => {
                   </Suspense>
                 </ProtectedRoute>
               </AuthSyncGate>
-            } />
-
-            {/* Fallback */}
+             } />
+             <Route path="/training" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['admin']}>
+                   <Suspense fallback={<LoadingFallback />}>
+                     <AdminMFAGate>
+                       <AdminBiometricLock>
+                         <PageWrapper><TrainingDashboard /></PageWrapper>
+                       </AdminBiometricLock>
+                     </AdminMFAGate>
+                   </Suspense>
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
+             
+             {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AnimatePresence>
