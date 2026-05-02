@@ -1,10 +1,10 @@
 export function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("vitachain", 6); // Incremented to version 6 for gemmaCache store
+    const request = indexedDB.open("vitachain", 7); // Bumped to v7 for searchCache
 
     request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
       const db = (event.target as IDBOpenDBRequest).result;
-      
+
       if (!db.objectStoreNames.contains("facilities")) {
         db.createObjectStore("facilities", { keyPath: "id" });
       }
@@ -14,59 +14,63 @@ export function openDB(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains("needs")) {
         db.createObjectStore("needs", { keyPath: "timestamp" });
       }
-      // New stores for mesh protocol
+      // Search logs (v4)
       if (!db.objectStoreNames.contains("searchLogs")) {
         db.createObjectStore("searchLogs", { keyPath: "id", autoIncrement: true });
       }
+      // Mesh state (v4)
       if (!db.objectStoreNames.contains("meshState")) {
-        db.createObjectStore("meshState", { keyPath: "key" }); // We'll store the CRDT state under key 'crdt'
+        db.createObjectStore("meshState", { keyPath: "key" });
       }
-      // Health graph and medication data stores (v3)
+      // Health graph & medication (v3)
       if (!db.objectStoreNames.contains("healthGraph")) {
         db.createObjectStore("healthGraph", { keyPath: "key" });
       }
       if (!db.objectStoreNames.contains("rxnorm")) {
         db.createObjectStore("rxnorm", { keyPath: "drugName" });
       }
-      // Passport shares and scans
+      // Passport shares/scans (v4)
       if (!db.objectStoreNames.contains("passportShares")) {
         db.createObjectStore("passportShares", { keyPath: "id", autoIncrement: true });
       }
       if (!db.objectStoreNames.contains("passportScans")) {
         db.createObjectStore("passportScans", { keyPath: "id", autoIncrement: true });
       }
-        // Generic KV store for tokens, settings, etc.
-        if (!db.objectStoreNames.contains("kv")) {
-          db.createObjectStore("kv", { keyPath: "key" });
-        }
-        
-        // Realtime cache for API responses with TTL
-        if (!db.objectStoreNames.contains("realtimeCache")) {
-          db.createObjectStore("realtimeCache", { keyPath: "key" });
-        }
-      // Phase 2: Dataset vectors for RAG
+      // KV store (v4)
+      if (!db.objectStoreNames.contains("kv")) {
+        db.createObjectStore("kv", { keyPath: "key" });
+      }
+      // Real-time cache (v4)
+      if (!db.objectStoreNames.contains("realtimeCache")) {
+        db.createObjectStore("realtimeCache", { keyPath: "key" });
+      }
+      // Dataset vectors for RAG (v5)
       if (!db.objectStoreNames.contains("datasetVectors")) {
         db.createObjectStore("datasetVectors", { keyPath: "id" });
       }
-      // Phase 2: Medication reminders
+      // Medication reminders (v5)
       if (!db.objectStoreNames.contains("medicationReminders")) {
         db.createObjectStore("medicationReminders", { keyPath: "id" });
       }
-      // Phase 2: Appointments
+      // Appointments (v5)
       if (!db.objectStoreNames.contains("appointments")) {
         db.createObjectStore("appointments", { keyPath: "id" });
       }
-      // Phase 2: Translation cache
+      // Translation cache (v5)
       if (!db.objectStoreNames.contains("translationCache")) {
         db.createObjectStore("translationCache", { keyPath: "key" });
       }
-      // Phase 2: User profile (migrate from old kv)
+      // User profile (v5)
       if (!db.objectStoreNames.contains("userProfile")) {
         db.createObjectStore("userProfile", { keyPath: "userId" });
       }
-      // Phase 3: Gemma 4 cache store for hybrid AI engine
+      // Gemma cache (v6)
       if (!db.objectStoreNames.contains("gemmaCache")) {
         db.createObjectStore("gemmaCache", { keyPath: "id" });
+      }
+      // Search cache for new web search (v7)
+      if (!db.objectStoreNames.contains("searchCache")) {
+        db.createObjectStore("searchCache", { keyPath: "query" });
       }
     };
 
@@ -985,4 +989,58 @@ export async function getMentalHealthLogs(userId: string, limit: number = 10): P
 // Alias
 export async function getDB(): Promise<IDBDatabase> {
   return openDB();
+}
+
+// ==================== Search Cache (for webSearchService) ====================
+
+export interface SearchCacheEntry {
+  query: string;
+  results: Array<{ title: string; url: string; snippet: string; source: string }>;
+  timestamp: number;
+}
+
+export async function getSearchCache(query: string): Promise<SearchCacheEntry | null> {
+  const db = await openDB();
+  return new Promise<SearchCacheEntry | null>((resolve, reject) => {
+    const transaction = db.transaction("searchCache", "readonly");
+    const store = transaction.objectStore("searchCache");
+    const request = store.get(query);
+    request.onsuccess = () => resolve(request.result || null);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function setSearchCache(entry: SearchCacheEntry): Promise<void> {
+  const db = await openDB();
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction("searchCache", "readwrite");
+    const store = transaction.objectStore("searchCache");
+    store.put(entry);
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+
+export async function deleteStaleSearchCache(ttlMs: number = 60 * 60 * 1000): Promise<number> {
+  const db = await openDB();
+  return new Promise<number>((resolve, reject) => {
+    const transaction = db.transaction("searchCache", "readwrite");
+    const store = transaction.objectStore("searchCache");
+    let deleted = 0;
+    const request = store.openCursor();
+    request.onsuccess = (event) => {
+      const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
+      if (cursor) {
+        const entry = cursor.value as SearchCacheEntry;
+        if (Date.now() - entry.timestamp > ttlMs) {
+          cursor.delete();
+          deleted++;
+        }
+        cursor.continue();
+      } else {
+        resolve(deleted);
+      }
+    };
+    request.onerror = () => reject(request.error);
+  });
 }

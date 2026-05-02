@@ -65,6 +65,7 @@ const EmergencyID = lazy(() => import("./pages/EmergencyID"));
 const RewardsPage = lazy(() => import("./pages/RewardsPage"));
 const QuestsPage = lazy(() => import("./pages/QuestsPage"));
 const TrainingDashboard = lazy(() => import("./pages/TrainingDashboard"));
+const EvaluationDashboard = lazy(() => import("./pages/EvaluationDashboard"));
 
 // Page wrapper with animation
 const PageWrapper = ({ children }) => (
@@ -486,19 +487,32 @@ const App = () => {
                 </ProtectedRoute>
               </AuthSyncGate>
              } />
-             <Route path="/training" element={
-               <AuthSyncGate>
-                 <ProtectedRoute allowedRoles={['admin']}>
-                   <Suspense fallback={<LoadingFallback />}>
-                     <AdminMFAGate>
-                       <AdminBiometricLock>
-                         <PageWrapper><TrainingDashboard /></PageWrapper>
-                       </AdminBiometricLock>
-                     </AdminMFAGate>
-                   </Suspense>
-                 </ProtectedRoute>
-               </AuthSyncGate>
-             } />
+              <Route path="/training" element={
+                <AuthSyncGate>
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <Suspense fallback={<LoadingFallback />}>
+                      <AdminMFAGate>
+                        <AdminBiometricLock>
+                          <PageWrapper><TrainingDashboard /></PageWrapper>
+                        </AdminBiometricLock>
+                      </AdminMFAGate>
+                    </Suspense>
+                  </ProtectedRoute>
+                </AuthSyncGate>
+              } />
+              <Route path="/evaluation" element={
+                <AuthSyncGate>
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <Suspense fallback={<LoadingFallback />}>
+                      <AdminMFAGate>
+                        <AdminBiometricLock>
+                          <PageWrapper><EvaluationDashboard /></PageWrapper>
+                        </AdminBiometricLock>
+                      </AdminMFAGate>
+                    </Suspense>
+                  </ProtectedRoute>
+                </AuthSyncGate>
+              } />
              
              {/* Fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />

@@ -185,6 +185,21 @@ export default function AIAssistant() {
 
   useEffect(() => {
     const prepareModel = async () => {
+      // Check if we're online first - if offline, skip model load
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        console.log('Offline mode - skipping TinyLlama load, will use cache/fallback on first query');
+        setModelLoaded(true); // Allow chat to work with offline/cached responses
+        return;
+      }
+
+      // Only load model if user has actually interacted with AI (lazy load)
+      const hasInteracted = localStorage.getItem('vita_ai_interacted');
+      if (!hasInteracted) {
+        console.log('Deferring AI model load until first user interaction');
+        setModelLoaded(true); // Set to true to allow UI, actual lazy load will trigger on first send
+        return;
+      }
+
       try {
         setLoadingModel(true);
         loaderToastRef.current = showStatus(
@@ -212,17 +227,6 @@ export default function AIAssistant() {
       }
     };
     prepareModel();
-  }, [showStatus, dismissStatus]);
-
-  useEffect(() => {
-    const initRxNorm = async () => {
-      const existing = await getAllRxNorm();
-      if (existing.length > 0) {
-        setRxnormReady(true);
-      }
-    };
-    initRxNorm();
-    initializeReminders();
   }, []);
 
   const addMessage = (role: MessageRole, content: string, extra?: Partial<Omit<Message, 'role' | 'content'>>) => {
@@ -311,15 +315,35 @@ export default function AIAssistant() {
     }
   };
 
-  const handleSend = async (text: string) => {
-    if (!text.trim()) return;
-    if (!modelLoaded) {
-      addMessage("system", "AI model is still loading. Please wait...");
-      return;
-    }
+   const handleSend = async (text: string) => {
+     if (!text.trim()) return;
 
-    setCurrentInput("");
-    setIsProcessing(true);
+     // Mark that user has interacted (for future sessions)
+     localStorage.setItem('vita_ai_interacted', 'true');
+
+     // Lazy load model on first use if not loaded yet
+     if (!modelLoaded) {
+       setLoadingModel(true);
+       try {
+         await loadModel((progress: any) => {
+           if (progress && progress.status === "downloading") {
+             console.log(`Downloading: ${Math.round((progress.loaded || 0) / (progress.total || 1) * 100)}%`);
+           }
+         });
+         setModelLoaded(true);
+         showStatus("success", "AI Engine Ready", "You can now use the assistant offline.");
+       } catch (err) {
+         console.error("Failed to load TinyLlama model:", err);
+         addMessage("system", "AI model failed to load. Some features may be limited.");
+         setLoadingModel(false);
+         return;
+       } finally {
+         setLoadingModel(false);
+       }
+     }
+
+     setCurrentInput("");
+     setIsProcessing(true);
 
     // CRISIS DETECTION Layer 1 & 2
     const detectionResult = scanMessage(text);

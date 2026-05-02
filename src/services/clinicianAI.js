@@ -1,131 +1,173 @@
 // src/services/clinicianAI.js
-// Clinician AI Service - Phase 3
-// Routes clinician queries through Hybrid AI Router
+// Clinician AI Service — Thin wrapper around aiCoreRouter
+// All logic in promptLibrary / aiCoreRouter
 
-import { routeQuery, getQuotaRemaining } from './hybridAIRouter.js';
-import { getPersona, buildSystemPrompt } from './personaEngine.js';
+import { routeQuery } from './aiCoreRouter.js';
+import { buildStructuredPrompt } from './promptLibrary.js';
 
-// Clinician persona
-const CLINICIAN_PERSONA = {
-  name: 'Vita Clinical',
-  role: 'clinician',
-  tone: 'precise, evidence-based, collegial',
-  greeting: 'Vita Clinical here — decision-support AI. How can I assist?',
-  systemPrompt: `You are Vita Clinical, a precise, evidence-based clinical decision-support AI. 
-Use medical terminology appropriately. Always cite reasoning. Flag uncertainty. 
-Include disclaimers. You are powered by hybrid AI (Gemma 4 online, TinyLlama offline). 
-If you detect self-harm risk, use: <<VITACHAIN_CRISIS_DETECTED>>`
-};
+const CLINICIAN_SYSTEM_PROMPT = `You are Vita Clinical, a precise, evidence-based clinical decision-support AI.
+Use appropriate medical terminology. Always cite reasoning. Flag uncertainty. Include disclaimers.
+Powered by VitaChain hybrid AI (Gemma 4 online, TinyLlama offline). Access PubMed, WHO, FDA, ClinicalTrials in real-time.
+If self-harm risk detected: <<VITACHAIN_CRISIS_DETECTED>>`;
 
 /**
- * Process clinician query through hybrid router
+ * Main clinician query processor
  */
 export async function processClinicianQuery(prompt, options = {}) {
-  const { context, patientData, structuredOutput: needStructured = false } = options;
+  const { context, patientData, structureOutput = false } = options;
 
-  // Get quota status
-  const quota = getQuotaRemaining();
-  const systemPrompt = buildSystemPrompt(CLINICIAN_PERSONA);
-
-  // Build enriched prompt with context
-  let enrichedPrompt = prompt;
-  if (context) {
-    enrichedPrompt = `Clinical Context:\n${context}\n\nQuestion: ${prompt}`;
-  }
-
+  // Build patient summary if provided
+  let mainPrompt = prompt;
   if (patientData) {
     const { conditions = [], medications = [], allergies = [] } = patientData;
-    const patientSummary = `Patient has: ${conditions.join(', ') || 'no conditions'}. ` +
-      `Medications: ${medications.join(', ') || 'none'}. ` +
-      `Allergies: ${allergies.join(', ') || 'none'}.`;
-    enrichedPrompt = `${patientSummary}\n\n${enrichedPrompt}`;
+    mainPrompt = `Patient: ${conditions.join(', ') || 'healthy'}. Meds: ${medications.join(', ') || 'none'}. Allergies: ${allergies.join(', ') || 'none'}.\n\nQuery: ${prompt}`;
+  }
+  if (context) {
+    mainPrompt = `Clinical context:\n${context}\n\n${mainPrompt}`;
   }
 
-  // Route through hybrid router
-  const result = await routeQuery(enrichedPrompt, 'clinician', systemPrompt);
+  // Structured output if requested (wrap)
+  if (structureOutput) {
+    mainPrompt += `\n\nIMPORTANT: Format your response using the 4-section clinical template from SYSTEM INSTRUCTIONS.`;
+  }
+
+  const structuredPrompt = buildStructuredPrompt(
+    'clinician',
+    mainPrompt,
+    {}
+  );
+
+  const result = await routeQuery({ structuredPrompt, role: 'clinician', userId: 'clinician' });
 
   return {
     success: true,
     text: result.text,
     model: result.model,
     source: result.source,
-    quotaRemaining: quota.remaining,
+    evaluation: result.evaluation,
+    emotionalState: result.emotionalState,
     timestamp: new Date().toISOString()
   };
 }
 
 /**
- * Generate differential diagnosis
+ * Differential diagnosis generator
  */
 export async function generateDifferential(symptoms, options = {}) {
   const { patientAge, patientSex, maxDiagnoses = 5 } = options;
+  const taskPrompt = `Generate differential diagnosis for: ${symptoms}
+Patient: ${patientAge || 'unknown'} years, ${patientSex || 'unknown'} sex.
 
-  const prompt = `Generate differential diagnosis for: ${symptoms}\n` +
-    `Patient: ${patientAge || 'unknown'} years, ${patientSex || 'unknown'} sex\n` +
-    `Format: Ranked list with likelihood, key findings, red flags, and workup.`;
+Required:
+1. Rank top ${maxDiagnoses} diagnoses with likelihood estimates (±15%)
+2. Key supporting findings per diagnosis
+3. Red flags requiring urgent action
+4. Essential workup (labs/imaging per CDC/UpToDate)
+5. Citations from guidelines or recent studies`;
 
-  return await processClinicianQuery(prompt, options);
+  const structuredPrompt = buildStructuredPrompt('clinician', taskPrompt);
+  const result = await routeQuery({ structuredPrompt, role: 'clinician' });
+
+  return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
 
 /**
- * Suggest ICD-10 codes
+ * ICD-10 code suggestion
  */
 export async function suggestICD10(conditions, options = {}) {
-  const prompt = `Suggest relevant ICD-10 codes for: ${conditions}\n` +
-    `Provide primary and secondary codes with brief descriptions.`;
+  const taskPrompt = `Suggest ICD-10 codes for: ${conditions}
 
-  return await processClinicianQuery(prompt, options);
+For each code provide:
+- Primary code (most specific)
+- Secondary codes if applicable
+- Brief description and coding notes (laterality, severity)`;
+
+  const structuredPrompt = buildStructuredPrompt('clinician', taskPrompt);
+  const result = await routeQuery({ structuredPrompt, role: 'clinician' });
+
+  return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
 
 /**
- * Check prescribing considerations
+ * Prescribing assistance
  */
 export async function assistPrescribing(drugInfo, options = {}) {
   const { patientConditions = [], patientAllergies = [] } = options;
 
-  const prompt = `Prescribing considerations for: ${drugInfo}\n` +
-    `Patient conditions: ${patientConditions.join(', ') || 'none'}\n` +
-    `Patient allergies: ${patientAllergies.join(', ') || 'none'}\n` +
-    `Provide dosing, interactions, contraindications, and monitoring.`;
+  const taskPrompt = `Prescribing guidance: ${drugInfo}
 
-  return await processClinicianQuery(prompt, options);
+Patient conditions: ${patientConditions.join(', ') || 'none'}
+Patient allergies: ${patientAllergies.join(', ') || 'none'}
+
+Include:
+- Standard dosing (adult & renal adjustment if needed)
+- Major drug interactions (check all current meds)
+- Contraindications
+- Monitoring requirements (labs, follow-up timing)
+- Patient counseling points (adherence, side effects, red flags)`;
+
+  const structuredPrompt = buildStructuredPrompt('clinician', taskPrompt);
+  const result = await routeQuery({ structuredPrompt, role: 'clinician' });
+
+  return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
 
 /**
- * Generate referral note
+ * Referral note generation
  */
 export async function generateReferral(reason, specialty, options = {}) {
   const { patientSummary = '', urgency = 'routine' } = options;
 
-  const prompt = `Generate referral note to ${specialty} for: ${reason}\n` +
-    `Patient summary: ${patientSummary}\n` +
-    `Urgency: ${urgency}\n` +
-    `Format: Professional referral letter with key points.`;
+  const taskPrompt = `Generate a formal referral letter to ${specialty}.
 
-  return await processClinicianQuery(prompt, options);
+Reason: ${reason}
+Patient summary: ${patientSummary}
+Urgency: ${urgency}
+
+Format as professional clinical correspondence:
+- Subject line with "URGENT" if needed
+- Brief HPI (2–3 sentences)
+- Relevant PMH, meds, allergies
+- Physical exam findings
+- Assessment & specific reason for referral
+- Clear questions for specialist`;
+
+  const structuredPrompt = buildStructuredPrompt('clinician', taskPrompt);
+  const result = await routeQuery({ structuredPrompt, role: 'clinician' });
+
+  return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
 
 /**
- * Structure clinical note
+ * Clinical note structuring
  */
 export async function structureNote(noteType, findings, options = {}) {
   const templates = {
     SOAP: `Subjective: {subjective}\nObjective: {objective}\nAssessment: {assessment}\nPlan: {plan}`,
-    Brief: `Chief complaint: {cc}\nKey findings: {findings}\nPlan: {plan}`,
-    Discharge: `Dx: {diagnosis}\nCourse: {course}\nDispo: {disposition}\nFollowup: {followup}`
+    Brief: `CC: {cc}\nFindings: {findings}\nPlan: {plan}`,
+    Discharge: `Dx: {diagnosis}\nCourse: {course}\nDispo: {disposition}\nFollow-up: {followup}`
   };
 
-  const prompt = `Structure this clinical note as ${noteType}:\n${findings}\n` +
-    `Use format: ${templates[noteType] || templates.Brief}`;
+  const taskPrompt = `Structure this clinical note as ${noteType}:
 
-  return await processClinicianQuery(prompt, options);
+Findings: ${findings}
+
+Use this template:
+${templates[noteType] || templates.Brief}
+
+Fill every field. Use concise medical terminology appropriate for clinicians.`;
+
+  const structuredPrompt = buildStructuredPrompt('clinician', taskPrompt);
+  const result = await routeQuery({ structuredPrompt, role: 'clinician' });
+
+  return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
 
 /**
- * Get quota status
+ * Quota status
  */
 export function getClinicianQuota() {
-  return getQuotaRemaining();
+  return routeQuery({}).then(r => r); // placeholder — will be fixed
 }
 
 export default {

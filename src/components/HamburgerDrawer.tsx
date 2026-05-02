@@ -19,7 +19,8 @@ import {
   Target,
   MessagesSquare,
   BookOpen,
-  MapPin
+  MapPin,
+  Moon
 } from "lucide-react";
 import { useState } from "react";
 import { clearActiveUser } from "../services/healthGraph";

@@ -1,154 +1,198 @@
 // src/services/chwAI.js
-// Community Health Worker AI Service - Phase 3
-// Routes CHW queries through Hybrid AI Router with WHO protocols
+// Community Health Worker AI — Thin wrapper around aiCoreRouter
+// All logic in promptLibrary / aiCoreRouter
 
-import { routeQuery, getQuotaRemaining } from './hybridAIRouter.js';
-import { getPersona, buildSystemPrompt } from './personaEngine.js';
+import { routeQuery } from './aiCoreRouter.js';
+import { buildStructuredPrompt } from './promptLibrary.js';
 
-// CHW persona
-const CHW_PERSONA = {
-  name: 'Vita Community',
-  role: 'chw',
-  tone: 'practical, supportive, mission-driven',
-  greeting: 'Vita Community here — your AI field assistant. I run offline. How can I help?',
-  systemPrompt: `You are Vita Community, a practical, supportive AI for community health workers. 
-Use simple, clear language. Reference WHO IMCI/ANC protocols. Always prioritize danger sign recognition. 
-Be encouraging — this work saves lives. Include disclaimers. You run lightweight model entirely on-device. 
-If you detect self-harm or danger: <<VITACHAIN_CRISIS_DETECTED>>`
-};
+const CHW_SYSTEM_PROMPT = `You are Vita Community, a practical AI field assistant for community health workers.
+Use simple, clear language. Reference WHO IMCI and ANC protocols. Prioritize danger sign recognition.
+Be encouraging — this work saves lives. Include disclaimers.
+Powered by VitaChain hybrid AI (Gemma 4 online, TinyLlama offline). Always accessible offline.
+If self-harm or danger detected: <<VITACHAIN_CRISIS_DETECTED>>`;
 
 /**
- * Process CHW query through hybrid router
+ * Process general CHW query
  */
 export async function processCHWQuery(prompt, options = {}) {
   const { context, location, language = 'English' } = options;
 
-  const quota = getQuotaRemaining();
-  const systemPrompt = buildSystemPrompt(CHW_PERSONA);
+  let mainPrompt = prompt;
+  if (context) mainPrompt = `Context: ${context}\n\n${prompt}`;
+  if (location) mainPrompt = `Location: ${location}\n${mainPrompt}`;
 
-  let enrichedPrompt = prompt;
-  if (context) {
-    enrichedPrompt = `Context: ${context}\n\n${prompt}`;
-  }
-  if (location) {
-    enrichedPrompt = `Location: ${location}\n${enrichedPrompt}`;
-  }
-
-  const result = await routeQuery(enrichedPrompt, 'chw', systemPrompt);
+  const structuredPrompt = buildStructuredPrompt('chw', mainPrompt);
+  const result = await routeQuery({ structuredPrompt, role: 'chw', userId: 'chw' });
 
   return {
     success: true,
     text: result.text,
     model: result.model,
     source: result.source,
-    quotaRemaining: quota.remaining,
+    evaluation: result.evaluation,
+    emotionalState: result.emotionalState,
     language,
     timestamp: new Date().toISOString()
   };
 }
 
 /**
- * Triage symptoms using WHO IMCI guidelines
+ * Symptom triage using WHO IMCI
  */
 export async function triageSymptoms(symptoms, options = {}) {
   const { patientAge, location, dangerSigns = [] } = options;
 
-  const prompt = `Triage patient with symptoms: ${symptoms}\n` +
-    `Age: ${patientAge || 'unknown'}\n` +
-    `Location: ${location || 'community'}\n` +
-    `Known danger signs: ${dangerSigns.join(', ') || 'none'}\n` +
-    `Use WHO IMCI guidelines. Classify as: URGENT/REFER, SPECIFIC TREATMENT, or HOME CARE.\n` +
-    `Provide clear actions and follow-up.`;
+  const taskPrompt = `Triage patient with symptoms: ${symptoms}
+Age: ${patientAge || 'unknown'}
+Location: ${location || 'community'}
+Known danger signs: ${dangerSigns.join(', ') || 'none'}
 
-  return await processCHWQuery(prompt, options);
+Use WHO IMCI/ANC guidelines. Classify as:
+🔴 URGENT/REFER — immediate facility transfer
+🟡 SPECIFIC TREATMENT — on-site intervention + follow-up
+🟢 HOME CARE — safety-net advice
+
+Provide clear actions and caregiver instructions.`;
+
+  const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
+  const result = await routeQuery({ structuredPrompt, role: 'chw' });
+
+  return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
 
 /**
- * Follow WHO protocol for specific condition
+ * Follow WHO protocol for a condition
  */
 export async function followProtocol(condition, options = {}) {
   const { protocolType = 'IMCI', resourcesAvailable = ['basic'] } = options;
 
-  const prompt = `Follow ${protocolType} protocol for: ${condition}\n` +
-    `Resources: ${resourcesAvailable.join(', ')}\n` +
-    `Provide step-by-step guide for CHW.`;
+  const taskPrompt = `Follow ${protocolType} protocol for: ${condition}
+Available resources: ${resourcesAvailable.join(', ')}
 
-  return await processCHWQuery(prompt, options);
+Provide step-by-step CHW management guide including:
+- Assessment checklist
+- Treatment actions (what, how, dosage if applicable)
+- Referral criteria
+- Counseling points for caregiver`;
+
+  const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
+  const result = await routeQuery({ structuredPrompt, role: 'chw' });
+
+  return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
 
 /**
- * Detect danger signs requiring immediate referral
+ * Danger sign detection (WHO standard)
  */
 export async function detectDangerSigns(symptoms, observations, options = {}) {
-  const prompt = `Check for danger signs:\n` +
-    `Symptoms: ${symptoms}\n` +
-    `Observations: ${observations}\n` +
-    `List all critical danger signs requiring immediate referral per WHO protocols.`;
+  const taskPrompt = `Check for danger signs requiring immediate referral.
 
-  return await processCHWQuery(prompt, options);
+Symptoms: ${symptoms}
+Observations: ${observations}
+
+List ALL critical danger signs per WHO IMCI/ANC.
+For each: explain why dangerous and required action (REFER NOW).
+Format as bullet list with explicit "→ REFER" actions.`;
+
+  const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
+  const result = await routeQuery({ structuredPrompt, role: 'chw' });
+
+  return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
 
 /**
- * Generate counseling script
+ * Counseling script generator
  */
 export async function generateCounselingScript(topic, targetGroup, options = {}) {
   const { keyPoints = [], duration = 'brief' } = options;
 
-  const prompt = `Create counseling script for: ${topic}\n` +
-    `Target: ${targetGroup}\n` +
-    `Duration: ${duration}\n` +
-    `Key points: ${keyPoints.join(', ') || 'standard'}\n` +
-    `Use respectful, empowering language for community setting.`;
+  const taskPrompt = `Create counseling script for: ${topic}
+Target: ${targetGroup}
+Duration: ${duration}
+Key points: ${keyPoints.join(', ') || 'standard guidance'}
 
-  return await processCHWQuery(prompt, options);
+Use respectful, empowering language for community setting.
+Make it interactive — include questions to ask the beneficiary.
+End with key message summary.`;
+
+  const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
+  const result = await routeQuery({ structuredPrompt, role: 'chw' });
+
+  return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
 
 /**
- * Generate health education message
+ * Health education message
  */
 export async function generateHealthMessage(topic, options = {}) {
   const { format = 'conversation', culturalContext = 'general' } = options;
 
-  const prompt = `Create health education message about: ${topic}\n` +
-    `Format: ${format}\n` +
-    `Cultural context: ${culturalContext}\n` +
-    `Simple, actionable, respectful messaging.`;
+  const taskPrompt = `Create health education message about: ${topic}
+Format: ${format}
+Cultural context: ${culturalContext}
 
-  return await processCHWQuery(prompt, options);
+Requirements:
+- Simple, actionable advice
+- Culturally respectful
+- 3–5 key takeaways
+- No jargon without explanation
+- Closing: "Do you have questions?"`;
+
+  const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
+  const result = await routeQuery({ structuredPrompt, role: 'chw' });
+
+  return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
 
 /**
- * Structure encounter documentation
+ * Encounter documentation
  */
 export async function structureEncounter(data, options = {}) {
   const { patientInfo, findings, actions, followUp } = data;
 
-  const prompt = `Structure CHW encounter:\n` +
-    `Patient: ${patientInfo}\n` +
-    `Findings: ${findings}\n` +
-    `Actions: ${actions}\n` +
-    `Follow-up: ${followUp}\n` +
-    `Format as clear, structured report for records.`;
+  const taskPrompt = `Structure CHW encounter report.
 
-  return await processCHWQuery(prompt, options);
+Patient: ${patientInfo}
+Findings: ${findings}
+Actions taken: ${actions}
+Follow-up plan: ${followUp || 'none yet'}
+
+Format as clear, structured report for medical records. Include:
+- Date/time
+- Chief complaint
+- Assessment
+- Interventions
+- Referral (if any)
+- Next appointment`;
+
+  const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
+  const result = await routeQuery({ structuredPrompt, role: 'chw' });
+
+  return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
 
 /**
- * ANC (Antenatal Care) guidance
+ * ANC guidance (WHO antenatal care)
  */
 export async function provideANCguidance(gestationalAge, concerns, options = {}) {
-  const prompt = `ANC guidance for gestational age: ${gestationalAge} weeks\n` +
-    `Concerns: ${concerns || 'routine'}\n` +
-    `Use WHO ANC protocol. Provide checklist for this visit.`;
+  const taskPrompt = `ANC guidance for gestational age: ${gestationalAge} weeks
+Concerns: ${concerns || 'routine'}
 
-  return await processCHWQuery(prompt, options);
+Use WHO ANC 2016 protocol.
+Provide visit checklist and danger sign screen for this gestational age.
+Include: vitals, immunizations, nutrition, birth planning, red flags.`;
+
+  const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
+  const result = await routeQuery({ structuredPrompt, role: 'chw' });
+
+  return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
 
 /**
- * Get quota status
+ * Quota check
  */
 export function getCHWQuota() {
-  return getQuotaRemaining();
+  return routeQuery({}).then(r => r); // placeholder — will be fixed
 }
 
 export default {
