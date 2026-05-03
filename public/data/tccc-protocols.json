@@ -1,11 +1,7 @@
-// public/data/tccc-protocols.json
-// Tactical Combat Casualty Care Protocols - Phase 3 Dataset
-// Military/law enforcement trauma protocols adapted for civilian first responders
-
 {
   "version": "2026.1",
   "source": "Committee on Tactical Combat Casualty Care (CoTCCC)",
-  "description": "TCCC protocols for trauma management in high-threat environments",
+  "description": "TCCC protocols for trauma management in high-threat environments - adapted from military TCCC for civilian first responders",
   "protocols": [
     {
       "id": "care_under_fire",

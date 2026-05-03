@@ -105,36 +105,36 @@ export default function ModernBottomNav() {
       {/* Modern Bottom Navigation Bar - Premium Treatment */}
       <nav className="fixed bottom-0 inset-x-0 z-50 h-16 bg-slate-900/85 backdrop-blur-2xl border-t border-slate-800/50 backdrop-filter backdrop-saturate-150">
         <div className="max-w-5xl mx-auto px-4">
-          <ul className="flex items-center justify-between h-full">
-            {navItems.map(({ to, label, icon }) => (
-              <li key={to} className="flex-1 h-full">
-                <NavLink
-                  to={to}
-                  className={({ isActive }) =>
-                    `flex flex-col items-center justify-center h-full gap-1.5 transition-all duration-300 relative ${
-                      isActive 
-                        ? "text-teal-400 font-medium" 
-                        : "text-slate-500 hover:text-slate-300"
-                    }`
-                  }
-                  aria-label={label}
-                >
-                  {({ isActive }) => (
-                    <>
-                      <motion.div
-                        className="flex-shrink-0"
-                        animate={{
-                          scale: isActive ? [0.95, 1.15, 1] : 1,
-                          y: isActive ? [-2, 2, 0] : 0,
-                        }}
-                        transition={{
-                          type: isReducedMotion ? false : "spring",
-                          duration: 0.3,
-                          bounce: 0.2,
-                        }}
-                      >
-                        {icon}
-                      </motion.div>
+           <ul className="flex items-center justify-between h-full">
+             {navItems.map(({ to, label, icon: Icon }) => (
+               <li key={to} className="flex-1 h-full">
+                 <NavLink
+                   to={to}
+                   className={({ isActive }) =>
+                     `flex flex-col items-center justify-center h-full gap-1.5 transition-all duration-300 relative ${
+                       isActive 
+                         ? "text-teal-400 font-medium" 
+                         : "text-slate-500 hover:text-slate-300"
+                     }`
+                   }
+                   aria-label={label}
+                 >
+                   {({ isActive }) => (
+                     <>
+                       <motion.div
+                         className="flex-shrink-0"
+                         animate={{
+                           scale: isActive ? [0.95, 1.15, 1] : 1,
+                           y: isActive ? [-2, 2, 0] : 0,
+                         }}
+                         transition={{
+                           type: isReducedMotion ? false : "spring",
+                           duration: 0.3,
+                           bounce: 0.2,
+                         }}
+                       >
+                         <Icon size={20} />
+                       </motion.div>
                       <span className="text-xs font-medium leading-none tracking-tight">
                         {label}
                       </span>
