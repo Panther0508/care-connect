@@ -4,11 +4,42 @@ import { getTopics } from '../services/communityEngine';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AlertTriangle, ChevronRight } from 'lucide-react';
+import useInfiniteScroll from '../hooks/useInfiniteScroll';
 
 export function CommunityPage() {
   const [topics, setTopics] = useState([]);
+  const [displayedTopics, setDisplayedTopics] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    const loadTopics = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const topicData = await getTopics();
+        setTopics(topicData);
+        setDisplayedTopics(topicData.slice(0, 10));
+        setHasMore(topicData.length > 10);
+      } catch (err) {
+        console.error('Failed to load topics:', err);
+        setError('Failed to load community topics');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTopics();
+  }, []);
+
+  const loadMore = async () => {
+    const nextBatch = topics.slice(displayedTopics.length, displayedTopics.length + 10);
+    setDisplayedTopics(prev => [...prev, ...nextBatch]);
+    setHasMore(displayedTopics.length + nextBatch.length < topics.length);
+  };
+
+  const { sentinelRef, isFetching } = useInfiniteScroll(loadMore, hasMore);
 
   useEffect(() => {
     const loadTopics = async () => {
@@ -99,7 +130,7 @@ export function CommunityPage() {
         </p>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {topics.map(topic => (
+          {displayedTopics.map(topic => (
             <motion.div
               key={topic.id}
               initial={{ opacity: 0, x: -10 }}
@@ -133,6 +164,8 @@ export function CommunityPage() {
             </motion.div>
           ))}
         </div>
+        {isFetching && <div className="text-center py-4 text-slate-400">Loading more topics...</div>}
+        <div ref={sentinelRef} className="h-10" />
       </motion.div>
     </motion.div>
   );

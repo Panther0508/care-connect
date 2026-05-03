@@ -24,13 +24,14 @@ export default function VitaAvatar({ state, size = 120, className = '' }) {
       width={size}
       height={size}
       className={className}
+      loading="lazy"
+      onError={(e) => { e.target.src = '/avatars/default.png'; }}
       style={{
         width: size,
         height: size,
         objectFit: 'contain',
         filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))',
       }}
-      loading="lazy"
     />
   );
 }

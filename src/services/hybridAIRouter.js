@@ -14,7 +14,5 @@ export {
 } from './aiCoreRouter.js';
 
 // Re-export legacy names
-export { getLastRouteResult } from './aiCoreRouter.js'; // Not implemented in router (no single global state) — returning null
-
 // Note: Individual AI services (medicalAI, clinicianAI, chwAI) now import from aiCoreRouter
 // This file remains only for legacy references; remove after migration complete.

@@ -2,7 +2,7 @@
 // Scans QR codes containing Verifiable Credentials
 
 import { useState, useRef, useEffect } from 'react';
-import { Html5Qrcode } from 'html5-qrcode';
+import { getScanner } from '../lib/scannerLoader';
 import { importCredential } from '../services/passport';
 
 const SCANNER_ID = 'qr-scanner';
@@ -26,6 +26,7 @@ export default function QRScanner({ onCredentialScanned, onBack }) {
     setError(null);
     setResult(null);
 
+    const { Html5Qrcode } = await getScanner();
     const html5Qr = new Html5Qrcode(SCANNER_ID);
     scannerRef.current = html5Qr;
 

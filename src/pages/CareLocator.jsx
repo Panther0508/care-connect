@@ -2,11 +2,17 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Heart, Star, Map, AlertCircle, Building2 } from 'lucide-react';
+import Pagination from '../components/Pagination';
 
 export default function CareLocator() {
   const [facilities, setFacilities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+
+  const totalPages = Math.ceil(facilities.length / itemsPerPage);
+  const paginatedFacilities = facilities.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   useEffect(() => {
     const loadFacilities = async () => {
@@ -97,7 +103,7 @@ export default function CareLocator() {
         >
           {facilities.length > 0 ? (
             <div className="space-y-4">
-              {facilities.map((facility) => (
+              {paginatedFacilities.map((facility) => (
                 <motion.div
                   key={facility.id}
                   initial={{ opacity: 0, x: -10 }}
@@ -143,10 +149,19 @@ export default function CareLocator() {
               animate={{ opacity: 1 }}
               className="text-center py-12"
             >
-              <p className="text-slate-400">No healthcare facilities found.</p>
+              <p className="text-slate-400 mb-4">No healthcare facilities found nearby.</p>
+              <p className="text-slate-500 text-sm mb-6">Try adjusting your location or search criteria.</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-6 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-colors"
+              >
+                Refresh Search
+              </button>
             </motion.div>
           )}
         </motion.div>
+
+        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
 
         {/* Footer note */}
         <motion.div

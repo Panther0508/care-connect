@@ -64,6 +64,8 @@ export default function CrisisPopup({ visible, riskLevel, matchedPattern, onDism
                 src="/avatars/vita-alert.png"
                 alt="Alert"
                 className="w-24 h-24 rounded-full object-contain"
+                loading="lazy"
+                onError={(e) => { e.target.src = '/avatars/default.png'; }}
                 style={{
                   filter: 'drop-shadow(0 0 20px rgba(234, 179, 8, 0.4))'
                 }}

@@ -59,3 +59,7 @@ Please follow the existing ESLint and Prettier configuration in the project. Key
 - Run `npm run lint` and `npm run format` before submitting your PR
 
 Thank you for contributing to VitaChain!
+
+## Contact
+
+For questions about contributing, reach out to **Nmesirionye Ngbaronye** at nmesirionyengbaronye@gmail.com.

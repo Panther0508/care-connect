@@ -20,8 +20,16 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: 'esnext',
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes('html5-qrcode')) return 'html5-qrcode';
+        },
+      },
+    },
   },
   optimizeDeps: {
+    include: ['html5-qrcode'],
     exclude: ["@automerge/automerge"],
   },
 }));

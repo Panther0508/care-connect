@@ -388,21 +388,7 @@ export default function AIAssistant() {
          setIsProcessing(false);
          return;
        }
-        const summary = await generateClinicalSummary(healthState, systemPrompt);
-        const responseDetection = scanAIResponse(summary);
-        if (responseDetection.requiresImmediatePopup) {
-          setCrisisVisible(true);
-          setCrisisState({ riskLevel: responseDetection.riskLevel, matchedPattern: responseDetection.matchedPatterns?.[0] });
-        }
-        addMessage("assistant", summary);
-        // Update model status
-        const lastRes = getLastRouteResult();
-        if (lastRes?.source === 'online') setActiveModel('online');
-        else if (lastRes?.source === 'cached-gemma') setActiveModel('cached');
-        else if (lastRes?.source === 'offline') setActiveModel('offline');
-        setIsProcessing(false);
-        return;
-      }
+
 
       if (lowerText.includes("care gaps") || lowerText.includes("gaps")) {
         const gaps: string[] = [];

@@ -6,7 +6,13 @@ const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  // Add other static assets as needed
+  '/avatars/vita-default.png',
+  '/avatars/vita-error.png',
+  '/avatars/vita-success.png',
+  '/avatars/vita-loading.png',
+  '/avatars/vita-empty.png',
+  '/avatars/vita-alert.png',
+  '/avatars/vita-offline.png',
 ];
 
   // HuggingFace CDN URLs for models (@huggingface/transformers v4)

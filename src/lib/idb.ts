@@ -1,10 +1,11 @@
 export function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("vitachain", 7); // Bumped to v7 for searchCache
+    const request = indexedDB.open("vitachain", 8); // Bumped to v8 for full store set
 
     request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
       const db = (event.target as IDBOpenDBRequest).result;
 
+      // Core stores (v1-v3)
       if (!db.objectStoreNames.contains("facilities")) {
         db.createObjectStore("facilities", { keyPath: "id" });
       }
@@ -14,65 +15,176 @@ export function openDB(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains("needs")) {
         db.createObjectStore("needs", { keyPath: "timestamp" });
       }
-      // Search logs (v4)
-      if (!db.objectStoreNames.contains("searchLogs")) {
-        db.createObjectStore("searchLogs", { keyPath: "id", autoIncrement: true });
-      }
-      // Mesh state (v4)
-      if (!db.objectStoreNames.contains("meshState")) {
-        db.createObjectStore("meshState", { keyPath: "key" });
-      }
-      // Health graph & medication (v3)
       if (!db.objectStoreNames.contains("healthGraph")) {
         db.createObjectStore("healthGraph", { keyPath: "key" });
       }
       if (!db.objectStoreNames.contains("rxnorm")) {
         db.createObjectStore("rxnorm", { keyPath: "drugName" });
       }
-      // Passport shares/scans (v4)
+
+      // Mesh & search (v4)
+      if (!db.objectStoreNames.contains("searchLogs")) {
+        db.createObjectStore("searchLogs", { keyPath: "id", autoIncrement: true });
+      }
+      if (!db.objectStoreNames.contains("meshState")) {
+        db.createObjectStore("meshState", { keyPath: "key" });
+      }
       if (!db.objectStoreNames.contains("passportShares")) {
         db.createObjectStore("passportShares", { keyPath: "id", autoIncrement: true });
       }
       if (!db.objectStoreNames.contains("passportScans")) {
         db.createObjectStore("passportScans", { keyPath: "id", autoIncrement: true });
       }
-      // KV store (v4)
       if (!db.objectStoreNames.contains("kv")) {
         db.createObjectStore("kv", { keyPath: "key" });
       }
-      // Real-time cache (v4)
       if (!db.objectStoreNames.contains("realtimeCache")) {
         db.createObjectStore("realtimeCache", { keyPath: "key" });
       }
-      // Dataset vectors for RAG (v5)
+
+      // Wellness & data (v5)
       if (!db.objectStoreNames.contains("datasetVectors")) {
         db.createObjectStore("datasetVectors", { keyPath: "id" });
       }
-      // Medication reminders (v5)
       if (!db.objectStoreNames.contains("medicationReminders")) {
         db.createObjectStore("medicationReminders", { keyPath: "id" });
       }
-      // Appointments (v5)
       if (!db.objectStoreNames.contains("appointments")) {
         db.createObjectStore("appointments", { keyPath: "id" });
       }
-      // Translation cache (v5)
       if (!db.objectStoreNames.contains("translationCache")) {
         db.createObjectStore("translationCache", { keyPath: "key" });
       }
-      // User profile (v5)
       if (!db.objectStoreNames.contains("userProfile")) {
         db.createObjectStore("userProfile", { keyPath: "userId" });
       }
-      // Gemma cache (v6)
+
+      // AI cache (v6-v7)
       if (!db.objectStoreNames.contains("gemmaCache")) {
         db.createObjectStore("gemmaCache", { keyPath: "id" });
       }
-      // Search cache for new web search (v7)
       if (!db.objectStoreNames.contains("searchCache")) {
         db.createObjectStore("searchCache", { keyPath: "query" });
       }
+
+      // ==================== v8: Full store set ====================
+
+      // Food & exercise databases
+      if (!db.objectStoreNames.contains("foodDatabase")) {
+        db.createObjectStore("foodDatabase", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("exerciseDatabase")) {
+        db.createObjectStore("exerciseDatabase", { keyPath: "id" });
+      }
+
+      // Wellness logs
+      if (!db.objectStoreNames.contains("foodLogs")) {
+        db.createObjectStore("foodLogs", { keyPath: "id", autoIncrement: true });
+      }
+      if (!db.objectStoreNames.contains("workoutLogs")) {
+        db.createObjectStore("workoutLogs", { keyPath: "id", autoIncrement: true });
+      }
+      if (!db.objectStoreNames.contains("cycleData")) {
+        db.createObjectStore("cycleData", { keyPath: "id", autoIncrement: true });
+      }
+      if (!db.objectStoreNames.contains("dailyHydration")) {
+        db.createObjectStore("dailyHydration", { keyPath: "date" });
+      }
+      if (!db.objectStoreNames.contains("sleepLogs")) {
+        db.createObjectStore("sleepLogs", { keyPath: "id", autoIncrement: true });
+      }
+      if (!db.objectStoreNames.contains("medicationLogs")) {
+        db.createObjectStore("medicationLogs", { keyPath: "id", autoIncrement: true });
+      }
+      if (!db.objectStoreNames.contains("medicationFeedback")) {
+        db.createObjectStore("medicationFeedback", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("mentalHealthLogs")) {
+        db.createObjectStore("mentalHealthLogs", { keyPath: "id", autoIncrement: true });
+      }
+
+      // Health tracking stores
+      if (!db.objectStoreNames.contains("documents")) {
+        db.createObjectStore("documents", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("healthGoals")) {
+        db.createObjectStore("healthGoals", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("dependents")) {
+        db.createObjectStore("dependents", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("smokingCessation")) {
+        db.createObjectStore("smokingCessation", { keyPath: "quitDate" });
+      }
+      if (!db.objectStoreNames.contains("alcoholLog")) {
+        db.createObjectStore("alcoholLog", { keyPath: "date" });
+      }
+      if (!db.objectStoreNames.contains("symptomDiary")) {
+        db.createObjectStore("symptomDiary", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("painTracker")) {
+        db.createObjectStore("painTracker", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("moodTracker")) {
+        db.createObjectStore("moodTracker", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("glucoseLog")) {
+        db.createObjectStore("glucoseLog", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("bloodPressureLog")) {
+        db.createObjectStore("bloodPressureLog", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("peakFlowLog")) {
+        db.createObjectStore("peakFlowLog", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("pelvicDiary")) {
+        db.createObjectStore("pelvicDiary", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("weightTracker")) {
+        db.createObjectStore("weightTracker", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("progressPhotos")) {
+        db.createObjectStore("progressPhotos", { keyPath: "id" });
+      }
+
+      // AI & RAG stores
+      if (!db.objectStoreNames.contains("ragVectors")) {
+        db.createObjectStore("ragVectors", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("trainingPairs")) {
+        db.createObjectStore("trainingPairs", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("evaluationLogs")) {
+        db.createObjectStore("evaluationLogs", { keyPath: "id" });
+      }
+
+      // Engagement stores
+      if (!db.objectStoreNames.contains("rewardsData")) {
+        db.createObjectStore("rewardsData", { keyPath: "userId" });
+      }
+      if (!db.objectStoreNames.contains("avatarAccessories")) {
+        db.createObjectStore("avatarAccessories", { keyPath: "userId" });
+      }
+      if (!db.objectStoreNames.contains("communityPosts")) {
+        db.createObjectStore("communityPosts", { keyPath: "postId" });
+      }
+      if (!db.objectStoreNames.contains("communityComments")) {
+        db.createObjectStore("communityComments", { keyPath: "commentId" });
+      }
+      if (!db.objectStoreNames.contains("questProgress")) {
+        db.createObjectStore("questProgress", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("milestones")) {
+        db.createObjectStore("milestones", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("educationProgress")) {
+        db.createObjectStore("educationProgress", { keyPath: "id" });
+      }
+      if (!db.objectStoreNames.contains("referralData")) {
+        db.createObjectStore("referralData", { keyPath: "userId" });
+      }
     };
+
 
     request.onsuccess = (event: Event) => {
       resolve((event.target as IDBOpenDBRequest).result);
@@ -1043,4 +1155,32 @@ export async function deleteStaleSearchCache(ttlMs: number = 60 * 60 * 1000): Pr
     };
     request.onerror = () => reject(request.error);
   });
+}
+
+// Medication reminder logs
+export async function storeMedicationEvent(event: any): Promise<void> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction("medicationLogs", "readwrite");
+    const store = transaction.objectStore("medicationLogs");
+    const request = store.add(event);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function getMedicationEvents(): Promise<any[]> {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction("medicationLogs", "readonly");
+    const store = transaction.objectStore("medicationLogs");
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function getMedicationSummary(): Promise<any> {
+  const events = await getMedicationEvents();
+  return { totalEvents: events.length };
 }

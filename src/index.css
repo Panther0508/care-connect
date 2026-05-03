@@ -33,6 +33,93 @@
     z-index: 9999;
   }
 
+  /* Skeleton shimmer effect */
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .skeleton-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skeleton-shimmer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    background-size: 200% 100%;
+    background-attachment: fixed;
+    animation: shimmer 1.5s infinite;
+    pointer-events: none;
+  }
+
+  /* Breathing animation for skeletons */
+  @keyframes breathing {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.6; }
+  }
+
+/* Card lift effect */
+.card-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Ripple effect for mobile */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(20, 184, 166, 0.3) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+  pointer-events: none;
+}
+
+.ripple:active::after {
+  width: 300px;
+  height: 300px;
+}
+
+/* Avatar bounce */
+@keyframes avatar-bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+  60% { transform: translateY(-3px); }
+}
+
+.avatar-bounce {
+  animation: avatar-bounce 0.6s ease-in-out;
+}
+
+/* CTA glow pulse */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(20, 184, 166, 0.2); }
+  50% { box-shadow: 0 0 30px rgba(20, 184, 166, 0.4); }
+}
+
+.cta-glow {
+  animation: glow-pulse 2.5s ease-in-out infinite;
+}
+
   /* Accessibility focus ring */
   *:focus-visible {
     @apply outline-none ring-2 ring-teal-500/50 ring-offset-2 ring-offset-slate-900 transition-all;
@@ -376,9 +463,33 @@
     border: 1px solid rgba(148, 163, 184, 0.08);
   }
 
+  .skeleton-container {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .skeleton-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .skeleton-breathing {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+    animation: breathing 2s ease-in-out infinite;
+    z-index: 2;
+  }
+
   @keyframes shimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
+  }
+
+  @keyframes breathing {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.6; }
   }
 
   /* Pulse glow for active states */
@@ -521,3 +632,30 @@
 
 .animate-toast-in { animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 .animate-toast-bounce { animation: toast-bounce 0.4s ease; }
+
+/* ==================== Accessibility ==================== */
+
+/* Reduced motion: disable all animations */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Reduced transparency: solid backgrounds instead of glass */
+@media (prefers-reduced-transparency: reduce) {
+  .glass-card {
+    background: #1E293B !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .glass-input {
+    background: #1E293B !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+

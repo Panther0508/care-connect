@@ -9,6 +9,8 @@ export default function LoadingFallback({ message = 'Loading...', showProgress =
               src="/avatars/vita-loading.png"
               alt="Vita loading"
               className="w-full h-full object-contain"
+              loading="lazy"
+              onError={(e) => { e.target.src = '/avatars/default.png'; }}
               style={{
                 filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))',
               }}

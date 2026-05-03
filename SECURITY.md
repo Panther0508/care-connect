@@ -4,7 +4,7 @@
 
 To report a security vulnerability, please use one of the following methods:
 
-1. **Email**: Send details to security@vitachain.health (placeholder address)
+1. **Email**: Send details to nmesirionyengbaronye@gmail.com
 2. **GitHub Private Vulnerability Reporting**: Go to Settings → Security → Advisories → "Report a vulnerability"
 
 Please include as much detail as possible, including steps to reproduce, affected versions, and any potential impact.

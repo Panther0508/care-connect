@@ -1,1 +1,148 @@
-['VitaChain](https://img.shields.io/badge/built_with-React%20%7C%20Vite%20%7C%20Tailwind-667eea?style=flat-square) [![PWA](https://img.shields.io/badge/PWA-Ready-5a0fc8?style=flat-square)](https://web.dev/pwa/) [![Offline-First](https://img.shields.io/badge/Offline-First-10b981?style=flat-square)](https://offlinefirst.com) [![Open Source](https://img.shields.io/badge/License-MIT-637381?style=flat-square)](LICENSE) [![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](SECURITY.md) [![Code of Conduct](https://img.shields.io/badge/Code%20of%20Conduct-Contributor%20Covenant%202.1-4baaaa)](CODE_OF_CONDUCT.md) [![Contributing](https://img.shields.io/badge/Contributing-Guide-brightgreen)](CONTRIBUTING.md)\n\n**VitaChain** is an offline-first, self-sovereign AI health guardian that works without internet, syncs anonymously via mesh networks, and shares clinical summaries through QR codes — built for the Global South.\n\n<!-- TODO: Add screenshots -->\n<!--\n<div align="center">\n  <img src="./screenshots/home.png" width="300" alt="Home screen" />\n  <img src="./screenshots/health-graph.png" width="300" alt="Health Graph" />\n  <img src="./screenshots/passport-qr.png" width="300" alt="Passport QR" />\n  <img src="./screenshots/outbreak-map.png" width="300" alt="Outbreak Map', 'div>\n-->\n\n---\n\n## Problem Statement\n\nHealthcare in Nigeria and across Africa is broken by **fragmentation**. A patient\'s record lives in silos — one clinic, one hospital, one pharmacy — and when they move, the information doesn\'t follow. This "baton‑drop', 'problem kills people:\n\n- **400,000** deaths per year globally from medication errors (WHO)\n- **1 in 24** patients die from unsafe hospital care in Nigeria (CDC)\n- **75%** of Africans have no access to essential health services (World Bank)\n\nWithout continuity, misdiagnosis, duplicate tests, and drug interactions are routine. The poorest suffer most.\n\nCurrent digital health solutions require constant internet, expensive servers, and centralized data ownership — making them unusable in the very regions that need them most.\n\n---\n\n## Solution\n\n**VitaChain** puts the patient in control. It\'s a complete health system that lives entirely on the patient\'s phone:\n\n- **No internet required** after initial install — everything works offline\n- **On-device AI** summarises health history, checks drug interactions, generates pre-visit notes\n- **Peer-to-peer mesh** anonymously shares outbreak signals and facility confirmations\n- **QR code health passport** lets you share your summary with any clinician instantly\n- **Self-sovereign identity** — you own your data, no company or government holds your records\n\nWe built VitaChain for the Global South: low bandwidth, intermittent connectivity, and extreme privacy needs.\n\n---\n\n## Key Features\n\n| Feature | Description |\n|---------|-------------|\n| **Personal Health Graph** | Encrypted on-device health records (conditions, medications, allergies, encounters) using Automerge CRDTs for future sync |\n| **On-Device Medical AI** | Gemma 2B running via Transformers.js — clinical summaries, drug interaction checks, care gap detection — all offline |\n| **Mesh Intelligence** | Anonymous peer-to-peer gossip over Bluetooth/BroadcastChannel — search counters, facility confirmations, stockout alerts, outbreak detection |\n| **Universal Health Passport** | W3C Verifiable Credentials encoded as QR codes — share your health summary with any clinician, no internet needed |\n| **Offline-First** | Full functionality with zero connectivity after initial model download |\n| **137 Languages** | Bergamot/Linguist offline translation — clinical notes in your local language |\n| **Zero Cost** | Entire stack is open-source and free — no SaaS fees, no paywalls |\n\n---\n\n## Architecture\n\n```mermaid\ngraph TB\n    subgraph "Client Device', 'A[PWA / Capacitor APK] --> B[Personal Health Graph]\n        A --> C[On-Device Medical AI]\n        A --> D[Mesh Intelligence]\n        A --> E[Universal Health Passport]\n        B --> F[IndexedDB + Web Crypto]\n        C --> G[Transformers.js + Gemma 2B]\n        D --> H[BroadcastChannel / BLE]\n        E --> I[W3C VC + QR Code]\n    end\n\n    subgraph "Cloud (Optional)', 'J[Vercel Hosting] --> K[Serverless Functions]\n        K --> L[Gemini Search API]\n        M[Upstash Redis] --> N[KV Store]\n    end\n\n    D -.->|Anonymised signals| M\n    A -.->|Online fallback| K\n```\n\n---\n\n## Tech Stack\n\n**Frontend & Build**\n- React 18 + TypeScript\n- Vite (lightning-fast build)\n- Tailwind CSS (utility-first styling)\n- React Router DOM (SPA navigation)\n\n**Offline AI**\n- Transformers.js v4\n- ONNX Runtime Web\n- Gemma 2B (quantized INT8, ~1.3GB)\n- All-MiniLM-L6-v2 (feature extraction)\n\n**Local Data**\n- Automerge v2.2+ (CRDT engine)\n- IndexedDB (persistent storage)\n- Web Crypto API (AES-256-GCM)\n\n**Mesh Networking**\n- BroadcastChannel (same-device tab sync)\n- Web Bluetooth (cross-device experimental)\n- Service Worker Background Sync\n\n**Identity & Sharing**\n- W3C Verifiable Credentials v2.0\n- ECDSA P-256 signatures (Web Crypto)\n- QR Code generation (qrcode.js)\n- QR scanning (html5-qrcode)\n\n**Mobile Wrapper**\n- Capacitor 6 (Android APK generation)\n- @capacitor/android (native project)\n- @capacitor-community/bluetooth-le (BLE mesh)\n- @capacitor/push-notifications\n\n**Deployment**\n- Vercel (static hosting + serverless)\n- Upstash Redis (KV store for online search)\n- Google Gemini API (online fallback)\n\n---\n\n## Live Demo\n\n**Vercel Deployment:** [https://care-connect-lilac-nine.vercel.app](https://care-connect-lilac-nine.vercel.app)\n\n> Note: The demo requires initial model download (~1.3GB) for AI features. After that, it works fully offline.\n\n---\n\n## Installation & Development\n\n### Prerequisites\n- Node.js 18+\n- npm or yarn\n- (Optional) Android Studio for APK building\n\n### Local Setup\n\n```bash\n# Clone the repository\ngit clone https://github.com/your-username/vitachain.git\ncd vitachain\n\n# Install dependencies\nnpm install\n\n# Start development server\nnpm run dev\n```\n\nOpen http://localhost:8080\n\n### Build for Production\n\n```bash\n# Build PWA\nnpm run build\n\n# Preview production build\nnpm run preview\n```\n\n### Build Android APK\n\n```bash\n# Install Capacitor\nnpm install @capacitor/core @capacitor/cli\nnpx cap init VitaChain com.vitachain.app --web-dir dist\n\n# Add Android platform\nnpm install @capacitor/android\nnpx cap add android\n\n# Install native plugins\nnpm install @capacitor-community/bluetooth-le @capacitor/push-notifications @capacitor/filesystem @capacitor/preferences @capacitor/camera\n\n# Sync web assets to Android project\nnpm run build\nnpx cap sync\n\n# Open Android Studio\nnpx cap open android\n\n# In Android Studio: Build → Build Bundle(s) / APK(s) → Build APK(s)\n# Output: android/app/build/outputs/apk/debug/app-debug.apk\n```\n\n---\n\n## Environment Variables\n\nCreate a `.env.local` file in the project root:\n\n| Variable | Description |\n|----------|-------------|\n| `VITE_API_URL` | Vercel app URL for online Gemini fallback (e.g., `https://care-connect-lilac-nine.vercel.app`) |\n| `GEMINI_API_KEY` | Google Gemini API key (server-side only, used in `api/search.js`) |\n| `KV_REST_API_URL` | Upstash Redis REST endpoint (optional, for facility cache) |\n| `KV_REST_API_TOKEN` | Upstash Redis auth token (optional) |\n| `VITE_SATELLITE_INTERVAL_HOURS` | Satellite upload interval in hours (default: 168 = 7 days) |\n\n**Important:** `.env.local` is gitignored. Never commit API keys.\n\n---\n\n## Project Structure\n\n```\nvitachain/\n├── src/\n│   ├── components/        # Reusable UI components\n│   │   ├── VitaAvatar.jsx\n│   │   ├── ClinicianTypeSelector.jsx\n│   │   ├── PreVisitSummary.jsx\n│   │   ├── QRCodeDisplay.jsx\n│   │   ├── QRScanner.jsx\n│   │   ├── OnlineStatusPill.tsx\n│   │   ├── ErrorBoundary.tsx\n│   │   └── ...\n│   ├── lib/               # Core libraries\n│   │   ├── vc.js          # Verifiable Credentials engine\n│   │   ├── crdtHealthGraph.ts\n│   │   ├── encryption.ts\n│   │   ├── gossipProtocol.ts\n│   │   └── idb.ts\n│   ├── services/          # Business logic\n│   │   ├── passport.js    # Passport orchestration\n│   │   ├── healthGraph.ts\n│   │   ├── medicalAI.ts\n│   │   ├── meshOrchestrator.ts\n│   │   ├── bluetoothTransport.ts\n│   │   ├── satelliteSnitch.ts\n│   │   ├── aiSearch.ts\n│   │   └── onlineSearch.ts\n│   ├── pages/             # Route components\n│   │   ├── HomePage.tsx\n│   │   ├── HealthGraph.tsx\n│   │   ├── AIAssistant.tsx\n│   │   ├── Passport.jsx\n│   │   ├── ClinicianView.jsx\n│   │   ├── OutbreakDashboard.tsx\n│   │   ├── AlertsPage.tsx\n│   │   ├── ReservationPage.tsx\n│   │   └── ...\n│   ├── hooks/             # Custom React hooks\n│   │   ├── useIDB.ts\n│   │   ├── useOnlineStatus.ts\n│   │   └── useSavedNeeds.ts\n│   └── main.tsx           # Entry point\n├── public/\n│   ├── avatars/           # Vita illustration set (12 PNGs)\n│   ├── facilities_offline.json\n│   ├── manifest.json\n│   ├── serviceWorker.js\n│   ├── favicon.ico\n│   ├── icon-192.png\n│   └── icon-512.png\n├── api/\n│   ├── search.js          # Gemini-powered online search (Vercel)\n│   └── feedback.js\n├── android/               # Capacitor-generated Android project (after `npx cap add android`)\n├── capacitor.config.ts    # Capacitor configuration\n├── vite.config.ts\n├── package.json\n├── tsconfig.json\n└── vercel.json            # Vercel deployment config\n```\n\n---\n\n## Contributing\n\nWe welcome contributions! VitaChain is a project with global impact potential.\n\n### How to Contribute\n\n1. Fork the repository\n2. Create a feature branch (`git checkout -b feature/amazing-improvement`)\n3. Make your changes and add tests if applicable\n4. Commit with clear messages (`git commit -m "Add offline QR scanner', 5.0, 'Push to your fork (`git push origin feature/amazing-improvement`)\n6. Open a Pull Request with a detailed description\n\n### Dev Environment Checklist\n\n- [ ] Node.js 18+ installed\n- [ ] Dependencies installed (`npm install`)\n- [ ] Build succeeds (`npm run build`)\n- [ ] Linter passes (no TypeScript errors)\n- [ ] Tested offline functionality (disable network, verify features)\n\n### Areas Needing Help\n\n- **RxNorm ingestion script** – populate local drug interaction database\n- **Bergamot translation models** – integrate 137-language offline pack\n- **iOS support** – Capacitor iOS platform testing\n- **Satellite sync simulation** – real Iridium/Starlink API integration\n- **DHIS2 integration** – connect to national health information systems\n- **Documentation & Translations** – help translate UI to more languages\n\n---\n\n## Roadmap\n\n### Phase 5 (Current)\n- [x] PWA build & deployment\n- [x] Universal Health Passport (VC + QR)\n- [ ] Android APK generation (Capacitor)\n- [ ] Push notifications for outbreak alerts\n- [ ] Native Bluetooth LE mesh (via Capacitor)\n\n### Phase 6 (Future)\n- [ ] iOS support (Capacitor iOS)\n- [ ] Real satellite sync (Iridium/Starlink)\n- [ ] DHIS2 integration for data reporting\n- [ ] Expand facility database beyond India\n- [ ] Fine-tuned Opus-MT medical translation models\n- [ ] Community health worker mobile toolkit\n\n---\n\n## License\n\nDistributed under the MIT License. See `LICENSE` for more information.\n\n---\n\n## Acknowledgments\n\n- **Abuja Innovation Challenge** — supporting African-led health solutions\n- **Hack‑Nation** — original inspiration and community\n- **Databricks** — for open-source ML infrastructure\n- **Hugging Face** — hosting Gemma and other models\n- **Mozilla Bergamot** — offline translation technology\n- **Google Gemini** — online search fallback API\n- **Capacitor** — native runtime for mobile\n- **Automerge** — CRDT library for offline-first apps\n\n---\n\n**Built with ❤️ for the Global South**\n\n*Your health, your guardian. Anywhere.*']
+# VitaChain 🌍
+
+[![Built with React | Vite | Tailwind](https://img.shields.io/badge/built_with-React%20%7C%20Vite%20%7C%20Tailwind-667eea?style=flat-square)](https://vitejs.dev)
+[![PWA](https://img.shields.io/badge/PWA-Ready-5a0fc8?style=flat-square)](https://web.dev/pwa/)
+[![Offline-First](https://img.shields.io/badge/Offline-First-10b981?style=flat-square)](https://offlinefirst.com)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue?style=flat-square)](LICENSE)
+[![Status](https://img.shields.io/badge/Status-Competition%20Ready-14B8A6?style=flat-square)]()
+[![Live Demo](https://img.shields.io/badge/Demo-Live-F59E0B?style=flat-square)](https://care-connect-lilac-nine.vercel.app)
+
+**VitaChain** is an offline-first, self-sovereign AI health guardian that works without internet, syncs anonymously via mesh networks, and shares clinical summaries through QR codes — built for the Global South.
+
+---
+
+## Quick Start
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/nmesirionyengbaronye/vitachain.git
+cd vitachain
+
+# 2. Install dependencies
+npm install
+
+# 3. Start development server
+npm run dev
+```
+
+Open [http://localhost:8080](http://localhost:8080) in your browser.
+
+---
+
+## Features
+
+| Layer | Feature | Description |
+|-------|---------|-------------|
+| **Health Graph** | Personal Health Record | Encrypted on-device records (conditions, medications, allergies, encounters) using Automerge CRDTs |
+| **Health Graph** | Clinical Tracking | 15+ trackers: nutrition, workouts, sleep, hydration, cycle, mental health, blood pressure, glucose, medications |
+| **AI Engine** | Hybrid AI | Gemma 4 online + TinyLlama/Qwen offline — clinical summaries, drug checks, care gaps, structured 4-section output |
+| **AI Engine** | Multi-Role | Patient, clinician, CHW personas with crisis detection, emotion awareness, and safety guardrails |
+| **AI Engine** | Web-Augmented | LangSearch + SearXNG + PubMed + ClinicalTrials + OpenFDA + WHO GHO + disease.sh integration |
+| **Mesh Network** | Gossip Protocol | Anonymous peer-to-peer via Bluetooth/BroadcastChannel — search counters, facility confirmations, outbreak signals |
+| **Mesh Network** | Outbreak Detection | Automated spike detection from aggregated mesh data with real-time alerting |
+| **Passport** | Health Passport | W3C Verifiable Credentials as QR codes — share health summaries with any clinician, no internet needed |
+| **Passport** | QR Scanner | Camera-based scanning with image fallback for clinician-side credential verification |
+| **Engagement** | Gamification | Rewards, quests, milestones, avatar customization, community health forums |
+| **Education** | Health Literacy | Module-based health education with progress tracking |
+| **Mobile** | APK Wrapper | Capacitor-powered Android APK with native Bluetooth, push notifications, camera access |
+
+---
+
+## Architecture
+
+```mermaid
+graph TB
+    subgraph "Client Device (PWA / APK)"
+        A[React + Vite PWA] --> B[Personal Health Graph]
+        A --> C[Hybrid AI Engine]
+        A --> D[Mesh Intelligence]
+        A --> E[Health Passport]
+        B --> F[IndexedDB + Web Crypto AES-256-GCM]
+        C --> G[Transformers.js + TinyLlama / Gemma 4]
+        D --> H[BroadcastChannel / BLE Gossip]
+        E --> I[W3C VC + QR Code]
+    end
+
+    subgraph "Cloud (Optional)"
+        J[Vercel Hosting] --> K[Serverless API]
+        K --> L[Gemini + LangSearch + SearXNG]
+        M[Upstash Redis] --> N[KV Store]
+    end
+
+    D -.->|Anonymised signals| M
+    A -.->|Online fallback| K
+```
+
+---
+
+## Tech Stack
+
+| Category | Technologies |
+|----------|-------------|
+| **Frontend** | React 18, TypeScript, Vite 5, Tailwind CSS, Framer Motion |
+| **Offline AI** | Transformers.js v4, ONNX Runtime Web, TinyLlama 1.1B, Qwen, all-MiniLM-L6-v2 |
+| **Online AI** | Google Gemini 4 (1,500 calls/day free), OpenRouter, HuggingFace Inference |
+| **Data** | IndexedDB (50+ stores), Automerge CRDTs, Web Crypto API (AES-256-GCM) |
+| **Search** | LangSearch API, SearXNG (14 public instances), DuckDuckGo fallback |
+| **Medical APIs** | PubMed, ClinicalTrials.gov, OpenFDA, WHO GHO, disease.sh |
+| **Mobile** | Capacitor 6, Android APK, Bluetooth LE, Push Notifications |
+| **Deployment** | Vercel (static + serverless), PWA with Service Worker |
+
+---
+
+## Competition Entries
+
+### Gemma 4 Good
+VitaChain uses Google's Gemma model family for on-device medical AI that works without internet connectivity. The hybrid AI engine routes queries between Gemma 4 (online, via Gemini API) and TinyLlama (offline, via Transformers.js), ensuring healthcare AI is accessible even in zero-connectivity environments across the Global South.
+
+### Abuja Innovation Challenge
+Built specifically for Nigeria's healthcare fragmentation crisis. VitaChain addresses the 400,000 annual deaths from medication errors by giving patients a self-sovereign health record that follows them across providers. The mesh network enables anonymous outbreak detection in communities with limited infrastructure.
+
+### Squad Hackathon 3.0
+Integrated Squad payment gateway for premium features (subscription management, clinician verification). The PWA-first approach ensures the app works on any device with a browser, while Capacitor wrapping provides native Android capabilities for offline-heavy use cases.
+
+---
+
+## Live Demo
+
+**Vercel Deployment:** [https://care-connect-lilac-nine.vercel.app](https://care-connect-lilac-nine.vercel.app)
+
+> **Note:** AI features require initial model download (~1.3GB). After that, everything works fully offline.
+
+---
+
+## Environment Variables
+
+Create a `.env.local` file:
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `VITE_CLERK_PUBLISHABLE_KEY` | Clerk auth publishable key | Yes |
+| `VITE_GEMINI_API_KEY` | Google Gemini API key (free tier) | Yes |
+| `VITE_LANGSEARCH_API_KEY` | LangSearch web search API key | Yes |
+| `VITE_SEARXNG_INSTANCES` | Comma-separated SearXNG instances | Yes |
+| `VITE_API_URL` | API base URL | Yes |
+| `VITE_OPENROUTER_API_KEY` | OpenRouter fallback key | Optional |
+| `VITE_HF_API_KEY` | HuggingFace Inference token | Optional |
+
+---
+
+## License
+
+Copyright (C) 2026 Nmesirionye Ngbaronye
+
+Distributed under the AGPL-3.0 License. See [LICENSE](LICENSE) for details.
+
+---
+
+## Contact
+
+**Nmesirionye Ngbaronye**
+- Email: nmesirionyengbaronye@gmail.com
+- GitHub: [@nmesirionyengbaronye](https://github.com/nmesirionyengbaronye)
+
+---
+
+**Built with ❤️ for the Global South**
+
+*Your health, your guardian. Anywhere.*

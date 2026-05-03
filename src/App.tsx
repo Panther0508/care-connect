@@ -66,6 +66,7 @@ const RewardsPage = lazy(() => import("./pages/RewardsPage"));
 const QuestsPage = lazy(() => import("./pages/QuestsPage"));
 const TrainingDashboard = lazy(() => import("./pages/TrainingDashboard"));
 const EvaluationDashboard = lazy(() => import("./pages/EvaluationDashboard"));
+const ImageLibrary = lazy(() => import("./pages/ImageLibrary"));
 
 // Page wrapper with animation
 const PageWrapper = ({ children }) => (
@@ -291,6 +292,15 @@ const App = () => {
                  <AuthSyncGate>
                    <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
                      <PageWrapper><CareLocator /></PageWrapper>
+                   </ProtectedRoute>
+                 </AuthSyncGate>
+               } />
+
+               {/* Image Library route */}
+               <Route path="/images" element={
+                 <AuthSyncGate>
+                   <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                     <PageWrapper><ImageLibrary /></PageWrapper>
                    </ProtectedRoute>
                  </AuthSyncGate>
                } />
