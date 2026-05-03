@@ -1,6 +1,6 @@
 // src/services/modelLoader.js
 // Centralized Model Loader - Phase 3
-// Uses jsDelivr CDN proxy for reliable HuggingFace model loading
+// Uses jsDelivr CDN proxy (configured in main.tsx) for reliable HuggingFace model loading
 
 import { pipeline, env } from '@huggingface/transformers';
 
@@ -66,13 +66,11 @@ const MODEL_CONFIGS = {
 async function loadModel(type, onProgress) {
   if (models[type]) return models[type];
   if (modelLoading[type]) {
-    // Wait for in-flight load
     while (modelLoading[type]) {
       await new Promise(r => setTimeout(r, 100));
     }
     if (models[type]) return models[type];
-    // Loading failed earlier, return null instead of throwing
-    return null;
+    return null; // failed earlier
   }
 
   modelLoading[type] = true;
@@ -88,7 +86,7 @@ async function loadModel(type, onProgress) {
           if (pct % 10 === 0) console.log(`  ${type}: ${pct}%`);
         }
       })
-      // fetch is globally overridden via env.fetch (set in main.tsx)
+      // fetch is globally overridden via env.fetch (main.tsx)
     });
     models[type] = loadedModel;
     console.log(`✅ Model loaded: ${type}`);
@@ -96,19 +94,6 @@ async function loadModel(type, onProgress) {
   } catch (err) {
     console.error(`Failed to load model ${type} (${config.model}):`, err);
     models[type] = null;
-    throw err;
-  } finally {
-    modelLoading[type] = false;
-  }
-      })
-      // fetch is globally overridden via env.fetch
-    });
-    models[type] = loadedModel;
-    console.log(`✅ Model loaded: ${type}`);
-    return loadedModel;
-  } catch (err) {
-    console.error(`Failed to load model ${type} (${config.model}):`, err);
-    models[type] = null; // cache null to avoid repeated attempts
     throw err;
   } finally {
     modelLoading[type] = false;
@@ -144,7 +129,6 @@ export async function getTranslator(onProgress) {
 export async function getTokenizer(type) {
   const model = await loadModel(type);
   if (!model) throw new Error(`Model ${type} not available`);
-  // v4 returns pipeline with tokenizer property; v2 also has it
   return model.tokenizer;
 }
 
