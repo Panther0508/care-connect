@@ -27,6 +27,9 @@ import {
   Scan,
   Heart,
   Settings,
+  FilePlus,
+  BookOpen,
+  Share2,
 } from "lucide-react";
 import { useState } from "react";
 import HamburgerDrawer from "./HamburgerDrawer";
