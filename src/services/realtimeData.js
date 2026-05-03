@@ -77,15 +77,15 @@ export async function getOutbreakAlerts() {
     return { cached: true, data: cached.data };
   }
 
-  try {
-    const [covidRes, fluRes] = await Promise.allSettled([
-      safeFetch('https://disease.sh/v3/covid-19/all', {
-        headers: DEFAULT_HEADERS,
-      }),
-      safeFetch('https://disease.sh/v3/influenza/current', {
-        headers: DEFAULT_HEADERS,
-      }),
-    ]);
+   try {
+     const [covidRes, fluRes] = await Promise.allSettled([
+       safeFetch('https://disease.sh/v3/covid-19/all', {
+         headers: DEFAULT_HEADERS,
+       }),
+       safeFetch('https://disease.sh/v3/flu', {
+         headers: DEFAULT_HEADERS,
+       }),
+     ]);
 
     const result = {
       covid: null,
