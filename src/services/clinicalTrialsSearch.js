@@ -41,26 +41,26 @@ export async function searchClinicalTrials(query, filters = {}, limit = 5) {
 
     return studies.map(study => {
       const protocol = study.protocolSection;
-      const idInfo = protocol.identificationModule;
-      const status = protocol.statusModule;
-      const design = protocol.designInfo;
-      const conditions = protocol.conditionsModule?.conditions || [];
+      const idInfo = protocol?.identificationModule || {};
+      const status = protocol?.statusModule || {};
+      const design = protocol?.designInfo || {};
+      const conditions = protocol?.conditionsModule?.conditions || [];
 
       return {
         nctId: idInfo.nctId || '',
         title: idInfo.briefTitle || '',
         officialTitle: idInfo.officialTitle || '',
-        status: status.overallStatus || '',
-        phase: design.phases?.[0] || 'Not Specified',
-        studyType: design.studyType || '',
+        status: status?.overallStatus || '',
+        phase: (Array.isArray(design?.phases) && design.phases.length > 0) ? design.phases[0] : 'Not Specified',
+        studyType: design?.studyType || '',
         conditions: conditions.slice(0, 3),
-        interventions: (protocol.armsInterventionsModule?.interventions || [])
+        interventions: (protocol?.armsInterventionsModule?.interventions || [])
           .map(i => i.name || i.type)
           .slice(0, 3),
-        enrollment: design.enrollmentInfo || null,
-        startDate: status.startDate || '',
-        completionDate: status.completionDate || '',
-        sponsor: protocol.sponsorCollaboratorsModule?.leadSponsor?.name || '',
+        enrollment: design?.enrollmentInfo || null,
+        startDate: status?.startDate || '',
+        completionDate: status?.completionDate || '',
+        sponsor: protocol?.sponsorCollaboratorsModule?.leadSponsor?.name || '',
         source: 'ClinicalTrials.gov',
         url: `https://clinicaltrials.gov/ct2/show/${idInfo.nctId}`
       };

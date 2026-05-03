@@ -64,13 +64,16 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-  self.addEventListener('fetch', (event) => {
-    const url = new URL(event.request.url);
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  const isHuggingFace = url.hostname.includes('huggingface.co') || url.hostname.includes('cdn.jsdelivr.net');
 
-    // Cache-first for static assets
-    if (ASSETS_TO_CACHE.some(p => url.pathname.endsWith(p) || url.pathname === '/')) {
-      event.respondWith(
-        caches.match(event.request).then((cached) => cached || fetch(event.request).then(response => {
+  // Cache-first for static assets
+  if (ASSETS_TO_CACHE.some(p => url.pathname.endsWith(p) || url.pathname === '/')) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        return fetch(event.request).then(response => {
           if (response && response.status === 200) {
             const responseClone = response.clone();
             caches.open(CACHE_NAME).then((cache) => {
@@ -78,52 +81,74 @@ self.addEventListener('activate', (event) => {
             });
           }
           return response;
-        }).catch(() => cached))
-      );
-      return;
-    }
+        }).catch(() => cached);
+      })
+    );
+    return;
+  }
 
-    // Optional: Pre-cache Gemma 4 E2B for stretch goal
-    if (url.origin === 'https://cdn.jsdelivr.net' && url.pathname.includes('@mediapipe')) {
-      event.respondWith(
-        caches.match(event.request).then((cached) => {
-          if (cached) return cached;
-          return fetch(event.request).then((response) => {
-            if (response && response.status === 200) {
-              const responseClone = response.clone();
-              caches.open(CACHE_NAME).then((cache) => {
-                cache.put(event.request, responseClone);
-              });
-            }
-            return response;
-          }).catch(() => null);
-        })
-      );
-      return;
-    }
-    
-    // Also cache huggingface.co gemma-4-e2b-it
-    if (url.origin === 'https://huggingface.co' && 
-        (url.pathname.includes('gemma-4-e2b') || url.pathname.includes('gemma-4'))) {
-      event.respondWith(
-        caches.match(event.request).then((cached) => {
-          if (cached) return cached;
-          return fetch(event.request).then((response) => {
+  // Pre-cache Gemma 4 E2B (stretch goal)
+  if (url.origin === 'https://cdn.jsdelivr.net' && url.pathname.includes('@mediapipe')) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        return fetch(event.request).then((response) => {
+          if (response && response.status === 200) {
             const responseClone = response.clone();
             caches.open(CACHE_NAME).then((cache) => {
               cache.put(event.request, responseClone);
             });
-            return response;
-          }).catch(() => null);
-        })
-      );
-      return;
-    }
+          }
+          return response;
+        }).catch(() => null);
+      })
+    );
+    return;
+  }
 
-  // Default: network-first with cache fallback, always return a valid Response
+  // HuggingFace model files — cache only successful responses
+  if (isHuggingFace && url.pathname.includes('huggingface.co')) {
+    event.respondWith(
+      caches.match(event.request).then(async (cached) => {
+        // Check if cached response is valid
+        if (cached) {
+          // BUG 2 FIX: Check status code first
+          if (cached.status >= 400) {
+            // Cached response is an error — delete and retry network
+            console.log('🗑️ Deleting stale HF error response (status=' + cached.status + '):', url.href);
+            caches.open(CACHE_NAME).then(cache => cache.delete(event.request));
+            // Fall through to network request below
+          } else {
+            // Valid cached response
+            return cached;
+          }
+        }
+
+        // Fetch from network
+        try {
+          const networkResponse = await fetch(event.request);
+          if (networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then(cache => {
+              cache.put(event.request, responseClone);
+            });
+          } else {
+            console.warn(`⚠️ HuggingFace HTTP ${networkResponse.status} — not caching`);
+          }
+          return networkResponse;
+        } catch (err) {
+          // Network failed, return cached if any
+          return cached || new Response('Network error', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+        }
+      })
+    );
+    return;
+  }
+
+  // Default: network-first with cache fallback
   event.respondWith(
     fetch(event.request)
-      .then((response) => {
+      .then(async (response) => {
         if (response && response.status === 200) {
           const responseClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {

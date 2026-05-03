@@ -122,9 +122,9 @@ function clamp(val) {
  */
 export async function logEvaluation(evalData) {
   try {
-    const db = await indexedDB.open('vitachain', 7);
-    // Simplified — actual DB open handled in aiCoreRouter's store function
-    // This is a hook; actual storage happens in aiCoreRouter
+    // Actual storage is handled by aiCoreRouter's storeEvaluationScore using openDB v9
+    // This is kept for API compatibility; version bump to v9 for consistency
+    const db = await indexedDB.open('vitachain', 9);
   } catch (e) {
     console.warn('Evaluation log skipped:', e);
   }

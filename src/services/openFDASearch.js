@@ -48,14 +48,24 @@ export async function searchOpenFDA(drugName, limit = 5) {
  * @param {number} limit - Results limit
  */
 export async function searchDrugRecalls(drugName = null, limit = 5) {
+  // BUG 7 FIX: Validate drug name before building query
+  if (drugName && (drugName.length < 3 || !/^[a-z\-]+$/i.test(drugName))) {
+    console.warn('⚠️ Invalid drug name for OpenFDA search:', drugName);
+    return [];
+  }
+
   try {
-    let url = `${BASE_URL}/recall.json?limit=${limit}&sort=report_date:desc`;
+    const params = new URLSearchParams();
+    params.set('limit', limit.toString());
+    params.set('sort', 'report_date:desc');
     if (drugName) {
-      url += `&search=product_description:"${drugName}"`;
+      params.set('search', `product_description:"${drugName}"`);
     }
 
-    const auth = API_KEY ? `api_key=${API_KEY}&` : '';
-    const resp = await fetch(`${url}&${auth}`);
+    const auth = API_KEY ? `api_key=${API_KEY}` : null;
+    const url = `${BASE_URL}/recall.json?${params}${auth ? '&' + auth : ''}`;
+
+    const resp = await fetch(url);
     if (!resp.ok) throw new Error(`OpenFDA Recall: ${resp.status}`);
 
     const data = await resp.json();

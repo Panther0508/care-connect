@@ -1,5 +1,5 @@
 // src/services/webSearchService.js
-// TIERED WEB SEARCH — LangSearch (primary) → SearXNG (fallback) → DuckDuckGo (final)
+// TIERED WEB SEARCH — LangSearch (primary) → DuckDuckGo (fallback) → Wikipedia (final)
 // All results normalized to { title, url, snippet, source } format
 // Includes 1-hour IndexedDB cache to avoid redundant calls
 
@@ -42,18 +42,7 @@ export async function searchWeb(query, maxResults = 5) {
     console.warn('LangSearch failed:', err.message);
   }
 
-  // Tier 2: SearXNG Public Instances
-  try {
-    const searxResults = await searchSearXNG(normalizedQuery, maxResults);
-    if (searxResults.length > 0) {
-      await cacheResults(normalizedQuery, searxResults);
-      return searxResults;
-    }
-  } catch (err) {
-    console.warn('SearXNG failed:', err.message);
-  }
-
-  // Tier 3: DuckDuckGo Instant Answer
+  // Tier 2: DuckDuckGo Instant Answer
   try {
     const ddgResults = await searchDuckDuckGo(normalizedQuery, maxResults);
     if (ddgResults.length > 0) {
@@ -62,6 +51,17 @@ export async function searchWeb(query, maxResults = 5) {
     }
   } catch (err) {
     console.warn('DuckDuckGo failed:', err.message);
+  }
+
+  // Tier 3: Wikipedia API (free, no key required)
+  try {
+    const wikiResults = await searchWikipedia(normalizedQuery, maxResults);
+    if (wikiResults.length > 0) {
+      await cacheResults(normalizedQuery, wikiResults);
+      return wikiResults;
+    }
+  } catch (err) {
+    console.warn('Wikipedia search failed:', err.message);
   }
 
   // All tiers failed — return empty array
@@ -113,95 +113,7 @@ async function searchLangSearch(query, maxResults = 5) {
 }
 
 /**
- * Tier 2: SearXNG Public Instances (HTML scraping)
- * GET https://{instance}/search?q={query}&language=en
- * Parse <article class="result"> blocks
- */
-async function searchSearXNG(query, maxResults = 5) {
-  const instances = (import.meta.env.VITE_SEARXNG_INSTANCES || '')
-    .split(',')
-    .map(i => i.trim())
-    .filter(i => i.length > 0);
-
-  if (instances.length === 0) {
-    throw new Error('VITE_SEARXNG_INSTANCES not configured');
-  }
-
-  // Try up to 5 instances before giving up
-  const attempts = Math.min(5, instances.length);
-  const encodedQuery = encodeURIComponent(query);
-
-  for (let i = 0; i < attempts; i++) {
-    const instance = instances[i];
-    const url = `${instance}/search?q=${encodedQuery}&language=en`;
-
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout per instance
-
-      const resp = await fetch(url, {
-        signal: controller.signal,
-        headers: { 'Accept': 'text/html' }
-      });
-      clearTimeout(timeoutId);
-
-      if (!resp.ok) continue;
-
-      const html = await resp.text();
-      const results = parseSearXNGHTML(html, maxResults);
-
-      if (results.length > 0) {
-        console.log('✅ SearXNG success via:', instance);
-        return results.map(r => ({
-          ...r,
-          source: 'SearXNG'
-        }));
-      }
-    } catch (err) {
-      console.warn(`SearXNG instance ${instance} failed:`, err.message);
-    }
-  }
-
-  throw new Error('All SearXNG instances failed or returned no results');
-}
-
-/**
- * Parse SearXNG HTML response
- * SearXNG standard markup: <article class="result"> … <h3> title </h3> … <a href="url"> … <p> snippet </p>
- */
-function parseSearXNGHTML(html, maxResults = 5) {
-  const results = [];
-
-  // Use DOM parser
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
-
-  // Find all <article class="result"> elements
-  const articles = doc.querySelectorAll('article.result');
-
-  articles.forEach(article => {
-    if (results.length >= maxResults) return;
-
-    // Extract title and URL from the first <a> in <h3> or <h4>
-    const titleEl = article.querySelector('h3, h4');
-    const linkEl = article.querySelector('a');
-    const snippetEl = article.querySelector('p, .content, .snippet');
-
-    if (titleEl && linkEl) {
-      const title = titleEl.textContent?.trim() || '';
-      const url = linkEl.getAttribute('href') || '';
-      const snippet = snippetEl?.textContent?.trim() || '';
-
-      if (title && url) {
-        results.push({ title, url, snippet });
-      }
-    }
-  });
-
-  return results;
-}
-
-/**
+ * Tier 3: DuckDuckGo Instant Answer API
  * Tier 3: DuckDuckGo Instant Answer API
  * GET https://api.duckduckgo.com/?q={query}&format=json
  * Returns: { AbstractText, AbstractURL, Heading, RelatedTopics: [{Text, FirstURL}] }
@@ -245,6 +157,37 @@ async function searchDuckDuckGo(query, maxResults = 5) {
   }
 
   return results.slice(0, maxResults);
+}
+
+/**
+ * Tier 3: Wikipedia API (free, no auth required)
+ * GET https://en.wikipedia.org/w/api.php?action=opensearch&search={query}&limit=5&format=json
+ * Returns: [query, [titles], [descriptions], [urls]]
+ */
+async function searchWikipedia(query, maxResults = 5) {
+  const encoded = encodeURIComponent(query);
+  const url = `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encoded}&limit=${maxResults}&format=json&namespace=0`;
+
+  const resp = await fetch(url);
+
+  if (!resp.ok) {
+    throw new Error(`Wikipedia API: ${resp.status}`);
+  }
+
+  const data = await resp.json();
+  const [_, titles, descriptions, urls] = data;
+
+  const results = [];
+  for (let i = 0; i < titles.length && i < maxResults; i++) {
+    results.push({
+      title: titles[i],
+      url: urls[i],
+      snippet: descriptions[i] || '',
+      source: 'Wikipedia'
+    });
+  }
+
+  return results;
 }
 
 // ==================== IndexedDB Caching ====================
@@ -299,6 +242,6 @@ async function cacheResults(query, results) {
 export default {
   searchWeb,
   searchLangSearch,
-  searchSearXNG,
-  searchDuckDuckGo
+  searchDuckDuckGo,
+  searchWikipedia
 };

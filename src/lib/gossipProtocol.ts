@@ -2,6 +2,10 @@
 // Gossip protocol for Mesh Intelligence using Automerge CRDTs
 
 import * as automerge from '@automerge/automerge/slim';
+import { initAutomerge } from './initAutomerge';
+
+// Ensure Automerge is initialized before any operations
+initAutomerge();
 
 export interface StockoutAlert {
   drugName: string;

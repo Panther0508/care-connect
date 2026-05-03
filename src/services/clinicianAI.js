@@ -2,7 +2,7 @@
 // Clinician AI Service — Thin wrapper around aiCoreRouter
 // All logic in promptLibrary / aiCoreRouter
 
-import { routeQuery } from './aiCoreRouter.js';
+import { routeQuery, getQuotaRemaining } from './aiCoreRouter.js';
 import { buildStructuredPrompt } from './promptLibrary.js';
 
 const CLINICIAN_SYSTEM_PROMPT = `You are Vita Clinical, a precise, evidence-based clinical decision-support AI.
@@ -37,7 +37,7 @@ export async function processClinicianQuery(prompt, options = {}) {
     {}
   );
 
-  const result = await routeQuery({ structuredPrompt, role: 'clinician', userId: 'clinician' });
+  const result = await routeQuery({ structuredPrompt, role: 'clinician', userId: 'clinician', extractedQuery: prompt });
 
   return {
     success: true,
@@ -66,7 +66,7 @@ Required:
 5. Citations from guidelines or recent studies`;
 
   const structuredPrompt = buildStructuredPrompt('clinician', taskPrompt);
-  const result = await routeQuery({ structuredPrompt, role: 'clinician' });
+  const result = await routeQuery({ structuredPrompt, role: 'clinician', extractedQuery: symptoms });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
@@ -83,7 +83,7 @@ For each code provide:
 - Brief description and coding notes (laterality, severity)`;
 
   const structuredPrompt = buildStructuredPrompt('clinician', taskPrompt);
-  const result = await routeQuery({ structuredPrompt, role: 'clinician' });
+  const result = await routeQuery({ structuredPrompt, role: 'clinician', extractedQuery: conditions });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
@@ -107,7 +107,7 @@ Include:
 - Patient counseling points (adherence, side effects, red flags)`;
 
   const structuredPrompt = buildStructuredPrompt('clinician', taskPrompt);
-  const result = await routeQuery({ structuredPrompt, role: 'clinician' });
+  const result = await routeQuery({ structuredPrompt, role: 'clinician', extractedQuery: drugInfo });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
@@ -133,7 +133,8 @@ Format as professional clinical correspondence:
 - Clear questions for specialist`;
 
   const structuredPrompt = buildStructuredPrompt('clinician', taskPrompt);
-  const result = await routeQuery({ structuredPrompt, role: 'clinician' });
+  const extractedQuery = `Referral to ${specialty}: ${reason}`;
+  const result = await routeQuery({ structuredPrompt, role: 'clinician', extractedQuery });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
@@ -158,7 +159,7 @@ ${templates[noteType] || templates.Brief}
 Fill every field. Use concise medical terminology appropriate for clinicians.`;
 
   const structuredPrompt = buildStructuredPrompt('clinician', taskPrompt);
-  const result = await routeQuery({ structuredPrompt, role: 'clinician' });
+  const result = await routeQuery({ structuredPrompt, role: 'clinician', extractedQuery: findings });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
@@ -167,7 +168,7 @@ Fill every field. Use concise medical terminology appropriate for clinicians.`;
  * Quota status
  */
 export function getClinicianQuota() {
-  return routeQuery({}).then(r => r); // placeholder — will be fixed
+  return getQuotaRemaining ? getQuotaRemaining() : Promise.resolve({ used: 0, remaining: 1500, resetAt: new Date().toISOString() });
 }
 
 export default {

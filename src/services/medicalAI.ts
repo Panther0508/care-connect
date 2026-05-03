@@ -63,7 +63,12 @@ export function getQuotaStatus() {
 export async function generateClinicalSummary(healthState, personaSystemPrompt = null, userId = 'guest') {
   const taskPrompt = buildClinicalSummaryTask(healthState);
   const structuredPrompt = buildStructuredPrompt('patient', taskPrompt, { healthContext: healthState });
-  const result = await routeQuery({ structuredPrompt, role: 'patient', userId });
+  // Extract query: summarize health state concisely
+  const extractedQuery = 'Patient health summary: ' + 
+    [(healthState.conditions || []).map(c => c.name).join(', '), 
+     (healthState.medications || []).map(m => m.name).join(', ')]
+    .filter(Boolean).join('; ') || 'health summary';
+  const result = await routeQuery({ structuredPrompt, role: 'patient', userId, extractedQuery });
   return result;
 }
 
@@ -73,7 +78,8 @@ export async function generateClinicalSummary(healthState, personaSystemPrompt =
 export async function generatePreVisitSummary(healthState, specialistType, userId = 'guest') {
   const taskPrompt = buildReferralTask(specialistType, healthState);
   const structuredPrompt = buildStructuredPrompt('patient', taskPrompt, { healthContext: healthState });
-  const result = await routeQuery({ structuredPrompt, role: 'patient', userId });
+  const extractedQuery = `${specialistType} referral summary`;
+  const result = await routeQuery({ structuredPrompt, role: 'patient', userId, extractedQuery });
   return result;
 }
 
@@ -83,7 +89,8 @@ export async function generatePreVisitSummary(healthState, specialistType, userI
 export async function checkMedicationInteractionLLM(medications, userId = 'guest') {
   const taskPrompt = buildDrugInteractionTask(medications);
   const structuredPrompt = buildStructuredPrompt('patient', taskPrompt);
-  const result = await routeQuery({ structuredPrompt, role: 'patient', userId });
+  const extractedQuery = `Drug interactions: ${medications.join(', ')}`;
+  const result = await routeQuery({ structuredPrompt, role: 'patient', userId, extractedQuery });
   return result;
 }
 
@@ -93,7 +100,8 @@ export async function checkMedicationInteractionLLM(medications, userId = 'guest
 export async function askMedicalQuestion(healthState, question, personaSystemPrompt = null, role = 'patient', userId = 'guest') {
   const taskPrompt = buildPatientTaskPrompt(healthState, question);
   const structuredPrompt = buildStructuredPrompt(role, taskPrompt, { healthContext: healthState });
-  const result = await routeQuery({ structuredPrompt, role, userId });
+  // Use the original user question for web search
+  const result = await routeQuery({ structuredPrompt, role, userId, extractedQuery: question });
   return result;
 }
 

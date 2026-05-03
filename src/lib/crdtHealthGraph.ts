@@ -2,6 +2,10 @@
 // CRDT-based health record manager using Automerge v2.2+
 
 import * as automerge from '@automerge/automerge/slim';
+import { initAutomerge } from './initAutomerge';
+
+// Ensure Automerge is initialized before any operations
+initAutomerge();
 
 export interface Condition {
   id: string;

@@ -4,8 +4,9 @@
 
 import { pipeline, env } from '@huggingface/transformers';
 
-env.allowLocalModels = true;
+env.allowLocalModels = false;
 env.useBrowserCache = true;
+// Note: env.fetch override is set globally in main.tsx before any imports
 
 const EMBEDDING_MODEL = 'Xenova/all-MiniLM-L6-v2';
 const VECTOR_DIM = 384;
@@ -13,6 +14,21 @@ const VECTOR_DIM = 384;
 let embedder = null;
 let embedderLoading = false;
 let embedderLoaded = false;
+let embedderError = null;
+
+// Simple keyword-based embedding fallback (offline-safe)
+function keywordEmbed(text) {
+  const words = text.toLowerCase().split(/\s+/);
+  const features = {};
+  words.forEach((w, i) => {
+    const hash = [...w].reduce((a, c) => ((a << 5) - a + c.charCodeAt(0)) | 0, 0);
+    features[Math.abs(hash) % 384] = (features[Math.abs(hash) % 384] || 0) + 1;
+  });
+  const vec = new Array(384).fill(0);
+  Object.entries(features).forEach(([idx, val]) => { vec[parseInt(idx)] = Math.min(val, 5); });
+  const mag = Math.sqrt(vec.reduce((a, b) => a + b * b, 0)) || 1;
+  return vec.map(v => v / mag);
+}
 
 // Dataset configurations
 const DATASETS = {
@@ -98,51 +114,68 @@ const DATASETS = {
   }
 };
 
-let dbVersion = 6;
+let dbVersion = 9; // Bumped to match unified vitachain schema
 
 // Load embedding model
 export async function loadEmbedder() {
   if (embedderLoaded) return embedder;
   if (embedderLoading) {
-    while (embedderLoading) {
-      await new Promise(r => setTimeout(r, 100));
-    }
-    if (embedderError) throw embedderError;
-    return embedder;
+    // Wait for in-flight load
+    while (embedderLoading) { await new Promise(r => setTimeout(r, 50)); }
+    if (embedderLoaded) return embedder;
+    if (embedderError) return null; // failed earlier
   }
 
   embedderLoading = true;
-  try {
-    console.log('Loading embedding model:', EMBEDDING_MODEL);
-    embedder = await pipeline('feature-extraction', EMBEDDING_MODEL, {
-      progress_callback: (progress) => {
-        if (progress.status === 'downloading') {
-          const pct = Math.round((progress.loaded / progress.total) * 100);
-          console.log(`  Embedding model: ${pct}%`);
+  const maxAttempts = 3;
+  let lastErr = null;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      console.log(`Loading embedding model (attempt ${attempt}/${maxAttempts}): ${EMBEDDING_MODEL}`);
+      embedder = await pipeline('feature-extraction', EMBEDDING_MODEL, {
+        progress_callback: (progress) => {
+          if (progress.status === 'downloading') {
+            const pct = Math.round((progress.loaded / progress.total) * 100);
+            console.log(`  Embedding model: ${pct}%`);
+          }
         }
+      });
+      embedderLoaded = true;
+      embedderLoading = false;
+      console.log('✅ Embedding model loaded (all-MiniLM-L6-v2, 384 dims)');
+      return embedder;
+    } catch (err) {
+      lastErr = err;
+      console.warn(`⚠️ Embedder attempt ${attempt} failed:`, err?.message || err);
+      if (attempt < maxAttempts) {
+        const delay = attempt === 1 ? 2000 : attempt === 2 ? 4000 : 6000;
+        console.log(`Retrying in ${delay}ms...`);
+        await new Promise(r => setTimeout(r, delay));
       }
-    });
-    embedderLoaded = true;
-    console.log('✅ Embedding model loaded (all-MiniLM-L6-v2, 384 dims)');
-    return embedder;
-  } catch (err) {
-    console.error('Failed to load embedding model:', err);
-    embedderError = err;
-    throw err;
-  } finally {
-    embedderLoading = false;
+    }
   }
+
+  embedderError = lastErr;
+  embedder = null;
+  embedderLoaded = false;
+  console.error('❌ Embedder failed after 3 attempts, using keyword fallback');
+  return null;
 }
 
 // Generate embedding
 export async function embedText(text) {
   await loadEmbedder();
+  if (!embedder) {
+    console.warn('Using keyword-based embedding fallback (advancedRAG)');
+    return keywordEmbed(text);
+  }
   try {
     const output = await embedder(text, { pooling: 'mean', normalize: true });
     return Array.from(output.data);
   } catch (err) {
-    console.error('Embedding failed:', err);
-    throw err;
+    console.error('Embedding failed, fallback to keyword:', err);
+    return keywordEmbed(text);
   }
 }
 
@@ -422,8 +455,6 @@ export function getEmbedderStatus() {
   if (embedderLoading) return { loaded: false, loading: true, error: null };
   return { loaded: false, loading: false, error: 'Not loaded' };
 }
-
-let embedderError = null;
 
 // Index all datasets on first run
 export async function ensureAllIndexed() {

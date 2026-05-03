@@ -35,6 +35,7 @@ dist-ssr
 
 # IDE
 .vimrc
+.kilo
 .npmrc
 
 # OS

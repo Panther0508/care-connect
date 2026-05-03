@@ -137,13 +137,13 @@ export function buildReasoningSteps(queryResult, webContext = null) {
   const steps = [];
 
   // Step 1: Web search (if available)
-  if (webContext?.brave?.length || webContext?.pubmed?.length) {
+  if (webContext?.web?.length || webContext?.pubmed?.length) {
     steps.push({
       type: 'search',
       title: 'Web & Literature Search',
-      description: `Searched across Brave (${webContext.brave?.length || 0} results), PubMed (${webContext.pubmed?.length || 0} articles)${webContext.clinicalTrials ? `, ClinicalTrials.gov (${webContext.clinicalTrials.length} trials)` : ''}`,
+      description: `Searched across Web (${webContext.web?.length || 0} results), PubMed (${webContext.pubmed?.length || 0} articles)${webContext.clinicalTrials ? `, ClinicalTrials.gov (${webContext.clinicalTrials.length} trials)` : ''}`,
       sources: [
-        ...(webContext.brave?.slice(0, 2).map(r => r.title) || []),
+        ...(webContext.web?.slice(0, 2).map(r => r.title) || []),
         ...(webContext.pubmed?.slice(0, 1).map(a => a.title) || [])
       ].slice(0, 3)
     });

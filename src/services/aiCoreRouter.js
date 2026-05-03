@@ -70,17 +70,41 @@ function incrementQuota() {
 // ─────────────────────────────────────────────────────────────────────────────
 export async function loadEmbedder() {
   if (embedderLoaded) return embedder;
-  try {
-    embedder = await getEmbeddingModel();
-    embedderLoaded = true;
-    console.log('✅ Embedder ready (all-MiniLM-L6-v2)');
-    return embedder;
-  } catch (err) {
-    embedderError = err;
-    console.warn('⚠️ HuggingFace embedder failed, using keyword fallback:', err?.message || err);
-    // Return null - embedText will use keyword fallback
-    return null;
+  if (embedderLoading) {
+    // Wait for in-flight load
+    while (embedderLoading) { await new Promise(r => setTimeout(r, 50)); }
+    if (embedderLoaded) return embedder;
+    if (embedderError) return null; // failed earlier
   }
+
+  embedderLoading = true;
+  const maxAttempts = 3;
+  let lastErr = null;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      console.log(`Loading embedder (attempt ${attempt}/${maxAttempts})...`);
+      embedder = await getEmbeddingModel();
+      embedderLoaded = true;
+      console.log('✅ Embedder ready (all-MiniLM-L6-v2)');
+      return embedder;
+    } catch (err) {
+      lastErr = err;
+      console.warn(`⚠️ Embedder attempt ${attempt} failed:`, err?.message || err);
+      if (attempt < maxAttempts) {
+        const delay = attempt === 1 ? 2000 : attempt === 2 ? 4000 : 6000;
+        console.log(`Retrying in ${delay}ms...`);
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
+  }
+
+  // All attempts failed
+  embedderError = lastErr;
+  embedder = null;
+  embedderLoaded = false;
+  console.error('❌ Embedder failed after 3 attempts, using keyword fallback');
+  return null;
 }
 
 export async function embedText(text) {
@@ -146,8 +170,8 @@ export async function loadTinyLlama() {
 let dbInstance = null;
 async function openDB() {
   if (dbInstance) return dbInstance;
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open('vitachain', 7); // bump version
+return new Promise((resolve, reject) => {
+      const req = indexedDB.open('vitachain', 9); // bump version - was 7, now 9
     req.onupgradeneeded = (e) => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains('gemmaCache')) db.createObjectStore('gemmaCache', { keyPath: 'id' });
@@ -254,7 +278,7 @@ async function enrichWithWebData(query) {
   const data = { web: [], pubmed: [], clinicalTrials: [], openFDA: [], who: null, diseaseSh: null, searchSource: 'unknown' };
 
   try {
-    // Tiered search: LangSearch → SearXNG → DuckDuckGo
+    // Tiered search: LangSearch → DuckDuckGo → Wikipedia (all free, no API keys required)
     const webResults = await searchWeb(query, 5);
     data.web = webResults;
     data.searchSource = webResults[0]?.source || 'unknown';
@@ -265,12 +289,13 @@ async function enrichWithWebData(query) {
   try { data.pubmed = await searchPubMed(query, 3); } catch (e) { console.warn('PubMed failed:', e); }
 
   const drugNames = extractDrugNames(query);
-  if (drugNames.length > 0 || query.toLowerCase().includes('drug') || query.toLowerCase().includes('medication')) {
-    try { data.clinicalTrials = await searchClinicalTrials(drugNames[0] || query, {}, 2); } catch (e) { console.warn('ClinicalTrials failed:', e); }
+  // Only search drug databases if we extracted a specific drug name
+  if (drugNames.length > 0) {
+    try { data.clinicalTrials = await searchClinicalTrials(drugNames[0], {}, 2); } catch (e) { console.warn('ClinicalTrials failed:', e); }
     try {
-      data.openFDA = await searchDrugRecalls(drugNames[0] || '');
+      data.openFDA = await searchDrugRecalls(drugNames[0]);
       if (data.openFDA.length === 0) {
-        const labeling = await searchDrugLabeling(drugNames[0] || '');
+        const labeling = await searchDrugLabeling(drugNames[0]);
         if (labeling) data.openFDA.push({ source: 'FDA Label', ...labeling });
       }
     } catch (e) { console.warn('OpenFDA failed:', e); }
@@ -300,16 +325,44 @@ async function enrichWithWebData(query) {
  }
 
 function extractDrugNames(query) {
-  const medKeywords = ['on ', 'taking ', 'drug ', 'medication ', 'prescribed '];
+  const medKeywords = ['on ', 'taking ', 'drug ', 'medication ', 'prescribed ', 'using '];
+  const nonDrugTerms = ['drug', 'drugs', 'medication', 'medications', 'medicine', 'pill', 'pills', 'dose', 'dosage', 'interaction', 'side effect', 'effects', 'reaction'];
+  
   for (const kw of medKeywords) {
     const idx = query.toLowerCase().indexOf(kw);
     if (idx !== -1) {
       const after = query.substring(idx + kw.length);
-      const candidates = after.split(/[,.!?;]/)[0].trim().split(/\s+/);
-      if (candidates[0]) return [candidates[0]];
+      // Take first segment before punctuation
+      const candidateRaw = after.split(/[,.!?;]/)[0].trim();
+      // Split into words, take first meaningful word
+      const words = candidateRaw.split(/\s+/).filter(w => w.length > 0);
+      
+      // Validate candidate: at least 3 chars, letters/hyphens only, not a common non-drug term
+      for (const word of words) {
+        const cleanWord = word.toLowerCase().replace(/[^a-z]/g, '');
+        if (cleanWord.length >= 3 && 
+            /^[a-z-]+$/.test(cleanWord) && 
+            !nonDrugTerms.includes(cleanWord) &&
+            cleanWord !== 'the' && 
+            cleanWord !== 'with' && 
+            cleanWord !== 'for' && 
+            cleanWord !== 'and' &&
+            cleanWord !== 'or') {
+          return [cleanWord];
+        }
+      }
     }
   }
-  return [];
+  
+  // Fallback: try to find any drug-like word (capitalized or known pattern)
+  const words = query.split(/\s+/);
+  for (const word of words) {
+    if (word.length >= 3 && /^[A-Z][a-z]+$/.test(word)) {
+      return [word];
+    }
+  }
+  
+   return [];
 }
 
 function detectCountryFromQuery(query, isoLength = 3) {
@@ -368,6 +421,7 @@ async function callGemmaAPI(prompt, systemPrompt) {
  * @param {object} options.emotionalContext — { emotionResult, threadTurns, trendSummary }
  * @param {object} options.enrichment — pre-fetched enrichment data (optional, fetched if not provided)
  * @param {boolean} options.useCache — allow cache lookup (default: true)
+ * @param {string} options.extractedQuery — Original user query for web search (default: first 200 chars of structuredPrompt)
  * @returns {Promise<object>} { text, reasoning, citations, emotionalState, model, source, evaluation }
  */
 export async function routeQuery({
@@ -376,8 +430,23 @@ export async function routeQuery({
   userId = 'guest',
   emotionalContext = {},
   enrichment = null,
-  useCache = true
+  useCache = true,
+  extractedQuery = null
 }) {
+  // Extract user question from structuredPrompt if not provided
+  let finalExtractedQuery = extractedQuery;
+  if (!finalExtractedQuery) {
+    // Try to find the TASK section and extract from there
+    const taskMatch = structuredPrompt.match(/─── SECTION 2: TASK ───\s*([^─]*?)(?=─── SECTION|$)/s);
+    if (taskMatch && taskMatch[1]) {
+      finalExtractedQuery = taskMatch[1].split('\n')[0].trim();
+    }
+    // Fallback to first 200 chars if no TASK section found
+    if (!finalExtractedQuery) {
+      finalExtractedQuery = structuredPrompt.substring(0, 200).split('\n')[0];
+    }
+  }
+
   const { emotionResult = { state: 'neutral', confidence: 0.8 }, threadTurns = [], trendSummary = null } = emotionalContext;
 
   // 1. Detect emotion (always)
@@ -405,10 +474,10 @@ export async function routeQuery({
   // 6. ONLINE PRIMARY PATH (Gemma 4)
   if (isOnline && hasQuota) {
     const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
-    if (geminiKey) {
-      try {
-        // Fetch enrichment if not provided
-        const enrichmentData = enrichment || (isOnline ? await enrichWithWebData(structuredPrompt) : null);
+   if (geminiKey) {
+     try {
+       // Fetch enrichment if not provided (use extracted query, not full prompt)
+       const enrichmentData = enrichment || (isOnline ? await enrichWithWebData(finalExtractedQuery) : null);
 
         // Build final enriched prompt
         const enrichedPrompt = enrichmentData
@@ -656,9 +725,9 @@ export async function routeQuery({
 
 function formatEnrichmentForPrompt(enrichment) {
   let ctx = '';
-  if (enrichment.brave?.length > 0) {
+  if (enrichment.web?.length > 0) {
     ctx += '--- Web Results ---\n';
-    enrichment.brave.forEach((r, i) => { ctx += `${i + 1}. ${r.title}: ${r.snippet}\n   Source: ${r.url}\n`; });
+    enrichment.web.forEach((r, i) => { ctx += `${i + 1}. ${r.title}: ${r.snippet}\n   Source: ${r.url}\n`; });
     ctx += '\n';
   }
   if (enrichment.pubmed?.length > 0) {

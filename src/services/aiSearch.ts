@@ -1,7 +1,10 @@
-import { pipeline } from '@huggingface/transformers';
+import { pipeline, env } from '@huggingface/transformers';
 import { getAllFacilities, getAllVectors } from '../lib/idb';
 import { searchOnline } from './onlineSearch';
 import { meshOrchestrator } from './meshOrchestrator';
+
+env.allowLocalModels = false;
+env.useBrowserCache = true;
 
 export interface Facility {
   id: string;
@@ -33,11 +36,47 @@ export interface Facility {
 }
 
 let extractor: any = null;
+let extractorError = null;
+
+// Simple keyword-based embedding fallback (offline-safe)
+function keywordEmbed(text: string): number[] {
+  const words = text.toLowerCase().split(/\s+/);
+  const features: Record<number, number> = {};
+  words.forEach((w) => {
+    const hash = [...w].reduce((a, c) => ((a << 5) - a + c.charCodeAt(0)) | 0, 0);
+    features[Math.abs(hash) % 384] = (features[Math.abs(hash) % 384] || 0) + 1;
+  });
+  const vec = new Array(384).fill(0);
+  Object.entries(features).forEach(([idx, val]) => { vec[parseInt(idx)] = Math.min(parseInt(val), 5); });
+  const mag = Math.sqrt(vec.reduce((a, b) => a + b * b, 0)) || 1;
+  return vec.map(v => v / mag);
+}
 
 export async function initModel() {
   if (extractor) return extractor;
-  extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
-  return extractor;
+  
+  const maxAttempts = 3;
+  let lastErr = null;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      console.log(`Loading embedding model (attempt ${attempt}/${maxAttempts}): Xenova/all-MiniLM-L6-v2`);
+      extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+      return extractor;
+    } catch (err) {
+      lastErr = err;
+      console.warn(`⚠️ Embedder attempt ${attempt} failed:`, err?.message || err);
+      if (attempt < maxAttempts) {
+        const delay = attempt === 1 ? 2000 : attempt === 2 ? 4000 : 6000;
+        console.log(`Retrying in ${delay}ms...`);
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
+  }
+
+  extractorError = lastErr;
+  console.error('❌ Embedder failed after 3 attempts, using keyword fallback');
+  return null;
 }
 
 function cosineSimilarity(vecA: number[], vecB: number[]) {
@@ -54,8 +93,13 @@ function cosineSimilarity(vecA: number[], vecB: number[]) {
 
 async function searchOffline(query: string): Promise<Facility[]> {
   const model = await initModel();
-  const output = await model(query, { pooling: 'mean', normalize: true });
-  const queryVector = Array.from(output.data) as number[];
+  let queryVector: number[];
+  if (!model) {
+    queryVector = keywordEmbed(query);
+  } else {
+    const output = await model(query, { pooling: 'mean', normalize: true });
+    queryVector = Array.from(output.data) as number[];
+  }
 
   const facilities = await getAllFacilities();
   const vectors = await getAllVectors();

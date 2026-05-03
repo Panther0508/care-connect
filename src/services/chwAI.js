@@ -2,7 +2,7 @@
 // Community Health Worker AI — Thin wrapper around aiCoreRouter
 // All logic in promptLibrary / aiCoreRouter
 
-import { routeQuery } from './aiCoreRouter.js';
+import { routeQuery, getQuotaRemaining } from './aiCoreRouter.js';
 import { buildStructuredPrompt } from './promptLibrary.js';
 
 const CHW_SYSTEM_PROMPT = `You are Vita Community, a practical AI field assistant for community health workers.
@@ -22,7 +22,7 @@ export async function processCHWQuery(prompt, options = {}) {
   if (location) mainPrompt = `Location: ${location}\n${mainPrompt}`;
 
   const structuredPrompt = buildStructuredPrompt('chw', mainPrompt);
-  const result = await routeQuery({ structuredPrompt, role: 'chw', userId: 'chw' });
+  const result = await routeQuery({ structuredPrompt, role: 'chw', userId: 'chw', extractedQuery: prompt });
 
   return {
     success: true,
@@ -55,7 +55,7 @@ Use WHO IMCI/ANC guidelines. Classify as:
 Provide clear actions and caregiver instructions.`;
 
   const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
-  const result = await routeQuery({ structuredPrompt, role: 'chw' });
+  const result = await routeQuery({ structuredPrompt, role: 'chw', extractedQuery: symptoms });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
@@ -76,7 +76,7 @@ Provide step-by-step CHW management guide including:
 - Counseling points for caregiver`;
 
   const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
-  const result = await routeQuery({ structuredPrompt, role: 'chw' });
+  const result = await routeQuery({ structuredPrompt, role: 'chw', extractedQuery: condition });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
@@ -95,7 +95,7 @@ For each: explain why dangerous and required action (REFER NOW).
 Format as bullet list with explicit "→ REFER" actions.`;
 
   const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
-  const result = await routeQuery({ structuredPrompt, role: 'chw' });
+  const result = await routeQuery({ structuredPrompt, role: 'chw', extractedQuery: symptoms });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
@@ -116,7 +116,7 @@ Make it interactive — include questions to ask the beneficiary.
 End with key message summary.`;
 
   const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
-  const result = await routeQuery({ structuredPrompt, role: 'chw' });
+  const result = await routeQuery({ structuredPrompt, role: 'chw', extractedQuery: topic });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
@@ -139,7 +139,7 @@ Requirements:
 - Closing: "Do you have questions?"`;
 
   const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
-  const result = await routeQuery({ structuredPrompt, role: 'chw' });
+  const result = await routeQuery({ structuredPrompt, role: 'chw', extractedQuery: topic });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
@@ -166,7 +166,7 @@ Format as clear, structured report for medical records. Include:
 - Next appointment`;
 
   const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
-  const result = await routeQuery({ structuredPrompt, role: 'chw' });
+  const result = await routeQuery({ structuredPrompt, role: 'chw', extractedQuery: findings });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
@@ -183,7 +183,7 @@ Provide visit checklist and danger sign screen for this gestational age.
 Include: vitals, immunizations, nutrition, birth planning, red flags.`;
 
   const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
-  const result = await routeQuery({ structuredPrompt, role: 'chw' });
+  const result = await routeQuery({ structuredPrompt, role: 'chw', extractedQuery: concerns || `ANC at ${gestationalAge} weeks` });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
 }
@@ -192,7 +192,7 @@ Include: vitals, immunizations, nutrition, birth planning, red flags.`;
  * Quota check
  */
 export function getCHWQuota() {
-  return routeQuery({}).then(r => r); // placeholder — will be fixed
+  return getQuotaRemaining ? getQuotaRemaining() : Promise.resolve({ used: 0, remaining: 1500, resetAt: new Date().toISOString() });
 }
 
 export default {

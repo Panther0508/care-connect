@@ -402,14 +402,14 @@ export function buildPromptWithHistory(basePrompt, threadTurns, role) {
 export function injectEnrichmentIntoPrompt(prompt, enrichment) {
   if (!enrichment) return prompt;
 
-  let contextBlock = '\n─── AVAILABLE MEDICAL LITERATURE ───\n';
+   let contextBlock = '\n─── AVAILABLE MEDICAL LITERATURE ───\n';
 
-  if (enrichment.brave?.length > 0) {
-    contextBlock += '\n[Web Results]\n';
-    enrichment.brave.forEach((r, i) => {
-      contextBlock += `${i + 1}. ${r.title}: ${r.snippet} (${r.url})\n`;
-    });
-  }
+   if (enrichment.web?.length > 0) {
+     contextBlock += '\n[Web Results]\n';
+     enrichment.web.forEach((r, i) => {
+       contextBlock += `${i + 1}. ${r.title}: ${r.snippet} (${r.url})\n`;
+     });
+   }
 
   if (enrichment.pubmed?.length > 0) {
     contextBlock += '\n[PubMed Articles]\n';

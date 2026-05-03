@@ -1,6 +1,6 @@
 export function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("vitachain", 8); // Bumped to v8 for full store set
+    const request = indexedDB.open("vitachain", 9); // Bumped to v9 to match aiCoreRouter
 
     request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
       const db = (event.target as IDBOpenDBRequest).result;

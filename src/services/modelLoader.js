@@ -75,29 +75,42 @@ async function loadModel(type, onProgress) {
 
   modelLoading[type] = true;
   const config = MODEL_CONFIGS[type];
+  const maxAttempts = 3;
+  let lastErr = null;
 
-  try {
-    console.log(`Loading model: ${type} (${config.model})`);
-    const loadedModel = await pipeline(config.task, config.model, {
-      ...config.options,
-      progress_callback: onProgress || ((p) => {
-        if (p.status === 'downloading' || p.status === 'progress') {
-          const pct = Math.round((p.loaded || 0) / (p.total || 1) * 100);
-          if (pct % 10 === 0) console.log(`  ${type}: ${pct}%`);
-        }
-      })
-      // fetch is globally overridden via env.fetch (main.tsx)
-    });
-    models[type] = loadedModel;
-    console.log(`✅ Model loaded: ${type}`);
-    return loadedModel;
-  } catch (err) {
-    console.error(`Failed to load model ${type} (${config.model}):`, err);
-    models[type] = null;
-    throw err;
-  } finally {
-    modelLoading[type] = false;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      console.log(`Loading model: ${type} (${config.model}) — attempt ${attempt}/${maxAttempts}`);
+      const loadedModel = await pipeline(config.task, config.model, {
+        ...config.options,
+        progress_callback: onProgress || ((p) => {
+          if (p.status === 'downloading' || p.status === 'progress') {
+            const pct = Math.round((p.loaded || 0) / (p.total || 1) * 100);
+            if (pct % 10 === 0) console.log(`  ${type}: ${pct}%`);
+          }
+        })
+        // fetch is globally overridden via env.fetch (main.tsx)
+      });
+      models[type] = loadedModel;
+      modelLoading[type] = false;
+      console.log(`✅ Model loaded: ${type}`);
+      return loadedModel;
+    } catch (err) {
+      lastErr = err;
+      console.warn(`⚠️ Model load attempt ${attempt} failed for ${type}:`, err?.message || err);
+      if (attempt < maxAttempts) {
+        const delay = attempt === 1 ? 2000 : attempt === 2 ? 4000 : 6000;
+        console.log(`Retrying in ${delay}ms...`);
+        await new Promise(r => setTimeout(r, delay));
+      }
+    }
   }
+
+  // All attempts failed
+  models[type] = null;
+  modelLoading[type] = false;
+  console.error(`❌ Model ${type} failed to load after ${maxAttempts} attempts`);
+  throw lastErr;
 }
 
 // Text Generation (TinyLlama)
