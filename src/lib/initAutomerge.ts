@@ -1,22 +1,15 @@
 // src/lib/initAutomerge.ts
-// Centralized Automerge v2 initialization — call exactly once at app startup
+// Centralized Automerge v2 initialization — MUST be executed before any Automerge usage
 import * as automerge from '@automerge/automerge/slim';
 
-let initialized = false;
-
-export function initAutomerge() {
-  if (initialized) return;
-  try {
-    // @ts-ignore — automerge.use() may not be in slim typings but exists at runtime
-    automerge.use();
-    initialized = true;
-    console.log('✅ Automerge initialized');
-  } catch (e) {
-    // Ignore if already initialized (throws "already called")
-    if (!e.message?.includes('already')) {
-      console.warn('Automerge init failed:', e);
-    } else {
-      initialized = true;
-    }
+// Call use() immediately upon module evaluation (synchronously)
+try {
+  // @ts-ignore — automerge.use may not be in typings but exists at runtime
+  automerge.use();
+  console.log('✅ Automerge initialized');
+} catch (e) {
+  // Ignore "already called" errors — that means it was initialized elsewhere
+  if (!e.message?.includes('already')) {
+    console.warn('Automerge init failed:', e);
   }
 }

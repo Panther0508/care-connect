@@ -1,9 +1,20 @@
-// Configure HuggingFace Transformers settings FIRST (before any other imports that use transformers)
+// ═══════════════════════════════════════════════════════════════════════════════
+// ENTRY POINT — CRITICAL INITIALIZATION ORDER
+// ═══════════════════════════════════════════════════════════════════════════════
+// 1. Automerge MUST be initialized before any module that uses Automerge types
+//    (meshOrchestrator, gossipProtocol, crdtHealthGraph, etc.)
+// 2. Transformers env config must be set before any transformers import runs
+// 3. Service worker registration follows
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Import initAutomerge for its side-effect (calls automerge.use() immediately)
+import './lib/initAutomerge';
+
+// Configure HuggingFace Transformers settings BEFORE any transformers code runs
 import { env } from '@huggingface/transformers';
 env.allowLocalModels = false;
 env.useBrowserCache = true;
-
-// Use direct huggingface.co URLs (service worker handles caching)
+// Use direct HuggingFace URLs; service worker handles offline caching
 // The CDN proxy to jsDelivr was removed because jsDelivr GH only proxies GitHub repos, not HuggingFace models
 
 import { BrowserRouter } from "react-router-dom";
