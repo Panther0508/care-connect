@@ -17,6 +17,23 @@ const PROHIBITED_PATTERNS = [
   /\b(?:100%|absolutely|certainly|guaranteed|always|never)\s+(?:cure|heal|work|effective)\b/i
 ];
 
+// Template leakage patterns (internal markers that must never appear in user-facing output)
+const TEMPLATE_LEAK_PATTERNS = [
+  /\*?\s*Plain language\?\s*Yes/i,
+  /\*?\s*Defined terms\?/i,
+  /\*?\s*No diagnosis\?/i,
+  /\*?\s*No prescribing\?/i,
+  /\*?\s*Citations included\?/i,
+  /\*?\s*Correct phrasing\?/i,
+  /\*?\s*Format followed\?/i,
+  /\*?\s*Checkmarks?:?\s*✓/i,
+  /^--+ SECTION \d+ --+$/i,
+  /^OUTPUT FORMAT/i,
+  /^QUALITY RULES/i,
+  /^SECTION \d+:?\s*$/i,
+  /\b(?:Self-evaluation|Quality check|Template test|Section \d+)\b/i
+];
+
 // Template leakage patterns (internal evaluation markers that should never appear in output)
 const TEMPLATE_LEAK_PATTERNS = [
   /\*?\s*Plain language\?\s*Yes/i,

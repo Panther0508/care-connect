@@ -86,6 +86,10 @@ async function loadModel(type, onProgress) {
           if (pct % 10 === 0) console.log(`  ${type}: ${pct}%`);
         }
       })
+    }).catch(err => {
+      // HuggingFace model load failed – likely CORS/network issue
+      console.error(`Failed to load model ${type} from HuggingFace:`, err);
+      throw new Error(`Model load failed: ${config.model} – ${err.message}`);
     });
     models[type] = loadedModel;
     console.log(`✅ Model loaded: ${type}`);
