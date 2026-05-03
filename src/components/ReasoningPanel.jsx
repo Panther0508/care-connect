@@ -32,7 +32,16 @@ const STEP_COLORS = {
   conclusion: 'text-teal-400'
 };
 
-export default function ReasoningPanel({ reasoningSteps, isOpen, onToggle }) {
+export default function ReasoningPanel({ reasoningSteps, isOpen: initialOpen = false, onToggle }) {
+  const [internalIsOpen, setInternalIsOpen] = useState(initialOpen);
+
+  const handleToggle = () => {
+    setInternalIsOpen(!internalIsOpen);
+    if (onToggle) onToggle();
+  };
+
+  const isOpen = internalIsOpen;
+
   if (!reasoningSteps || reasoningSteps.length === 0) return null;
 
   return (
@@ -43,7 +52,7 @@ export default function ReasoningPanel({ reasoningSteps, isOpen, onToggle }) {
     >
       {/* Header */}
       <button
-        onClick={onToggle}
+        onClick={handleToggle}
         className="w-full flex items-center justify-between p-4 hover:bg-slate-800/30 transition-colors"
       >
         <div className="flex items-center gap-3">

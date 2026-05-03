@@ -29,6 +29,10 @@ export default function AdminBiometricLock({
   const redirectRef = useRef(false);
   const { user } = useAuth();
 
+  const [pinInput, setPinInput] = useState('');
+  const [showPinModal, setShowPinModal] = useState(false);
+  const FALLBACK_PIN = '0000'; // Mock PIN for web fallback
+
   const triggerBiometricCheck = useCallback(async () => {
     if (redirectRef.current) return;
     if (devSkipBiometric) {
@@ -42,18 +46,9 @@ export default function AdminBiometricLock({
     try {
       const available = await isBiometricAvailable();
       if (!available && !devAutoVerify) {
-        // Log biometric failure
-        if (user?.id) {
-          adminAuditLogger.log(
-            user.id,
-            'biometric.failed',
-            'admin_access',
-            { reason: 'biometric_unavailable' },
-            user.publicMetadata?.did
-          );
-        }
-        redirectRef.current = true;
-        window.location.href = '/dashboard';
+        // If not available (e.g. on web), show fallback PIN instead of failing
+        setShowPinModal(true);
+        setIsChecking(false);
         return;
       }
 
@@ -104,9 +99,28 @@ export default function AdminBiometricLock({
       redirectRef.current = true;
       window.location.href = '/dashboard';
     } finally {
-      setIsChecking(false);
+      if (available) setIsChecking(false);
     }
   }, [devSkipBiometric, devAutoVerify, user]);
+
+  const handlePinSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pinInput === FALLBACK_PIN) {
+      setShowPinModal(false);
+      setBiometricVerified(true);
+      setLastActivity(Date.now());
+      if (user?.id) {
+        adminAuditLogger.log(user.id, 'biometric.success', 'admin_access_fallback', {}, user.publicMetadata?.did);
+      }
+    } else {
+      setPinInput('');
+      if (user?.id) {
+        adminAuditLogger.log(user.id, 'biometric.failed', 'admin_access_fallback', { reason: 'invalid_pin' }, user.publicMetadata?.did);
+      }
+      redirectRef.current = true;
+      window.location.href = '/dashboard';
+    }
+  };
 
   // Handle user activity
   const handleActivity = useCallback(() => {
@@ -215,6 +229,44 @@ export default function AdminBiometricLock({
   return (
     <>
       {children}
+
+      {/* Fallback PIN Modal for Web */}
+      {showPinModal && !biometricVerified && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-700 rounded-xl p-6 max-w-sm w-full mx-4 shadow-2xl">
+            <div className="flex flex-col items-center text-center mb-6">
+              <div className="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mb-4 border border-slate-700">
+                <svg className="w-8 h-8 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Authentication Required</h3>
+              <p className="text-sm text-slate-400">
+                Biometrics are unavailable on this device. Please enter your PIN to continue. (Default: 0000)
+              </p>
+            </div>
+
+            <form onSubmit={handlePinSubmit} className="space-y-4">
+              <input
+                type="password"
+                maxLength={4}
+                value={pinInput}
+                onChange={(e) => setPinInput(e.target.value.replace(/[^0-9]/g, ''))}
+                className="w-full text-center text-2xl tracking-[0.5em] font-mono bg-slate-800 border border-slate-700 rounded-lg py-3 text-white focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition-all"
+                placeholder="••••"
+                autoFocus
+              />
+              <button
+                type="submit"
+                disabled={pinInput.length !== 4}
+                className="w-full py-3 bg-teal-600 hover:bg-teal-500 text-white font-semibold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Verify PIN
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Session Warning Modal */}
       {showWarning && (

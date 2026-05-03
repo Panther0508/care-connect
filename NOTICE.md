@@ -2,115 +2,142 @@
 
 This file lists third-party dependencies used in VitaChain and their respective licenses.
 
-## Dependencies
+## Core Dependencies
 
-@automerge/automerge
+**@automerge/automerge**
 License: MIT
 
-@capgo/capacitor-native-biometric
+**@capacitor/core**
+License: MIT
+
+**@capgo/capacitor-native-biometric**
 License: Apache-2.0
 
-@clerk/clerk-react
+**@clerk/clerk-react**
 License: MIT
 
-@finegym/fitness-calc
+**@finegym/fitness-calc**
 License: ISC
 
-@huggingface/transformers
+**@huggingface/transformers**
 License: Apache-2.0
 
-@radix-ui/react-dialog
+**@radix-ui/react-dialog**
 License: MIT
 
-@vercel/kv
+**@vercel/kv**
 License: MIT
 
-adm-zip
+**adm-zip**
 License: MIT
 
-canvas-confetti
+**canvas-confetti**
 License: MIT
 
-class-variance-authority
+**class-variance-authority**
 License: MIT
 
-date-fns
+**date-fns**
 License: MIT
 
-framer-motion
+**framer-motion**
 License: MIT
 
-healthicons
+**healthicons**
+License: MIT (CC0)
+
+**html5-qrcode**
 License: MIT
 
-html5-qrcode
-License: MIT
-
-leaflet
+**leaflet**
 License: BSD-2-Clause
 
-leaflet-heatmap
+**leaflet-heatmap**
 License: MIT
 
-lucide-react
+**lucide-react**
 License: ISC
 
-node-fetch
+**node-fetch**
 License: MIT
 
-paystack-react-lite
+**paystack-react-lite**
 License: MIT
 
-qrcode
+**qrcode**
 License: MIT
 
-react
+**react**
 License: MIT
 
-react-dom
+**react-dom**
 License: MIT
 
-react-leaflet
+**react-leaflet**
 License: MIT
 
-react-router-dom
+**react-router-dom**
 License: MIT
 
-read-excel-file
+**read-excel-file**
 License: MIT
 
-recharts
+**recharts**
 License: MIT
 
-tailwind-merge
+**tailwind-merge**
 License: MIT
 
-xlsx
+**xlsx**
 License: MIT
 
-@types/node
+## Mobile & Integration (Capacitor)
+
+**@capacitor-community/bluetooth-le**
 License: MIT
 
-@types/react
+**@capacitor/push-notifications**
 License: MIT
 
-@vitejs/plugin-react
+**@capacitor/camera**
 License: MIT
 
-autoprefixer
+**@capacitor/cli**
 License: MIT
 
-postcss
+## AI & Processing Tools
+
+**LangSearch**
+License: Proprietary (Free Tier)
+
+**SearXNG**
+License: AGPL-3.0
+
+**natural** (Evaluation Engine)
 License: MIT
 
-tailwindcss
+## Development Tools
+
+**@types/node**, **@types/react**
 License: MIT
 
-typescript
+**@vitejs/plugin-react**
+License: MIT
+
+**autoprefixer**
+License: MIT
+
+**postcss**
+License: MIT
+
+**tailwindcss**
+License: MIT
+
+**typescript**
 License: Apache-2.0
 
-vite
+**vite**
 License: MIT
 
-vite-plugin-wasm
+**vite-plugin-wasm**
 License: MIT
