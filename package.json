@@ -2,7 +2,11 @@
   "name": "vitachain",
   "private": true,
   "version": "1.0.0",
-  "author": "Nmesirionye Ngbaronye <nmesirionyengbaronye@gmail.com>",
+  "author": {
+    "name": "Nmesirionye Ngbaronye",
+    "email": "ngbaronyeoswald@gmail.com",
+    "url": "https://github.com/Panther0508"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,7 +15,7 @@
   },
   "dependencies": {
     "@automerge/automerge": "^2.2.8",
-    "@capacitor/core": "^6.0.0",
+    "@capacitor/core": "^8.3.1",
     "@capgo/capacitor-native-biometric": "^8.4.2",
     "@clerk/clerk-react": "^5.61.6",
     "@finegym/fitness-calc": "^1.0.1",
@@ -42,7 +46,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "@capacitor/cli": "^6.0.0",
+    "@capacitor/cli": "^8.3.1",
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "@vitejs/plugin-react": "^4.3.0",

@@ -46,7 +46,13 @@ License: MIT
 **healthicons**
 License: MIT (CC0)
 
-**html5-qrcode**
+**natural**
+License: MIT
+
+**@capacitor/cli**
+License: MIT
+
+**@squadco/js**
 License: MIT
 
 **leaflet**

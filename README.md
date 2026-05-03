@@ -1,11 +1,103 @@
-# VitaChain — Your Health, Your Guardian
+# VitaChain
 
-[![Built with React | Vite | Tailwind](https://img.shields.io/badge/Built%20with-React%20%7C%20Vite%20%7C%20Tailwind-61DAFB?style=flat-square)](https://reactjs.org/)
-[![PWA Ready](https://img.shields.io/badge/PWA-Ready-5A0FC8?style=flat-square)](https://web.dev/pwa/)
-[![Offline-First](https://img.shields.io/badge/Offline--First-10B981?style=flat-square)](https://offlinefirst.com/)
-[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue?style=flat-square)](LICENSE)
+A revolutionary AI-powered healthcare platform for Africa, combining offline-first architecture with advanced medical AI to deliver equitable healthcare access.
 
-> VitaChain is an offline-first, self-sovereign AI health guardian that works without internet, syncs anonymously via mesh networks, and shares structured clinical summaries through QR codes — built for the Global South.
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![Status](https://img.shields.io/badge/Status-Competition%20Ready-success)](https://github.com/Panther0508/vitachain)
+[![Live Demo](https://img.shields.io/badge/Demo-Live-orange)](https://vitachain.vercel.app)
+
+## Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/Panther0508/vitachain.git
+cd vitachain
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+## Features
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| AI-Powered Diagnostics | Gemma 4B model for medical consultations | ✅ |
+| Offline-First Architecture | Full functionality without internet | ✅ |
+| QR Code Health Passports | Verifiable credentials for patients | ✅ |
+| Real-Time Health Monitoring | Integrated vitals tracking | ✅ |
+| Community Health Worker Tools | Triage and protocol navigation | ✅ |
+| Medication Management | Reminders and interaction checking | ✅ |
+| Nutrition & Fitness Tracking | Personalized wellness plans | ✅ |
+| Emergency Response System | Crisis detection and protocols | ✅ |
+| Multi-Role Authentication | Patient, Clinician, CHW, Admin roles | ✅ |
+| Satellite Data Integration | Real-time health metrics from mesh networks | ✅ |
+| Biometric Security | Native biometric authentication | ✅ |
+| Multilingual Support | 10+ African languages | ✅ |
+| PWA Installation | Installable web app | ✅ |
+| Capacitor Mobile App | Android APK generation | ✅ |
+| Vercel Deployment | Serverless API endpoints | ✅ |
+| IndexedDB Storage | Local data persistence | ✅ |
+| Real-Time Sync | Background data synchronization | ✅ |
+
+## Architecture
+
+```mermaid
+graph TB
+    A[React PWA] --> B[Vite Build]
+    B --> C[Capacitor Android]
+    A --> D[Vercel API Routes]
+    D --> E[@vercel/kv Storage]
+    A --> F[IndexedDB]
+    F --> G[Offline AI Models]
+    G --> H[HuggingFace Transformers]
+    D --> I[Gemini API]
+    I --> J[Medical AI Router]
+    J --> K[Crisis Detection]
+    K --> L[Emergency Protocols]
+```
+
+## Tech Stack
+
+- **Frontend**: React 18, TypeScript, Tailwind CSS
+- **Backend**: Vercel Serverless Functions
+- **AI/ML**: HuggingFace Transformers, Google Gemini
+- **Storage**: IndexedDB, @vercel/kv
+- **Mobile**: Capacitor 8
+- **Maps**: Leaflet
+- **Charts**: Recharts
+- **Auth**: Clerk
+- **Payments**: Paystack
+
+## Competition Sections
+
+### Gemma 4 Good Challenge
+VitaChain leverages Google's Gemma 4B model for offline medical AI, ensuring ethical AI deployment in low-resource settings.
+
+### Abuja Innovation Challenge
+Targeted at improving healthcare access in Nigeria through innovative tech solutions.
+
+### Squad Hackathon 3.0
+Collaborative development with Squad's payment integration for seamless healthcare transactions.
+
+## Live Demo
+
+[https://vitachain.vercel.app](https://vitachain.vercel.app)
+
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+**Nmesirionye Ngbaronye**
+- Email: ngbaronyeoswald@gmail.com
+- GitHub: [@Panther0508](https://github.com/Panther0508)
 
 ## Problem Statement
 Healthcare in the Global South is severely fragmented. Medication errors cause over 400,000 preventable deaths annually. The chance of a patient’s health record being lost during a facility transfer is as high as 1-in-24, and 75% of clinical data remains siloed or inaccessible when needed most.
