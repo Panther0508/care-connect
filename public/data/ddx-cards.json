@@ -1,7 +1,3 @@
-// public/data/ddx-cards.json
-// Differential Diagnosis Cards - Phase 3 Dataset
-// Common chief complaints with differential diagnoses
-
 {
   "version": "2026.1",
   "description": "Differential diagnosis cards for common chief complaints - Phase 3 RAG",

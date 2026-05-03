@@ -4,7 +4,7 @@ A revolutionary AI-powered healthcare platform for Africa, combining offline-fir
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Status](https://img.shields.io/badge/Status-Competition%20Ready-success)](https://github.com/Panther0508/vitachain)
-[![Live Demo](https://img.shields.io/badge/Demo-Live-orange)](https://vitachain.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Demo-Live-orange)](https://care-connect-lilac-nine.vercel.app/)
 
 ## Quick Start
 
@@ -49,18 +49,27 @@ npm run build
 
 ```mermaid
 graph TB
-    A[React PWA / Capacitor] --> B[Vite Build]
-    B --> C[Android APK]
-    A --> D[Vercel Serverless]
-    D --> E[Gemini API]
-    D --> F[Upstash KV]
-    A --> G[IndexedDB]
-    G --> H[Offline AI Cache]
-    H --> I[TinyLlama 1.1B]
-    A --> J[Mesh Network]
-    J --> K[Web Bluetooth]
-    A --> L[Health Passport]
-    L --> M[QR + W3C VC]
+    subgraph Client
+        A[PWA / Capacitor] --> B[Health Graph CRDT]
+        A --> C[Hybrid AI Engine]
+        A --> D[Mesh Intelligence]
+        A --> E[Health Passport]
+        B --> F[IndexedDB + AES]
+        C --> G[TinyLlama 1.1B]
+        C --> H[Gemma 4 31B]
+        H --> I[Gemini API]
+        D --> J[Web Bluetooth]
+        E --> K[QR + W3C VC]
+        G -.->|Cached responses| H
+    end
+    
+    subgraph Cloud
+        L[Vercel Serverless] --> M[Gemini API]
+        N[Upstash Redis] --> O[KV Store]
+    end
+    
+    A -.->|Online fallback| L
+    D -.->|Anonymised signals| N
 ```
 
 ## Tech Stack
@@ -88,7 +97,7 @@ Collaborative development with Squad's payment integration for seamless healthca
 
 ## Live Demo
 
-[https://vitachain.vercel.app](https://vitachain.vercel.app)
+[https://care-connect-lilac-nine.vercel.app/](https://care-connect-lilac-nine.vercel.app/)
 
 ## License
 

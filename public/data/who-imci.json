@@ -1,7 +1,3 @@
-// public/data/who-imci.json
-// WHO Integrated Management of Childhood Illness (IMCI) - Phase 3 Dataset
-// Guidelines for managing common childhood illnesses in resource-limited settings
-
 {
   "version": "2026.1",
   "source": "World Health Organization - IMCI Guidelines",
