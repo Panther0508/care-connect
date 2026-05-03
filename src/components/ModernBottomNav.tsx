@@ -44,7 +44,7 @@ const PATIENT_NAV: NavItem[] = [
   { to: "/ai", label: "AI", icon: Sparkles },
   { to: "/nutrition", label: "Nutrition", icon: Apple },
   { to: "/workout", label: "Workout", icon: Dumbbell },
-  { to: "/passport", label: "Passport", icon: Scanner },
+  { to: "/passport", label: "Passport", icon: Scan },
 ];
 
 // Clinician navigation items
