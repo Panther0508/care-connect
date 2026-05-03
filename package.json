@@ -21,6 +21,7 @@
     "@finegym/fitness-calc": "^1.0.1",
     "@huggingface/transformers": "^4.2.0",
     "@radix-ui/react-dialog": "^1.1.15",
+    "@vercel/analytics": "^2.0.1",
     "@vercel/kv": "^1.0.1",
     "@vercel/speed-insights": "^2.0.0",
     "adm-zip": "^0.5.17",
