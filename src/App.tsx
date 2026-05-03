@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { lazy, Suspense } from "react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 // Layout & Components
 import AppLayout from "./components/AppLayout";
@@ -540,6 +541,7 @@ const App = () => {
           </Routes>
         </AnimatePresence>
       </Suspense>
+      <SpeedInsights />
     </AppLayout>
   );
 };
