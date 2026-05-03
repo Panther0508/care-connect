@@ -88,6 +88,19 @@ async function loadModel(type, onProgress) {
           if (pct % 10 === 0) console.log(`  ${type}: ${pct}%`);
         }
       })
+      // fetch is globally overridden via env.fetch (set in main.tsx)
+    });
+    models[type] = loadedModel;
+    console.log(`✅ Model loaded: ${type}`);
+    return loadedModel;
+  } catch (err) {
+    console.error(`Failed to load model ${type} (${config.model}):`, err);
+    models[type] = null;
+    throw err;
+  } finally {
+    modelLoading[type] = false;
+  }
+      })
       // fetch is globally overridden via env.fetch
     });
     models[type] = loadedModel;
@@ -131,6 +144,7 @@ export async function getTranslator(onProgress) {
 export async function getTokenizer(type) {
   const model = await loadModel(type);
   if (!model) throw new Error(`Model ${type} not available`);
+  // v4 returns pipeline with tokenizer property; v2 also has it
   return model.tokenizer;
 }
 
