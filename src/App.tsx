@@ -2,6 +2,7 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { lazy, Suspense } from "react";
+import { Analytics } from "@vercel/analytics/react";
 
 // Layout & Components
 import AppLayout from "./components/AppLayout";
@@ -125,6 +126,7 @@ const App = () => {
 
   return (
     <AppLayout>
+      <Analytics />
       <Suspense fallback={<LoadingFallback message="Loading page..." />}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
