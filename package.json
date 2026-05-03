@@ -19,7 +19,7 @@
     "@capgo/capacitor-native-biometric": "^8.4.2",
     "@clerk/clerk-react": "^5.61.6",
     "@finegym/fitness-calc": "^1.0.1",
-    "@huggingface/transformers": "^2.4.0",
+    "@huggingface/transformers": "2.3.0",
     "@radix-ui/react-dialog": "^1.1.15",
     "@vercel/kv": "^1.0.1",
     "adm-zip": "^0.5.17",

@@ -1,15 +1,32 @@
 // src/services/modelLoader.js
 // Centralized Model Loader - Phase 3
-// Single entry point for all HuggingFace Transformers models
-// Implements lazy loading, model pooling, and shared embedding model
+// Uses jsDelivr CDN proxy for reliable HuggingFace model loading
 
 import { pipeline, env } from '@huggingface/transformers';
 
-// Configure environment for reliable browser loading
-env.allowLocalModels = false; // Use remote hub only
+// Configure environment
+env.allowLocalModels = false;
 env.useBrowserCache = true;
-env.HUGGINGFACE_HUB_URL = 'https://huggingface.co';
-env.HUGGINGFACE_HUB_CACHE = 'persist'; // Use IndexedDB for model caching
+
+// Custom fetch that proxies HuggingFace model files through jsDelivr CDN
+// This avoids CORS issues and ensures reliable delivery
+const hfFetch = async (url, init) => {
+  // Transform huggingface.co model file URLs to jsDelivr
+  // Example: https://huggingface.co/Xenova/all-MiniLM-L6-v2/resolve/main/onnx/model_quantized.onnx
+  // Becomes: https://cdn.jsdelivr.net/gh/Xenova/all-MiniLM-L6-v2@main/onnx/model_quantized.onnx
+  const hfMatch = url.match(/https?:\/\/huggingface\.co\/([^/]+\/[^/]+)\/resolve\/main\/(.+)/);
+  if (hfMatch) {
+    const modelId = hfMatch[1];
+    const filePath = hfMatch[2];
+    const cdnUrl = `https://cdn.jsdelivr.net/gh/${modelId}@main/${filePath}`;
+    console.log('Proxying via jsDelivr:', cdnUrl);
+    return fetch(cdnUrl, init);
+  }
+  return fetch(url, init);
+};
+
+// Override transformers' fetch globally
+env.fetch = hfFetch;
 
 // Model cache
 const models = {
@@ -64,16 +81,18 @@ const MODEL_CONFIGS = {
 };
 
 /**
- * Load a model with progress tracking
+ * Load a model with progress tracking and robust error handling
  */
 async function loadModel(type, onProgress) {
   if (models[type]) return models[type];
   if (modelLoading[type]) {
-    // Wait for existing load
+    // Wait for in-flight load
     while (modelLoading[type]) {
       await new Promise(r => setTimeout(r, 100));
     }
-    return models[type];
+    if (models[type]) return models[type];
+    // Loading failed earlier, return null instead of throwing
+    return null;
   }
 
   modelLoading[type] = true;
@@ -84,22 +103,19 @@ async function loadModel(type, onProgress) {
     const loadedModel = await pipeline(config.task, config.model, {
       ...config.options,
       progress_callback: onProgress || ((p) => {
-        if (p.status === 'downloading') {
-          const pct = Math.round((p.loaded / p.total) * 100);
+        if (p.status === 'downloading' || p.status === 'progress') {
+          const pct = Math.round((p.loaded || 0) / (p.total || 1) * 100);
           if (pct % 10 === 0) console.log(`  ${type}: ${pct}%`);
         }
       })
-    }).catch(err => {
-      // HuggingFace model load failed – likely CORS/network issue
-      console.error(`Failed to load model ${type} from HuggingFace:`, err);
-      throw new Error(`Model load failed: ${config.model} – ${err.message}`);
+      // fetch is globally overridden via env.fetch
     });
     models[type] = loadedModel;
     console.log(`✅ Model loaded: ${type}`);
     return loadedModel;
   } catch (err) {
-    console.error(`Failed to load model ${type}:`, err);
-    modelLoading[type] = false;
+    console.error(`Failed to load model ${type} (${config.model}):`, err);
+    models[type] = null; // cache null to avoid repeated attempts
     throw err;
   } finally {
     modelLoading[type] = false;
@@ -134,6 +150,7 @@ export async function getTranslator(onProgress) {
 // Get tokenizer for a model
 export async function getTokenizer(type) {
   const model = await loadModel(type);
+  if (!model) throw new Error(`Model ${type} not available`);
   return model.tokenizer;
 }
 
