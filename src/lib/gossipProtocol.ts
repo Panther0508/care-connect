@@ -1,7 +1,7 @@
 // src/lib/gossipProtocol.ts
 // Gossip protocol for Mesh Intelligence using Automerge CRDTs
 
-import * as automerge from '@automerge/automerge';
+import * as automerge from '@automerge/automerge/slim';
 
 export interface StockoutAlert {
   drugName: string;

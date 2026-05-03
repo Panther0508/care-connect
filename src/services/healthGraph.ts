@@ -59,7 +59,13 @@ export async function setActiveUser(userId: string, passphrase: string = DEMO_PA
     currentKey = await deriveKey(passphrase, currentSalt);
     const decrypted = await decrypt(record.iv, record.encryptedBlob, currentKey);
     const bytes = new TextEncoder().encode(decrypted);
-    currentDoc = deserializeDoc(new Uint8Array(bytes));
+    try {
+      currentDoc = deserializeDoc(new Uint8Array(bytes));
+    } catch (e) {
+      console.warn('Failed to deserialize health graph, creating fresh:', e);
+      currentDoc = createHealthDoc();
+      await persistCurrentDoc();
+    }
   } else {
     // Create fresh health graph
     currentDoc = createHealthDoc();

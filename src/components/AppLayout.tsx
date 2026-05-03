@@ -5,6 +5,7 @@ import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { AnimatePresence, motion } from "framer-motion";
 import { useStatus } from "../hooks/useStatus";
 import OutbreakAlertNotifier from "./OutbreakAlertNotifier";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -13,6 +14,7 @@ interface AppLayoutProps {
 export default function AppLayout({ children }: AppLayoutProps) {
   const isOnline = useOnlineStatus();
   const { showStatus } = useStatus();
+  const [footerVisible, setFooterVisible] = useState(true);
 
   useEffect(() => {
     const handleOnline = () => {
@@ -43,14 +45,34 @@ export default function AppLayout({ children }: AppLayoutProps) {
       {/* Global outbreak alert listener (no UI) */}
       <OutbreakAlertNotifier />
 
-      <main className="relative z-10 pb-20 min-h-screen">
+      <main className={`relative z-10 min-h-screen ${footerVisible ? 'pb-20' : 'pb-0'}`}>
         <div className="mx-auto w-full max-w-5xl px-4 pt-8 md:px-8">
           {children}
         </div>
       </main>
 
-      {/* Modern Bottom Navigation */}
-      <ModernBottomNav />
+      {/* Footer toggle button */}
+      <button
+        onClick={() => setFooterVisible(v => !v)}
+        className="fixed bottom-4 right-4 z-50 p-2 rounded-full bg-teal-600 hover:bg-teal-500 text-white shadow-lg transition-colors"
+        aria-label={footerVisible ? "Hide navigation" : "Show navigation"}
+      >
+        {footerVisible ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+      </button>
+
+      {/* Modern Bottom Navigation with animation */}
+      <AnimatePresence>
+        {footerVisible && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          >
+            <ModernBottomNav />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

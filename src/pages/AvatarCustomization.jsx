@@ -10,7 +10,7 @@ import {
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 
-export function AvatarCustomization() {
+export default function AvatarCustomization() {
   const [accessories, setAccessories] = useState([]);
   const [equipped, setEquipped] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -158,11 +158,10 @@ export function AvatarCustomization() {
                   </div>
                 </div>
               </div>
-              
               {/* Equipped Accessories */}
               {equipped.map((accessory, index) => (
-                <div 
-                  key={`${accessory.id}-${index}`} 
+                <div
+                  key={`${accessory.id}-${index}`}
                   className="absolute inset-0 pointer-events-none"
                   style={{
                     left: accessory.position?.x || '50%',
@@ -182,105 +181,34 @@ export function AvatarCustomization() {
           </div>
         </motion.div>
 
-        {/* Accessories Grid */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h3 className="font-semibold text-slate-100 mb-4">Accessories</h3>
-          <p className="text-slate-400 mb-4">
-            Unlock accessories by earning points or completing specific achievements
-          </p>
-          
-          <div className="space-y-4">
-            {accessories.map(accessory => {
-              const isUnlocked = accessories.some(a => a.id === accessory.id && a.unlocked);
-              const isEquipped = equipped.some(e => e.id === accessory.id);
-              
-              return (
-                <motion.div
-                  key={accessory.id}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: accessory.id.length * 10 }}
-                  className={`glass-card p-4 cursor-default 
-                    ${isUnlocked 
-                      ? (isEquipped 
-                          ? 'border-teal-500/30 bg-teal-500/5' 
-                          : 'border-teal-500/20 bg-teal-500/10 hover:bg-teal-500/5') 
-                      : 'border-slate-600/20 bg-slate-900/20'}
-                    hover:${isUnlocked && !isEquipped ? 'scale-105' : ''} 
-                    transition-transform duration-300`
+        {/* Accessories List */}
+        <div className="space-y-4">
+          {accessories.map((accessory) => (
+            <div key={accessory.id} className="p-4 border border-teal-500/20 rounded">
+              <h4 className="text-slate-100">{accessory.name}</h4>
+              <p className="text-slate-400">{accessory.category}</p>
+              <div className="mt-2">
+                {accessory.locked ? (
+                  <button
+                    onClick={() => handleUnlock(accessory.id)}
+                    disabled={unlocking.has(accessory.id)}
+                    className="px-3 py-1 text-sm bg-yellow-500/20 text-yellow-300 rounded hover:bg-yellow-500/30"
                   >
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full 
-                          ${isUnlocked 
-                            ? 'bg-teal-500/20' 
-                            : 'bg-slate-600/20'}"
-                          className="flex items-center justify-center">
-                          {accessory.icon}
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-slate-100 
-                            ${isUnlocked ? '' : 'line-through'}">
-                            {accessory.name}
-                          </h4>
-                          <p className="text-xs text-slate-400 
-                            ${isUnlocked ? '' : 'line-through'}">
-                            {accessory.category}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs">
-                        {isUnlocked ? (
-                          isEquipped ? (
-                            <span className="text-teal-400">Equipped</span>
-                          ) : (
-                            <button 
-                              onClick={() => handleEquip(accessory.id)}
-                              disabled={equipping.has(accessory.id)}
-                              className="px-2 py-0.5 
-                                ${equipping.has(accessory.id) 
-                                  ? 'bg-slate-600/20 text-slate-400' 
-                                  : 'bg-teal-500/20 text-teal-400'} 
-                                rounded hover:bg-teal-500/30"
-                            >
-                              Equip
-                            </button>
-                          )
-                        ) : (
-                          <button 
-                            onClick={() => handleUnlock(accessory.id)}
-                            disabled={unlocking.has(accessory.id)}
-                            className="px-2 py-0.5 
-                              ${unlocking.has(accessory.id) 
-                                ? 'bg-slate-600/20 text-slate-400' 
-                                : 'bg-teal-500/20 text-teal-400'} 
-                              rounded hover:bg-teal-500/30"
-                          >
-                            Unlock
-                            {accessory.unlockCondition({ points: 0, badges: [] }) 
-                              ? '' 
-                              : ` (${getUnlockRequirementText(accessory)})`}
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Locked overlay */}
-                    {!isUnlocked && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-slate-900/50">
-                        <div className="text-slate-400 text-center">
-                          ???
-                        </div>
-                      </div>
-                    )}
-                  </motion.div>
-                );
-            })}
-          </div>
-        </motion.div>
+                    {unlocking.has(accessory.id) ? 'Unlocking...' : 'Unlock'}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleEquip(accessory.id)}
+                    disabled={equipping.has(accessory.id)}
+                    className="px-3 py-1 text-sm bg-teal-500/20 text-teal-300 rounded hover:bg-teal-500/30"
+                  >
+                    {equipping.has(accessory.id) ? 'Equipping...' : 'Equip'}
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
 
         {/* Reset Button */}
         <motion.div
@@ -288,7 +216,7 @@ export function AvatarCustomization() {
           animate={{ opacity: 1, y: 0 }}
           className="mt-6"
         >
-          <button 
+          <button
             onClick={handleReset}
             className="w-full px-4 py-2 bg-slate-600/20 text-slate-100 rounded hover:bg-slate-600/30"
           >

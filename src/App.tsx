@@ -68,6 +68,7 @@ const QuestsPage = lazy(() => import("./pages/QuestsPage"));
 const TrainingDashboard = lazy(() => import("./pages/TrainingDashboard"));
 const EvaluationDashboard = lazy(() => import("./pages/EvaluationDashboard"));
 const ImageLibrary = lazy(() => import("./pages/ImageLibrary"));
+const AvatarCustomization = lazy(() => import("./pages/AvatarCustomization"));
 
 // Page wrapper with animation
 const PageWrapper = ({ children }) => (
@@ -279,8 +280,17 @@ const App = () => {
                 </AuthSyncGate>
                } />
                
-               {/* Patient health history */}
-               <Route path="/patient-history" element={
+               {/* Patient avatar customization */}
+               <Route path="/avatar" element={
+                 <AuthSyncGate>
+                   <ProtectedRoute allowedRoles={['patient']}>
+                     <PageWrapper><AvatarCustomization /></PageWrapper>
+                   </ProtectedRoute>
+                 </AuthSyncGate>
+               } />
+               
+                {/* Patient health history */}
+                <Route path="/patient-history" element={
                  <AuthSyncGate>
                    <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
                      <PageWrapper><PatientHistory /></PageWrapper>

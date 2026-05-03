@@ -43,7 +43,7 @@ interface NavItem {
 
 // Patient navigation items
 const PATIENT_NAV: NavItem[] = [
-  { to: "/", label: "Dashboard", icon: Home },
+  { to: "/dashboard", label: "Dashboard", icon: Home },
   { to: "/ai", label: "AI", icon: Sparkles },
   { to: "/nutrition", label: "Nutrition", icon: Apple },
   { to: "/workout", label: "Workout", icon: Dumbbell },
@@ -52,28 +52,29 @@ const PATIENT_NAV: NavItem[] = [
 
 // Clinician navigation items
 const CLINICIAN_NAV: NavItem[] = [
-  { to: "/clinician/dashboard", label: "Dashboard", icon: Home },
-  { to: "/clinician/patients", label: "Patients", icon: Users },
-  { to: "/clinician/calendar", label: "Calendar", icon: Bell },
-  { to: "/clinician/records", label: "Records", icon: FilePlus },
-  { to: "/clinician/settings", label: "Settings", icon: Settings },
+  { to: "/dashboard", label: "Dashboard", icon: Home },
+  { to: "/ai", label: "AI", icon: Sparkles },
+  { to: "/health", label: "Health", icon: Heart },
+  { to: "/clinician/profile", label: "Profile", icon: Users },
+  { to: "/settings", label: "Settings", icon: Settings },
 ];
 
 // CHW navigation items
 const CHW_NAV: NavItem[] = [
-  { to: "/chw/dashboard", label: "Dashboard", icon: Home },
-  { to: "/chw/visits", label: "Visits", icon: Map },
-  { to: "/chw/resources", label: "Resources", icon: BookOpen },
-  { to: "/chw/referrals", label: "Referrals", icon: Share2 },
-  { to: "/chw/settings", label: "Settings", icon: Settings },
+  { to: "/dashboard", label: "Dashboard", icon: Home },
+  { to: "/outbreak", label: "Outbreak", icon: Map },
+  { to: "/register-need", label: "Needs", icon: FilePlus },
+  { to: "/alerts", label: "Alerts", icon: AlertTriangle },
+  { to: "/settings", label: "Settings", icon: Settings },
 ];
 
 // Admin navigation items
 const ADMIN_NAV: NavItem[] = [
-  { to: "/admin/dashboard", label: "Dashboard", icon: Home },
-  { to: "/admin/users", label: "Users", icon: Users },
-  { to: "/admin/analytics", label: "Analytics", icon: BarChart3 },
-  { to: "/admin/settings", label: "Settings", icon: Settings },
+  { to: "/admin", label: "Dashboard", icon: Home },
+  { to: "/audit-log", label: "Audit", icon: FilePlus },
+  { to: "/training", label: "Training", icon: BookOpen },
+  { to: "/evaluation", label: "Evaluation", icon: BarChart3 },
+  { to: "/settings", label: "Settings", icon: Settings },
 ];
 
 export default function ModernBottomNav() {
