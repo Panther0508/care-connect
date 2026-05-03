@@ -2,7 +2,16 @@
 // CRDT-based health record manager using Automerge v2.2+
 
 import * as automerge from '@automerge/automerge/slim';
-// Note: Automerge is initialized globally via src/lib/initAutomerge.ts (imported first in main.tsx)
+
+// Ensure Automerge is initialized before any Automerge operation
+try {
+  // @ts-ignore
+  automerge.use();
+} catch (e) {
+  if (!e.message?.includes('already')) {
+    console.error('Automerge init failed in crdtHealthGraph:', e);
+  }
+}
 
 export interface Condition {
   id: string;

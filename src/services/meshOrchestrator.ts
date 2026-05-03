@@ -1,6 +1,19 @@
 // src/services/meshOrchestrator.ts
 // Central coordinator for Mesh Intelligence
 
+// IMPORTANT: Automerge v2 requires use() to be called before any Automerge operation.
+// This module uses Automerge at top-level (createMeshDoc()), so we initialize first.
+import * as automerge from '@automerge/automerge/slim';
+try {
+  // @ts-ignore
+  automerge.use();
+} catch (e) {
+  // ignore "already called" errors
+  if (!e.message?.includes('already')) {
+    console.error('Automerge init failed in meshOrchestrator:', e);
+  }
+}
+
 import {
   MeshDoc,
   createMeshDoc,

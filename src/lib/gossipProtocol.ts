@@ -2,7 +2,16 @@
 // Gossip protocol for Mesh Intelligence using Automerge CRDTs
 
 import * as automerge from '@automerge/automerge/slim';
-// Note: Automerge is initialized globally via src/lib/initAutomerge.ts (imported first in main.tsx)
+
+// Ensure Automerge is initialized BEFORE any Automerge API is used in this module
+try {
+  // @ts-ignore
+  automerge.use();
+} catch (e) {
+  if (!e.message?.includes('already')) {
+    console.error('Automerge init failed in gossipProtocol:', e);
+  }
+}
 
 export interface StockoutAlert {
   drugName: string;

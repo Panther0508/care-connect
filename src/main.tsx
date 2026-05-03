@@ -1,22 +1,32 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // ENTRY POINT — CRITICAL INITIALIZATION ORDER
 // ═══════════════════════════════════════════════════════════════════════════════
-// 1. Automerge MUST be initialized before any module that uses Automerge types
-//    (meshOrchestrator, gossipProtocol, crdtHealthGraph, etc.)
-// 2. Transformers env config must be set before any transformers import runs
-// 3. Service worker registration follows
+// MUST execute in this exact order before ANY other code:
+// 1. Call automerge.use() synchronously (Automerge v2 requirement)
+// 2. Configure HuggingFace env
+// 3. Then import React and other modules
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// Import initAutomerge for its side-effect (calls automerge.use() immediately)
-import './lib/initAutomerge';
+// Step 1: Initialize Automerge FIRST — before any module that uses Automerge
+// This must be a direct synchronous call at module top-level
+import * as automerge from '@automerge/automerge/slim';
+try {
+  // @ts-ignore — use() is required for v2 proxy-based change tracking
+  automerge.use();
+  console.log('✅ Automerge initialized (main.tsx synchronous)');
+} catch (e) {
+  // Ignore "already called" — means initialized elsewhere (shouldn't happen)
+  if (!e.message?.includes('already')) {
+    console.error('❌ Automerge init failed:', e);
+  }
+}
 
-// Configure HuggingFace Transformers settings BEFORE any transformers code runs
+// Step 2: Configure HuggingFace Transformers BEFORE any transformers code runs
 import { env } from '@huggingface/transformers';
 env.allowLocalModels = false;
 env.useBrowserCache = true;
-// Use direct HuggingFace URLs; service worker handles offline caching
-// The CDN proxy to jsDelivr was removed because jsDelivr GH only proxies GitHub repos, not HuggingFace models
 
+// Step 3: Standard React imports
 import { BrowserRouter } from "react-router-dom";
 import { ClerkProvider } from "@clerk/clerk-react";
 import App from "./App.tsx";
