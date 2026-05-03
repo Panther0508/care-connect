@@ -1,8 +1,4 @@
-﻿// public/data/who-protocols.json
-// WHO Treatment Protocols - Phase 3 Dataset
-// Essential medicines and treatment guidelines
-
-{
+﻿{
   "version": "2026.1",
   "source": "World Health Organization - Essential Medicines and Health Products",
   "description": "WHO treatment protocols for common conditions in resource-limited settings",

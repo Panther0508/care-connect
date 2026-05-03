@@ -49,17 +49,18 @@ npm run build
 
 ```mermaid
 graph TB
-    A[React PWA] --> B[Vite Build]
-    B --> C[Capacitor Android]
-    A --> D[Vercel API Routes]
-    D --> E[@vercel/kv Storage]
-    A --> F[IndexedDB]
-    F --> G[Offline AI Models]
-    G --> H[HuggingFace Transformers]
-    D --> I[Gemini API]
-    I --> J[Medical AI Router]
-    J --> K[Crisis Detection]
-    K --> L[Emergency Protocols]
+    A[React PWA / Capacitor] --> B[Vite Build]
+    B --> C[Android APK]
+    A --> D[Vercel Serverless]
+    D --> E[Gemini API]
+    D --> F[Upstash KV]
+    A --> G[IndexedDB]
+    G --> H[Offline AI Cache]
+    H --> I[TinyLlama 1.1B]
+    A --> J[Mesh Network]
+    J --> K[Web Bluetooth]
+    A --> L[Health Passport]
+    L --> M[QR + W3C VC]
 ```
 
 ## Tech Stack
@@ -137,26 +138,39 @@ VitaChain provides a revolutionary architecture to close the gap:
 
 ```mermaid
 graph TB
-subgraph "Client Device"
-A[PWA / Capacitor APK] --> B[Personal Health Graph CRDT]
-A --> C[Hybrid AI Engine]
-A --> D[Mesh Intelligence]
-A --> E[Universal Health Passport]
-B --> F[IndexedDB + AES-256-GCM]
-C --> G[TinyLlama 1.1B (offline)]
-C --> H[Gemma 4 31B (online)]
-H --> I[Gemini API / OpenRouter / HF]
-D --> J[Web Bluetooth / BLE]
-E --> K[W3C VC + QR Code]
-end
-subgraph "Cloud (Optional)"
-L[Vercel Hosting] --> M[Serverless Functions]
-M --> N[Gemini API]
-O[Upstash Redis] --> P[KV Store]
-end
-D -.->|Anonymised signals| O
-A -.->|Online fallback| L
-G -.->|Cached Gemma responses| H
+    subgraph "Client Device"
+        A[PWA / Capacitor APK]
+        B[Health Graph CRDT]
+        C[Hybrid AI Engine]
+        D[Mesh Intelligence]
+        E[Health Passport]
+        F[IndexedDB + AES]
+    end
+    
+    A --> B
+    A --> C
+    A --> D
+    A --> E
+    B --> F
+    
+    C --> G[TinyLlama 1.1B Offline]
+    C --> H[Gemma 4 31B Online]
+    H --> I[Gemini / OpenRouter]
+    
+    D --> J[Web Bluetooth / BLE]
+    E --> K[QR + W3C VC]
+    
+    G -.->|Cached responses| H
+    
+    subgraph "Cloud"
+        L[Vercel Serverless]
+        M[Gemini API]
+        N[Upstash Redis KV]
+    end
+    
+    A -.->|Online fallback| L
+    D -.->|Anonymised signals| N
+    L --> M
 ```
 
 ## Tech Stack

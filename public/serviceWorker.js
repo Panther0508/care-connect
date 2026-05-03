@@ -120,11 +120,10 @@ self.addEventListener('activate', (event) => {
       return;
     }
 
-  // Default: network-first with cache fallback
+  // Default: network-first with cache fallback, always return a valid Response
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Only cache successful responses
         if (response && response.status === 200) {
           const responseClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -133,7 +132,9 @@ self.addEventListener('activate', (event) => {
         }
         return response;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() => caches.match(event.request).then(cached => {
+        return cached || new Response('Offline', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+      }))
   );
 });
 
