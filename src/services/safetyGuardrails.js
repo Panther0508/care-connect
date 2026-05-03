@@ -17,6 +17,23 @@ const PROHIBITED_PATTERNS = [
   /\b(?:100%|absolutely|certainly|guaranteed|always|never)\s+(?:cure|heal|work|effective)\b/i
 ];
 
+// Template leakage patterns (internal evaluation markers that should never appear in output)
+const TEMPLATE_LEAK_PATTERNS = [
+  /\*?\s*Plain language\?\s*Yes/i,
+  /\*?\s*Defined terms\?/i,
+  /\*?\s*No diagnosis\?/i,
+  /\*?\s*No prescribing\?/i,
+  /\*?\s*Citations included\?/i,
+  /\*?\s*Correct phrasing\?/i,
+  /\*?\s*Format followed\?/i,
+  /\*?\s*Checkmarks?:?\s*✓/i,
+  /^--+ SECTION \d+ --+$/i,
+  /^OUTPUT FORMAT/i,
+  /^QUALITY RULES/i,
+  /^SECTION \d+:?\s*$/i,
+  /\b(?:Self-evaluation|Quality check|Template test)\b/i
+];
+
 // Crisis keyword triggers (requires immediate resource offer)
 const CRISIS_KEYWORDS = [
   'suicide', 'kill myself', 'end my life', 'want to die', 'better off dead',
@@ -38,12 +55,21 @@ export function applyGuardrails(rawText, role = 'patient') {
   // 1. Check for crisis language
   const isCrisis = CRISIS_KEYWORDS.some(phrase => cleaned.toLowerCase().includes(phrase));
 
-  // 2. Redact prohibited content
-  for (const pattern of PROHIBITED_PATTERNS) {
-    if (pattern.test(cleaned)) {
-      cleaned = cleaned.replace(pattern, '[REDACTED — consult a healthcare professional directly]');
-    }
-  }
+   // 2. Redact prohibited content
+   for (const pattern of PROHIBITED_PATTERNS) {
+     if (pattern.test(cleaned)) {
+       cleaned = cleaned.replace(pattern, '[REDACTED — consult a healthcare professional directly]');
+     }
+   }
+
+   // 3. Remove template leakage (internal evaluation markers)
+   for (const pattern of TEMPLATE_LEAK_PATTERNS) {
+     if (pattern.test(cleaned)) {
+       // If we detect template leakage, replace entire response with clean fallback
+       cleaned = 'I am temporarily unable to provide a complete response. Please try again in a moment, or contact a healthcare provider for immediate assistance.';
+       break;
+     }
+   }
 
   // 3. Inject crisis resources if detected
   if (isCrisis) {

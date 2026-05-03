@@ -551,60 +551,80 @@ export async function routeQuery({
     } catch (err) { console.warn('HuggingFace failed:', err.message); }
   }
 
-  // 7d. TinyLlama 1.1B — final fallback (always available)
-  try {
-    const llm = await loadTinyLlama();
-    const tokenizer = await getTokenizer('textGeneration');
+   // 7d. TinyLlama 1.1B — final fallback (always available)
+   try {
+     const llm = await loadTinyLlama();
+     const tokenizer = await getTokenizer('textGeneration');
 
-    const messages = [
-      { role: 'system', content: fullSystemPrompt },
-      { role: 'user', content: structuredPrompt }
-    ];
+     const messages = [
+       { role: 'system', content: fullSystemPrompt },
+       { role: 'user', content: structuredPrompt }
+     ];
 
-    let formattedPrompt;
-    if (tokenizer && tokenizer.apply_chat_template) {
-      formattedPrompt = tokenizer.apply_chat_template(messages, { tokenize: false, add_generation_prompt: true });
-    } else {
-      formattedPrompt = `<|system|>\n${fullSystemPrompt}<|user|>\n${structuredPrompt}<|assistant|>\n`;
+     let formattedPrompt;
+     if (tokenizer && tokenizer.apply_chat_template) {
+       formattedPrompt = tokenizer.apply_chat_template(messages, { tokenize: false, add_generation_prompt: true });
+     } else {
+       formattedPrompt = `<|system|>\n${fullSystemPrompt}<|user|>\n${structuredPrompt}<|assistant|>\n`;
+     }
+
+     const output = await llm(formattedPrompt, { max_new_tokens: 600, temperature: 0.3, do_sample: true });
+     const generated = output[0]?.generated_text || '';
+     const responseText = generated.replace(formattedPrompt, '').trim();
+
+     // If the model output looks like it's repeating the prompt/template, give a clean fallback
+     if (responseText.length < 50 || responseText.includes('SECTION') || responseText.includes('=== ====')) {
+       const fallbackText = 'I am currently in offline mode with limited AI capabilities. Please check your internet connection for a more comprehensive response, or try again later when I can access my full medical knowledge base. For urgent medical concerns, contact a healthcare professional directly.';
+        await addTurn(userId, structuredPrompt, fallbackText, finalEmotion);
+       const tinyResult = {
+         text: fallbackText,
+         reasoning: [{ type: 'conclusion', title: 'Offline Limited', description: 'TinyLlama offline model available but connectivity required for full responses' }],
+         citations: [],
+         emotionalState: finalEmotion,
+         model: 'tinyllama-1.1b',
+         source: 'offline',
+         evaluation: { overall: 0.5, components: { factual: 0.5, clarity: 0.7, safety: 0.8, completeness: 0.4 } },
+         quotaRemaining: 0
+       };
+       lastResult = tinyResult;
+       lastReasoning = tinyResult.reasoning;
+       return tinyResult;
+     }
+
+      const safeText = applyGuardrails(responseText, role);
+
+      await addTurn(userId, structuredPrompt, safeText, finalEmotion);
+
+      const tinyResult = {
+        text: safeText,
+        reasoning: [{ type: 'conclusion', title: 'TinyLlama Offline', description: 'On-device 1.1B model — always available without internet' }],
+        citations: [],
+        emotionalState: finalEmotion,
+        model: 'tinyllama-1.1b',
+        source: 'offline',
+        evaluation: { overall: 0.6, components: { factual: 0.6, clarity: 0.7, safety: 0.8, completeness: 0.5 } },
+        quotaRemaining: 0
+      };
+      lastResult = tinyResult;
+      lastReasoning = tinyResult.reasoning;
+      return tinyResult;
+    } catch (err) {
+      console.error('TinyLlama failed:', err);
+      const fallbackText = 'All AI models are currently unavailable. Please check your internet connection and try again. For urgent medical questions, contact a healthcare provider directly.';
+      const errorResult = {
+        text: fallbackText,
+        reasoning: [],
+        citations: [],
+        emotionalState: finalEmotion,
+        model: 'none',
+        source: 'error',
+        evaluation: { overall: 0, components: { factual: 0, clarity: 0, safety: 0, completeness: 0 } },
+        quotaRemaining: 0
+      };
+      lastResult = errorResult;
+      lastReasoning = [];
+      return errorResult;
     }
-
-    const output = await llm(formattedPrompt, { max_new_tokens: 600, temperature: 0.3, do_sample: true });
-    const generated = output[0]?.generated_text || '';
-    const responseText = generated.replace(formattedPrompt, '').trim();
-
-     const safeText = applyGuardrails(responseText, role);
-
-     await addTurn(userId, structuredPrompt, safeText, finalEmotion);
-
-     const tinyResult = {
-       text: safeText || 'I apologize — I am currently offline and cannot generate a response. Please check your connection.',
-       reasoning: [{ type: 'conclusion', title: 'TinyLlama Offline', description: 'On-device 1.1B model — always available without internet' }],
-       citations: [],
-       emotionalState: finalEmotion,
-       model: 'tinyllama-1.1b',
-       source: 'offline',
-       evaluation: { overall: 0.6, components: { factual: 0.6, clarity: 0.7, safety: 0.8, completeness: 0.5 } },
-       quotaRemaining: 0
-     };
-     lastResult = tinyResult;
-     lastReasoning = tinyResult.reasoning;
-     return tinyResult;
-   } catch (err) {
-     console.error('TinyLlama failed:', err);
-     const errorResult = {
-       text: 'All AI models unavailable. Please check internet connection or try again later.',
-       reasoning: [],
-       citations: [],
-       emotionalState: finalEmotion,
-       model: 'none',
-       source: 'error',
-       evaluation: { overall: 0, components: { factual: 0, clarity: 0, safety: 0, completeness: 0 } },
-       quotaRemaining: 0
-     };
-     lastResult = errorResult;
-     lastReasoning = [];
-     return errorResult;
-   }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
