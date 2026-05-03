@@ -66,7 +66,7 @@ function incrementQuota() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// EMBEDDING (for semantic cache)
+// EMBEDDING (for semantic cache) - with offline fallback
 // ─────────────────────────────────────────────────────────────────────────────
 export async function loadEmbedder() {
   if (embedderLoaded) return embedder;
@@ -77,18 +77,41 @@ export async function loadEmbedder() {
     return embedder;
   } catch (err) {
     embedderError = err;
-    throw err;
+    console.warn('⚠️ HuggingFace embedder failed, using keyword fallback:', err?.message || err);
+    // Return null - embedText will use keyword fallback
+    return null;
   }
 }
+
 export async function embedText(text) {
   await loadEmbedder();
+  if (!embedder) {
+    // Fallback: keyword-based simple vector (bag-of-words hashing)
+    console.warn('Using keyword-based embedding fallback');
+    return keywordEmbed(text);
+  }
   try {
     const output = await embedder(text, { pooling: 'mean', normalize: true });
     return Array.from(output.data);
   } catch (err) {
-    console.error('Embedding failed:', err);
-    throw err;
+    console.error('Embedding failed, using fallback:', err);
+    return keywordEmbed(text);
   }
+}
+
+// Simple keyword-based embedding fallback (offline-safe)
+function keywordEmbed(text) {
+  const words = text.toLowerCase().split(/\s+/);
+  const features = {};
+  words.forEach((w, i) => {
+    const hash = [...w].reduce((a, c) => ((a << 5) - a + c.charCodeAt(0)) | 0, 0);
+    features[Math.abs(hash) % 384] = (features[Math.abs(hash) % 384] || 0) + 1;
+  });
+  const vec = new Array(384).fill(0);
+  Object.entries(features).forEach(([idx, val]) => { vec[parseInt(idx)] = Math.min(val, 5); });
+  // Normalize
+  const mag = Math.sqrt(vec.reduce((a, b) => a + b * b, 0)) || 1;
+  return vec.map(v => v / mag);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

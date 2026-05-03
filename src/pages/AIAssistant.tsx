@@ -22,7 +22,7 @@ import { useStatus } from "../hooks/useStatus";
 import { getPersona, buildSystemPrompt, generateGreeting } from "../services/personaEngine";
 import { scanMessage, scanAIResponse } from "../services/crisisDetector";
 import { showCrisisPopup, dismissCrisisPopup, registerCrisisHandler } from "../services/crisisManager";
-import { X, Send, Mic, ArrowLeft, AlertCircle, CheckCircle, FileText, Image, Calendar, Pill, Globe, Volume2, VolumeX, Camera } from "lucide-react";
+import { X, Send, Mic, ArrowLeft, AlertCircle, CheckCircle, FileText, Image, Calendar, Pill, Globe, Volume2, VolumeX, Camera, Clock } from "lucide-react";
 import { getUserProfile } from "../lib/idb";
 import { useRole } from "../hooks/auth/useRole";
 
@@ -200,31 +200,33 @@ export default function AIAssistant() {
         return;
       }
 
-      try {
-        setLoadingModel(true);
-        loaderToastRef.current = showStatus(
-          "loading",
-          "Initialising AI Engine",
-          "Loading TinyLlama - this only happens once. The model will work offline after download.",
-          { duration: 0 as any }
-        );
-        await loadModel((progress: any) => {
-          if (progress && progress.status === "downloading") {
-            console.log(`Downloading: ${Math.round((progress.loaded || 0) / (progress.total || 1) * 100)}%`);
-          }
-        });
-        setModelLoaded(true);
-        showStatus("success", "AI Engine Ready", "You can now use the assistant offline.");
-      } catch (err) {
-        console.error("Failed to load TinyLlama model:", err);
-        showStatus("error", "AI Load Failed", "Could not initialise the engine. Check your storage.");
-      } finally {
-        setLoadingModel(false);
-        if (loaderToastRef.current) {
-          dismissStatus(loaderToastRef.current);
-          loaderToastRef.current = null;
-        }
-      }
+       try {
+         setLoadingModel(true);
+         loaderToastRef.current = showStatus(
+           "loading",
+           "Initialising AI Engine",
+           "Loading offline model — this only happens once.",
+           { duration: 0 as any }
+         );
+         await loadModel((progress: any) => {
+           if (progress && progress.status === "downloading") {
+             console.log(`Downloading: ${Math.round((progress.loaded || 0) / (progress.total || 1) * 100)}%`);
+           }
+         });
+         setModelLoaded(true);
+         showStatus("success", "AI Engine Ready", "You can now use the assistant offline.");
+       } catch (err) {
+         console.error("Failed to load offline model:", err);
+         showStatus("warning", "AI Limited", "Offline model unavailable — using online mode only.");
+         // Still mark as loaded to allow usage (will use online APIs)
+         setModelLoaded(true);
+       } finally {
+         setLoadingModel(false);
+         if (loaderToastRef.current) {
+           dismissStatus(loaderToastRef.current);
+           loaderToastRef.current = null;
+         }
+       }
     };
     prepareModel();
   }, []);
@@ -679,7 +681,12 @@ export default function AIAssistant() {
               <div className="flex items-center gap-2 text-sm">
                 {isSpeakingNow ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4 text-teal-400" />}
                 <span className="text-slate-300">Text-to-Speech</span>
-                <button onClick={() => isSpeakingNow ? cancelSpeech() : setIsSpeakingNow(false)} className="text-xs px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 transition-all">{isSpeakingNow ? "Stop" : "Play last"}</button>
+                 <button onClick={() => {
+                   const lastAssistantMsg = [...messages].reverse().find(m => m.role === 'assistant');
+                   if (lastAssistantMsg) {
+                     handleTextToSpeech(lastAssistantMsg.content);
+                   }
+                 }} className="text-xs px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 transition-all">Play last</button>
               </div>
             </motion.div>
           )}

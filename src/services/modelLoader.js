@@ -5,8 +5,11 @@
 
 import { pipeline, env } from '@huggingface/transformers';
 
-env.allowLocalModels = true;
+// Configure environment for reliable browser loading
+env.allowLocalModels = false; // Use remote hub only
 env.useBrowserCache = true;
+env.HUGGINGFACE_HUB_URL = 'https://huggingface.co';
+env.HUGGINGFACE_HUB_CACHE = 'persist'; // Use IndexedDB for model caching
 
 // Model cache
 const models = {
