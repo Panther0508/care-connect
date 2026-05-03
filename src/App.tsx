@@ -52,6 +52,7 @@ const MentalHealth = lazy(() => import("./pages/MentalHealth"));
 const EducationPage = lazy(() => import("./pages/EducationPage"));
 const EducationModule = lazy(() => import("./components/EducationModule"));
 const FirstAid = lazy(() => import("./pages/FirstAid"));
+const CareLocator = lazy(() => import("./pages/CareLocator"));
 // Community pages
 const CommunityPage = lazy(() => import("./pages/CommunityPage"));
 const TopicFeed = lazy(() => import("./pages/TopicFeed"));
