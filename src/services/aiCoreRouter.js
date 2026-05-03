@@ -35,6 +35,7 @@ let quotaUsed = 0;
 let quotaResetDate = new Date().toDateString();
 let embedder = null;
 let embedderLoaded = false;
+let embedderLoading = false;
 let embedderError = null;
 let generator = null;
 let generatorLoaded = false;
