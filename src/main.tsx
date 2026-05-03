@@ -1,3 +1,18 @@
+// Configure HuggingFace Transformers CDN proxy FIRST (before any other imports that use transformers)
+import { env } from '@huggingface/transformers';
+env.allowLocalModels = false;
+env.useBrowserCache = true;
+env.fetch = async (url, init) => {
+  const hfMatch = url.match(/https?:\/\/huggingface\.co\/([^/]+\/[^/]+)\/resolve\/main\/(.+)/);
+  if (hfMatch) {
+    const modelId = hfMatch[1];
+    const filePath = hfMatch[2];
+    const cdnUrl = `https://cdn.jsdelivr.net/gh/${modelId}@main/${filePath}`;
+    return fetch(cdnUrl, init);
+  }
+  return fetch(url, init);
+};
+
 import { BrowserRouter } from "react-router-dom";
 import { ClerkProvider } from "@clerk/clerk-react";
 import App from "./App.tsx";

@@ -4,29 +4,9 @@
 
 import { pipeline, env } from '@huggingface/transformers';
 
-// Configure environment
+// Configure - fetch override is set globally in main.tsx
 env.allowLocalModels = false;
 env.useBrowserCache = true;
-
-// Custom fetch that proxies HuggingFace model files through jsDelivr CDN
-// This avoids CORS issues and ensures reliable delivery
-const hfFetch = async (url, init) => {
-  // Transform huggingface.co model file URLs to jsDelivr
-  // Example: https://huggingface.co/Xenova/all-MiniLM-L6-v2/resolve/main/onnx/model_quantized.onnx
-  // Becomes: https://cdn.jsdelivr.net/gh/Xenova/all-MiniLM-L6-v2@main/onnx/model_quantized.onnx
-  const hfMatch = url.match(/https?:\/\/huggingface\.co\/([^/]+\/[^/]+)\/resolve\/main\/(.+)/);
-  if (hfMatch) {
-    const modelId = hfMatch[1];
-    const filePath = hfMatch[2];
-    const cdnUrl = `https://cdn.jsdelivr.net/gh/${modelId}@main/${filePath}`;
-    console.log('Proxying via jsDelivr:', cdnUrl);
-    return fetch(cdnUrl, init);
-  }
-  return fetch(url, init);
-};
-
-// Override transformers' fetch globally
-env.fetch = hfFetch;
 
 // Model cache
 const models = {
