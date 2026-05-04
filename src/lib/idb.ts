@@ -103,51 +103,65 @@ export function openDB(): Promise<IDBDatabase> {
         db.createObjectStore("mentalHealthLogs", { keyPath: "id", autoIncrement: true });
       }
 
-      // Health tracking stores
-      if (!db.objectStoreNames.contains("documents")) {
-        db.createObjectStore("documents", { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains("healthGoals")) {
-        db.createObjectStore("healthGoals", { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains("dependents")) {
-        db.createObjectStore("dependents", { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains("smokingCessation")) {
-        db.createObjectStore("smokingCessation", { keyPath: "quitDate" });
-      }
-      if (!db.objectStoreNames.contains("alcoholLog")) {
-        db.createObjectStore("alcoholLog", { keyPath: "date" });
-      }
-      if (!db.objectStoreNames.contains("symptomDiary")) {
-        db.createObjectStore("symptomDiary", { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains("painTracker")) {
-        db.createObjectStore("painTracker", { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains("moodTracker")) {
-        db.createObjectStore("moodTracker", { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains("glucoseLog")) {
-        db.createObjectStore("glucoseLog", { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains("bloodPressureLog")) {
-        db.createObjectStore("bloodPressureLog", { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains("peakFlowLog")) {
-        db.createObjectStore("peakFlowLog", { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains("pelvicDiary")) {
-        db.createObjectStore("pelvicDiary", { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains("weightTracker")) {
-        db.createObjectStore("weightTracker", { keyPath: "id" });
-      }
-      if (!db.objectStoreNames.contains("progressPhotos")) {
-        db.createObjectStore("progressPhotos", { keyPath: "id" });
-      }
+       // Health tracking stores
+       if (!db.objectStoreNames.contains("documents")) {
+         db.createObjectStore("documents", { keyPath: "id" });
+       }
+       if (!db.objectStoreNames.contains("healthGoals")) {
+         db.createObjectStore("healthGoals", { keyPath: "id" });
+       }
+       if (!db.objectStoreNames.contains("dependents")) {
+         db.createObjectStore("dependents", { keyPath: "id" });
+       }
+       if (!db.objectStoreNames.contains("smokingCessation")) {
+         db.createObjectStore("smokingCessation", { keyPath: "quitDate" });
+       }
+       if (!db.objectStoreNames.contains("alcoholLog")) {
+         db.createObjectStore("alcoholLog", { keyPath: "date" });
+       }
+       if (!db.objectStoreNames.contains("symptomDiary")) {
+         db.createObjectStore("symptomDiary", { keyPath: "id" });
+       }
+       if (!db.objectStoreNames.contains("painTracker")) {
+         db.createObjectStore("painTracker", { keyPath: "id" });
+       }
+       if (!db.objectStoreNames.contains("moodTracker")) {
+         db.createObjectStore("moodTracker", { keyPath: "id" });
+       }
+       if (!db.objectStoreNames.contains("glucoseLog")) {
+         db.createObjectStore("glucoseLog", { keyPath: "id" });
+       }
+       if (!db.objectStoreNames.contains("bloodPressureLog")) {
+         db.createObjectStore("bloodPressureLog", { keyPath: "id" });
+       }
+       if (!db.objectStoreNames.contains("peakFlowLog")) {
+         db.createObjectStore("peakFlowLog", { keyPath: "id" });
+       }
+       if (!db.objectStoreNames.contains("pelvicDiary")) {
+         db.createObjectStore("pelvicDiary", { keyPath: "id" });
+       }
+       if (!db.objectStoreNames.contains("weightTracker")) {
+         db.createObjectStore("weightTracker", { keyPath: "id" });
+       }
+       if (!db.objectStoreNames.contains("progressPhotos")) {
+         db.createObjectStore("progressPhotos", { keyPath: "id" });
+       }
+// Care Plans stores
+        if (!db.objectStoreNames.contains("carePlans")) {
+          db.createObjectStore("carePlans", { keyPath: "conditionId" });
+        }
+        if (!db.objectStoreNames.contains("carePlanLogs")) {
+          db.createObjectStore("carePlanLogs", { keyPath: "id", autoIncrement: true });
+        }
+        // Anatomy Explorer stores
+        if (!db.objectStoreNames.contains("anatomy")) {
+          db.createObjectStore("anatomy", { keyPath: "id", autoIncrement: true });
+        }
+        if (!db.objectStoreNames.contains("anatomyCache")) {
+          db.createObjectStore("anatomyCache", { keyPath: "organId" });
+        }
 
-      // AI & RAG stores
+       // AI & RAG stores
       if (!db.objectStoreNames.contains("ragVectors")) {
         db.createObjectStore("ragVectors", { keyPath: "id" });
       }
@@ -167,6 +181,9 @@ export function openDB(): Promise<IDBDatabase> {
       }
       if (!db.objectStoreNames.contains("avatarAccessories")) {
         db.createObjectStore("avatarAccessories", { keyPath: "userId" });
+      }
+      if (!db.objectStoreNames.contains("savedLiterature")) {
+        db.createObjectStore("savedLiterature", { keyPath: "pmid" });
       }
       if (!db.objectStoreNames.contains("communityPosts")) {
         db.createObjectStore("communityPosts", { keyPath: "postId" });
@@ -1346,6 +1363,51 @@ export async function storeContactSubmission(submission: Omit<ContactSubmission,
   });
 }
 
+// ==================== Saved Literature ====================
+
+export interface SavedLiterature {
+  pmid: string;
+  title: string;
+  authors: string[];
+  journal: string;
+  pubDate: string;
+  abstract: string;
+  savedAt: number;
+}
+
+export async function saveLiterature(article: SavedLiterature): Promise<void> {
+  const db = await openDB();
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction("savedLiterature", "readwrite");
+    const store = transaction.objectStore("savedLiterature");
+    store.put(article);
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+
+export async function getSavedLiterature(): Promise<SavedLiterature[]> {
+  const db = await openDB();
+  return new Promise<SavedLiterature[]>((resolve, reject) => {
+    const transaction = db.transaction("savedLiterature", "readonly");
+    const store = transaction.objectStore("savedLiterature");
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result as SavedLiterature[]);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function deleteSavedLiterature(pmid: string): Promise<void> {
+  const db = await openDB();
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction("savedLiterature", "readwrite");
+    const store = transaction.objectStore("savedLiterature");
+    store.delete(pmid);
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+
 export async function getAllContactSubmissions(): Promise<ContactSubmission[]> {
   const db = await openDB();
   return new Promise<ContactSubmission[]>((resolve, reject) => {
@@ -1353,6 +1415,179 @@ export async function getAllContactSubmissions(): Promise<ContactSubmission[]> {
     const store = transaction.objectStore("contactSubmissions");
     const request = store.getAll();
     request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// ==================== Care Plans Storage ====================
+
+export interface DailyTask {
+  id: string;
+  label: string;
+  completed: boolean;
+}
+
+export interface CarePlan {
+  conditionId: string;
+  conditionName: string;
+  conditionIcon: string;
+  createdAt: number;
+  dailyTasks: DailyTask[];
+  medications: Array<{
+    name: string;
+    dose: string;
+    frequency: string;
+    times: string[];
+  }>;
+  dietRecommendations: Array<{
+    foodId: string;
+    name: string;
+    reason: string;
+  }>;
+  exercises: Array<{
+    id: string;
+    name: string;
+    description: string;
+    instructions: string[];
+  }>;
+  warningSigns: string[];
+  emergencyContact: {
+    phone: string;
+    hotline: string;
+  };
+  redFlags: string[];
+}
+
+export interface CarePlanLog {
+  id?: number;
+  userId: string;
+  conditionId: string;
+  taskId: string;
+  date: string;
+  completed: boolean;
+  timestamp: number;
+}
+
+export async function storeCarePlan(plan: CarePlan): Promise<void> {
+  const db = await openDB();
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction("carePlans", "readwrite");
+    const store = transaction.objectStore("carePlans");
+    store.put(plan);
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+
+export async function getCarePlan(conditionId: string): Promise<CarePlan | null> {
+  const db = await openDB();
+  return new Promise<CarePlan | null>((resolve, reject) => {
+    const transaction = db.transaction("carePlans", "readonly");
+    const store = transaction.objectStore("carePlans");
+    const request = store.get(conditionId);
+    request.onsuccess = () => resolve(request.result || null);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function getAllCarePlans(): Promise<CarePlan[]> {
+  const db = await openDB();
+  return new Promise<CarePlan[]>((resolve, reject) => {
+    const transaction = db.transaction("carePlans", "readonly");
+    const store = transaction.objectStore("carePlans");
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result as CarePlan[]);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function deleteCarePlan(conditionId: string): Promise<void> {
+  const db = await openDB();
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction("carePlans", "readwrite");
+    const store = transaction.objectStore("carePlans");
+    store.delete(conditionId);
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+
+// Care Plan Logs
+export async function logCarePlanTask(log: Omit<CarePlanLog, 'id'>): Promise<number> {
+  const db = await openDB();
+  return new Promise<number>((resolve, reject) => {
+    const transaction = db.transaction("carePlanLogs", "readwrite");
+    const store = transaction.objectStore("carePlanLogs");
+    const request = store.add(log);
+    request.onsuccess = () => resolve(request.result as number);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function getCarePlanLogsForDate(userId: string, date: string): Promise<CarePlanLog[]> {
+  const db = await openDB();
+  return new Promise<CarePlanLog[]>((resolve, reject) => {
+    const transaction = db.transaction("carePlanLogs", "readonly");
+    const store = transaction.objectStore("carePlanLogs");
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const all = request.result as CarePlanLog[];
+      const dayLogs = all.filter(l => l.userId === userId && l.date === date);
+      resolve(dayLogs);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function getCarePlanLogsForRange(
+  userId: string,
+  startDate: string,
+  endDate: string
+): Promise<CarePlanLog[]> {
+  const db = await openDB();
+  return new Promise<CarePlanLog[]>((resolve, reject) => {
+    const transaction = db.transaction("carePlanLogs", "readonly");
+    const store = transaction.objectStore("carePlanLogs");
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const all = request.result as CarePlanLog[];
+      const rangeLogs = all.filter(l => l.userId === userId && l.date >= startDate && l.date <= endDate);
+      resolve(rangeLogs);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function getCarePlanStreak(userId: string, conditionId: string): Promise<number> {
+  const db = await openDB();
+  return new Promise<number>((resolve, reject) => {
+    const transaction = db.transaction("carePlanLogs", "readonly");
+    const store = transaction.objectStore("carePlanLogs");
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const all = request.result as CarePlanLog[];
+      const userLogs = all.filter(l => l.userId === userId && l.conditionId === conditionId);
+      // Sort by date descending
+      userLogs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      
+      let streak = 0;
+      const today = new Date();
+      let currentDate = new Date(today);
+      
+      for (const log of userLogs) {
+        const logDate = new Date(log.date);
+        const diffDays = Math.floor((currentDate.getTime() - logDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (diffDays === streak && log.completed) {
+          streak++;
+        } else if (!log.completed) {
+          break;
+        } else {
+          break;
+        }
+      }
+      resolve(streak);
+    };
     request.onerror = () => reject(request.error);
   });
 }

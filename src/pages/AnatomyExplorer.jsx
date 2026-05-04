@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Heart, Brain, Stethoscope, Pill, Syringe, Virus, 
-  Activity, Eye, Bone, HeartPulse, Lung, Shield
+  Heart, Brain, Stethoscope, Pill, Syringe,
+  Activity, Eye, Bone, HeartPulse, Shield,
+  CheckCircle, Sparkles
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { openDB, getDB } from '../lib/idb';
 
 const AnatomyExplorer = () => {
   const navigate = useNavigate();
@@ -36,7 +38,7 @@ const AnatomyExplorer = () => {
     {
       id: 'lungs',
       name: 'Lungs',
-      icon: Lung,
+      icon: Activity,
       color: 'from-blue-500 to-cyan-600',
       apiEndpoint: 'lungs',
       description: 'Respiratory health'
@@ -90,12 +92,12 @@ const AnatomyExplorer = () => {
 
   const loadExploredCount = async () => {
     try {
-      const db = await idb.openDB('vitachain', 1);
+      const db = await openDB();
       const tx = db.transaction('anatomy', 'readonly');
       const store = tx.objectStore('anatomy');
       const today = new Date().toDateString();
       const count = await store.count(today);
-      setExploredToday(prev => [...prev, today]); // Simplified; would store actual organ IDs
+      setExploredToday(prev => [...prev, today]);
     } catch (err) {
       console.warn('Could not load explored count:', err);
     }
@@ -177,7 +179,7 @@ const AnatomyExplorer = () => {
 
   const recordExploration = async (organId) => {
     try {
-      const db = await idb.openDB('vitachain', 1);
+      const db = await openDB();
       const tx = db.transaction('anatomy', 'readwrite');
       const store = tx.objectStore('anatomy');
       await store.add({
@@ -193,7 +195,7 @@ const AnatomyExplorer = () => {
 
   const getCachedOrganData = async (organId) => {
     try {
-      const db = await idb.openDB('vitachain', 1);
+      const db = await openDB();
       const tx = db.transaction('anatomyCache', 'readonly');
       const store = tx.objectStore('anatomyCache');
       const cached = await store.get(organId);
@@ -208,13 +210,13 @@ const AnatomyExplorer = () => {
 
   const cacheOrganData = async (organId, data) => {
     try {
-      const db = await idb.openDB('vitachain', 1);
+      const db = await openDB();
       const tx = db.transaction('anatomyCache', 'readwrite');
       const store = tx.objectStore('anatomyCache');
       await store.put({
         organId,
         data,
-        expiry: Date.now() + (24 * 60 * 60 * 1000) // 24 hours
+        expiry: Date.now() + (24 * 60 * 60 * 1000)
       });
     } catch (err) {
       console.warn('Could not cache organ data:', err);
