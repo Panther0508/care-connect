@@ -35,17 +35,18 @@ const CrisisMapPage = lazy(() => import("./pages/CrisisMapPage"));
 const FacilityDetailPage = lazy(() => import("./pages/FacilityDetailPage"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Support = lazy(() => import("./pages/Support"));
+const LiteratureSearch = lazy(() => import("./pages/LiteratureSearch"));
 const LanguageSelector = lazy(() => import("./pages/LanguageSelector"));
  const Subscription = lazy(() => import("./pages/Subscription"));
  const Referral = lazy(() => import("./pages/Referral"));
- const AuditLog = lazy(() => import("./pages/AuditLog"));
- const TermsOfService = lazy(() => import("./pages/TermsOfService"));
- const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
- const ContactUs = lazy(() => import("./pages/ContactUs"));
- const AdminMFAGate = lazy(() => import("./components/AdminMFAGate"));
- const AdminBiometricLock = lazy(() => import("./components/AdminBiometricLock"));
+const AuditLog = lazy(() => import("./pages/AuditLog"));
+  const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+  const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+  const ContactUs = lazy(() => import("./pages/ContactUs"));
+  const AdminMFAGate = lazy(() => import("./components/AdminMFAGate"));
+  const AdminBiometricLock = lazy(() => import("./components/AdminBiometricLock"));
 
-// New wellness pages
+  // New wellness pages
 const Nutrition = lazy(() => import("./pages/Nutrition"));
 const Workout = lazy(() => import("./pages/Workout"));
 const WorkoutHistory = lazy(() => import("./pages/WorkoutHistory"));
@@ -59,6 +60,7 @@ const EducationPage = lazy(() => import("./pages/EducationPage"));
 const EducationModule = lazy(() => import("./components/EducationModule"));
 const FirstAid = lazy(() => import("./pages/FirstAid"));
 const CareLocator = lazy(() => import("./pages/CareLocator"));
+const CarePlans = lazy(() => import("./pages/CarePlans"));
 // Community pages
 const CommunityPage = lazy(() => import("./pages/CommunityPage"));
 const TopicFeed = lazy(() => import("./pages/TopicFeed"));
@@ -75,6 +77,7 @@ const TrainingDashboard = lazy(() => import("./pages/TrainingDashboard"));
 const EvaluationDashboard = lazy(() => import("./pages/EvaluationDashboard"));
 const ImageLibrary = lazy(() => import("./pages/ImageLibrary"));
 const AvatarCustomization = lazy(() => import("./pages/AvatarCustomization"));
+const AnatomyExplorer = lazy(() => import("./pages/AnatomyExplorer"));
 
 // Page wrapper with animation
 const PageWrapper = ({ children }) => (
@@ -302,7 +305,16 @@ const App = () => {
                  </AuthSyncGate>
                } />
                
-                {/* Patient health history */}
+                {/* Anatomy Explorer route */}
+                 <Route path="/anatomy" element={
+                  <AuthSyncGate>
+                    <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                      <PageWrapper><AnatomyExplorer /></PageWrapper>
+                    </ProtectedRoute>
+                  </AuthSyncGate>
+                 } />
+
+                 {/* Patient health history */}
                 <Route path="/patient-history" element={
                  <AuthSyncGate>
                    <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
@@ -318,7 +330,25 @@ const App = () => {
                      <PageWrapper><CareLocator /></PageWrapper>
                    </ProtectedRoute>
                  </AuthSyncGate>
+                } />
+
+                {/* Literature Search for clinicians */}
+<Route path="/literature" element={
+                <AuthSyncGate>
+                  <ProtectedRoute allowedRoles={['clinician', 'admin']}>
+                    <PageWrapper><LiteratureSearch /></PageWrapper>
+                  </ProtectedRoute>
+                </AuthSyncGate>
                } />
+
+                 {/* Care Plans route */}
+                <Route path="/care-plans" element={
+                 <AuthSyncGate>
+                   <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                     <PageWrapper><CarePlans /></PageWrapper>
+                   </ProtectedRoute>
+                 </AuthSyncGate>
+                } />
 
                {/* Image Library route */}
                <Route path="/images" element={
@@ -442,14 +472,14 @@ const App = () => {
                 </ProtectedRoute>
               </AuthSyncGate>
             } />
-            <Route path="/crisis-map" element={
-              <AuthSyncGate>
-                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
-                  <PageWrapper><CrisisMapPage /></PageWrapper>
-                </ProtectedRoute>
-              </AuthSyncGate>
-            } />
-            <Route path="/facility/:id" element={
+<Route path="/crisis-map" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                   <PageWrapper><CrisisMapPage /></PageWrapper>
+                 </ProtectedRoute>
+</AuthSyncGate>
+              } />
+             <Route path="/facility/:id" element={
               <AuthSyncGate>
                 <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
                   <PageWrapper><FacilityDetailPage /></PageWrapper>
