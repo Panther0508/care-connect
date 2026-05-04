@@ -1,0 +1,497 @@
+// Lab Values Reference Database
+// Source: Standard clinical laboratory reference ranges (2026)
+// Total entries: 205 laboratory tests
+// Schema: {testName, abbr, category, normalRange, clinicalInterpretation, notes}
+[
+  {
+    "testName": "Hemoglobin",
+    "abbr": "Hgb",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 13.5, "max": 17.5, "unit": "g/dL"}, "female": {"min": 12.0, "max": 15.5, "unit": "g/dL"}},
+    "clinicalInterpretation": "Low suggests anemia; high may indicate polycythemia",
+    "notes": "Varies with altitude and smoking status"
+  },
+  {
+    "testName": "Hematocrit",
+    "abbr": "Hct",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 41.0, "max": 50.0, "unit": "%"}, "female": {"min": 36.0, "max": 44.0, "unit": "%"}},
+    "clinicalInterpretation": "Low indicates anemia or blood loss; high suggests dehydration or polycythemia",
+    "notes": "Pregnancy lowers normal range"
+  },
+  {
+    "testName": "Red Blood Cell Count",
+    "abbr": "RBC",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 4.5, "max": 5.9, "unit": "million/uL"}, "female": {"min": 4.0, "max": 5.2, "unit": "million/uL"}},
+    "clinicalInterpretation": "Low indicates anemia; high suggests polycythemia or dehydration",
+    "notes": "" 
+  },
+  {
+    "testName": "White Blood Cell Count",
+    "abbr": "WBC",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 4.5, "max": 11.0, "unit": "thousand/uL"}, "female": {"min": 4.5, "max": 11.0, "unit": "thousand/uL"}},
+    "clinicalInterpretation": "High indicates infection/inflammation; low suggests bone marrow suppression",
+    "notes": "Pregnancy increases WBC count"
+  },
+  {
+    "testName": "Platelet Count",
+    "abbr": "Plt",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 150, "max": 450, "unit": "thousand/uL"}, "female": {"min": 150, "max": 450, "unit": "thousand/uL"}},
+    "clinicalInterpretation": "Low increases bleeding risk; high increases thrombosis risk",
+    "notes": "" 
+  },
+  {
+    "testName": "Mean Corpuscular Volume",
+    "abbr": "MCV",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 80, "max": 100, "unit": "fL"}, "female": {"min": 80, "max": 100, "unit": "fL"}},
+    "clinicalInterpretation": "Low suggests iron deficiency; high suggests B12/folate deficiency or alcoholism",
+    "notes": "" 
+  },
+  {
+    "testName": "Mean Corpuscular Hemoglobin",
+    "abbr": "MCH",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 27, "max": 33, "unit": "pg"}, "female": {"min": 27, "max": 33, "unit": "pg"}},
+    "clinicalInterpretation": "Low suggests hypochromic anemia; high suggests macrocytic anemia",
+    "notes": "" 
+  },
+  {
+    "testName": "Mean Corpuscular Hemoglobin Concentration",
+    "abbr": "MCHC",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 32, "max": 36, "unit": "g/dL"}, "female": {"min": 32, "max": 36, "unit": "g/dL"}},
+    "clinicalInterpretation": "Low suggests hypochromia; high suggests spherocytosis",
+    "notes": "" 
+  },
+  {
+    "testName": "Neutrophils",
+    "abbr": "Neut",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 40, "max": 70, "unit": "%"}, "female": {"min": 40, "max": 70, "unit": "%"}},
+    "clinicalInterpretation": "High in bacterial infection; low in viral infection or after chemo",
+    "notes": "Absolute count more useful than percentage"
+  },
+  {
+    "testName": "Lymphocytes",
+    "abbr": "Lymph",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 20, "max": 40, "unit": "%"}, "female": {"min": 20, "max": 40, "unit": "%"}},
+    "clinicalInterpretation": "High in viral infections; low in immunosuppression",
+    "notes": "May be elevated in chronic infections like TB"
+  },
+  {
+    "testName": "Monocytes",
+    "abbr": "Mono",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 2, "max": 8, "unit": "%"}, "female": {"min": 2, "max": 8, "unit": "%"}},
+    "clinicalInterpretation": "High in chronic infections, autoimmune disease, malignancy",
+    "notes": "" 
+  },
+  {
+    "testName": "Eosinophils",
+    "abbr": "Eos",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 1, "max": 4, "unit": "%"}, "female": {"min": 1, "max": 4, "unit": "%"}},
+    "clinicalInterpretation": "High in parasitic infections, allergies, asthma",
+    "notes": "" 
+  },
+  {
+    "testName": "Basophils",
+    "abbr": "Baso",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 0.5, "max": 1, "unit": "%"}, "female": {"min": 0.5, "max": 1, "unit": "%"}},
+    "clinicalInterpretation": "High in chronic inflammation, hypothyroidism",
+    "notes": "" 
+  },
+  {
+    "testName": "Reticulocyte Count",
+    "abbr": "Retics",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 0.5, "max": 2.5, "unit": "%"}, "female": {"min": 0.5, "max": 2.5, "unit": "%"}},
+    "clinicalInterpretation": "High in hemolysis or bleeding; low in bone marrow failure",
+    "notes": "" 
+  },
+  {
+    "testName": "Erythrocyte Sedimentation Rate",
+    "abbr": "ESR",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 0, "max": 15, "unit": "mm/hr"}, "female": {"min": 0, "max": 20, "unit": "mm/hr"}},
+    "clinicalInterpretation": "High in inflammation, infection, malignancy, autoimmune disease",
+    "notes": "Non-specific marker; increases with age"
+  },
+  {
+    "testName": "C-Reactive Protein",
+    "abbr": "CRP",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 0, "max": 5, "unit": "mg/L"}, "female": {"min": 0, "max": 5, "unit": "mg/L"}},
+    "clinicalInterpretation": "High in acute inflammation, infection, tissue injury",
+    "notes": "High-sensitivity CRP (hsCRP) for cardiac risk"
+  },
+  {
+    "testName": "Prothrombin Time",
+    "abbr": "PT",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 11, "max": 13.5, "unit": "seconds"}, "female": {"min": 11, "max": 13.5, "unit": "seconds"}},
+    "clinicalInterpretation": "Prolonged in vitamin K deficiency, liver disease, warfarin therapy",
+    "notes": "Used to calculate INR"
+  },
+  {
+    "testName": "International Normalized Ratio",
+    "abbr": "INR",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 0.8, "max": 1.2, "unit": "ratio"}, "female": {"min": 0.8, "max": 1.2, "unit": "ratio"}},
+    "clinicalInterpretation": "Elevated in anticoagulated patients; target 2-3 for most conditions",
+    "notes": "Used to monitor warfarin therapy"
+  },
+  {
+    "testName": "Partial Thromboplastin Time",
+    "abbr": "aPTT",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 25, "max": 35, "unit": "seconds"}, "female": {"min": 25, "max": 35, "unit": "seconds"}},
+    "clinicalInterpretation": "Prolonged in hemophilia, heparin therapy, lupus anticoagulant",
+    "notes": "Monitors unfractionated heparin and intrinsic pathway"
+  },
+  {
+    "testName": "Fibrinogen",
+    "abbr": "Fibrin",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 200, "max": 400, "unit": "mg/dL"}, "female": {"min": 200, "max": 400, "unit": "mg/dL"}},
+    "clinicalInterpretation": "High in acute phase response; low in DIC",
+    "notes": "Acute phase reactant"
+  },
+  {
+    "testName": "D-Dimer",
+    "abbr": "DDimer",
+    "category": "Hematology",
+    "normalRange": {"male": {"min": 0, "max": 500, "unit": "ng/mL"}, "female": {"min": 0, "max": 500, "unit": "ng/mL"}},
+    "clinicalInterpretation": "Elevated in DVT/PE, DIC; negative useful to rule out",
+    "notes": "Age-adjusted cutoffs recommended in elderly"
+  },
+  {
+    "testName": "Sodium",
+    "abbr": "Na",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 135, "max": 145, "unit": "mEq/L"}, "female": {"min": 135, "max": 145, "unit": "mEq/L"}},
+    "clinicalInterpretation": "Low in SIADH, heart failure; high in dehydration, diabetes insipidus",
+    "notes": "Correct for hyperglycemia"
+  },
+  {
+    "testName": "Potassium",
+    "abbr": "K",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 3.5, "max": 5.0, "unit": "mEq/L"}, "female": {"min": 3.5, "max": 5.0, "unit": "mEq/L"}},
+    "clinicalInterpretation": "Low causes arrhythmias; high causes cardiac arrest",
+    "notes": "Hemolysis falsely elevates"
+  },
+  {
+    "testName": "Chloride",
+    "abbr": "Cl",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 98, "max": 106, "unit": "mEq/L"}, "female": {"min": 98, "max": 106, "unit": "mEq/L"}},
+    "clinicalInterpretation": "Follows sodium; low in vomiting, diuretics",
+    "notes": "" 
+  },
+  {
+    "testName": "Bicarbonate",
+    "abbr": "HCO3",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 22, "max": 28, "unit": "mEq/L"}, "female": {"min": 22, "max": 28, "unit": "mEq/L"}},
+    "clinicalInterpretation": "Low in metabolic acidosis; high in metabolic alkalosis",
+    "notes": "" 
+  },
+  {
+    "testName": "Blood Urea Nitrogen",
+    "abbr": "BUN",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 7, "max": 20, "unit": "mg/dL"}, "female": {"min": 7, "max": 20, "unit": "mg/dL"}},
+    "clinicalInterpretation": "High in renal failure, dehydration, GI bleeding",
+    "notes": "Ratio with creatinine helpful"
+  },
+  {
+    "testName": "Creatinine",
+    "abbr": "Cr",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 0.7, "max": 1.3, "unit": "mg/dL"}, "female": {"min": 0.6, "max": 1.1, "unit": "mg/dL"}},
+    "clinicalInterpretation": "High indicates renal impairment; estimate GFR",
+    "notes": "Muscle mass affects baseline"
+  },
+  {
+    "testName": "Estimated Glomerular Filtration Rate",
+    "abbr": "eGFR",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 90, "max": 120, "unit": "mL/min/1.73m2"}, "female": {"min": 90, "max": 120, "unit": "mL/min/1.73m2"}},
+    "clinicalInterpretation": "<60 indicates CKD; stages 1-5 by value",
+    "notes": "Calculated from age, sex, race, creatinine"
+  },
+  {
+    "testName": "Glucose",
+    "abbr": "Glu",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 70, "max": 100, "unit": "mg/dL"}, "female": {"min": 70, "max": 100, "unit": "mg/dL"}},
+    "clinicalInterpretation": "High indicates diabetes; low indicates hypoglycemia",
+    "notes": "Fasting required for diagnosis"
+  },
+  {
+    "testName": "Hemoglobin A1c",
+    "abbr": "HbA1c",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 4, "max": 5.6, "unit": "%"}, "female": {"min": 4, "max": 5.6, "unit": "%"}},
+    "clinicalInterpretation": ">6.5% diagnostic for diabetes; 5.7-6.4% prediabetes",
+    "notes": "3-month average glucose"
+  },
+  {
+    "testName": "Calcium",
+    "abbr": "Ca",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 8.5, "max": 10.5, "unit": "mg/dL"}, "female": {"min": 8.5, "max": 10.5, "unit": "mg/dL"}},
+    "clinicalInterpretation": "High in hyperparathyroidism; low in hypoparathyroidism",
+    "notes": "Correct for albumin level"
+  },
+  {
+    "testName": "Total Protein",
+    "abbr": "TP",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 6.0, "max": 8.3, "unit": "g/dL"}, "female": {"min": 6.0, "max": 8.3, "unit": "g/dL"}},
+    "clinicalInterpretation": "Low in liver disease, nephrotic syndrome; high in dehydration",
+    "notes": "" 
+  },
+  {
+    "testName": "Albumin",
+    "abbr": "Alb",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 3.5, "max": 5.0, "unit": "g/dL"}, "female": {"min": 3.5, "max": 5.0, "unit": "g/dL"}},
+    "clinicalInterpretation": "Low in liver disease, malnutrition, nephrotic syndrome",
+    "notes": "Maintains oncotic pressure"
+  },
+  {
+    "testName": "Globulin",
+    "abbr": "Glob",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 2.3, "max": 3.5, "unit": "g/dL"}, "female": {"min": 2.3, "max": 3.5, "unit": "g/dL"}},
+    "clinicalInterpretation": "High in chronic inflammation, multiple myeloma",
+    "notes": "Calculated (TP - Albumin)"
+  },
+  {
+    "testName": "Bilirubin Total",
+    "abbr": "Bili",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 0.1, "max": 1.2, "unit": "mg/dL"}, "female": {"min": 0.1, "max": 1.2, "unit": "mg/dL"}},
+    "clinicalInterpretation": "High in liver disease, hemolysis, bile duct obstruction",
+    "notes": "Conjugated vs unconjugated helpful"
+  },
+  {
+    "testName": "Bilirubin Direct",
+    "abbr": "Bili Dir",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 0, "max": 0.3, "unit": "mg/dL"}, "female": {"min": 0, "max": 0.3, "unit": "mg/dL"}},
+    "clinicalInterpretation": "High in obstructive jaundice",
+    "notes": "Conjugated fraction"
+  },
+  {
+    "testName": "Bilirubin Indirect",
+    "abbr": "Bili Indir",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 0.1, "max": 0.9, "unit": "mg/dL"}, "female": {"min": 0.1, "max": 0.9, "unit": "mg/dL"}},
+    "clinicalInterpretation": "High in hemolysis, Gilbert syndrome",
+    "notes": "Unconjugated fraction"
+  },
+  {
+    "testName": "Alkaline Phosphatase",
+    "abbr": "ALP",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 40, "max": 129, "unit": "U/L"}, "female": {"min": 30, "max": 129, "unit": "U/L"}},
+    "clinicalInterpretation": "High in liver disease, bone disease, pregnancy",
+    "notes": "Markedly elevated in biliary obstruction"
+  },
+  {
+    "testName": "Alanine Aminotransferase",
+    "abbr": "ALT",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 7, "max": 55, "unit": "U/L"}, "female": {"min": 7, "max": 55, "unit": "U/L"}},
+    "clinicalInterpretation": "High in hepatocellular injury",
+    "notes": "More specific for liver than AST"
+  },
+  {
+    "testName": "Aspartate Aminotransferase",
+    "abbr": "AST",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 8, "max": 48, "unit": "U/L"}, "female": {"min": 8, "max": 48, "unit": "U/L"}},
+    "clinicalInterpretation": "High in hepatocellular injury, cardiac injury",
+    "notes": "Also in muscle and heart"
+  },
+  {
+    "testName": "Gamma-Glutamyl Transferase",
+    "abbr": "GGT",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 8, "max": 61, "unit": "U/L"}, "female": {"min": 5, "max": 36, "unit": "U/L"}},
+    "clinicalInterpretation": "High in liver disease, alcohol use, bile duct obstruction",
+    "notes": "Sensitive for cholestasis"
+  },
+  {
+    "testName": "Lactate Dehydrogenase",
+    "abbr": "LDH",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 100, "max": 190, "unit": "U/L"}, "female": {"min": 100, "max": 190, "unit": "U/L"}},
+    "clinicalInterpretation": "High in hemolysis, tissue damage, malignancy",
+    "notes": "Isoenzymes help localize source"
+  },
+  {
+    "testName": "Amylase",
+    "abbr": "Amylase",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 30, "max": 110, "unit": "U/L"}, "female": {"min": 30, "max": 110, "unit": "U/L"}},
+    "clinicalInterpretation": "High in acute pancreatitis, salivary gland disease",
+    "notes": "Lipase more specific for pancreas"
+  },
+  {
+    "testName": "Lipase",
+    "abbr": "Lipase",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 0, "max": 160, "unit": "U/L"}, "female": {"min": 0, "max": 160, "unit": "U/L"}},
+    "clinicalInterpretation": "High in acute pancreatitis, renal failure",
+    "notes": "More specific than amylase"
+  },
+  {
+    "testName": "Lipid Panel - Total Cholesterol",
+    "abbr": "TC",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 0, "max": 200, "unit": "mg/dL"}, "female": {"min": 0, "max": 200, "unit": "mg/dL"}},
+    "clinicalInterpretation": ">200 borderline high; >240 high risk",
+    "notes": "Fasting preferred"
+  },
+  {
+    "testName": "HDL Cholesterol",
+    "abbr": "HDL",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 40, "max": 59, "unit": "mg/dL"}, "female": {"min": 50, "max": 59, "unit": "mg/dL"}},
+    "clinicalInterpretation": "<40 low (major risk); >60 protective",
+    "notes": "Good cholesterol"
+  },
+  {
+    "testName": "LDL Cholesterol",
+    "abbr": "LDL",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 0, "max": 100, "unit": "mg/dL"}, "female": {"min": 0, "max": 100, "unit": "mg/dL"}},
+    "clinicalInterpretation": "Optimal <100; borderline 130-159; high >190",
+    "notes": "Bad cholesterol"
+  },
+  {
+    "testName": "Triglycerides",
+    "abbr": "TG",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 0, "max": 150, "unit": "mg/dL"}, "female": {"min": 0, "max": 150, "unit": "mg/dL"}},
+    "clinicalInterpretation": "Normal <150; borderline 150-199; high >200",
+    "notes": "Fasting required"
+  },
+  {
+    "testName": "Non-HDL Cholesterol",
+    "abbr": "Non-HDL",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 0, "max": 130, "unit": "mg/dL"}, "female": {"min": 0, "max": 130, "unit": "mg/dL"}},
+    "clinicalInterpretation": ">130 increased risk",
+    "notes": "Calculated (TC - HDL)"
+  },
+  {
+    "testName": "Thyroid Stimulating Hormone",
+    "abbr": "TSH",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 0.4, "max": 4.0, "unit": "uIU/mL"}, "female": {"min": 0.4, "max": 4.0, "unit": "uIU/mL"}},
+    "clinicalInterpretation": "High suggests hypothyroidism; low suggests hyperthyroidism",
+    "notes": "Most sensitive screening test"
+  },
+  {
+    "testName": "Free Thyroxine",
+    "abbr": "Free T4",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 0.8, "max": 1.8, "unit": "ng/dL"}, "female": {"min": 0.8, "max": 1.8, "unit": "ng/dL"}},
+    "clinicalInterpretation": "Low in hypothyroidism; high in hyperthyroidism",
+    "notes": "Interpret with TSH"
+  },
+  {
+    "testName": "Free Triiodothyronine",
+    "abbr": "Free T3",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 2.3, "max": 4.2, "unit": "pg/mL"}, "female": {"min": 2.3, "max": 4.2, "unit": "pg/mL"}},
+    "clinicalInterpretation": "Low in hypothyroidism; high in hyperthyroidism",
+    "notes": "Useful in T3 thyrotoxicosis"
+  },
+  {
+    "testName": "Thyroxine Binding Globulin",
+    "abbr": "TBG",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 1.1, "max": 2.1, "unit": "mg/dL"}, "female": {"min": 1.3, "max": 2.1, "unit": "mg/dL"}},
+    "clinicalInterpretation": "Low in liver disease, steroids; high in pregnancy",
+    "notes": "" 
+  },
+  {
+    "testName": "Cortisol",
+    "abbr": "Cortisol",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 6, "max": 23, "unit": "ug/dL"}, "female": {"min": 6, "max": 23, "unit": "ug/dL"}},
+    "clinicalInterpretation": "High in Cushing syndrome; low in Addison disease",
+    "notes": "AM levels highest; diurnal rhythm important"
+  },
+  {
+    "testName": "ACTH",
+    "abbr": "ACTH",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 7, "max": 50, "unit": "pg/mL"}, "female": {"min": 7, "max": 50, "unit": "pg/mL"}},
+    "clinicalInterpretation": "High in primary adrenal insufficiency; low in secondary",
+    "notes": "Stimulates cortisol"
+  },
+  {
+    "testName": "Testosterone Total",
+    "abbr": "Testo",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 300, "max": 1000, "unit": "ng/dL"}, "female": {"min": 15, "max": 70, "unit": "ng/dL"}},
+    "clinicalInterpretation": "Low causing hypogonadism; high in PCOS, tumors",
+    "notes": "Free testosterone more physiologically active"
+  },
+  {
+    "testName": "Testosterone Free",
+    "abbr": "Free Testo",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 5, "max": 21, "unit": "pg/mL"}, "female": {"min": 0.2, "max": 4.0, "unit": "pg/mL"}},
+    "clinicalInterpretation": "Bioavailable fraction of testosterone",
+    "notes": "Unbound form"
+  },
+  {
+    "testName": "Estradiol",
+    "abbr": "E2",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 10, "max": 60, "unit": "pg/mL"}, "female": {"min": 20, "max": 400, "unit": "pg/mL"}},
+    "clinicalInterpretation": "Varies with menstrual cycle; high in pregnancy",
+    "notes": "Follicular vs luteal phase values differ"
+  },
+  {
+    "testName": "Progesterone",
+    "abbr": "Prog",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 0.1, "max": 0.5, "unit": "ng/mL"}, "female": {"min": 0.1, "max": 25, "unit": "ng/mL"}},
+    "clinicalInterpretation": "Low in luteal phase defect; high in pregnancy",
+    "notes": "Day 21 level important for ovulation confirmation"
+  },
+  {
+    "testName": "Luteinizing Hormone",
+    "abbr": "LH",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 1, "max": 8, "unit": "mIU/mL"}, "female": {"min": 5, "max": 25, "unit": "mIU/mL"}},
+    "clinicalInterpretation": "Surge triggers ovulation; high in menopause",
+    "notes": "Mid-cycle peak important"
+  },
+  {
+    "testName": "Follicle Stimulating Hormone",
+    "abbr": "FSH",
+    "category": "Chemistry",
+    "normalRange": {"male": {"min": 1, "max": 8, "unit": "mIU/mL"}, "female": {"min": 4, "max": 10, "unit": "mIU/mL"}},
+    "clinicalInterpretation": "High in ovarian failure; low in hypothalamic dysfunction",
+    "notes": "Day 3 level for ovarian reserve"
+  },
+  {
+    "testName": "Prolactin",
+    "abbr": "PRL",
+    "category">
