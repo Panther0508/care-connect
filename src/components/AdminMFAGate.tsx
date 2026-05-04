@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { Navigate } from 'react-router-dom';
 import { adminAuditLogger } from '@/services/adminAuditLogger';
+import MagnifyingLoader from './MagnifyingLoader';
 
 interface AdminMFAGateProps {
   children: React.ReactNode;
@@ -20,14 +21,14 @@ const AdminMFAGate: React.FC<AdminMFAGateProps> = ({ children }) => {
      return <>{children}</>;
    }
   
-  // If not loaded yet, show loading
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
-        <div className="w-8 h-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+   // If not loaded yet, show loading
+   if (!isLoaded) {
+     return (
+       <div className="min-h-screen flex items-center justify-center bg-slate-900">
+         <MagnifyingLoader size={32} />
+       </div>
+     );
+   }
   
   // MFA setup flow states
   const [mfaStep, setMfaStep] = useState<'totp-setup' | 'totp-verify' | 'mfa-complete'>('totp-setup');
@@ -191,7 +192,7 @@ const AdminMFAGate: React.FC<AdminMFAGateProps> = ({ children }) => {
             >
               {isVerifying ? (
                 <div className="flex items-center space-x-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <MagnifyingLoader size={16} />
                   <span>Verifying...</span>
                 </div>
               ) : (
@@ -256,7 +257,7 @@ const AdminMFAGate: React.FC<AdminMFAGateProps> = ({ children }) => {
               >
                 {isVerifying ? (
                   <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <MagnifyingLoader size={16} />
                     <span>Verifying...</span>
                   </div>
                 ) : (

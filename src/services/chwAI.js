@@ -21,7 +21,7 @@ export async function processCHWQuery(prompt, options = {}) {
   if (context) mainPrompt = `Context: ${context}\n\n${prompt}`;
   if (location) mainPrompt = `Location: ${location}\n${mainPrompt}`;
 
-  const structuredPrompt = buildStructuredPrompt('chw', mainPrompt);
+  const { structuredPrompt } = buildStructuredPrompt('chw', mainPrompt);
   const result = await routeQuery({ structuredPrompt, role: 'chw', userId: 'chw', extractedQuery: prompt });
 
   return {
@@ -42,7 +42,7 @@ export async function processCHWQuery(prompt, options = {}) {
 export async function triageSymptoms(symptoms, options = {}) {
   const { patientAge, location, dangerSigns = [] } = options;
 
-  const taskPrompt = `Triage patient with symptoms: ${symptoms}
+   const taskPrompt = `Triage patient with symptoms: ${symptoms}
 Age: ${patientAge || 'unknown'}
 Location: ${location || 'community'}
 Known danger signs: ${dangerSigns.join(', ') || 'none'}
@@ -54,7 +54,7 @@ Use WHO IMCI/ANC guidelines. Classify as:
 
 Provide clear actions and caregiver instructions.`;
 
-  const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
+  const { structuredPrompt } = buildStructuredPrompt('chw', taskPrompt);
   const result = await routeQuery({ structuredPrompt, role: 'chw', extractedQuery: symptoms });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
@@ -66,7 +66,7 @@ Provide clear actions and caregiver instructions.`;
 export async function followProtocol(condition, options = {}) {
   const { protocolType = 'IMCI', resourcesAvailable = ['basic'] } = options;
 
-  const taskPrompt = `Follow ${protocolType} protocol for: ${condition}
+   const taskPrompt = `Follow ${protocolType} protocol for: ${condition}
 Available resources: ${resourcesAvailable.join(', ')}
 
 Provide step-by-step CHW management guide including:
@@ -75,7 +75,7 @@ Provide step-by-step CHW management guide including:
 - Referral criteria
 - Counseling points for caregiver`;
 
-  const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
+  const { structuredPrompt } = buildStructuredPrompt('chw', taskPrompt);
   const result = await routeQuery({ structuredPrompt, role: 'chw', extractedQuery: condition });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
@@ -85,16 +85,15 @@ Provide step-by-step CHW management guide including:
  * Danger sign detection (WHO standard)
  */
 export async function detectDangerSigns(symptoms, observations, options = {}) {
-  const taskPrompt = `Check for danger signs requiring immediate referral.
+   const taskPrompt = `Check for danger signs requiring immediate referral.
 
 Symptoms: ${symptoms}
 Observations: ${observations}
 
 List ALL critical danger signs per WHO IMCI/ANC.
-For each: explain why dangerous and required action (REFER NOW).
-Format as bullet list with explicit "→ REFER" actions.`;
+For each: explain why dangerous and required action (REFER NOW).`;
 
-  const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
+  const { structuredPrompt } = buildStructuredPrompt('chw', taskPrompt);
   const result = await routeQuery({ structuredPrompt, role: 'chw', extractedQuery: symptoms });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
@@ -106,7 +105,7 @@ Format as bullet list with explicit "→ REFER" actions.`;
 export async function generateCounselingScript(topic, targetGroup, options = {}) {
   const { keyPoints = [], duration = 'brief' } = options;
 
-  const taskPrompt = `Create counseling script for: ${topic}
+   const taskPrompt = `Create counseling script for: ${topic}
 Target: ${targetGroup}
 Duration: ${duration}
 Key points: ${keyPoints.join(', ') || 'standard guidance'}
@@ -115,7 +114,7 @@ Use respectful, empowering language for community setting.
 Make it interactive — include questions to ask the beneficiary.
 End with key message summary.`;
 
-  const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
+  const { structuredPrompt } = buildStructuredPrompt('chw', taskPrompt);
   const result = await routeQuery({ structuredPrompt, role: 'chw', extractedQuery: topic });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
@@ -127,7 +126,7 @@ End with key message summary.`;
 export async function generateHealthMessage(topic, options = {}) {
   const { format = 'conversation', culturalContext = 'general' } = options;
 
-  const taskPrompt = `Create health education message about: ${topic}
+   const taskPrompt = `Create health education message about: ${topic}
 Format: ${format}
 Cultural context: ${culturalContext}
 
@@ -138,7 +137,7 @@ Requirements:
 - No jargon without explanation
 - Closing: "Do you have questions?"`;
 
-  const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
+  const { structuredPrompt } = buildStructuredPrompt('chw', taskPrompt);
   const result = await routeQuery({ structuredPrompt, role: 'chw', extractedQuery: topic });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
@@ -150,7 +149,7 @@ Requirements:
 export async function structureEncounter(data, options = {}) {
   const { patientInfo, findings, actions, followUp } = data;
 
-  const taskPrompt = `Structure CHW encounter report.
+   const taskPrompt = `Structure CHW encounter report.
 
 Patient: ${patientInfo}
 Findings: ${findings}
@@ -165,7 +164,7 @@ Format as clear, structured report for medical records. Include:
 - Referral (if any)
 - Next appointment`;
 
-  const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
+  const { structuredPrompt } = buildStructuredPrompt('chw', taskPrompt);
   const result = await routeQuery({ structuredPrompt, role: 'chw', extractedQuery: findings });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
@@ -182,7 +181,7 @@ Use WHO ANC 2016 protocol.
 Provide visit checklist and danger sign screen for this gestational age.
 Include: vitals, immunizations, nutrition, birth planning, red flags.`;
 
-  const structuredPrompt = buildStructuredPrompt('chw', taskPrompt);
+  const { structuredPrompt } = buildStructuredPrompt('chw', taskPrompt);
   const result = await routeQuery({ structuredPrompt, role: 'chw', extractedQuery: concerns || `ANC at ${gestationalAge} weeks` });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };

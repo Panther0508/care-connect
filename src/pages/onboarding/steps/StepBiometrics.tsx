@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { isBiometricAvailable, getBiometricType, biometricVerify } from '../../../lib/biometric/biometricAuth';
+import MagnifyingLoader from '../../../components/MagnifyingLoader';
 
 interface StepBiometricsProps {
   onNext: () => void;
@@ -67,14 +68,14 @@ export default function StepBiometrics({ onNext, onBack, onUpdate, enabled: init
     }
   };
 
-  if (checking) {
-    return (
-      <div className="text-center py-12">
-        <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-        <p className="text-slate-400">Checking biometric support...</p>
-      </div>
-    );
-  }
+   if (checking) {
+     return (
+       <div className="text-center py-12">
+         <MagnifyingLoader size={40} />
+         <p className="text-slate-400">Checking biometric support...</p>
+       </div>
+     );
+   }
 
   return (
     <motion.div

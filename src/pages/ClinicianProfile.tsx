@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { setItem, getItem } from '../lib/idb';
 import { User, Stethoscope, Building2, Clock, CreditCard, FileText, Save, Edit3, Check, X } from 'lucide-react';
+import MagnifyingLoader from '../components/MagnifyingLoader';
 
 interface ClinicianProfileData {
   firstName: string;
@@ -81,9 +82,9 @@ export default function ClinicianProfile() {
     }
   };
 
-  if (!isLoaded) {
-    return <div className="flex items-center justify-center min-h-screen"><div className="text-slate-400">Loading...</div></div>;
-  }
+   if (!isLoaded) {
+     return <div className="flex items-center justify-center min-h-screen"><MagnifyingLoader size={48} /></div>;
+   }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6 p-4 pb-24">

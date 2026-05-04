@@ -1,6 +1,6 @@
 export function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("vitachain", 9); // Bumped to v9 to match aiCoreRouter
+    const request = indexedDB.open("vitachain", 10); // Bumped to v10 for new referral + contact stores
 
     request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
       const db = (event.target as IDBOpenDBRequest).result;
@@ -157,6 +157,9 @@ export function openDB(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains("evaluationLogs")) {
         db.createObjectStore("evaluationLogs", { keyPath: "id" });
       }
+      if (!db.objectStoreNames.contains("chatHistory")) {
+        db.createObjectStore("chatHistory", { keyPath: "id", autoIncrement: true });
+      }
 
       // Engagement stores
       if (!db.objectStoreNames.contains("rewardsData")) {
@@ -177,11 +180,14 @@ export function openDB(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains("milestones")) {
         db.createObjectStore("milestones", { keyPath: "id" });
       }
-      if (!db.objectStoreNames.contains("educationProgress")) {
-        db.createObjectStore("educationProgress", { keyPath: "id" });
-      }
       if (!db.objectStoreNames.contains("referralData")) {
         db.createObjectStore("referralData", { keyPath: "userId" });
+      }
+      if (!db.objectStoreNames.contains("referrals")) {
+        db.createObjectStore("referrals", { keyPath: "id", autoIncrement: true });
+      }
+      if (!db.objectStoreNames.contains("contactSubmissions")) {
+        db.createObjectStore("contactSubmissions", { keyPath: "id", autoIncrement: true });
       }
     };
 
@@ -370,6 +376,28 @@ export async function saveHealthGraph(record: HealthGraphRecord): Promise<void> 
     transaction.oncomplete = () => resolve();
     transaction.onerror = () => reject(transaction.error);
   });
+}
+
+// ==================== Simple scanned health data storage (for clinician view) ====================
+
+export async function getHealthData(): Promise<{ conditions: any[]; medications: any[]; allergies: any[] }> {
+  const defaultData = { conditions: [], medications: [], allergies: [] };
+  try {
+    const stored = await getItem('scannedHealthData');
+    return stored || defaultData;
+  } catch (err) {
+    console.error('Failed to get health data:', err);
+    return defaultData;
+  }
+}
+
+export async function storeHealthData(data: { conditions: any[]; medications: any[]; allergies: any[] }): Promise<void> {
+  try {
+    await setItem('scannedHealthData', data);
+  } catch (err) {
+    console.error('Failed to store health data:', err);
+    throw err;
+  }
 }
 
 // ==================== RxNorm Storage (new) ====================
@@ -1184,3 +1212,149 @@ export async function getMedicationSummary(): Promise<any> {
   const events = await getMedicationEvents();
   return { totalEvents: events.length };
 }
+
+// ==================== Chat History Storage ====================
+
+export interface ChatEntry {
+  id?: number;
+  createdAt: number;
+  title: string;
+  preview: string;
+  messages?: Array<{ role: string; content: string; timestamp?: number }>;
+}
+
+export async function storeChatEntry(entry: Omit<ChatEntry, 'id'>): Promise<number> {
+  const db = await openDB();
+  return new Promise<number>((resolve, reject) => {
+    const transaction = db.transaction("chatHistory", "readwrite");
+    const store = transaction.objectStore("chatHistory");
+    const request = store.add(entry);
+    request.onsuccess = () => resolve(request.result as number);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function getAllChatHistory(): Promise<ChatEntry[]> {
+  const db = await openDB();
+  return new Promise<ChatEntry[]>((resolve, reject) => {
+    const transaction = db.transaction("chatHistory", "readonly");
+    const store = transaction.objectStore("chatHistory");
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const all = request.result as ChatEntry[];
+      // Sort by newest first
+      all.sort((a, b) => b.createdAt - a.createdAt);
+      resolve(all);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function updateChatEntry(id: number, updates: Partial<ChatEntry>): Promise<void> {
+  const db = await openDB();
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction("chatHistory", "readwrite");
+    const store = transaction.objectStore("chatHistory");
+    const existing = store.get(id);
+    existing.onsuccess = () => {
+      const entry = { ...existing.result, ...updates, id };
+      store.put(entry);
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    };
+  });
+}
+
+// ==================== Referral Storage ====================
+
+export interface Referral {
+  id?: number;
+  patientName: string;
+  specialistType: string;
+  reason: string;
+  status: 'pending' | 'completed' | 'cancelled';
+  createdAt: number;
+  clinicianId?: string;
+}
+
+export async function storeReferral(referral: Omit<Referral, 'id'>): Promise<number> {
+  const db = await openDB();
+  return new Promise<number>((resolve, reject) => {
+    const transaction = db.transaction("referrals", "readwrite");
+    const store = transaction.objectStore("referrals");
+    const request = store.add(referral);
+    request.onsuccess = () => resolve(request.result as number);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function getReferrals(status?: string): Promise<Referral[]> {
+  const db = await openDB();
+  return new Promise<Referral[]>((resolve, reject) => {
+    const transaction = db.transaction("referrals", "readonly");
+    const store = transaction.objectStore("referrals");
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const all = request.result as Referral[];
+      if (status) {
+        resolve(all.filter(r => r.status === status));
+      } else {
+        resolve(all);
+      }
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function updateReferralStatus(id: number, status: 'pending' | 'completed' | 'cancelled'): Promise<void> {
+  const db = await openDB();
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction("referrals", "readwrite");
+    const store = transaction.objectStore("referrals");
+    const getRequest = store.get(id);
+    getRequest.onsuccess = () => {
+      const existing = getRequest.result;
+      if (existing) {
+        store.put({ ...existing, status });
+      }
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    };
+    getRequest.onerror = () => reject(getRequest.error);
+  });
+}
+
+// ==================== Contact Submissions ====================
+
+export interface ContactSubmission {
+  id?: number;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  timestamp: number;
+}
+
+export async function storeContactSubmission(submission: Omit<ContactSubmission, 'id'>): Promise<number> {
+  const db = await openDB();
+  return new Promise<number>((resolve, reject) => {
+    const transaction = db.transaction("contactSubmissions", "readwrite");
+    const store = transaction.objectStore("contactSubmissions");
+    const request = store.add(submission);
+    request.onsuccess = () => resolve(request.result as number);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function getAllContactSubmissions(): Promise<ContactSubmission[]> {
+  const db = await openDB();
+  return new Promise<ContactSubmission[]>((resolve, reject) => {
+    const transaction = db.transaction("contactSubmissions", "readonly");
+    const store = transaction.objectStore("contactSubmissions");
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+

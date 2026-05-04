@@ -3,6 +3,8 @@ import { useMesh } from '../../hooks/useMesh';
 import { useAuth } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { getReferrals } from '../../lib/idb';
 import VitaAvatar from '../../components/VitaAvatar';
 import {
   Users,
@@ -14,8 +16,12 @@ import {
   Clock,
   ChevronRight,
   Activity,
-  Sparkles
+  Sparkles,
+  Search,
+  Pill
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { getReferrals } from '../../lib/idb';
 
 export default function ClinicianDashboard() {
   const { user } = useAuth();
@@ -27,6 +33,27 @@ export default function ClinicianDashboard() {
 
   // Care gaps for clinician (placeholder: show pending reviews)
   const pendingReviews = 3; // placeholder from current UI
+
+  // Patient search
+  const [searchQuery, setSearchQuery] = useState("");
+  const filteredScans = recentScans.filter(scan =>
+    scan.patientDid?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Pending referrals
+  const [pendingReferrals, setPendingReferrals] = useState([]);
+
+  useEffect(() => {
+    const loadPending = async () => {
+      try {
+        const referrals = await getReferrals('pending');
+        setPendingReferrals(referrals);
+      } catch (e) {
+        console.error('Failed to load referrals', e);
+      }
+    };
+    loadPending();
+  }, []);
 
   const stats = [
     {
@@ -109,63 +136,124 @@ export default function ClinicianDashboard() {
          </div>
        </section>
 
-       {/* Recent Scans */}
-       <section className="space-y-3">
-         <div className="flex justify-between items-center">
-           <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-             <Activity size={20} className="text-emerald-400" />
-             Recent Scans
-           </h2>
-           <button className="text-xs text-teal-400 hover:text-teal-300">View All</button>
-         </div>
-         {scansLoading ? (
-           <div className="space-y-2">
-             {[1,2,3].map(i => (
-               <div key={i} className="skeleton-card h-24 rounded-xl" />
-             ))}
-           </div>
-         ) : recentScans.length > 0 ? (
-           <div className="space-y-2">
-             {recentScans.slice(0, 5).map((scan) => (
-               <motion.div
-                 key={scan.id}
-                 whileHover={{ x: 2 }}
-                 className="glass-card bg-slate-800/40 rounded-xl p-4 border border-slate-700/40 hover:border-emerald-500/40"
-               >
-                 <div className="flex justify-between items-start gap-2 mb-2">
-                   <div>
-                     <div className="font-medium text-white">
-                       Patient {scan.patientDid.slice(0, 8)}...{scan.patientDid.slice(-4)}
-                     </div>
-                     <div className="text-xs text-slate-400 flex items-center gap-1 mt-1">
-                       <Clock size={10} />
-                       {new Date(scan.timestamp).toLocaleDateString()}
-                     </div>
-                   </div>
-                   <div className="px-2.5 py-1 bg-blue-500/20 text-blue-300 rounded-full text-xs capitalize flex items-center gap-1">
-                     <Scan size={10} />
-                     {scan.specialistType || "General"}
-                   </div>
-                 </div>
-                 {scan.summary && (
-                   <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{scan.summary}</p>
-                 )}
-               </motion.div>
-             ))}
-           </div>
-         ) : (
-           <div className="glass-card bg-slate-800/40 rounded-xl p-6 text-center border border-slate-700/40">
-             <VitaAvatar state="empty" size={48} />
-             <p className="text-slate-400 mt-3 text-sm">No patient scans yet.</p>
-             <button
-               onClick={() => navigate("/clinician-view")}
-               className="mt-3 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm transition-colors"
-             >
-               Scan a Passport
-             </button>
-           </div>
-         )}
-       </section>
+        {/* Recent Scans with Patient Search */}
+        <section className="space-y-3">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+              <Activity size={20} className="text-emerald-400" />
+              Recent Scans
+            </h2>
+          </div>
+          {/* Patient Search */}
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search patient scans..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-slate-800/50 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+            />
+          </div>
+
+          {scansLoading ? (
+            <div className="space-y-2">
+              {[1,2,3].map(i => (
+                <div key={i} className="skeleton-card h-24 rounded-xl" />
+              ))}
+            </div>
+          ) : filteredScans.length > 0 ? (
+            <div className="space-y-2">
+              {filteredScans.slice(0, 5).map((scan) => (
+                <motion.div
+                  key={scan.id}
+                  whileHover={{ x: 2 }}
+                  className="glass-card bg-slate-800/40 rounded-xl p-4 border border-slate-700/40 hover:border-emerald-500/40"
+                >
+                  <div className="flex justify-between items-start gap-2 mb-2">
+                    <div>
+                      <div className="font-medium text-white">
+                        Patient {scan.patientDid.slice(0, 8)}...{scan.patientDid.slice(-4)}
+                      </div>
+                      <div className="text-xs text-slate-400 flex items-center gap-1 mt-1">
+                        <Clock size={10} />
+                        {new Date(scan.timestamp).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <div className="px-2.5 py-1 bg-blue-500/20 text-blue-300 rounded-full text-xs capitalize flex items-center gap-1">
+                      <Scan size={10} />
+                      {scan.specialistType || "General"}
+                    </div>
+                  </div>
+                  {scan.summary && (
+                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{scan.summary}</p>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="glass-card bg-slate-800/40 rounded-xl p-6 text-center border border-slate-700/40">
+              <VitaAvatar state="empty" size={48} />
+              <p className="text-slate-400 mt-3 text-sm">
+                {searchQuery ? 'No matching scans found.' : 'No patient scans yet.'}
+              </p>
+              {!searchQuery && (
+                <button
+                  onClick={() => navigate("/clinician-view")}
+                  className="mt-3 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-sm transition-colors"
+                >
+                  Scan a Passport
+                </button>
+              )}
+            </div>
+          )}
+        </section>
+
+        {/* Pending Referrals */}
+        <section className="space-y-3">
+          <div className="flex justify-between items-center">
+            <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+              <FileText size={20} className="text-amber-400" />
+              Pending Referrals
+            </h2>
+            <button onClick={() => navigate("/referral-generator")} className="text-xs text-teal-400 hover:text-teal-300">
+              + New
+            </button>
+          </div>
+          {pendingReferrals.length > 0 ? (
+            <div className="space-y-2">
+              {pendingReferrals.map((ref) => (
+                <motion.div
+                  key={ref.id}
+                  whileHover={{ x: 2 }}
+                  className="glass-card bg-slate-800/40 rounded-xl p-4 border border-slate-700/40"
+                >
+                  <div className="flex justify-between items-start gap-2 mb-2">
+                    <div>
+                      <div className="font-medium text-white">{ref.patientName}</div>
+                      <div className="text-xs text-slate-400">{ref.specialistType}</div>
+                    </div>
+                    <div className="px-2.5 py-1 bg-amber-500/20 text-amber-300 rounded-full text-xs">
+                      Pending
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-400 line-clamp-2">{ref.reason}</p>
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <div className="glass-card bg-slate-800/40 rounded-xl p-6 text-center border border-slate-700/40">
+              <VitaAvatar state="empty" size={48} />
+              <p className="text-slate-400 mt-3 text-sm">No pending referrals.</p>
+              <button
+                onClick={() => navigate("/referral-generator")}
+                className="mt-3 px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-xl text-sm transition-colors"
+              >
+                Create Referral
+              </button>
+            </div>
+          )}
+        </section>
 
        {/* Upcoming: Care Gaps / Pending Reviews */}
        {pendingReviews > 0 && (

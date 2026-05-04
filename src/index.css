@@ -1,3 +1,28 @@
+/* Prevent iOS zoom on input focus — MUST be ≥ 16px */
+input, textarea, select {
+  font-size: max(16px, 1rem) !important;
+  min-height: 44px;
+}
+
+/* Touch targets minimum 44×44 px per WCAG 2.5.5 */
+button, a, [role="button"], input[type="submit"] {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Auto-growing textareas in Chrome — JS fallback for Firefox/Safari */
+textarea {
+  field-sizing: content;
+  min-height: 88px;
+  resize: vertical;
+}
+
+/* Smooth scrolling for the whole app */
+html { scroll-behavior: smooth; }
+
+/* Consistent box-sizing */
+*, *::before, *::after { box-sizing: border-box; }
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -33,13 +58,39 @@
     z-index: 9999;
   }
 
-  /* Skeleton shimmer effect */
-  @keyframes shimmer {
-    0% { background-position: -200% 0; }
-    100% { background-position: 200% 0; }
-  }
+   /* Skeleton shimmer effect */
+   @keyframes shimmer {
+     0% { background-position: -200% 0; }
+     100% { background-position: 200% 0; }
+   }
 
-  .skeleton-shimmer {
+    /* Orbit animation for MagnifyingLoader */
+    @keyframes orbit {
+      from { transform: rotate(0deg) translateX(48px) rotate(0deg); }
+      to { transform: rotate(360deg) translateX(48px) rotate(-360deg); }
+    }
+
+    /* Avatar pulse when ring reaches leftmost point (scales at 180deg = halfway) */
+    @keyframes avatar-pulse {
+      0%, 45%, 55%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); }
+    }
+
+    /* Typing dot animation */
+    @keyframes typing-dot {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.2); opacity: 1; }
+    }
+
+    .animate-typing-dot {
+      animation: typing-dot 0.6s ease-in-out infinite;
+    }
+    .animate-typing-dot-1 { animation-delay: 0ms; }
+    .animate-typing-dot-2 { animation-delay: 200ms; }
+    .animate-typing-dot-3 { animation-delay: 400ms; }
+
+
+   .skeleton-shimmer {
     position: relative;
     overflow: hidden;
   }

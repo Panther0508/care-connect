@@ -4,6 +4,7 @@ import { X, CreditCard, Shield, Check } from 'lucide-react';
 import { initiateSquadPayment } from '../services/squadPayment';
 import { useAuth } from '@clerk/clerk-react';
 import { useStatus } from '../hooks/useStatus';
+import MagnifyingLoader from './MagnifyingLoader';
 
 interface SquadPaymentModalProps {
   open: boolean;
@@ -110,7 +111,7 @@ export default function SquadPaymentModal({ open, onClose, onSuccess }: SquadPay
               <button onClick={handlePay} disabled={processing} className="flex-1 btn-primary py-3 flex items-center justify-center gap-2">
                 {processing ? (
                   <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <MagnifyingLoader size={16} />
                     Processing...
                   </>
                 ) : (

@@ -20,7 +20,8 @@ import {
   MessagesSquare,
   BookOpen,
   MapPin,
-  Moon
+  Moon,
+  Mail
 } from "lucide-react";
 import { useState } from "react";
 import { clearActiveUser } from "../services/healthGraph";
@@ -36,6 +37,9 @@ const SECONDARY_ITEMS = [
   { label: "Subscription", icon: CreditCard, route: "/subscription", roles: ["patient", "clinician", "chw", "admin"] },
   { label: "Referral", icon: Gift, route: "/referral", roles: ["patient", "clinician", "chw", "admin"] },
   { label: "Support", icon: HelpCircle, route: "/support", roles: ["patient", "clinician", "chw", "admin"] },
+  { label: "Terms", icon: FileText, route: "/terms", roles: ["patient", "clinician", "chw", "admin"] },
+  { label: "Privacy", icon: Shield, route: "/privacy", roles: ["patient", "clinician", "chw", "admin"] },
+  { label: "Contact", icon: Mail, route: "/contact", roles: ["patient", "clinician", "chw", "admin"] },
   { label: "Language", icon: Globe, route: "/language", roles: ["patient", "clinician", "chw", "admin"] },
   // New features for patient engagement
   { label: "Rewards", icon: Trophy, route: "/rewards", roles: ["patient"] },

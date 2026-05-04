@@ -4,7 +4,7 @@
 import type { MeshDoc } from '../lib/gossipProtocol';
 
 // BroadcastChannel for same-device tab communication
-const channel = new BroadcastChannel('vita-mesh-gossip');
+const channel = new BroadcastChannel('vitachain-mesh');
 
 // Unique ID for this client (tab)
 const CLIENT_ID = crypto.randomUUID();
@@ -29,9 +29,20 @@ export function setOnUpdate(callback: (remoteMesh: MeshDoc) => void): void {
  */
 export async function startBluetoothMesh(): Promise<void> {
   channel.onmessage = (event) => {
-    const msg = event.data as { sender: string; mesh: MeshDoc };
+    const msg = event.data;
     if (msg.sender === CLIENT_ID) return;
-    if (onUpdateCallback) onUpdateCallback(msg.mesh);
+
+    // Handle full mesh sync messages
+    if (msg.mesh && onUpdateCallback) {
+      onUpdateCallback(msg.mesh);
+    }
+
+    // Handle lightweight search events
+    if (msg.type === 'search' && msg.termHash) {
+      import('./meshOrchestrator').then(({ recordSearch }) => {
+        recordSearch(msg.termHash);
+      }).catch(() => {});
+    }
   };
 
   try {

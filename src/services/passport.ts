@@ -8,9 +8,12 @@ import { addPassportShare, addPassportScan } from '../lib/idb';
 let keyPair = null;
 let modelLoaded = false;
 
-export async function initPassport(userId, passphrase = 'vita-demo-2026') {
+export async function initPassport(userId?: string, passphrase = 'vita-demo-2026'): Promise<void> {
   await initHealthGraph();
-  await setActiveUser(userId, passphrase);
+  // Only set active user if userId is provided (preserves current user for dev/bypass scenarios)
+  if (userId !== undefined) {
+    await setActiveUser(userId, passphrase);
+  }
   await ensureKeyPair();
   try {
     await loadModel();

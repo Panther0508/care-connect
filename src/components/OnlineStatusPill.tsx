@@ -2,6 +2,7 @@ import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { AnimatePresence, motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import VitaAvatar from "./VitaAvatar";
+import { Link } from "react-router-dom";
 
 export function OnlineStatusPill() {
   const isOnline = useOnlineStatus();
@@ -27,7 +28,7 @@ export function OnlineStatusPill() {
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50">
+    <Link to="/sync-patterns" className="fixed top-4 right-4 z-50 inline-block">
       <AnimatePresence mode="wait">
         {isOnline ? (
           <motion.div
@@ -36,7 +37,7 @@ export function OnlineStatusPill() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.2 }}
-            className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full px-3 py-1 text-xs flex items-center gap-1"
+            className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full px-4 py-2 text-xs flex items-center gap-1"
           >
             <span>🟢</span>
             <span>Online — Synced {getSyncedText()}</span>
@@ -48,7 +49,7 @@ export function OnlineStatusPill() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 0.2 }}
-            className="bg-red-500/20 text-red-400 border border-red-500/30 rounded-full px-3 py-1 text-xs flex items-center gap-2 relative"
+            className="bg-red-500/20 text-red-400 border border-red-500/30 rounded-full px-4 py-2 text-xs flex items-center gap-2 relative"
           >
             <VitaAvatar state="offline" size={16} />
             <span>🔴 Offline — Last synced {getSyncedText()}</span>
@@ -60,6 +61,6 @@ export function OnlineStatusPill() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </Link>
   );
 }

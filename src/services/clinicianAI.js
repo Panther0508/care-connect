@@ -31,7 +31,7 @@ export async function processClinicianQuery(prompt, options = {}) {
     mainPrompt += `\n\nIMPORTANT: Format your response using the 4-section clinical template from SYSTEM INSTRUCTIONS.`;
   }
 
-  const structuredPrompt = buildStructuredPrompt(
+  const { structuredPrompt } = buildStructuredPrompt(
     'clinician',
     mainPrompt,
     {}
@@ -65,7 +65,7 @@ Required:
 4. Essential workup (labs/imaging per CDC/UpToDate)
 5. Citations from guidelines or recent studies`;
 
-  const structuredPrompt = buildStructuredPrompt('clinician', taskPrompt);
+  const { structuredPrompt } = buildStructuredPrompt('clinician', taskPrompt);
   const result = await routeQuery({ structuredPrompt, role: 'clinician', extractedQuery: symptoms });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
@@ -82,7 +82,7 @@ For each code provide:
 - Secondary codes if applicable
 - Brief description and coding notes (laterality, severity)`;
 
-  const structuredPrompt = buildStructuredPrompt('clinician', taskPrompt);
+  const { structuredPrompt } = buildStructuredPrompt('clinician', taskPrompt);
   const result = await routeQuery({ structuredPrompt, role: 'clinician', extractedQuery: conditions });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
@@ -106,7 +106,7 @@ Include:
 - Monitoring requirements (labs, follow-up timing)
 - Patient counseling points (adherence, side effects, red flags)`;
 
-  const structuredPrompt = buildStructuredPrompt('clinician', taskPrompt);
+  const { structuredPrompt } = buildStructuredPrompt('clinician', taskPrompt);
   const result = await routeQuery({ structuredPrompt, role: 'clinician', extractedQuery: drugInfo });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };
@@ -132,7 +132,7 @@ Format as professional clinical correspondence:
 - Assessment & specific reason for referral
 - Clear questions for specialist`;
 
-  const structuredPrompt = buildStructuredPrompt('clinician', taskPrompt);
+  const { structuredPrompt } = buildStructuredPrompt('clinician', taskPrompt);
   const extractedQuery = `Referral to ${specialty}: ${reason}`;
   const result = await routeQuery({ structuredPrompt, role: 'clinician', extractedQuery });
 
@@ -158,7 +158,7 @@ ${templates[noteType] || templates.Brief}
 
 Fill every field. Use concise medical terminology appropriate for clinicians.`;
 
-  const structuredPrompt = buildStructuredPrompt('clinician', taskPrompt);
+  const { structuredPrompt } = buildStructuredPrompt('clinician', taskPrompt);
   const result = await routeQuery({ structuredPrompt, role: 'clinician', extractedQuery: findings });
 
   return { success: true, text: result.text, model: result.model, source: result.source, evaluation: result.evaluation };

@@ -29,17 +29,21 @@ const modelLoading = {
 
 const MODEL_CONFIGS = {
   textGeneration: {
-    model: 'Xenova/TinyLlama-1.1B-Chat-v1.0',
+    // GitHub Releases direct download — user-requested model hosting location
+    // If the exact release asset is not yet published, replace with actual URL when ready:
+    // https://github.com/Panther0508/care-connect/releases/download/v1.0.0-model/decoder_model_merged_quantized.onnx
+    model: 'https://github.com/Panther0508/care-connect/releases/download/v1.0.0-model/decoder_model_merged_quantized.onnx',
     task: 'text-generation',
     options: { model_type: 'llama' }
   },
   embedding: {
-    model: 'Xenova/all-MiniLM-L6-v2',
+    // Load from local /models/ directory only — no remote fallback
+    model: '/models/Xenova/all-MiniLM-L6-v2',
     task: 'feature-extraction',
     options: {}
   },
   featureExtraction: {
-    model: 'Xenova/all-MiniLM-L6-v2',
+    model: '/models/Xenova/all-MiniLM-L6-v2',
     task: 'feature-extraction',
     options: {}
   },
@@ -74,6 +78,20 @@ async function loadModel(type, onProgress) {
   }
 
   modelLoading[type] = true;
+
+  // Per-model env configuration (user requirement: TinyLlama remote, embedding local-only)
+  if (type === 'textGeneration') {
+    env.allowRemoteModels = true;   // GitHub Releases download allowed
+    env.allowLocalModels = false;   // Do not attempt local filesystem
+  } else if (type === 'embedding' || type === 'featureExtraction') {
+    env.allowRemoteModels = false;  // Load from local /models/ only
+    env.allowLocalModels = true;    // Permit local /models/ path
+  } else {
+    // Default for other models (translation, speech, image): allow remote from HuggingFace
+    env.allowRemoteModels = true;
+    env.allowLocalModels = false;
+  }
+
   const config = MODEL_CONFIGS[type];
   const maxAttempts = 3;
   let lastErr = null;

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MessageCircle } from 'lucide-react';
 import whatsappSharing from '../services/whatsappSharing';
+import MagnifyingLoader from './MagnifyingLoader';
 
 export function ShareViaWhatsApp({ 
   type, 
@@ -74,7 +75,7 @@ export function ShareViaWhatsApp({
       <MessageCircle size={20} className="flex-shrink-0" />
       <span className="text-sm font-medium">Share via WhatsApp</span>
       {loading && (
-        <span className="ml-2 h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin flex-shrink-0" />
+        <MagnifyingLoader size={16} />
       )}
     </motion.button>
   );

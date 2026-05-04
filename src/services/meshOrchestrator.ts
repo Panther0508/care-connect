@@ -95,6 +95,8 @@ export function recordSearch(term: string): void {
   storeSearchLog({ term, timestamp: new Date().toISOString() }).catch(console.error);
   schedulePersist();
   scheduleBroadcast();
+  // Trigger outbreak detection for local searches
+  evaluateOutbreak(meshDoc).catch(console.error);
 }
 
 /**

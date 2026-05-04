@@ -36,6 +36,11 @@ export function RequireAuth({ children }: GuardProps) {
   const { isSignedIn, isLoaded } = useAuth();
   const location = useLocation();
 
+  // DEV ONLY: ?devBypass=true skips auth for local testing
+  if (import.meta.env?.DEV && new URLSearchParams(location.search).has('devBypass')) {
+    return <>{children}</>;
+  }
+
   if (!isLoaded) {
     return <LoadingFallback message="Loading..." />;
   }
@@ -51,6 +56,14 @@ export function RequireAuth({ children }: GuardProps) {
 export function ProtectedRoute({ children, allowedRoles }: GuardProps) {
   const { isSignedIn, isLoaded } = useAuth();
   const location = useLocation();
+
+  // DEV ONLY: ?devBypass=true skips auth for local testing
+  if (import.meta.env?.DEV && new URLSearchParams(location.search).has('devBypass')) {
+    if (!localStorage.getItem('user_role')) {
+      localStorage.setItem('user_role', allowedRoles ? (Array.isArray(allowedRoles) ? allowedRoles[0] : allowedRoles) : 'patient');
+    }
+    return <>{children}</>;
+  }
 
   if (!isLoaded) {
     return <LoadingFallback message="Loading..." />;

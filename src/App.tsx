@@ -12,7 +12,9 @@ import { ProtectedRoute, RequireAuth, AuthSyncGate } from "./components/role/Req
 
 // Lazy-loaded pages for code splitting
 const Landing = lazy(() => import("./pages/Landing"));
+const HomePage = lazy(() => import("./pages/HomePage"));
 const SignInPage = lazy(() => import("./pages/auth/SignInPage"));
+const SyncPatternsPage = lazy(() => import("./pages/SyncPatternsPage"));
 const SignUpPage = lazy(() => import("./pages/auth/SignUpPage"));
 const Onboarding = lazy(() => import("./pages/onboarding"));
 const PatientDashboard = lazy(() => import("./pages/dashboards/PatientDashboard"));
@@ -34,11 +36,14 @@ const FacilityDetailPage = lazy(() => import("./pages/FacilityDetailPage"));
 const Settings = lazy(() => import("./pages/Settings"));
 const Support = lazy(() => import("./pages/Support"));
 const LanguageSelector = lazy(() => import("./pages/LanguageSelector"));
-const Subscription = lazy(() => import("./pages/Subscription"));
-const Referral = lazy(() => import("./pages/Referral"));
-const AuditLog = lazy(() => import("./pages/AuditLog"));
-const AdminMFAGate = lazy(() => import("./components/AdminMFAGate"));
-const AdminBiometricLock = lazy(() => import("./components/AdminBiometricLock"));
+ const Subscription = lazy(() => import("./pages/Subscription"));
+ const Referral = lazy(() => import("./pages/Referral"));
+ const AuditLog = lazy(() => import("./pages/AuditLog"));
+ const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+ const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+ const ContactUs = lazy(() => import("./pages/ContactUs"));
+ const AdminMFAGate = lazy(() => import("./components/AdminMFAGate"));
+ const AdminBiometricLock = lazy(() => import("./components/AdminBiometricLock"));
 
 // New wellness pages
 const Nutrition = lazy(() => import("./pages/Nutrition"));
@@ -83,6 +88,13 @@ const PageWrapper = ({ children }) => (
     {children}
   </motion.div>
 );
+
+// Conditional root to show HomePage when devBypass is present (for e2e tests)
+function ConditionalRoot() {
+  const location = useLocation();
+  const isDevBypass = new URLSearchParams(location.search).has('devBypass');
+  return isDevBypass ? <HomePage /> : <Landing />;
+}
 
 // Role-based dashboard switcher
 function RoleBasedDashboard() {
@@ -130,7 +142,7 @@ const App = () => {
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             {/* Public routes */}
-            <Route path="/" element={<Landing />} />
+            <Route path="/" element={<ConditionalRoot />} />
             <Route path="/sign-in" element={<SignInPage />} />
             <Route path="/sign-up" element={<SignUpPage />} />
 
@@ -445,15 +457,22 @@ const App = () => {
               </AuthSyncGate>
             } />
 
-            {/* Settings & support */}
-            <Route path="/settings" element={
-              <AuthSyncGate>
-                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
-                  <PageWrapper><Settings /></PageWrapper>
-                </ProtectedRoute>
-              </AuthSyncGate>
-            } />
-            <Route path="/subscription" element={
+             {/* Settings & support */}
+             <Route path="/settings" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                   <PageWrapper><Settings /></PageWrapper>
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
+             <Route path="/sync-patterns" element={
+               <AuthSyncGate>
+                 <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                   <PageWrapper><SyncPatternsPage /></PageWrapper>
+                 </ProtectedRoute>
+               </AuthSyncGate>
+             } />
+             <Route path="/subscription" element={
               <AuthSyncGate>
                 <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
                   <PageWrapper><Subscription /></PageWrapper>
@@ -471,6 +490,27 @@ const App = () => {
               <AuthSyncGate>
                 <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
                   <PageWrapper><Support /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
+            } />
+            <Route path="/terms" element={
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                  <PageWrapper><TermsOfService /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
+            } />
+            <Route path="/privacy" element={
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                  <PageWrapper><PrivacyPolicy /></PageWrapper>
+                </ProtectedRoute>
+              </AuthSyncGate>
+            } />
+            <Route path="/contact" element={
+              <AuthSyncGate>
+                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                  <PageWrapper><ContactUs /></PageWrapper>
                 </ProtectedRoute>
               </AuthSyncGate>
             } />

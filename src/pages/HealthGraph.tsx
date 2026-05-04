@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import VitaAvatar from "../components/VitaAvatar";
+import MagnifyingLoader from "../components/MagnifyingLoader";
 import {
   initHealthGraph,
   addCondition,
@@ -28,7 +29,7 @@ export default function HealthGraph() {
   const [modalOpen, setModalOpen] = useState<ModalType>(null);
   const [formData, setFormData] = useState({
     conditionName: "",
-    conditionDate: "",
+    diagnosedDate: "",
     conditionNotes: "",
     medicationName: "",
     medicationDose: "",
@@ -70,7 +71,7 @@ export default function HealthGraph() {
     setModalOpen(type);
     setFormData({
       conditionName: "",
-      conditionDate: "",
+      diagnosedDate: "",
       conditionNotes: "",
       medicationName: "",
       medicationDose: "",
@@ -97,7 +98,7 @@ export default function HealthGraph() {
   };
 
   const handleAddCondition = async () => {
-    await addCondition(formData.conditionName, formData.conditionDate, formData.conditionNotes);
+    await addCondition(formData.conditionName, formData.diagnosedDate, formData.conditionNotes);
     refreshData();
     closeModal();
   };
@@ -203,13 +204,13 @@ export default function HealthGraph() {
     </div>
   );
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+   if (loading) {
+     return (
+       <div className="flex items-center justify-center py-20">
+         <MagnifyingLoader size={32} />
+       </div>
+     );
+   }
 
   return (
     <div className="space-y-6">
@@ -302,7 +303,7 @@ export default function HealthGraph() {
       )}
 
       {/* Modal for Condition */}
-      <Modal onClose={closeModal} title="Add Condition">
+      <Modal isOpen={modalOpen === 'condition'} onClose={closeModal} title="Add Condition">
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1">Condition Name</label>
@@ -318,8 +319,8 @@ export default function HealthGraph() {
             <label className="block text-sm font-medium text-slate-300 mb-1">Diagnosed Date</label>
             <input
               type="date"
-              name="conditionDate"
-              value={formData.conditionDate}
+              name="diagnosedDate"
+              value={formData.diagnosedDate}
               onChange={handleInputChange}
               className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400"
             />
@@ -336,14 +337,14 @@ export default function HealthGraph() {
           </div>
           <div className="pt-2">
             <button onClick={handleAddCondition} className="w-full btn-primary">
-              Add Condition
+              Save Condition
             </button>
           </div>
         </div>
       </Modal>
 
-      {/* Modal for Medication */}
-      <Modal onClose={closeModal} title="Add Medication">
+       {/* Modal for Medication */}
+       <Modal isOpen={modalOpen === 'medication'} onClose={closeModal} title="Add Medication">
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1">Medication Name</label>
@@ -407,8 +408,8 @@ export default function HealthGraph() {
         </div>
       </Modal>
 
-      {/* Modal for Allergy */}
-      <Modal onClose={closeModal} title="Add Allergy">
+       {/* Modal for Allergy */}
+       <Modal isOpen={modalOpen === 'allergy'} onClose={closeModal} title="Add Allergy">
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1">Substance</label>
@@ -451,8 +452,8 @@ export default function HealthGraph() {
         </div>
       </Modal>
 
-      {/* Modal for Encounter */}
-      <Modal onClose={closeModal} title="Add Encounter">
+       {/* Modal for Encounter */}
+       <Modal isOpen={modalOpen === 'encounter'} onClose={closeModal} title="Add Encounter">
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1">Date</label>
@@ -507,14 +508,18 @@ export default function HealthGraph() {
 
 // Modal component
 function Modal({
+  isOpen,
   onClose,
   title,
   children,
 }: {
+  isOpen: boolean;
   onClose: () => void;
   title: string;
   children: React.ReactNode;
 }) {
+  if (!isOpen) return null;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <motion.div

@@ -8,6 +8,7 @@ import VitaAvatar from '../../components/VitaAvatar';
 import CustomizableVitaAvatar from '../../components/CustomizableVitaAvatar';
 import { LiquidGlassCard } from '../../components/LiquidGlassCard';
 import RewardsPanel from '../../components/RewardsPanel';
+import MagnifyingLoader from '../../components/MagnifyingLoader';
 import {
   Sparkles,
   AlertCircle,
@@ -72,36 +73,16 @@ const LiveHealthAlerts = () => {
     }
   };
 
-  if (loading && !alertsData) {
-    return (
-      <div className="glass-card p-4">
-        <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
-          <AlertCircle size={20} className="text-amber-400" />
-          Live Health Alerts
-        </h2>
-        <div className="space-y-3 pt-4">
-          <div className="flex items-center gap-4 animate-pulse">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
-              <AlertCircle size={24} className="text-amber-400" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="font-medium text-slate-100">COVID-19</h3>
-              <p className="text-slate-400 text-sm">Loading...</p>
-            </div>
-            <div className="flex items-center gap-4 animate-pulse">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center">
-                <Activity size={24} className="text-cyan-400" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="font-medium text-slate-100">Influenza</h3>
-                <p className="text-slate-400 text-sm">Loading...</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+   if (loading && !alertsData) {
+     return (
+       <div className="glass-card p-4 flex items-center justify-center" style={{ minHeight: '200px' }}>
+         <div className="text-center space-y-4">
+           <MagnifyingLoader size={48} />
+           <p className="text-slate-400">Loading health alerts...</p>
+         </div>
+       </div>
+     );
+   }
 
   if (error && !alertsData) {
     return (
@@ -484,7 +465,7 @@ export default function PatientDashboard() {
        >
         <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8">
           <WellnessRing />
-          <div className="flex-1 grid grid-cols-3 gap-4 text-center md:text-left">
+          <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center md:text-left">
             {[
               { label: "Calories", value: "1,450", target: "2,000", color: "#14B8A6", unit: "kcal" },
               { label: "Water", value: "1.32", target: "2.0", color: "#06B6D4", unit: "L" },
@@ -628,7 +609,7 @@ export default function PatientDashboard() {
         className="space-y-3"
       >
         <h2 className="text-lg font-semibold text-slate-100">Quick Actions</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {quickActions.map((action, idx) => {
             const Icon = action.icon;
             return (
@@ -642,7 +623,7 @@ export default function PatientDashboard() {
                 onClick={() => navigate(action.route)}
                 className="glass-card p-4 text-center group"
               >
-                <div className="w-12 h-12 rounded-2xl mx-auto mb-3 flex items-center justify-center bg-gradient-to-br from-teal-500/20 to-cyan-500/20 group-hover:from-teal-500/30 group-hover:to-cyan-500/30 transition-all">
+                <div className="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center bg-gradient-to-br from-teal-500/20 to-cyan-500/20 group-hover:from-teal-500/30 group-hover:to-cyan-500/30 transition-all">
                   <Icon size={24} className="text-teal-400" />
                 </div>
                 <span className="text-sm font-medium text-slate-200 group-hover:text-teal-300 transition-colors">
@@ -682,7 +663,7 @@ export default function PatientDashboard() {
                 className="btn-primary px-5 py-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {aiLoading ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <MagnifyingLoader size={16} />
                 ) : (
                   <Sparkles size={18} />
                 )}
@@ -702,7 +683,7 @@ export default function PatientDashboard() {
 
           {aiLoading && (
             <div className="mt-3 flex items-center gap-2 text-sm text-slate-400">
-              <div className="w-4 h-4 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+              <MagnifyingLoader size={16} />
               Vita is thinking...
             </div>
           )}

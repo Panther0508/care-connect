@@ -66,6 +66,18 @@ export default function Settings() {
         {activeTab === 'language' && <LanguageSelector />}
         {activeTab === 'export' && <ExportTab />}
         {activeTab === 'delete' && <DeleteTab />}
+       </div>
+
+      {/* Legal Links Footer */}
+      <div className="mt-8 pt-6 border-t border-white/5 text-center">
+        <p className="text-slate-500 text-sm">
+          <span className="mx-2">© 2026 VitaChain.</span>
+          <a href="/terms" className="text-teal-400 hover:underline mx-1">Terms</a>
+          <span className="text-slate-600 mx-1">•</span>
+          <a href="/privacy" className="text-teal-400 hover:underline mx-1">Privacy</a>
+          <span className="text-slate-600 mx-1">•</span>
+          <a href="/contact" className="text-teal-400 hover:underline mx-1">Contact</a>
+        </p>
       </div>
     </motion.div>
   );

@@ -97,7 +97,10 @@ export default function ImpactPage() {
 
       <section className="relative z-10 flex-1 flex flex-col justify-between gap-8 pb-8">
         {loading ? (
-          <div className="text-center py-10 text-slate-500 text-sm">Loading impact stats...</div>
+          <div className="flex flex-col items-center justify-center space-y-4 py-20">
+            <MagnifyingLoader size={48} />
+            <p className="text-slate-400 text-sm">Loading impact stats...</p>
+          </div>
         ) : (
           <motion.div 
             initial="hidden" animate="visible" variants={{ visible: { transition: { staggerChildren: 0.1 } } }}

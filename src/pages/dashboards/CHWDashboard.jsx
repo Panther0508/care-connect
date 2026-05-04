@@ -8,6 +8,8 @@ export default function CHWDashboard() {
   const { meshStats, facilityConfirmations } = useMesh();
   const { needs } = useSavedNeeds();
 
+  const meshSyncCount = meshStats?.searchCount || 0;
+
   const alerts = [
     { id: 1, type: 'Cholera', severity: 'high', location: 'Kano', cases: 12 },
     { id: 2, type: 'Malaria', severity: 'medium', location: 'Lagos', cases: 45 },

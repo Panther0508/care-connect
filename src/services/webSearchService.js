@@ -113,19 +113,21 @@ async function searchLangSearch(query, maxResults = 5) {
 }
 
 /**
- * Tier 3: DuckDuckGo Instant Answer API
- * Tier 3: DuckDuckGo Instant Answer API
- * GET https://api.duckduckgo.com/?q={query}&format=json
- * Returns: { AbstractText, AbstractURL, Heading, RelatedTopics: [{Text, FirstURL}] }
+ * Tier 2: DuckDuckGo Instant Answer API via CORS proxy
+ * GET /api/proxy → forward to https://api.duckduckgo.com/
  */
 async function searchDuckDuckGo(query, maxResults = 5) {
   const encoded = encodeURIComponent(query);
-  const url = `https://api.duckduckgo.com/?q=${encoded}&format=json&no_html=1&skip_disambig=1`;
+  const targetUrl = `https://api.duckduckgo.com/?q=${encoded}&format=json&no_html=1&skip_disambig=1`;
 
-  const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+  const resp = await fetch('/api/proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ targetUrl })
+  });
 
   if (!resp.ok) {
-    throw new Error(`DuckDuckGo HTTP ${resp.status}`);
+    throw new Error(`DuckDuckGo via proxy HTTP ${resp.status}`);
   }
 
   const data = await resp.json();
@@ -147,7 +149,7 @@ async function searchDuckDuckGo(query, maxResults = 5) {
     topics.forEach(topic => {
       if (topic.Text && topic.FirstURL) {
         results.push({
-          title: topic.Text.split(' — ')[0] || topic.Text, // Take first part as title
+          title: topic.Text.split(' — ')[0] || topic.Text,
           url: topic.FirstURL,
           snippet: topic.Text,
           source: 'DuckDuckGo'
@@ -160,18 +162,21 @@ async function searchDuckDuckGo(query, maxResults = 5) {
 }
 
 /**
- * Tier 3: Wikipedia API (free, no auth required)
- * GET https://en.wikipedia.org/w/api.php?action=opensearch&search={query}&limit=5&format=json
- * Returns: [query, [titles], [descriptions], [urls]]
+ * Tier 3: Wikipedia API (free, no auth required) via CORS proxy
+ * GET /api/proxy → forward to https://en.wikipedia.org/w/api.php
  */
 async function searchWikipedia(query, maxResults = 5) {
   const encoded = encodeURIComponent(query);
-  const url = `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encoded}&limit=${maxResults}&format=json&namespace=0`;
+  const targetUrl = `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encoded}&limit=${maxResults}&format=json&namespace=0`;
 
-  const resp = await fetch(url);
+  const resp = await fetch('/api/proxy', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ targetUrl })
+  });
 
   if (!resp.ok) {
-    throw new Error(`Wikipedia API: ${resp.status}`);
+    throw new Error(`Wikipedia via proxy HTTP ${resp.status}`);
   }
 
   const data = await resp.json();

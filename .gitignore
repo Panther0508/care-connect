@@ -40,3 +40,7 @@ dist-ssr
 
 # OS
 Thumbs.db
+prompt.md
+
+# Test artifacts
+test-results/

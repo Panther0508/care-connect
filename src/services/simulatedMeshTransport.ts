@@ -8,6 +8,7 @@ const STORAGE_KEY = 'vita_mesh_gossip';
 const CLIENT_ID = crypto.randomUUID();
 
 let onUpdateCallback: ((remoteMesh: MeshDoc) => void) | null = null;
+let broadcastChannel: BroadcastChannel | null = null;
 
 /**
  * Set the callback invoked when new mesh data arrives from another tab
@@ -24,6 +25,20 @@ export function startSimulatedMesh(): void {
   // Listen for localStorage changes from other tabs
   window.addEventListener('storage', handleStorageChange);
 
+  // Listen for BroadcastChannel messages from other contexts (e.g., Playwright tests, other tabs)
+  broadcastChannel = new BroadcastChannel('vitachain-mesh');
+  broadcastChannel.onmessage = async (event) => {
+    const data = event.data;
+    if (data?.type === 'search' && data.termHash) {
+      try {
+        const { recordSearch } = await import('./meshOrchestrator');
+        recordSearch(data.termHash);
+      } catch (e) {
+        console.error('Failed to record search from BroadcastChannel:', e);
+      }
+    }
+  };
+
   // Broadcast local state periodically (every 30s)
   setInterval(() => {
     broadcastLocalState();
@@ -38,6 +53,10 @@ export function startSimulatedMesh(): void {
  */
 export function stopSimulatedMesh(): void {
   window.removeEventListener('storage', handleStorageChange);
+  if (broadcastChannel) {
+    broadcastChannel.close();
+    broadcastChannel = null;
+  }
 }
 
 /**

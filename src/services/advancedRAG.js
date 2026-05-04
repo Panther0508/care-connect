@@ -201,7 +201,8 @@ export function openDB() {
       const db = e.target.result;
       // RAG vectors store
       if (!db.objectStoreNames.contains('datasetVectors')) {
-        db.createObjectStore('datasetVectors', { keyPath: 'id' });
+        const store = db.createObjectStore('datasetVectors', { keyPath: 'id' });
+        store.createIndex('dataset', 'dataset', { unique: false });
       }
       // Gemma cache store
       if (!db.objectStoreNames.contains('gemmaCache')) {
@@ -285,12 +286,13 @@ export async function isDatasetIndexed(datasetName) {
     const db = await openDB();
     const tx = db.transaction('datasetVectors', 'readonly');
     const store = tx.objectStore('datasetVectors');
-    const request = store.index('dataset').openCursor(IDBKeyRange.only(datasetName));
+    // Use getAll and filter since index may not exist in older versions
+    const request = store.getAll();
     return new Promise((resolve) => {
-      request.onsuccess = () => {
-        const cursor = request.result;
-        resolve(!!cursor);
-      };
+        request.onsuccess = () => {
+          const results = request.result || [];
+          resolve(results.some(item => item.dataset === datasetName));
+        };
       request.onerror = () => resolve(false);
     });
   } catch (err) {

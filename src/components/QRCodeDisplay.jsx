@@ -28,7 +28,7 @@ export default function QRCodeDisplay({ qrDataURL, credential, onDone, onScanAno
         className="flex justify-center"
       >
         <div className="p-4 bg-white rounded-2xl shadow-lg">
-          <img src={qrDataURL} alt="Health Passport QR Code" className="w-64 h-64" loading="lazy" onError={(e) => { e.target.style.display = 'none'; }} />
+          <img src={qrDataURL} alt="Health Passport QR Code" className="max-w-full w-auto h-auto max-w-[280px] qr-code" loading="lazy" onError={(e) => { e.target.style.display = 'none'; }} />
         </div>
       </motion.div>
 

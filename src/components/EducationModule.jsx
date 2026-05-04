@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
 import { getEducationModuleById, getEducationProgress, markLessonCompleted, saveQuizScore, calculateModuleProgress } from '../services/educationEngine';
-import { Sparkles, BookOpen, Activity, Heart, Shield, CheckCircle, AlertTriangle, Loader, ArrowLeft, ArrowRight, Circle } from 'lucide-react';
+import { Sparkles, BookOpen, Activity, Heart, Shield, CheckCircle, AlertTriangle, ArrowLeft, ArrowRight, Circle } from 'lucide-react';
+import MagnifyingLoader from './MagnifyingLoader';
 
 const EducationModule = () => {
   const { moduleId } = useParams();
@@ -82,16 +83,16 @@ const EducationModule = () => {
     return await calculateModuleProgress(user.id, moduleId);
   };
 
-  if (loading) {
-    return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
-        <div className="text-center">
-          <Loader size={32} className="mb-4 text-teal-400 animate-spin" />
-          <h2 className="text-xl font-bold text-slate-100">Loading module...</h2>
-        </div>
-      </motion.div>
-    );
-  }
+   if (loading) {
+     return (
+       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+         <div className="text-center">
+           <MagnifyingLoader size={32} />
+           <h2 className="text-xl font-bold text-slate-100">Loading module...</h2>
+         </div>
+       </motion.div>
+     );
+   }
 
   if (error || !module) {
     return (

@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getEducationModules, fetchAndStoreEducationModules } from '../services/educationEngine';
 import { Sparkles, BookOpen, Activity, Heart, Shield, Sparkles as SparklesIcon, CheckCircle } from 'lucide-react';
+import SkeletonCard from '../components/SkeletonCard';
 
 const EducationPage = () => {
   const [modules, setModules] = useState([]);
@@ -39,11 +40,20 @@ const EducationPage = () => {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="min-h-[calc(100vh-4rem)] flex items-center justify-center"
+        className="min-h-[calc(100vh-4rem)] p-6"
       >
-        <div className="text-center">
-          <SparklesIcon size={32} className="mb-4 text-teal-400" />
-          <h2 className="text-xl font-bold text-slate-100">Loading educational content...</h2>
+        <div className="max-w-4xl mx-auto space-y-6">
+          {/* Header skeleton */}
+          <div className="space-y-2">
+            <div className="h-8 bg-slate-700 rounded w-1/3 skeleton-shimmer" />
+            <div className="h-4 bg-slate-700 rounded w-1/2 skeleton-shimmer" />
+          </div>
+          {/* Modules grid skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <SkeletonCard key={i} variant="github" lines={4} />
+            ))}
+          </div>
         </div>
       </motion.div>
     );

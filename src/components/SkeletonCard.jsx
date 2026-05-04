@@ -7,6 +7,8 @@ const SkeletonCard = ({ lines = 3, variant = 'default' }) => {
         return 'p-3';
       case 'wide':
         return 'p-6 w-full';
+      case 'github':
+        return 'p-4'; // standard card padding
       default:
         return 'p-4';
     }
@@ -83,6 +85,19 @@ const SkeletonCard = ({ lines = 3, variant = 'default' }) => {
               <div className="h-4 bg-slate-700 rounded w-2/3 skeleton-shimmer"></div>
               <div className="h-6 bg-slate-700 rounded w-1/2 skeleton-shimmer"></div>
             </div>
+          </div>
+        );
+      case 'github':
+        // Static placeholder, no shimmer, GitHub‑style
+        return (
+          <div className="space-y-3">
+            {Array.from({ length: lines || 5 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-3 rounded-[12px] bg-[#1E293B]"
+                style={{ width: `${80 + Math.random() * 20}%` }}
+              />
+            ))}
           </div>
         );
       default:

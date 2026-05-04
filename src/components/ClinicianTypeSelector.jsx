@@ -20,11 +20,12 @@ export default function ClinicianTypeSelector({ onSelect }) {
         <p className="text-slate-400 text-sm">Select the clinician type to tailor your pre‑visit summary.</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {CLINICIAN_TYPES.map((type) => (
           <button
             key={type.id}
             onClick={() => onSelect(type.id)}
+              data-testid={type.id}
             className="p-4 rounded-xl border border-slate-700/30 bg-slate-800/40 hover:border-teal-500/50 hover:bg-slate-700/40 transition-all group text-left"
           >
             <div className="text-3xl mb-2">{type.icon}</div>

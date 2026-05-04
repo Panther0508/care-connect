@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useStatus } from "../hooks/useStatus";
 import OutbreakAlertNotifier from "./OutbreakAlertNotifier";
 import { ChevronUp, ChevronDown } from "lucide-react";
+import { useIDB } from "../hooks/useIDB";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -15,6 +16,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const isOnline = useOnlineStatus();
   const { showStatus } = useStatus();
   const [footerVisible, setFooterVisible] = useState(true);
+  // Initialize offline data and mesh orchestrator globally
+  const { ready: idbReady } = useIDB();
 
   useEffect(() => {
     const handleOnline = () => {

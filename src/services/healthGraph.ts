@@ -4,16 +4,16 @@
 import type { HealthDoc } from '../lib/crdtHealthGraph';
 import {
   createHealthDoc,
-  addCondition,
-  addMedication,
-  addAllergy,
-  addEncounter,
-  updateCondition,
-  updateMedication,
-  deleteCondition,
-  deleteMedication,
-  deleteAllergy,
-  deleteEncounter,
+  addCondition as crdtAddCondition,
+  addMedication as crdtAddMedication,
+  addAllergy as crdtAddAllergy,
+  addEncounter as crdtAddEncounter,
+  updateCondition as crdtUpdateCondition,
+  updateMedication as crdtUpdateMedication,
+  deleteCondition as crdtDeleteCondition,
+  deleteMedication as crdtDeleteMedication,
+  deleteAllergy as crdtDeleteAllergy,
+  deleteEncounter as crdtDeleteEncounter,
   mergeDocs,
   serializeDoc,
   deserializeDoc,
@@ -131,7 +131,7 @@ export async function addCondition(
   notes: string
 ): Promise<void> {
   if (!currentDoc) await initHealthGraph();
-  currentDoc = addCondition(currentDoc, { name, diagnosedDate, notes });
+  currentDoc = crdtAddCondition(currentDoc, { name, diagnosedDate, notes });
   await persistCurrentDoc();
 }
 
@@ -143,7 +143,7 @@ export async function addMedication(
   endDate?: string
 ): Promise<void> {
   if (!currentDoc) await initHealthGraph();
-  currentDoc = addMedication(currentDoc, { name, dose, frequency, startDate, endDate });
+  currentDoc = crdtAddMedication(currentDoc, { name, dose, frequency, startDate, endDate });
   await persistCurrentDoc();
 }
 
@@ -153,7 +153,7 @@ export async function addAllergy(
   severity: 'mild' | 'moderate' | 'severe'
 ): Promise<void> {
   if (!currentDoc) await initHealthGraph();
-  currentDoc = addAllergy(currentDoc, { substance, reaction, severity });
+  currentDoc = crdtAddAllergy(currentDoc, { substance, reaction, severity });
   await persistCurrentDoc();
 }
 
@@ -164,7 +164,7 @@ export async function addEncounter(
   notes?: string
 ): Promise<void> {
   if (!currentDoc) await initHealthGraph();
-  currentDoc = addEncounter(currentDoc, { date, facilityName, reason, notes });
+  currentDoc = crdtAddEncounter(currentDoc, { date, facilityName, reason, notes });
   await persistCurrentDoc();
 }
 
@@ -173,7 +173,7 @@ export async function updateCondition(
   updates: Partial<{ name: string; diagnosedDate: string; notes: string }>
 ): Promise<void> {
   if (!currentDoc) await initHealthGraph();
-  currentDoc = updateCondition(currentDoc, id, updates);
+  currentDoc = crdtUpdateCondition(currentDoc, id, updates);
   await persistCurrentDoc();
 }
 
@@ -182,31 +182,31 @@ export async function updateMedication(
   updates: Partial<{ name: string; dose: string; frequency: string; startDate: string; endDate: string }>
 ): Promise<void> {
   if (!currentDoc) await initHealthGraph();
-  currentDoc = updateMedication(currentDoc, id, updates);
+  currentDoc = crdtUpdateMedication(currentDoc, id, updates);
   await persistCurrentDoc();
 }
 
 export async function removeCondition(id: string): Promise<void> {
   if (!currentDoc) await initHealthGraph();
-  currentDoc = deleteCondition(currentDoc, id);
+  currentDoc = crdtDeleteCondition(currentDoc, id);
   await persistCurrentDoc();
 }
 
 export async function removeMedication(id: string): Promise<void> {
   if (!currentDoc) await initHealthGraph();
-  currentDoc = deleteMedication(currentDoc, id);
+  currentDoc = crdtDeleteMedication(currentDoc, id);
   await persistCurrentDoc();
 }
 
 export async function removeAllergy(id: string): Promise<void> {
   if (!currentDoc) await initHealthGraph();
-  currentDoc = deleteAllergy(currentDoc, id);
+  currentDoc = crdtDeleteAllergy(currentDoc, id);
   await persistCurrentDoc();
 }
 
 export async function removeEncounter(id: string): Promise<void> {
   if (!currentDoc) await initHealthGraph();
-  currentDoc = deleteEncounter(currentDoc, id);
+  currentDoc = crdtDeleteEncounter(currentDoc, id);
   await persistCurrentDoc();
 }
 

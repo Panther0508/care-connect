@@ -6,6 +6,8 @@ import { getAllFacilities } from "../lib/idb";
 import { motion, AnimatePresence } from "framer-motion";
 import VitaAvatar from "../components/VitaAvatar";
 import { useStatus } from "../hooks/useStatus";
+import { getOutbreakAlerts } from "../services/meshOutbreakDetector";
+import MagnifyingLoader from "../components/MagnifyingLoader";
 
 const PLACEHOLDERS = [
   "Pediatric malaria care near Kano...",
@@ -23,6 +25,7 @@ export default function HomePage() {
   const [results, setResults] = useState<Facility[]>([]);
   const [placeholderIdx, setPlaceholderIdx] = useState(0);
   const [advancedPanelOpen, setAdvancedPanelOpen] = useState(false);
+  const [outbreakAlerts, setOutbreakAlerts] = useState<any[]>([]);
   const [advancedQuery, setAdvancedQuery] = useState({
     condition: "",
     location: "",
@@ -38,6 +41,31 @@ export default function HomePage() {
     }, 4000);
     return () => clearInterval(interval);
   }, []);
+
+   // Load outbreak alerts for display
+   useEffect(() => {
+     const loadAlerts = async () => {
+       try {
+         const alerts = await getOutbreakAlerts();
+         setOutbreakAlerts(alerts.filter((a: any) => a.status === 'active'));
+       } catch (e) { console.error('Failed to load outbreak alerts:', e); }
+     };
+     loadAlerts();
+     const interval = setInterval(loadAlerts, 30000);
+     return () => clearInterval(interval);
+   }, []);
+
+   // Real-time outbreak alert listener
+   useEffect(() => {
+     const handleOutbreakAlert = (event: Event) => {
+       const detail = (event as any).detail;
+       if (detail) {
+         setOutbreakAlerts(prev => [detail, ...prev]);
+       }
+     };
+     window.addEventListener('outbreakAlert', handleOutbreakAlert);
+     return () => window.removeEventListener('outbreakAlert', handleOutbreakAlert);
+   }, []);
 
   const handleSearch = async (overrideQuery?: string) => {
     const q = overrideQuery || query;
@@ -156,6 +184,27 @@ export default function HomePage() {
           </div>
         </motion.div>
 
+        {/* Outbreak Alerts (Requirement 7.5) */}
+        {outbreakAlerts.length > 0 && (
+          <div data-outbreak-alert className="glass-card p-4 border-l-4 border-rose-500 bg-rose-500/10">
+            <div className="flex items-center gap-2 text-rose-300 font-semibold mb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4v16h16V4"/>
+                <path d="M8 13h8"/>
+                <path d="M12 8v5"/>
+              </svg>
+              Active Health Alerts
+            </div>
+            <div className="space-y-1">
+              {outbreakAlerts.slice(0, 3).map((alert: any) => (
+                <div key={alert.id} className="text-sm text-slate-200">
+                  <span className="capitalize">{alert.term}</span> — {alert.count} cases in {alert.region}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <motion.div 
           initial={{ scale: 0.95, opacity: 0 }} 
           animate={{ scale: 1, opacity: 1 }} 
@@ -207,13 +256,13 @@ export default function HomePage() {
                 </svg>
               </button>
 
-              <AnimatePresence mode="wait">
-                {isSearching ? (
-                  <div className="w-10 h-10 flex items-center justify-center">
-                    <div className="w-5 h-5 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
-                  </div>
-                ) : (
-                  <motion.button 
+               <AnimatePresence mode="wait">
+                 {isSearching ? (
+                   <div className="w-10 h-10 flex items-center justify-center">
+                     <MagnifyingLoader size={20} />
+                   </div>
+                 ) : (
+                   <motion.button 
                     whileTap={{ scale: 0.95 }}
                     onClick={() => handleSearch()} 
                     className="btn-primary"

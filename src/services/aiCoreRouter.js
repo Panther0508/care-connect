@@ -172,7 +172,7 @@ let dbInstance = null;
 async function openDB() {
   if (dbInstance) return dbInstance;
 return new Promise((resolve, reject) => {
-      const req = indexedDB.open('vitachain', 9); // bump version - was 7, now 9
+      const req = indexedDB.open('vitachain', 9); // unified version v9
     req.onupgradeneeded = (e) => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains('gemmaCache')) db.createObjectStore('gemmaCache', { keyPath: 'id' });

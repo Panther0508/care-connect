@@ -5,6 +5,7 @@ import { checkForAlerts } from "../services/needWatcher";
 import { useSavedNeeds } from "../hooks/useSavedNeeds";
 import { getOutbreakAlerts } from "../services/meshOutbreakDetector";
 import { AlertTriangle, Building2 } from "lucide-react";
+import MagnifyingLoader from "../components/MagnifyingLoader";
 
 export default function AlertsPage() {
   const [facilityAlerts, setFacilityAlerts] = useState<any[]>([]);
@@ -48,8 +49,8 @@ export default function AlertsPage() {
       <section className="flex-1 flex flex-col z-10 space-y-6">
         <AnimatePresence mode="wait">
           {loading ? (
-            <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-10 text-slate-500 text-sm">
-              Loading...
+            <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-10">
+              <MagnifyingLoader size={32} />
             </motion.div>
           ) : totalAlerts === 0 ? (
             <motion.div

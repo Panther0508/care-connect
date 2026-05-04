@@ -13,11 +13,16 @@ const ASSETS_TO_CACHE = [
   '/avatars/vita-empty.png',
   '/avatars/vita-alert.png',
   '/avatars/vita-offline.png',
+  // TinyLlama ONNX model — GitHub Releases (uncomment when URL is live)
+  // 'https://github.com/Panther0508/care-connect/releases/download/v1.0.0-model/decoder_model_merged_quantized.onnx',
 ];
 
   // HuggingFace CDN URLs for models (@huggingface/transformers v4)
   const HF_CDN_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers';
-
+  
+  // VitaChain AI models hosted on GitHub Releases
+  const VITACHAIN_MODELS_URL = 'https://github.com/vitachain-ai/models/releases/download/v1.0';
+  
   // Model files we expect to cache
   const MODEL_PATTERNS = [
     (path) => path.includes('Xenova/TinyLlama-1.1B-Chat-v1.0'),
@@ -27,6 +32,10 @@ const ASSETS_TO_CACHE = [
     (path) => path.includes('Xenova/clip-vit-base-patch32'),
     (path) => path.includes('@huggingface/transformers'),
     (path) => path.includes('huggingface.co') && (path.includes('.json') || path.includes('.bin') || path.includes('.onnx') || path.includes('.msgpack')),
+    // VitaChain GitHub Releases models — user-requested host
+    (path) => path.includes('Panther0508/care-connect/releases/download'),
+    (path) => path.includes('decoder_model_merged_quantized.onnx'),
+    (path) => path.includes('tinyllama-1.1b-chat.onnx'),
     // Gemma 4 E2B browser model (stretch goal)
     (path) => path.includes('gemma-4-e2b-it') || path.includes('gemma-4'),
     (path) => path.includes('MediaPipe') && path.includes('gemma')
@@ -139,6 +148,27 @@ self.addEventListener('fetch', (event) => {
         } catch (err) {
           // Network failed, return cached if any
           return cached || new Response('Network error', { status: 503, headers: { 'Content-Type': 'text/plain' } });
+        }
+      })
+    );
+    return;
+  }
+
+  // GitHub Releases model files — cache for offline use
+  if (url.hostname.includes('github.com') && url.pathname.includes('/releases/')) {
+    event.respondWith(
+      caches.match(event.request).then(async (cached) => {
+        if (cached && cached.status === 200) return cached;
+        
+        try {
+          const networkResponse = await fetch(event.request);
+          if (networkResponse.status === 200) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+          }
+          return networkResponse;
+        } catch (err) {
+          return cached || new Response('Model download failed', { status: 503 });
         }
       })
     );

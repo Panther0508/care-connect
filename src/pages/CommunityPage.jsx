@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AlertTriangle, ChevronRight } from 'lucide-react';
 import useInfiniteScroll from '../hooks/useInfiniteScroll';
+import SkeletonCard from '../components/SkeletonCard';
 
 export function CommunityPage() {
   const [topics, setTopics] = useState([]);
@@ -66,9 +67,16 @@ export function CommunityPage() {
         animate={{ opacity: 1 }}
         className="min-h-screen bg-slate-900 p-4"
       >
-        <div className="flex flex-col items-center justify-center h-full">
-          <div className="animate-pulse rounded-full w-16 h-16 bg-teal-500/20 mb-4"></div>
-          <p className="text-slate-400">Loading community topics...</p>
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="space-y-2">
+            <div className="h-8 bg-slate-700 rounded w-1/3 skeleton-shimmer" />
+            <div className="h-4 bg-slate-700 rounded w-1/2 skeleton-shimmer" />
+          </div>
+          <div className="grid gap-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <SkeletonCard key={i} variant="github" lines={3} />
+            ))}
+          </div>
         </div>
       </motion.div>
     );

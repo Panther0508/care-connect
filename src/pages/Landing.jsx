@@ -214,7 +214,7 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="px-4 py-12 border-t border-slate-800 text-center">
+      <footer className="px-4 py-12 border-t border-[rgba(148,163,184,0.12)] bg-[rgba(30,41,59,0.65)] backdrop-blur-[20px] text-center">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-center gap-6 mb-8">
             <Link to="/terms" className="text-slate-400 hover:text-teal-400 transition-colors">

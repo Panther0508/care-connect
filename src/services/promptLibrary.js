@@ -338,7 +338,7 @@ export function getCHWQualityRules() {
  * @param {string} role - 'patient' | 'clinician' | 'chw'
  * @param {string} taskPrompt - Section 2: task-specific instruction
  * @param {object} context - { healthContext, emotionalState, threadContext, enrichment }
- * @returns {string} Full 4-section prompt
+ * @returns {{ structuredPrompt: string, extractedQuery: string }}
  */
 export function buildStructuredPrompt(role, taskPrompt, context = {}) {
   const {
@@ -383,7 +383,10 @@ ${formatSection}
 ─── SECTION 4: QUALITY RULES ───
 ${qualitySection}`;
 
-  return fullPrompt;
+  // Use raw taskPrompt as the extracted query for web search (user's actual question)
+  const extractedQuery = taskPrompt.trim().split('\n')[0].trim();
+
+  return { structuredPrompt: fullPrompt, extractedQuery };
 }
 
 /**

@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import QRScanner from '../components/QRScanner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { storeHealthData, getHealthData } from '../lib/idb';
 
 export default function ClinicianView() {
   const [scannedCredential, setScannedCredential] = useState(null);
@@ -11,6 +12,31 @@ export default function ClinicianView() {
   const handleScanSuccess = (validation) => {
     setScannedCredential(validation);
   };
+
+  // Global VC scan handler for tests
+  const handleVCScan = (credential) => {
+    setScannedCredential(credential);
+    // Store health data in IndexedDB for health graph
+    if (credential?.claims?.healthSummary) {
+      const stored = getHealthData() || { conditions: [], medications: [], allergies: [] };
+      const summary = credential.claims.healthSummary;
+      if (summary.conditions) {
+        stored.conditions = [...stored.conditions, ...summary.conditions];
+      }
+      if (summary.medications) {
+        stored.medications = [...stored.medications, ...summary.medications];
+      }
+      if (summary.allergies) {
+        stored.allergies = [...stored.allergies, ...summary.allergies];
+      }
+      storeHealthData(stored);
+    }
+  };
+
+  // Expose globally for cross-tab testing
+  if (typeof window !== 'undefined') {
+    window.handleVCScan = handleVCScan;
+  }
 
   const handleReset = () => {
     setScannedCredential(null);

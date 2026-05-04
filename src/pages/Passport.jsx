@@ -9,6 +9,7 @@ import QRCodeDisplay from '../components/QRCodeDisplay';
 import QRScanner from '../components/QRScanner';
 import { generatePassport, initPassport } from '../services/passport';
 import { getCurrentHealthState } from '../services/healthGraph';
+import MagnifyingLoader from '../components/MagnifyingLoader';
 
 export default function Passport() {
   const [step, setStep] = useState('select'); // 'select' | 'review' | 'qr' | 'scan'
@@ -60,13 +61,13 @@ export default function Passport() {
     alert(`Credential verified for ${validation.claims.healthSummary.specialist}`);
   };
 
-  if (!healthData) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+   if (!healthData) {
+     return (
+       <div className="flex items-center justify-center py-20">
+         <MagnifyingLoader size={32} />
+       </div>
+     );
+   }
 
   // Check if health data exists
   const hasHealthData = healthData.conditions.length > 0 || healthData.medications.length > 0;
@@ -123,12 +124,12 @@ export default function Passport() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
           >
-            {loading ? (
-              <div className="flex items-center justify-center py-20">
-                <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
-                <span className="ml-3 text-slate-300">Generating summary...</span>
-              </div>
-            ) : (
+             {loading ? (
+               <div className="flex items-center justify-center py-20">
+                 <MagnifyingLoader size={32} />
+                 <span className="ml-3 text-slate-300">Generating summary...</span>
+               </div>
+             ) : (
               <PreVisitSummary
                 specialist={specialist}
                 summaryText={summaryText}

@@ -17,12 +17,14 @@ import {
 } from "../services/medicalAI";
 import { checkInteractionsSimple } from "../services/medicationChecker";
 import { getCurrentHealthState } from "../services/healthGraph";
-import { getAllRxNorm, getAllVectors, retrieveContext } from "../lib/idb";
+import { getAllRxNorm, getAllVectors, retrieveContext, getAllChatHistory, storeChatEntry } from "../lib/idb";
 import { useStatus } from "../hooks/useStatus";
 import { getPersona, buildSystemPrompt, generateGreeting } from "../services/personaEngine";
 import { scanMessage, scanAIResponse } from "../services/crisisDetector";
 import { showCrisisPopup, dismissCrisisPopup, registerCrisisHandler } from "../services/crisisManager";
-import { X, Send, Mic, ArrowLeft, AlertCircle, CheckCircle, FileText, Image, Calendar, Pill, Globe, Volume2, VolumeX, Camera, Clock } from "lucide-react";
+import {
+  X, Send, Mic, ArrowLeft, AlertCircle, CheckCircle, FileText, Image, Calendar, Pill, Globe, Volume2, VolumeX, Camera, Clock, Plus
+} from "lucide-react";
 import { getUserProfile } from "../lib/idb";
 import { useRole } from "../hooks/auth/useRole";
 
@@ -97,6 +99,7 @@ export default function AIAssistant() {
   const [reminderForm, setReminderForm] = useState({ medicationName: "", time: "09:00", days: [0, 1, 2, 3, 4, 5, 6] });
   const [appointmentForm, setAppointmentForm] = useState({ specialistType: "general", date: "", time: "10:00", purpose: "" });
   const fileInputRef = useRef<any>(null);
+  const [showToolMenu, setShowToolMenu] = useState(false);
   const [crisisVisible, setCrisisVisible] = useState(false);
   const [crisisState, setCrisisState] = useState<{ riskLevel: string; matchedPattern?: string }>({ riskLevel: "LOW" });
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -104,6 +107,9 @@ export default function AIAssistant() {
   const [quotaRemaining, setQuotaRemaining] = useState(1500);
   const [modelType, setModelType] = useState<'gemma4-31b' | 'tinyllama-1.1b'>('gemma4-31b');
   const chatEndRef = useRef<HTMLDivElement>(null);
+  // Chat history sidebar
+  const [showHistory, setShowHistory] = useState(false);
+  const [chatHistory, setChatHistory] = useState<any[]>([]);
 
   // Update model status periodically
   useEffect(() => {
@@ -513,6 +519,34 @@ export default function AIAssistant() {
     setCrisisVisible(false);
   };
 
+  // Load chat history from IndexedDB
+  const loadChatHistory = async () => {
+    try {
+      const entries = await getAllChatHistory();
+      setChatHistory(entries);
+    } catch (err) {
+      console.error('Failed to load chat history:', err);
+    }
+  };
+
+  // Persist current conversation on unmount
+  useEffect(() => {
+    return () => {
+      if (messages.length > 0) {
+        const firstUserMsg = messages.find(m => m.role === 'user');
+        const title = firstUserMsg ? firstUserMsg.content.substring(0, 30) + (firstUserMsg.content.length > 30 ? '...' : '') : 'New Chat';
+        const lastMsg = messages[messages.length - 1];
+        const preview = lastMsg ? lastMsg.content.substring(0, 50) : '';
+        storeChatEntry({
+          title,
+          preview,
+          messages: messages,
+          createdAt: Date.now(),
+        }).catch(console.error);
+      }
+    };
+  }, [messages]);
+
   return (
     <div className="flex flex-col h-full min-h-screen bg-slate-900">
       <CrisisPopup
@@ -532,26 +566,34 @@ export default function AIAssistant() {
              <VitaAvatar state="online" size={44} />
              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-slate-900 bg-teal-500" />
            </div>
-           <div className="flex-1 min-w-0">
-             <div className="flex items-center gap-2">
-               <h1 className="text-white font-bold text-lg leading-tight">Vita AI</h1>
-               {activeModel && (
-                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                   activeModel === 'online' ? 'bg-teal-500/20 text-teal-400' :
-                   activeModel === 'cached' ? 'bg-amber-500/20 text-amber-400' :
-                   'bg-slate-500/20 text-slate-400'
-                 }`}>
-                   {activeModel === 'online' ? `Gemma-4` : activeModel === 'cached' ? 'Gemma-4 (cached)' : 'TinyLlama'}
-                 </span>
-               )}
-             </div>
-             <p className="text-slate-400 text-xs">
-               {activeModel === 'online' && `Gemma 4 31B | ${quotaRemaining.toLocaleString()}/1,500 today`}
-               {activeModel === 'cached' && `Gemma 4 (cached) | responses from ${new Date().toLocaleDateString()}`}
-               {activeModel === 'offline' && 'TinyLlama 1.1B | offline'}
-               {!activeModel && 'On-device medical assistant'}
-             </p>
-           </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h1 className="text-white font-bold text-lg leading-tight">Vita AI</h1>
+                {activeModel && (
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                    activeModel === 'online' ? 'bg-teal-500/20 text-teal-400' :
+                    activeModel === 'cached' ? 'bg-amber-500/20 text-amber-400' :
+                    'bg-slate-500/20 text-slate-400'
+                  }`}>
+                    {activeModel === 'online' ? `Gemma-4` : activeModel === 'cached' ? 'Gemma-4 (cached)' : 'TinyLlama'}
+                  </span>
+                )}
+              </div>
+              <p className="text-slate-400 text-xs">
+                {activeModel === 'online' && `Gemma 4 31B | ${quotaRemaining.toLocaleString()}/1,500 today`}
+                {activeModel === 'cached' && `Gemma 4 (cached) | responses from ${new Date().toLocaleDateString()}`}
+                {activeModel === 'offline' && 'TinyLlama 1.1B | offline'}
+                {!activeModel && 'On-device medical assistant'}
+              </p>
+            </div>
+            {/* Chat history button */}
+            <button
+              onClick={() => { setShowHistory(true); loadChatHistory(); }}
+              className="p-2.5 rounded-xl bg-slate-800/70 text-slate-400 hover:text-slate-300 transition-colors"
+              title="Chat History"
+            >
+              <Clock size={20} />
+            </button>
          </div>
        </header>
 
@@ -573,8 +615,8 @@ export default function AIAssistant() {
             const isSystem = msg.role === "system";
             const isAssistant = msg.role === "assistant";
             return (
-              <motion.div key={idx} initial={{ opacity: 0, y: 15, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-                <div className={`flex gap-3 max-w-[88%] ${isUser ? "flex-row-reverse" : "flex-row"}`}>
+              <motion.div key={idx} initial={{ opacity: 0, y: 15, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className={`flex ${isUser ? "justify-end" : "justify-start"}`} data-message-role={msg.role}>
+                <div className={`flex gap-3 max-w-full sm:max-w-[88%] ${isUser ? "flex-row-reverse" : "flex-row"}`}>
                   {!isUser && !isSystem && (
                     <div className="flex-shrink-0 mt-0.5">
                       <div className="w-8 h-8 rounded-xl bg-slate-800/70 border border-slate-700/50 flex items-center justify-center">
@@ -638,8 +680,25 @@ export default function AIAssistant() {
 
         {isProcessing && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-slate-800/70 border border-slate-700/50 flex items-center justify-center flex-shrink-0"><div className="w-4 h-4 border border-teal-400 border-t-transparent rounded-full animate-spin" /></div>
-            <div className="glass-card px-4 py-3"><div className="flex items-center gap-2 text-slate-400 text-sm"><span className="w-2 h-2 bg-teal-400 rounded-full animate-pulse" />Vita is thinking...</div></div>
+            <div className="w-8 h-8 rounded-xl bg-slate-800/70 border border-slate-700/50 flex items-center justify-center flex-shrink-0">
+              <div className="w-4 h-4 border border-teal-400 border-t-transparent rounded-full animate-spin" />
+            </div>
+            <div className="glass-card px-4 py-3">
+              <div className="text-slate-300 text-sm space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-teal-400 rounded-full animate-pulse" />
+                  <span>Searching your health records...</span>
+                </div>
+                <div className="flex items-center gap-2 opacity-70">
+                  <span className="w-2 h-2 bg-teal-400 rounded-full animate-pulse" style={{ animationDelay: '100ms' }} />
+                  <span>Consulting medical knowledge base...</span>
+                </div>
+                <div className="flex items-center gap-2 opacity-70">
+                  <span className="w-2 h-2 bg-teal-400 rounded-full animate-pulse" style={{ animationDelay: '200ms' }} />
+                  <span>Preparing your personalized answer</span>
+                </div>
+              </div>
+            </div>
           </motion.div>
         )}
         <div ref={chatEndRef} />
@@ -735,22 +794,72 @@ export default function AIAssistant() {
               placeholder="Ask me anything about your health records..."
               disabled={isProcessing || !modelLoaded}
               rows={1}
-              className="glass-input w-full py-2.5 pr-12 text-sm resize-none min-h-[44px] max-h-32"
+              className="glass-input w-full py-3 pr-12 text-sm resize-none min-h-[48px] max-h-32"
             />
             <button type="button" onClick={() => handleSend(currentInput)} disabled={isProcessing || !currentInput.trim() || !modelLoaded} className="absolute right-2 bottom-2 p-1.5 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               <Send size={16} />
             </button>
           </div>
-          <div className="flex gap-1">
-            <button type="button" onClick={() => setShowTranslation(!showTranslation)} className={`p-2.5 rounded-xl ${showTranslation ? "bg-teal-500/30 text-teal-300" : "bg-slate-800/70 text-slate-400 hover:text-slate-300"} transition-colors`} title="Translate"><Globe size={18} /></button>
-            <button type="button" onClick={() => setShowSpeech(!showSpeech)} className={`p-2.5 rounded-xl ${showSpeech ? "bg-teal-500/30 text-teal-300" : "bg-slate-800/70 text-slate-400 hover:text-slate-300"} transition-colors`} title="Voice input"><Mic size={18} /></button>
-            <button type="button" onClick={() => setShowImageUpload(!showImageUpload)} className={`p-2.5 rounded-xl ${showImageUpload ? "bg-teal-500/30 text-teal-300" : "bg-slate-800/70 text-slate-400 hover:text-slate-300"} transition-colors`} title="Upload image"><Camera size={18} /></button>
-            <button type="button" onClick={() => setShowReminders(!showReminders)} className={`p-2.5 rounded-xl ${showReminders ? "bg-teal-500/30 text-teal-300" : "bg-slate-800/70 text-slate-400 hover:text-slate-300"} transition-colors`} title="Medication reminder"><Pill size={18} /></button>
-            <button type="button" onClick={() => setShowAppointments(!showAppointments)} className={`p-2.5 rounded-xl ${showAppointments ? "bg-teal-500/30 text-teal-300" : "bg-slate-800/70 text-slate-400 hover:text-slate-300"} transition-colors`} title="Schedule appointment"><Calendar size={18} /></button>
+          <div className="flex gap-1 relative">
+            <button
+              type="button"
+              onClick={() => setShowToolMenu(!showToolMenu)}
+              className={`p-2.5 rounded-xl ${showToolMenu ? "bg-teal-500/30 text-teal-300" : "bg-slate-800/70 text-slate-400 hover:text-slate-300"} transition-colors`}
+              title="More tools"
+            >
+              <Plus size={18} />
+            </button>
+            {showToolMenu && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className="absolute bottom-full right-0 mb-2 w-12 bg-slate-800/90 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-lg z-50 overflow-hidden"
+              >
+                <div className="flex flex-col py-2">
+                  <button type="button" onClick={() => { setShowTranslation(!showTranslation); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Translate"><Globe size={18} /></button>
+                  <button type="button" onClick={() => { setShowSpeech(!showSpeech); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Voice input"><Mic size={18} /></button>
+                  <button type="button" onClick={() => { setShowImageUpload(!showImageUpload); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Upload image"><Camera size={18} /></button>
+                  <button type="button" onClick={() => { setShowReminders(!showReminders); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Medication reminder"><Pill size={18} /></button>
+                  <button type="button" onClick={() => { setShowAppointments(!showAppointments); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Schedule appointment"><Calendar size={18} /></button>
+                </div>
+              </motion.div>
+            )}
           </div>
         </form>
         <p className="text-[10px] text-slate-500 text-center mt-3 leading-relaxed">Vita provides general health information and does not substitute professional medical advice.</p>
       </div>
+
+      {/* Chat history overlay and drawer */}
+      {showHistory && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/50" onClick={() => setShowHistory(false)}></div>
+          <motion.div
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            className="fixed inset-y-0 left-0 z-50 w-80 max-w-[80vw] bg-slate-900/95 backdrop-blur-xl border-r border-white/10 flex flex-col"
+          >
+            <div className="p-4 border-b border-white/5 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-slate-100">Chat History</h2>
+              <button onClick={() => setShowHistory(false)} className="p-1 rounded hover:bg-white/5 text-slate-400">✕</button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {chatHistory.length === 0 ? (
+                <p className="text-slate-500 text-sm text-center">No past conversations.</p>
+              ) : (
+                chatHistory.map(entry => (
+                  <div key={entry.id} className="glass-card p-3 cursor-pointer hover:border-teal-500/30" onClick={() => { setShowHistory(false); }}>
+                    <div className="font-medium text-slate-200 text-sm">{entry.title}</div>
+                    <div className="text-xs text-slate-400 mt-1">{new Date(entry.createdAt).toLocaleDateString()}</div>
+                    <div className="text-xs text-slate-500 line-clamp-2 mt-2">{entry.preview}</div>
+                  </div>
+                ))
+              )}
+            </div>
+          </motion.div>
+        </>
+      )}
+
     </div>
   );
 }

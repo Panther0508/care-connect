@@ -12,39 +12,28 @@ export default function QRScanner({ onCredentialScanned, onBack }) {
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
   const scannerRef = useRef(null);
+  const fileInputRef = useRef(null);
 
-   useEffect(() => {
-     return () => {
-       // Cleanup on unmount: stop scanner if running
-       if (scannerRef.current) {
-         scannerRef.current.stop().catch(() => {});
-       }
-     };
-   }, []);
+  useEffect(() => {
+    return () => {
+      if (scannerRef.current) {
+        scannerRef.current.stop().catch(() => {});
+      }
+    };
+  }, []);
 
   const startScan = async () => {
     setError(null);
     setResult(null);
-
     const { Html5Qrcode } = await getScanner();
     const html5Qr = new Html5Qrcode(SCANNER_ID);
     scannerRef.current = html5Qr;
-
     try {
       await html5Qr.start(
         { facingMode: 'environment' },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0,
-        },
-        (decodedText) => {
-          // QR code detected
-          handleScanSuccess(decodedText);
-        },
-        () => {
-          // Scan failed - ignore
-        }
+        { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
+        (decodedText) => { handleScanSuccess(decodedText); },
+        () => {}
       );
       setScanning(true);
     } catch (err) {
@@ -55,10 +44,22 @@ export default function QRScanner({ onCredentialScanned, onBack }) {
 
   const stopScan = async () => {
     if (scannerRef.current) {
-      try {
-        await scannerRef.current.stop();
-        setScanning(false);
-      } catch (e) {}
+      try { await scannerRef.current.stop(); setScanning(false); } catch (e) {}
+    }
+  };
+
+  const handleFileScan = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setError(null);
+    setResult(null);
+    try {
+      const { Html5Qrcode } = await getScanner();
+      const html5Qr = new Html5Qrcode(SCANNER_ID);
+      const decoded = await html5Qr.scanFile(file, true);
+      handleScanSuccess(decoded);
+    } catch (err) {
+      setError('Could not read QR code from image. Try a clearer photo.');
     }
   };
 
@@ -98,11 +99,25 @@ export default function QRScanner({ onCredentialScanned, onBack }) {
         <div id={SCANNER_ID} className={`w-full ${scanning ? 'block' : 'hidden'}`} />
       </div>
 
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileScan}
+        className="hidden"
+      />
+
       {/* Controls */}
       {!scanning && !result && (
-        <button onClick={startScan} className="w-full btn-primary py-4">
-          Start Camera Scan
-        </button>
+        <>
+          <button onClick={startScan} className="w-full btn-primary py-4 mb-2">
+            Start Camera Scan
+          </button>
+          <button onClick={() => fileInputRef.current?.click()} className="w-full btn-secondary py-4">
+            Scan from Image
+          </button>
+        </>
       )}
 
       {scanning && (

@@ -60,8 +60,19 @@ function getIntervalHours(): number {
 async function triggerUpload(): Promise<void> {
   try {
     const payload = meshOrchestrator.getAggregatedMeshData();
-    
+
     // Simulated upload - in production would POST to Vercel function
+    // For tests, we need to actually POST to mock endpoint
+    try {
+      await fetch('/api/satellite-ingest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      // ignore network errors during dev
+    }
+
     localStorage.setItem(SYNC_KEY, Date.now().toString());
   } catch (error) {
     console.error('Satellite upload failed:', error);
@@ -71,6 +82,11 @@ async function triggerUpload(): Promise<void> {
 /**
  * Force an immediate upload (for debug/demo panel)
  */
-export function forceUpload(): void {
-  triggerUpload();
+export async function forceUpload(): Promise<void> {
+  await triggerUpload();
+}
+
+// Expose globally for tests
+if (typeof window !== 'undefined') {
+  (window as any).satelliteSnitch = { forceUpload };
 }

@@ -11,7 +11,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui"
   },
   "dependencies": {
     "@automerge/automerge": "^2.2.8",
@@ -20,6 +22,7 @@
     "@clerk/clerk-react": "^5.61.6",
     "@finegym/fitness-calc": "^1.0.1",
     "@huggingface/transformers": "^4.2.0",
+    "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-dialog": "^1.1.15",
     "@vercel/analytics": "^2.0.1",
     "@vercel/kv": "^1.0.1",
@@ -49,12 +52,14 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.3.1",
+    "@playwright/test": "^1.59.1",
     "@types/node": "^25.6.0",
     "@types/react": "^19.2.14",
     "@vitejs/plugin-react": "^4.3.0",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
+    "tailwindcss-fluid-type": "^2.0.7",
     "typescript": "^6.0.3",
     "vite": "^5.4.19",
     "vite-plugin-wasm": "^3.6.0"

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { biometricVerify, isBiometricAvailable } from '@/lib/biometric/biometricAuth';
 import { adminAuditLogger } from '@/services/adminAuditLogger';
 import { useAuth } from '@clerk/clerk-react';
+import MagnifyingLoader from './MagnifyingLoader';
 
 interface AdminBiometricLockProps {
   children: React.ReactNode;
@@ -210,16 +211,16 @@ export default function AdminBiometricLock({
   }, []);
 
   // Loading state during initial check
-  if (isChecking && !biometricVerified) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-slate-300">Verifying biometric authentication...</p>
-        </div>
-      </div>
-    );
-  }
+   if (isChecking && !biometricVerified) {
+     return (
+       <div className="min-h-screen flex items-center justify-center bg-slate-900">
+         <div className="flex flex-col items-center gap-4">
+           <MagnifyingLoader size={40} />
+           <p className="text-slate-300">Verifying biometric authentication...</p>
+         </div>
+       </div>
+     );
+   }
 
   // Calculate remaining time for warning
   const now = Date.now();

@@ -173,5 +173,9 @@ export default {
       },
     },
   },
-  plugins: [],
+   plugins: [
+     require('tailwindcss-fluid-type')({
+       settings: ['xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl', '4xl'],
+     }),
+   ],
 } satisfies Config;

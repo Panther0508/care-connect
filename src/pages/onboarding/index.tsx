@@ -12,6 +12,7 @@ import StepAdminMFA from './steps/StepAdminMFA';
 import StepBiometrics from './steps/StepBiometrics';
 import StepDone from './steps/StepDone';
 import { updateUserMetadata } from '../../services/auth/userMetadata';
+import MagnifyingLoader from '../../components/MagnifyingLoader';
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
@@ -176,13 +177,13 @@ export default function Onboarding() {
     navigate('/dashboard', { replace: true });
   };
 
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-900">
-        <div className="w-10 h-10 border-4 border-teal-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
+   if (!isLoaded) {
+     return (
+       <div className="min-h-screen flex items-center justify-center bg-slate-900">
+         <MagnifyingLoader size={40} />
+       </div>
+     );
+   }
 
   // If user is already onboarded (local fallback check), redirect to dashboard
   // This prevents re-entering onboarding after completion

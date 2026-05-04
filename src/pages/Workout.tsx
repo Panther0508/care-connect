@@ -4,6 +4,7 @@ import { Dumbbell, Plus, Trash2, Edit2, Save, X, Play, CheckCircle, Target, Flam
 import { getAllExercises, searchExercises, addWorkoutLog, getWorkoutLogsForUser, addExercise, storeExercises } from "../lib/idb";
 import { useStatus } from "../hooks/useStatus";
 import { format } from "date-fns";
+import MagnifyingLoader from "../components/MagnifyingLoader";
 
 export default function Workout() {
   const { showStatus, dismissStatus } = useStatus();
@@ -364,7 +365,7 @@ export default function Workout() {
                   >
                     {isLogging ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        <MagnifyingLoader size={16} />
                         Saving...
                       </>
                     ) : (

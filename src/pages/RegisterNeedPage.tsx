@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useSavedNeeds } from "../hooks/useSavedNeeds";
 import { motion, AnimatePresence } from "framer-motion";
 import VitaAvatar from "../components/VitaAvatar";
+import MagnifyingLoader from "../components/MagnifyingLoader";
 
 function RelativeTime({ timestamp }: { timestamp: number }) {
   const [timeText, setTimeText] = useState("");
@@ -110,7 +111,9 @@ export default function RegisterNeedPage() {
         </div>
         
         {loading ? (
-          <div className="text-center py-10 text-slate-500 text-sm">Loading...</div>
+          <div className="text-center py-10">
+            <MagnifyingLoader size={32} />
+          </div>
         ) : needs.length === 0 ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-10 text-slate-500 text-sm glass-card border-dashed flex flex-col items-center gap-4">
             <VitaAvatar state="empty" size={80} />

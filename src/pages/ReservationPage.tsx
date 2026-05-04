@@ -136,9 +136,14 @@ export default function ReservationPage() {
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  if (loading) {
-    return <div className="text-center py-10 text-slate-500 text-sm">Loading reservation details...</div>;
-  }
+   if (loading) {
+     return (
+       <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
+         <MagnifyingLoader size={48} />
+         <p className="text-slate-400 text-sm">Loading reservation details...</p>
+       </div>
+     );
+   }
 
   if (!facility) {
     return (

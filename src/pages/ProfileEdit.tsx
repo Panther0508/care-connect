@@ -6,6 +6,7 @@ import { useStatus } from '../hooks/useStatus';
 import { getUserProfile, storeUserProfile, syncProfileToClerk } from '../services/userProfile';
 import type { ProfileData } from '../services/userProfile';
 import { User, Phone, Calendar, Ruler, Weight, Activity, Globe, Camera, Check } from 'lucide-react';
+import MagnifyingLoader from '../components/MagnifyingLoader';
 
 const GENDER_OPTIONS = [
   { value: 'male', label: 'Male' },
@@ -373,7 +374,7 @@ export default function ProfileEdit() {
         >
           {saving ? (
             <span className="flex items-center justify-center gap-2">
-              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <MagnifyingLoader size={16} />
               Saving...
             </span>
           ) : (
