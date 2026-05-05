@@ -40,7 +40,7 @@ export function FacilityCard({ facility, index = 0 }: FacilityCardProps) {
           {facility.name}
           <div className="flex items-center gap-2">
             {/* Trust Score Badge */}
-            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter shadow-sm ${getTrustScoreColor(facility.trust_score)}`}>
+            <span className={`px-2.5 py-1 rounded-lg text-xs font-black uppercase tracking-tighter shadow-sm ${getTrustScoreColor(facility.trust_score)}`}>
               {facility.trust_score}% Trust
             </span>
             {/* Contradictions Indicator */}
@@ -103,7 +103,7 @@ export function FacilityCard({ facility, index = 0 }: FacilityCardProps) {
       {/* AI Extraction Insights (Citation) */}
       {facility.citation && (
         <div className="mb-4 p-4 bg-slate-900/40 rounded-xl border border-white/5 group-hover:border-teal-500/20 transition-colors">
-          <div className="flex items-center gap-2 mb-2 text-[10px] font-black text-teal-500 uppercase tracking-widest opacity-70">
+          <div className="flex items-center gap-2 mb-2 text-xs font-black text-teal-500 uppercase tracking-widest opacity-70">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
             </svg>

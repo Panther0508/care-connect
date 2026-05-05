@@ -22,7 +22,7 @@ import {
 } from "../services/medicalAI";
 import { checkInteractionsSimple } from "../services/medicationChecker";
 import { getCurrentHealthState } from "../services/healthGraph";
-import { getAllRxNorm, getAllVectors, retrieveContext, getAllChatHistory, storeChatEntry, deleteChatEntry } from "../lib/idb";
+import { getAllRxNorm, getAllVectors, retrieveContext, getAllChatHistory, storeChatEntry, deleteChatEntry, getSetting } from "../lib/idb";
 import { useStatus } from "../hooks/useStatus";
 import { getPersona, buildSystemPrompt, generateGreeting } from "../services/personaEngine";
 import { scanMessage, scanAIResponse } from "../services/crisisDetector";
@@ -97,6 +97,7 @@ export default function AIAssistant() {
   const { user } = useAuth();
   const { role: userRole } = useRole();
   const loaderToastRef = useRef<string | null>(null);
+  const lastSpokenIndex = useRef<number>(-1);
 
   // Emoji indicators for emotional state
   const EMOJI_MAP: Record<string, string> = {
@@ -117,6 +118,14 @@ export default function AIAssistant() {
   const [isRecording, setIsRecording] = useState(false);
   const [showTTS, setShowTTS] = useState(false);
   const [isSpeakingNow, setIsSpeakingNow] = useState(false);
+  const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
+
+  // Load voice mode setting
+  useEffect(() => {
+    getSetting<boolean>('voice_mode_enabled').then(value => {
+      if (value) setVoiceModeEnabled(true);
+    });
+  }, []);
   const [showReminders, setShowReminders] = useState(false);
   const [showAppointments, setShowAppointments] = useState(false);
   const [showImageUpload, setShowImageUpload] = useState(false);
@@ -174,10 +183,25 @@ export default function AIAssistant() {
      setDynamicQuickActions(actions);
    }, []);
 
-   // Update dynamic actions whenever messages change
-   useEffect(() => {
-     updateDynamicQuickActions(messages);
-   }, [messages, updateDynamicQuickActions]);
+    // Update dynamic actions whenever messages change
+    useEffect(() => {
+      updateDynamicQuickActions(messages);
+    }, [messages, updateDynamicQuickActions]);
+
+    // Auto-speak assistant responses when voice mode is enabled
+    useEffect(() => {
+      if (!voiceModeEnabled || messages.length === 0) return;
+      const lastIdx = messages.length - 1;
+      const lastMsg = messages[lastIdx];
+      if (lastMsg.role === 'assistant' && lastIdx !== lastSpokenIndex.current) {
+        speakText(lastMsg.content, { language: 'en' }).then(() => {
+          setIsSpeakingNow(true);
+        }).catch(err => {
+          console.error('TTS failed:', err);
+        });
+        lastSpokenIndex.current = lastIdx;
+      }
+    }, [messages, voiceModeEnabled]);
 
   const getLanguageName = (code: string) => {
     const lang = SUPPORTED_LANGUAGES.find(l => l.code === code);
@@ -445,10 +469,16 @@ const handleSpeechInput = async () => {
   };
 
    const handleSend = async (text: string) => {
-     if (!text.trim()) return;
+      if (!text.trim()) return;
 
-     // Mark that user has interacted (for future sessions)
-     localStorage.setItem('vita_ai_interacted', 'true');
+      // Cancel any ongoing speech
+      if (isSpeakingNow) {
+        cancelSpeech();
+        setIsSpeakingNow(false);
+      }
+
+      // Mark that user has interacted (for future sessions)
+      localStorage.setItem('vita_ai_interacted', 'true');
 
      // Lazy load model on first use if not loaded yet
      if (!modelLoaded) {

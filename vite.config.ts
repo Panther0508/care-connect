@@ -64,7 +64,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    include: ['html5-qrcode'],
+    include: ['html5-qrcode', 'tesseract.js'],
     exclude: ["@automerge/automerge"],
   },
 }));

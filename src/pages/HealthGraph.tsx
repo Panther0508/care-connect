@@ -1,7 +1,7 @@
 // src/pages/HealthGraph.tsx
 // Personal Health Graph page – encrypted CRDT health records
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import VitaAvatar from "../components/VitaAvatar";
 import MagnifyingLoader from "../components/MagnifyingLoader";
@@ -19,7 +19,7 @@ import {
   getCurrentHealthState,
 } from "../services/healthGraph";
 import { getMedicationByBarcode } from "../services/medicationLookup";
-import { ChevronRight, Heart, ScanBarcode, Pill, AlertTriangle, Calendar, Plus, X } from 'lucide-react';
+import { ChevronRight, Heart, ScanBarcode, Pill, AlertTriangle, Calendar, Plus, X, Upload, FileText, CheckCircle } from 'lucide-react';
 import type { Condition, Medication, Allergy, Encounter } from "../lib/crdtHealthGraph";
 
 type ModalType = 'condition' | 'medication' | 'allergy' | 'encounter' | null;
@@ -49,6 +49,14 @@ export default function HealthGraph() {
     encounterReason: "",
     encounterNotes: "",
   });
+
+  // OCR state
+  const [ocrImage, setOcrImage] = useState<string | null>(null);
+  const [ocrText, setOcrText] = useState<string>("");
+  const [ocrExplanation, setOcrExplanation] = useState<string>("");
+  const [ocrStatus, setOcrStatus] = useState<"idle" | "processing" | "done" | "error">("idle");
+  const [ocrError, setOcrError] = useState<string>("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const refreshData = () => {
     const state = getCurrentHealthState();
@@ -155,6 +163,58 @@ export default function HealthGraph() {
     refreshData();
   };
 
+  // OCR handlers
+   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+     const file = e.target.files?.[0];
+     if (!file) return;
+
+     setOcrStatus("processing");
+     setOcrError("");
+     setOcrText("");
+     setOcrExplanation("");
+     setOcrImage(URL.createObjectURL(file));
+
+     try {
+       const TesseractGlobal = (window as any).Tesseract;
+       if (!TesseractGlobal) {
+         throw new Error("OCR engine not loaded. Please ensure you have an internet connection to load Tesseract.");
+       }
+       const { data: { text } } = await TesseractGlobal.recognize(file, 'eng', {
+         logger: m => console.log(m)
+       });
+       setOcrText(text);
+
+      // Generate plain-language explanation using medical AI
+      try {
+        const { askMedicalQuestion } = await import('../services/medicalAI');
+        const healthState = getCurrentHealthState();
+        const prompt = `I have extracted the following text from a medical lab report or prescription:\n\n"${text}"\n\nPlease provide a clear, plain-language explanation of what this text means for the patient. If you can identify specific lab values, medications, or diagnoses, explain them in simple terms and indicate whether they appear normal (green), borderline (amber), or concerning (red). Keep the explanation concise and actionable.`;
+        const explanation = await askMedicalQuestion(healthState, prompt);
+        setOcrExplanation(explanation);
+      } catch (aiErr) {
+        console.error('AI explanation failed:', aiErr);
+        setOcrExplanation("Could not generate AI explanation. Please consult your healthcare provider.");
+      }
+
+      setOcrStatus("done");
+    } catch (err: any) {
+      console.error('OCR failed:', err);
+      setOcrError(err.message || 'Failed to extract text from image');
+      setOcrStatus("error");
+    }
+  };
+
+  const clearOcr = () => {
+    setOcrImage(null);
+    setOcrText("");
+    setOcrExplanation("");
+    setOcrStatus("idle");
+    setOcrError("");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const renderSection = (
     title: string,
     icon: React.ReactNode,
@@ -232,6 +292,95 @@ export default function HealthGraph() {
           </p>
         </div>
       </header>
+
+      {/* OCR Section: Upload Lab Report */}
+      <section className="glass-card p-5 rounded-2xl">
+        <div className="flex items-center gap-2 mb-4">
+          <FileText className="w-5 h-5 text-teal-400" />
+          <h2 className="text-lg font-semibold text-slate-100">Explain Lab Results</h2>
+        </div>
+        <p className="text-sm text-slate-400 mb-4">
+          Upload a photo or screenshot of your lab report. We'll extract the text and provide a plain-language explanation with color-coded status.
+        </p>
+
+        {ocrStatus === "idle" && !ocrImage && (
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full py-8 border-2 border-dashed border-slate-600/50 rounded-2xl flex flex-col items-center gap-2 text-slate-400 hover:border-teal-500/50 hover:text-teal-300 transition-colors"
+          >
+            <Upload className="w-8 h-8" />
+            <span className="text-sm font-medium">Tap to upload lab report image</span>
+            <span className="text-xs text-slate-500">Supports JPG, PNG, PDF (via image)</span>
+          </button>
+        )}
+
+        {ocrStatus === "processing" && (
+          <div className="flex flex-col items-center gap-4 py-8">
+            <MagnifyingLoader size={40} />
+            <p className="text-slate-300 text-sm">Extracting text from image...</p>
+            <p className="text-xs text-slate-500">This may take a few seconds</p>
+          </div>
+        )}
+
+        {ocrStatus === "error" && (
+          <div className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl text-center">
+            <p className="text-rose-300 text-sm mb-2">{ocrError}</p>
+            <button onClick={clearOcr} className="text-xs text-teal-400 underline">Try again</button>
+          </div>
+        )}
+
+        {ocrStatus === "done" && ocrImage && (
+          <div className="space-y-4">
+            <div className="flex items-start gap-4">
+              <img src={ocrImage} alt="Lab report" className="w-32 h-32 object-cover rounded-xl border border-slate-700/50" />
+              <div className="flex-1">
+                <p className="text-xs text-slate-400 mb-1">Extracted text:</p>
+                <pre className="text-sm text-slate-300 bg-slate-900/30 p-3 rounded-lg overflow-x-auto max-h-40 overflow-y-auto whitespace-pre-wrap">
+                  {ocrText || "(No text detected)"}
+                </pre>
+              </div>
+            </div>
+
+            {ocrExplanation && (
+              <div>
+                <p className="text-xs text-slate-400 mb-2 flex items-center gap-1">
+                  <CheckCircle className="w-3 h-3 text-teal-400" />
+                  Vita AI Explanation
+                </p>
+                <div className="p-4 bg-slate-800/40 rounded-xl border border-slate-700/30 text-sm text-slate-300 leading-relaxed">
+                  {ocrExplanation}
+                </div>
+                <p className="text-[10px] text-slate-500 mt-2 italic">
+                  AI-generated explanation for informational purposes only. Always verify with your healthcare provider.
+                </p>
+              </div>
+            )}
+
+            <div className="flex gap-2">
+              <button
+                onClick={clearOcr}
+              className="flex-1 py-2 bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 rounded-xl text-sm transition-colors"
+              >
+                Clear & Start Over
+              </button>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="flex-1 py-2 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 rounded-xl text-sm transition-colors"
+              >
+                Upload Another
+              </button>
+            </div>
+          </div>
+        )}
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+      </section>
 
       {renderSection(
         "Conditions",

@@ -1,6 +1,6 @@
 export function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("vitachain", 11); // Bumped to v11 for settings, appState, supportTickets stores
+    const request = indexedDB.open("vitachain", 12); // Bumped to v12 for auditLogs, evaluations, trainingRecords stores
 
     request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
       const db = (event.target as IDBOpenDBRequest).result;
@@ -206,16 +206,31 @@ export function openDB(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains("referralData")) {
         db.createObjectStore("referralData", { keyPath: "userId" });
       }
-      if (!db.objectStoreNames.contains("referrals")) {
-        db.createObjectStore("referrals", { keyPath: "id", autoIncrement: true });
-      }
-       if (!db.objectStoreNames.contains("contactSubmissions")) {
-         db.createObjectStore("contactSubmissions", { keyPath: "id", autoIncrement: true });
+if (!db.objectStoreNames.contains("referrals")) {
+         db.createObjectStore("referrals", { keyPath: "id", autoIncrement: true });
        }
-       if (!db.objectStoreNames.contains("supportTickets")) {
-         db.createObjectStore("supportTickets", { keyPath: "id", autoIncrement: true });
-       }
-     };
+        if (!db.objectStoreNames.contains("contactSubmissions")) {
+          db.createObjectStore("contactSubmissions", { keyPath: "id", autoIncrement: true });
+        }
+        if (!db.objectStoreNames.contains("supportTickets")) {
+          db.createObjectStore("supportTickets", { keyPath: "id", autoIncrement: true });
+        }
+
+        // Audit Logs store
+        if (!db.objectStoreNames.contains("auditLogs")) {
+          db.createObjectStore("auditLogs", { keyPath: "id", autoIncrement: true });
+        }
+
+        // Evaluations store
+        if (!db.objectStoreNames.contains("evaluations")) {
+          db.createObjectStore("evaluations", { keyPath: "id", autoIncrement: true });
+        }
+
+        // Training records store
+        if (!db.objectStoreNames.contains("trainingRecords")) {
+          db.createObjectStore("trainingRecords", { keyPath: "id", autoIncrement: true });
+        }
+      };
 
 
     request.onsuccess = (event: Event) => {
@@ -1758,6 +1773,206 @@ export async function updateSupportTicket(id: number, updates: Partial<SupportTi
       transaction.onerror = () => reject(transaction.error);
     };
     getRequest.onerror = () => reject(getRequest.error);
+  });
+}
+
+// ==================== Audit Logs ====================
+
+export interface AuditLogEvent {
+  id?: number;
+  timestamp: number;
+  userId: string;
+  userName?: string;
+  userRole: string;
+  action: string;
+  resource: string;
+  resourceId?: string;
+  ipAddress?: string;
+  success: boolean;
+  metadata?: Record<string, any>;
+}
+
+export async function storeAuditLog(event: Omit<AuditLogEvent, 'id'>): Promise<number> {
+  const db = await openDB();
+  return new Promise<number>((resolve, reject) => {
+    const transaction = db.transaction("auditLogs", "readwrite");
+    const store = transaction.objectStore("auditLogs");
+    const request = store.add({ ...event, timestamp: event.timestamp || Date.now() });
+    request.onsuccess = () => resolve(request.result as number);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function getAllAuditLogs(): Promise<AuditLogEvent[]> {
+  const db = await openDB();
+  return new Promise<AuditLogEvent[]>((resolve, reject) => {
+    const transaction = db.transaction("auditLogs", "readonly");
+    const store = transaction.objectStore("auditLogs");
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const all = request.result as AuditLogEvent[];
+      all.sort((a, b) => b.timestamp - a.timestamp);
+      resolve(all);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function getFilteredAuditLogs(filters?: {
+  userRole?: string;
+  action?: string;
+  startDate?: number;
+  endDate?: number;
+}): Promise<AuditLogEvent[]> {
+  const db = await openDB();
+  return new Promise<AuditLogEvent[]>((resolve, reject) => {
+    const transaction = db.transaction("auditLogs", "readonly");
+    const store = transaction.objectStore("auditLogs");
+    const request = store.getAll();
+    request.onsuccess = () => {
+      let all = request.result as AuditLogEvent[];
+      
+      if (filters?.userRole) {
+        all = all.filter(e => e.userRole === filters.userRole);
+      }
+      if (filters?.action) {
+        all = all.filter(e => e.action === filters.action);
+      }
+      if (filters?.startDate) {
+        all = all.filter(e => e.timestamp >= filters.startDate!);
+      }
+      if (filters?.endDate) {
+        all = all.filter(e => e.timestamp <= filters.endDate!);
+      }
+      
+      all.sort((a, b) => b.timestamp - a.timestamp);
+      resolve(all);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// ==================== Evaluations ====================
+
+export interface Evaluation {
+  id?: number;
+  userId: string;
+  userName: string;
+  evaluatorId: string;
+  evaluatorName: string;
+  date: number;
+  ratings: {
+    communication: number;
+    clinicalSkills: number;
+    professionalism: number;
+    efficiency: number;
+  };
+  comments: string;
+  goals: string;
+  overallScore: number;
+}
+
+export async function storeEvaluation(evaluation: Omit<Evaluation, 'id'>): Promise<number> {
+  const db = await openDB();
+  return new Promise<number>((resolve, reject) => {
+    const transaction = db.transaction("evaluations", "readwrite");
+    const store = transaction.objectStore("evaluations");
+    const request = store.add({ ...evaluation, date: evaluation.date || Date.now() });
+    request.onsuccess = () => resolve(request.result as number);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function getAllEvaluations(): Promise<Evaluation[]> {
+  const db = await openDB();
+  return new Promise<Evaluation[]>((resolve, reject) => {
+    const transaction = db.transaction("evaluations", "readonly");
+    const store = transaction.objectStore("evaluations");
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const all = request.result as Evaluation[];
+      all.sort((a, b) => b.date - a.date);
+      resolve(all);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function getEvaluationsForUser(userId: string): Promise<Evaluation[]> {
+  const db = await openDB();
+  return new Promise<Evaluation[]>((resolve, reject) => {
+    const transaction = db.transaction("evaluations", "readonly");
+    const store = transaction.objectStore("evaluations");
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const all = request.result as Evaluation[];
+      const userEvals = all.filter(e => e.userId === userId);
+      userEvals.sort((a, b) => b.date - a.date);
+      resolve(userEvals);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// ==================== Training Records ====================
+
+export interface TrainingModule {
+  id: string;
+  title: string;
+  description: string;
+  duration: number;
+  category: string;
+  content?: string;
+  videoUrl?: string;
+}
+
+export interface TrainingRecord {
+  id?: number;
+  userId: string;
+  moduleId: string;
+  completed: boolean;
+  completedAt?: number;
+  assignedBy?: string;
+}
+
+export async function storeTrainingRecord(record: Omit<TrainingRecord, 'id'>): Promise<number> {
+  const db = await openDB();
+  return new Promise<number>((resolve, reject) => {
+    const transaction = db.transaction("trainingRecords", "readwrite");
+    const store = transaction.objectStore("trainingRecords");
+    const request = store.add(record);
+    request.onsuccess = () => resolve(request.result as number);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function getTrainingRecordsForUser(userId: string): Promise<TrainingRecord[]> {
+  const db = await openDB();
+  return new Promise<TrainingRecord[]>((resolve, reject) => {
+    const transaction = db.transaction("trainingRecords", "readonly");
+    const store = transaction.objectStore("trainingRecords");
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const all = request.result as TrainingRecord[];
+      const userRecords = all.filter(r => r.userId === userId);
+      resolve(userRecords);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function getTrainingRecord(userId: string, moduleId: string): Promise<TrainingRecord | null> {
+  const db = await openDB();
+  return new Promise<TrainingRecord | null>((resolve, reject) => {
+    const transaction = db.transaction("trainingRecords", "readonly");
+    const store = transaction.objectStore("trainingRecords");
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const all = request.result as TrainingRecord[];
+      const record = all.find(r => r.userId === userId && r.moduleId === moduleId);
+      resolve(record || null);
+    };
+    request.onerror = () => reject(request.error);
   });
 }
 

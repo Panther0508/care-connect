@@ -52,3 +52,4 @@
 - **Leaflet.js**
 - **read-excel-file**
 - **healthicons** (CC0)
+- **Tesseract.js** (Apache 2.0) — OCR for lab report image text extraction

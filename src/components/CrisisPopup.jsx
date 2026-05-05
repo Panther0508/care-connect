@@ -53,7 +53,7 @@ export default function CrisisPopup({ visible, riskLevel, matchedPattern, onDism
               }}
               className="absolute -top-4 left-1/2 transform -translate-x-1/2 w-24 h-24 rounded-full"
               style={{
-                border: '3px solid rgba(234, 179, 8, 0.5)',
+                border: '3px solid rgba(239, 68, 68, 0.5)',
                 borderTopColor: 'transparent'
               }}
             />
@@ -67,7 +67,7 @@ export default function CrisisPopup({ visible, riskLevel, matchedPattern, onDism
                 loading="lazy"
                 onError={(e) => { e.target.src = '/avatars/default.png'; }}
                 style={{
-                  filter: 'drop-shadow(0 0 20px rgba(234, 179, 8, 0.4))'
+                  filter: 'drop-shadow(0 0 20px rgba(239, 68, 68, 0.4))'
                 }}
               />
             </div>
@@ -75,64 +75,37 @@ export default function CrisisPopup({ visible, riskLevel, matchedPattern, onDism
             {/* Content */}
             <div className="relative z-10">
               <h2 className="text-2xl font-bold text-slate-100 mb-3">
-                We're here for you
+                Emergency Help
               </h2>
               <p className="text-slate-300 text-sm leading-relaxed mb-6">
-                It looks like you're going through something really difficult right now. You are not alone. Please reach out — there are people who want to help.
+                If you are in crisis or having thoughts of harming yourself, tap the button below to call emergency services immediately.
               </p>
 
-              {/* Action Buttons */}
-              <div className="space-y-3 mb-4">
-                {/* Call Emergency Services */}
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => {
-                    window.location.href = `tel:${emergencyNumbers.emergency}`;
-                  }}
-                  className="w-full py-4 px-6 rounded-xl font-medium text-white text-sm transition-all flex items-center justify-center gap-2"
-                  style={{
-                    background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-                    boxShadow: '0 4px 20px rgba(239, 68, 68, 0.3)'
-                  }}
-                >
-                  <span role="img" aria-label="phone">📞</span>
-                  Call Emergency Services {emergencyNumbers.emergency}
-                </motion.button>
-
-                {/* Crisis Counselor */}
-                {emergencyNumbers.crisisHotline && (
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => {
-                      if (/^\d/.test(emergencyNumbers.crisisHotline)) {
-                        window.location.href = `tel:${emergencyNumbers.crisisHotline.replace(/\D/g, '')}`;
-                      } else if (emergencyNumbers.crisisHotline.startsWith('http')) {
-                        window.open(emergencyNumbers.crisisHotline, '_blank');
-                      } else {
-                        window.open(`tel:${emergencyNumbers.crisisHotline.replace(/[^\d+]/g, '')}`, '_blank');
-                      }
-                    }}
-                    className="w-full py-4 px-6 rounded-xl font-medium text-white text-sm transition-all flex items-center justify-center gap-2"
-                    style={{
-                      background: 'linear-gradient(135deg, #d97706, #b45309)',
-                      boxShadow: '0 4px 20px rgba(217, 119, 6, 0.3)'
-                    }}
-                  >
-                    <span role="img" aria-label="heart">💚</span>
-                    Talk to a Crisis Counselor
-                  </motion.button>
-                )}
-
-                {/* Emergency Contact */}
-                <EmergencyContactButton userProfile={userProfile} />
-              </div>
+              {/* Single large emergency button */}
+              <motion.button
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
+                onClick={() => {
+                  window.location.href = `tel:${emergencyNumbers.emergency}`;
+                }}
+                className="w-full py-6 px-6 rounded-2xl font-bold text-white text-base transition-all flex items-center justify-center gap-3 shadow-lg"
+                style={{
+                  background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                  boxShadow: '0 8px 32px rgba(239, 68, 68, 0.4)',
+                  minHeight: '120px'
+                }}
+              >
+                <span role="img" aria-label="phone" className="text-3xl">📞</span>
+                <div className="flex flex-col">
+                  <span>Call Emergency Services</span>
+                  <span className="text-lg font-mono">{emergencyNumbers.emergency}</span>
+                </div>
+              </motion.button>
 
               {/* Close link */}
               <button
                 onClick={onDismiss}
-                className="text-slate-400 text-xs underline hover:text-slate-300 transition-colors"
+                className="text-slate-400 text-xs underline hover:text-slate-300 transition-colors mt-6"
               >
                 Continue to App
               </button>

@@ -182,9 +182,9 @@ export default function HydrationPage() {
                   }`}
                   style={{ height: `${barHeight}%` }}
                 />
-                <span className="text-[10px] text-slate-500">
-                  {d.toLocaleDateString("en-US", { weekday: "narrow" })}
-                </span>
+                 <span className="text-xs text-slate-500">
+                   {d.toLocaleDateString("en-US", { weekday: "narrow" })}
+                 </span>
               </div>
             );
           })}

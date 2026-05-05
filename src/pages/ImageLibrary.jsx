@@ -64,7 +64,7 @@ const ImageLibrary = () => {
               />
             </div>
             <div className="p-2 border-t border-slate-700/50 bg-slate-900/40">
-              <p className="text-[10px] font-medium text-slate-300 truncate text-center capitalize">{asset.title}</p>
+               <p className="text-xs font-medium text-slate-300 truncate text-center capitalize">{asset.title}</p>
             </div>
           </GlassCard>
         ))}

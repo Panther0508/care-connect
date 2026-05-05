@@ -24,7 +24,7 @@
 
 ## Slide 5: Offline AI Engine
 - **Fully Offline:** TinyLlama 1.1B runs locally via ONNX Runtime Web.
-- **Online Power:** Gemma 4 31B (1,500 free calls/day via Google AI Studio) for deep clinical reasoning.
+- **Online Power:** Gemma 4 31B (1,500 calls/day via Google AI Studio) for deep clinical reasoning.
 - **Smart Caching:** High-quality Gemma responses are cached locally to teach the offline models.
 
 ## Slide 6: Data Sovereignty
@@ -45,6 +45,13 @@
 - **Abuja Innovation Challenge:** Solves a localized infrastructure problem with high-tech PWA deployment and strict data sovereignty.
 - **Squad Hackathon 3.0:** Uses Squad payment rails to monetize premium health intelligence seamlessly.
 
-## Slide 10: Roadmap & Ask
+## Slide 10: Zero-Cost Feature Set (Phase 3)
+- **Lab Report OCR** — Tesseract.js integration: extract text from images and get AI explanations.
+- **Guest Mode PIN** — Simple PIN gate protects health data on shared devices.
+- **Voice-Only Mode** — Hands-free AI chat via Whisper-tiny STT and TTS.
+- **Simplified CrisisPopup** — One-touch emergency dialing from any screen.
+- **Glassmorphism UI Rebuild** — Consistent design system across all 29+ new pages.
+
+## Slide 11: Roadmap & Ask
 - **Current Ask:** [Specify prize money / incubator goal]
 - **Future Plans:** White-label deployment for state health ministries, satellite sync integration, and DHIS2 data pipelines.

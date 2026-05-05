@@ -7,10 +7,10 @@ import { changePassphrase } from '../services/healthGraph';
 import Referral from './Referral';
 import Support from './Support';
 import LanguageSelector from '../components/LanguageSelector';
-import { Settings as SettingsIcon, User, Lock, Bell, CreditCard, Download, Trash2, Globe } from 'lucide-react';
+import { Settings as SettingsIcon, User, Lock, Bell, CreditCard, Download, Trash2, Globe, Mic } from 'lucide-react';
 import { getSetting, storeSetting } from '../lib/idb';
 
-type Tab = 'profile' | 'security' | 'notifications' | 'subscription' | 'export' | 'delete' | 'referral' | 'support' | 'language';
+type Tab = 'profile' | 'security' | 'notifications' | 'subscription' | 'export' | 'delete' | 'referral' | 'support' | 'language' | 'voice';
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -25,6 +25,7 @@ export default function Settings() {
     { id: 'referral', label: 'Referral', icon: SettingsIcon },
     { id: 'support', label: 'Help & Support', icon: SettingsIcon },
     { id: 'language', label: 'Language', icon: Globe },
+    { id: 'voice', label: 'Voice Mode', icon: Mic },
     { id: 'export', label: 'Export', icon: Download },
     { id: 'delete', label: 'Delete', icon: Trash2 },
   ];
@@ -187,10 +188,23 @@ function SecurityTab() {
   const [changing, setChanging] = useState(false);
   const [biometricEnabled, setBiometricEnabled] = useState(false);
 
-  // Load biometric setting from IDB on mount
+  // Guest Mode state
+  const [guestModeEnabled, setGuestModeEnabled] = useState(false);
+  const [guestPin, setGuestPin] = useState('');
+  const [guestPinConfirm, setGuestPinConfirm] = useState('');
+  const [savingGuest, setSavingGuest] = useState(false);
+  const [hasGuestPin, setHasGuestPin] = useState(false);
+
+  // Load settings from IDB on mount
   useEffect(() => {
     getSetting<boolean>('biometric_enabled').then(value => {
       if (value !== null) setBiometricEnabled(value);
+    });
+    getSetting<boolean>('guest_mode_enabled').then(value => {
+      if (value) setGuestModeEnabled(value);
+    });
+    getSetting<string>('guest_pin_hash').then(value => {
+      if (value) setHasGuestPin(true);
     });
   }, []);
 
@@ -201,7 +215,79 @@ function SecurityTab() {
     showStatus('success', newVal ? 'Biometric Enabled' : 'Biometric Disabled', '');
   };
 
-  return (
+  // Hash PIN using SHA-256
+  const hashPin = async (pin: string): Promise<string> => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(pin);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  };
+
+  const saveGuestPin = async () => {
+    if (guestPin.length < 4) {
+      showStatus('error', 'PIN Too Short', 'Use at least 4 digits');
+      return;
+    }
+    if (guestPin !== guestPinConfirm) {
+      showStatus('error', 'PINs Mismatch', 'Please ensure both PINs match');
+      return;
+    }
+    setSavingGuest(true);
+    try {
+      const pinHash = await hashPin(guestPin);
+      await storeSetting('guest_mode_enabled', true);
+      await storeSetting('guest_pin_hash', pinHash);
+      setGuestModeEnabled(true);
+      setHasGuestPin(true);
+      setGuestPin('');
+      setGuestPinConfirm('');
+      showStatus('success', 'Guest Mode Enabled', 'Your PIN has been set. You will need it to access the app.');
+    } catch (err) {
+      console.error('Failed to save guest PIN:', err);
+      showStatus('error', 'Error', 'Could not save PIN');
+    } finally {
+      setSavingGuest(false);
+    }
+  };
+
+   const disableGuestMode = async () => {
+     setSavingGuest(true);
+     try {
+       await storeSetting('guest_mode_enabled', false);
+       setGuestModeEnabled(false);
+       showStatus('success', 'Guest Mode Disabled', 'PIN requirement removed');
+     } catch (err) {
+       console.error('Failed to disable guest mode:', err);
+     } finally {
+       setSavingGuest(false);
+     }
+   };
+
+   const handlePassphraseChange = async () => {
+     if (!passCurrent || !passNew || !passConfirm) {
+       showStatus('error', 'Missing Fields', 'Please fill in all passphrase fields');
+       return;
+     }
+     if (passNew !== passConfirm) {
+       showStatus('error', 'Mismatch', 'New passphrase and confirmation do not match');
+       return;
+     }
+     setChanging(true);
+     try {
+       await changePassphrase(passCurrent, passNew);
+       showStatus('success', 'Passphrase Changed', 'Your health data encryption passphrase has been updated');
+       setPassCurrent('');
+       setPassNew('');
+       setPassConfirm('');
+     } catch (err: any) {
+       showStatus('error', 'Change Failed', err?.message || 'Could not change passphrase');
+     } finally {
+       setChanging(false);
+     }
+   };
+
+   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-white">Security</h3>
 
@@ -262,6 +348,87 @@ function SecurityTab() {
         </div>
         <p className="text-xs text-slate-500 mt-2">
           {biometricEnabled ? 'Biometric unlock is active. App will require auth after 15 minutes of inactivity.' : 'Enable for faster, secure access.'}
+        </p>
+      </div>
+
+      {/* Guest Mode PIN Gate */}
+      <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/30">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h4 className="font-medium text-white">Guest Mode PIN Protection</h4>
+            <p className="text-xs text-slate-400">Require PIN to access the app</p>
+          </div>
+          <button
+            onClick={() => {
+              if (guestModeEnabled) {
+                disableGuestMode();
+              } else {
+                setGuestPin('');
+                setGuestPinConfirm('');
+                setGuestModeEnabled(true);
+              }
+            }}
+            disabled={savingGuest}
+            className={`w-12 h-7 rounded-full p-1 transition-colors ${guestModeEnabled ? 'bg-teal-600' : 'bg-slate-600'} disabled:opacity-50`}
+          >
+            <div className={`w-5 h-5 rounded-full bg-white transition-transform ${guestModeEnabled ? 'translate-x-6' : ''}`} />
+          </button>
+        </div>
+        {guestModeEnabled && (
+          <div className="space-y-3">
+            {!hasGuestPin ? (
+              <>
+                <div>
+                  <label className="block text-sm text-slate-300 mb-1">Set PIN (4-6 digits)</label>
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={guestPin}
+                    onChange={e => setGuestPin(e.target.value.replace(/\D/g, ''))}
+                    className="w-full px-3 py-2 bg-slate-900/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400"
+                    placeholder="Enter PIN"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-slate-300 mb-1">Confirm PIN</label>
+                  <input
+                    type="password"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={guestPinConfirm}
+                    onChange={e => setGuestPinConfirm(e.target.value.replace(/\D/g, ''))}
+                    className="w-full px-3 py-2 bg-slate-900/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400"
+                    placeholder="Confirm PIN"
+                  />
+                </div>
+                <button
+                  onClick={saveGuestPin}
+                  disabled={savingGuest || guestPin.length < 4 || guestPin !== guestPinConfirm}
+                  className="px-4 py-2 bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white rounded-lg font-medium transition-colors"
+                >
+                  {savingGuest ? 'Saving...' : 'Save PIN'}
+                </button>
+              </>
+            ) : (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-300">PIN is set. You can change it below.</span>
+                <button
+                  onClick={() => {
+                    setGuestPin('');
+                    setGuestPinConfirm('');
+                    setHasGuestPin(false);
+                  }}
+                  className="text-xs text-amber-400 hover:underline"
+                >
+                  Change PIN
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+        <p className="text-xs text-slate-500 mt-2">
+          When enabled, you will need to enter this PIN each time you open the app.
         </p>
       </div>
 
@@ -331,6 +498,68 @@ function NotificationsTab() {
             </button>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+function VoiceTab() {
+  const { showStatus } = useStatus();
+  const [voiceEnabled, setVoiceEnabled] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    getSetting<boolean>('voice_mode_enabled').then(value => {
+      if (value !== null) setVoiceEnabled(value);
+    });
+  }, []);
+
+  const toggleVoiceMode = async () => {
+    setSaving(true);
+    const newVal = !voiceEnabled;
+    try {
+      await storeSetting('voice_mode_enabled', newVal);
+      setVoiceEnabled(newVal);
+      showStatus('success', newVal ? 'Voice Mode Enabled' : 'Voice Mode Disabled', '');
+    } catch (err) {
+      console.error('Failed to toggle voice mode:', err);
+      showStatus('error', 'Error', 'Could not update voice mode');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <h3 className="text-lg font-semibold text-white">Voice Mode</h3>
+
+      <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/30">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <h4 className="font-medium text-white">Voice-Only Mode</h4>
+            <p className="text-xs text-slate-400">Use语音和听问答 interact with Vita AI via voice</p>
+          </div>
+          <button
+            onClick={toggleVoiceMode}
+            disabled={saving}
+            className={`w-12 h-7 rounded-full p-1 transition-colors ${voiceEnabled ? 'bg-teal-600' : 'bg-slate-600'} disabled:opacity-50`}
+          >
+            <div className={`w-5 h-5 rounded-full bg-white transition-transform ${voiceEnabled ? 'translate-x-6' : ''}`} />
+          </button>
+        </div>
+        <p className="text-xs text-slate-500">
+          When enabled, you can speak to Vita AI and hear responses. This mode uses your device's microphone and speaker.
+        </p>
+      </div>
+
+      <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/30">
+        <h4 className="font-medium text-white mb-2">How to use</h4>
+        <ol className="list-decimal list-inside space-y-2 text-sm text-slate-300">
+          <li>Open the <strong>Vita AI</strong> page from the dashboard.</li>
+          <li>Tap the microphone icon to start speaking.</li>
+          <li>Release to send your message; Vita will respond with voice.</li>
+          <li>You can continue the conversation hands‑free.</li>
+        </ol>
       </div>
     </div>
   );

@@ -129,7 +129,7 @@ export default function WorkoutHistoryPage() {
                     className="w-full bg-teal-500/70 rounded-t transition-all hover:bg-teal-400"
                     style={{ height: `${Math.min(height, 120)}px` }}
                   />
-                  <span className="text-[10px] text-slate-500">
+                  <span className="text-xs text-slate-500">
                     {day.toLocaleDateString("en-US", { weekday: "short" })}
                   </span>
                 </div>
@@ -175,7 +175,7 @@ export default function WorkoutHistoryPage() {
                 </div>
                 <div className="text-right">
                   <div className="text-lg font-bold text-teal-400">{log.exercises.length}</div>
-                  <div className="text-[10px] text-slate-500">exercises</div>
+                   <div className="text-xs text-slate-500">exercises</div>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2 mt-2">

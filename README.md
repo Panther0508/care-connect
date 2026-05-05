@@ -34,7 +34,7 @@ npm run build
 | Community Health Worker Tools | Triage and protocol navigation | ✅ |
 | Medication Management | Reminders and interaction checking | ✅ |
 | Nutrition & Fitness Tracking | Personalized wellness plans | ✅ |
-| Emergency Response System | Crisis detection and protocols | ✅ |
+| Emergency Response System | Crisis detection and one-touch emergency call | ✅ |
 | Multi-Role Authentication | Patient, Clinician, CHW, Admin roles | ✅ |
 | Satellite Data Integration | Real-time health metrics from mesh networks | ✅ |
 | Biometric Security | Native biometric authentication | ✅ |
@@ -44,6 +44,10 @@ npm run build
 | Vercel Deployment | Serverless API endpoints | ✅ |
 | IndexedDB Storage | Local data persistence | ✅ |
 | Real-Time Sync | Background data synchronization | ✅ |
+| Lab Report OCR | Extract & explain lab results from images | ✅ |
+| Guest Mode PIN Protection | Simple PIN gate for guest access | ✅ |
+| Voice-Only Mode | Hands-free AI chat with TTS & Whisper STT | ✅ |
+| Glassmorphism UI | Modern glass-card design system | ✅ |
 
 ## Architecture
 

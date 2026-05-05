@@ -45,3 +45,12 @@
 
 **[Narrator / Pitcher]**  
 "The referral loop is closed, and Amara's self-sovereign Health Graph is updated. VitaChain is an offline-first AI guardian, a mesh intelligence network, and a decentralized health infrastructure—all running in your pocket. Thank you."
+
+---
+
+## Phase 3 Zero-Cost Features (Optional Demo Segments)
+
+- **Lab Report OCR**: Upload an image of a lab report; VitaChain extracts text using Tesseract.js and generates a plain-language explanation with color-coded status.
+- **Guest Mode PIN**: Set a PIN to protect health data on shared devices; requires PIN entry for each session.
+- **Voice-Only Mode**: Toggle voice interaction; use Whisper-tiny for speech-to-text and TTS for AI responses, enabling hands-free usage.
+- **Simplified CrisisPopup**: One-touch emergency call button directly from any screen; instantly dials local emergency services.

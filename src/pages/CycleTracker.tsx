@@ -129,17 +129,17 @@ export default function CycleTrackerPage() {
         <div className="grid grid-cols-3 gap-3">
           <div className="glass-card p-3 text-center accent-border-l">
             <div className="text-xl font-bold text-white">{cycleStats.averageCycle}</div>
-            <div className="text-[10px] text-slate-400 uppercase tracking-wide">Avg Cycle (d)</div>
+            <div className="text-xs text-slate-400 uppercase tracking-wide">Avg Cycle (d)</div>
           </div>
           <div className="glass-card p-3 text-center accent-border-l">
             <div className="text-xl font-bold text-white">{cycleStats.periodLogs}</div>
-            <div className="text-[10px] text-slate-400 uppercase tracking-wide">Periods Logged</div>
+            <div className="text-xs text-slate-400 uppercase tracking-wide">Periods Logged</div>
           </div>
           <div className="glass-card p-3 text-center accent-border-l">
             <div className="text-xl font-bold text-rose-400 truncate">
               {cycleStats.predictedNext ? new Date(cycleStats.predictedNext).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—"}
             </div>
-            <div className="text-[10px] text-slate-400 uppercase tracking-wide">Next Period</div>
+            <div className="text-xs text-slate-400 uppercase tracking-wide">Next Period</div>
           </div>
         </div>
       )}
@@ -194,7 +194,7 @@ export default function CycleTrackerPage() {
           <div className="flex gap-2 flex-wrap">
             {FLOW_LEVELS.map(level => (
               <button key={level.value} onClick={() => setFlow(level.value)}
-                className={`flex-1 py-2 rounded-xl text-xs font-medium transition-all flex flex-col items-center gap-1 ${
+                className={`flex-1 py-2 rounded-xl text-sm font-medium transition-all flex flex-col items-center gap-1 ${
                   flow === level.value ? `${level.color} text-white ring-2 ring-white/20` : "glass-card text-slate-400 hover:border-teal-500/25 hover:text-slate-200"
                 }`}>
                 {level.icon} {level.label}
