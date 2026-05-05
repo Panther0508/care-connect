@@ -8,6 +8,7 @@ import Referral from './Referral';
 import Support from './Support';
 import LanguageSelector from '../components/LanguageSelector';
 import { Settings as SettingsIcon, User, Lock, Bell, CreditCard, Download, Trash2, Globe } from 'lucide-react';
+import { getSetting, storeSetting } from '../lib/idb';
 
 type Tab = 'profile' | 'security' | 'notifications' | 'subscription' | 'export' | 'delete' | 'referral' | 'support' | 'language';
 
@@ -184,33 +185,19 @@ function SecurityTab() {
   const [passNew, setPassNew] = useState('');
   const [passConfirm, setPassConfirm] = useState('');
   const [changing, setChanging] = useState(false);
-  const [biometricEnabled, setBiometricEnabled] = useState(() => localStorage.getItem('biometric_enabled') === 'true');
+  const [biometricEnabled, setBiometricEnabled] = useState(false);
 
-  const handlePassphraseChange = async () => {
-    if (!user) return;
-    if (passNew !== passConfirm) {
-      showStatus('error', 'Mismatch', 'New passphrase does not match confirmation.');
-      return;
-    }
-    setChanging(true);
-    try {
-      await changePassphrase(user.id, passCurrent, passNew);
-      showStatus('success', 'Passphrase Updated', 'Your health graph has been re-encrypted.');
-      setPassCurrent('');
-      setPassNew('');
-      setPassConfirm('');
-    } catch (err: any) {
-      console.error(err);
-      showStatus('error', 'Change Failed', err?.message || 'Could not change passphrase.');
-    } finally {
-      setChanging(false);
-    }
-  };
+  // Load biometric setting from IDB on mount
+  useEffect(() => {
+    getSetting<boolean>('biometric_enabled').then(value => {
+      if (value !== null) setBiometricEnabled(value);
+    });
+  }, []);
 
-  const toggleBiometric = () => {
+  const toggleBiometric = async () => {
     const newVal = !biometricEnabled;
     setBiometricEnabled(newVal);
-    localStorage.setItem('biometric_enabled', String(newVal));
+    await storeSetting('biometric_enabled', newVal);
     showStatus('success', newVal ? 'Biometric Enabled' : 'Biometric Disabled', '');
   };
 
@@ -312,13 +299,21 @@ function NotificationsTab() {
     product_updates: false,
   });
 
-  const toggle = (key: keyof typeof prefs) => {
+  // Load prefs from IDB on mount
+  useEffect(() => {
+    getSetting<typeof prefs>('notification_prefs').then(stored => {
+      if (stored) setPrefs(stored);
+    });
+  }, []);
+
+  const toggle = async (key: keyof typeof prefs) => {
     setPrefs((prev) => {
       const next = { ...prev, [key]: !prev[key] };
-      // Persist to localStorage
-      localStorage.setItem('notification_prefs', JSON.stringify(next));
       return next;
     });
+    // Persist to IDB (use next value after state update)
+    const next = { ...prefs, [key]: !prefs[key] };
+    await storeSetting('notification_prefs', next);
   };
 
   return (

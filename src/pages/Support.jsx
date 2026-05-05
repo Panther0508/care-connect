@@ -1,11 +1,18 @@
 import { useState } from 'react';
 import { useTranslation } from '../services/translation/useTranslation';
 import { motion } from 'framer-motion';
+import { useAuth } from '@clerk/clerk-react';
+import { useRole } from '../hooks/auth/useRole';
+import { addSupportTicket } from '../lib/idb';
 
 export default function Support() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const { role } = useRole();
   const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   const faq = [
     {
@@ -26,11 +33,31 @@ export default function Support() {
     },
   ];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Send email to support
-    setSubmitted(true);
-    setTimeout(() => setMessage(''), 5000);
+    if (!message.trim()) return;
+
+    setSubmitting(true);
+    setError('');
+
+    try {
+      await addSupportTicket({
+        message: message.trim(),
+        userId: user?.id || 'anonymous',
+        timestamp: new Date().toISOString(),
+        status: 'open',
+        userRole: role || 'patient',
+      });
+      setSubmitted(true);
+      setMessage('');
+      // Reset after 5 seconds
+      setTimeout(() => setSubmitted(false), 5000);
+    } catch (err) {
+      console.error('Failed to submit support ticket:', err);
+      setError('Failed to send message. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -62,9 +89,13 @@ export default function Support() {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold text-white">Contact Us</h2>
         {submitted ? (
-          <div className="bg-green-900/30 border border-green-700 p-4 rounded-lg text-green-200">
-            Message sent! We'll get back to you within 24 hours.
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-green-900/30 border border-green-700 p-4 rounded-lg text-green-200"
+          >
+            Thanks for reaching out! We'll get back to you within 24 hours.
+          </motion.div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -76,13 +107,18 @@ export default function Support() {
                 required
                 className="w-full bg-slate-800 border border-slate-600 rounded-lg px-4 py-3 focus:outline-none focus:border-teal-500 text-white resize-none"
                 placeholder="How can we help?"
+                disabled={submitting}
               />
             </div>
+            {error && (
+              <p className="text-red-400 text-sm">{error}</p>
+            )}
             <button
               type="submit"
-              className="px-6 py-3 bg-teal-600 hover:bg-teal-500 rounded-lg font-semibold transition-colors"
+              disabled={submitting}
+              className="px-6 py-3 bg-teal-600 hover:bg-teal-500 disabled:bg-teal-800 disabled:cursor-not-allowed rounded-lg font-semibold transition-colors"
             >
-              Send Message
+              {submitting ? 'Sending...' : 'Send Message'}
             </button>
           </form>
         )}

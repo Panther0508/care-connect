@@ -20,7 +20,7 @@ export default function PreVisitSummary({ specialist, summaryText, healthData, o
         className="glass-card p-5 border-l-4 border-teal-500"
       >
         <h3 className="text-lg font-semibold text-slate-100 mb-3">AI‑Generated Summary</h3>
-        <div className="prose prose-invert max-w-none text-slate-300 text-sm whitespace-pre-line">
+        <div className="prose prose-invert max-w-none text-slate-300 text-base whitespace-pre-line">
           {summaryText}
         </div>
       </motion.div>

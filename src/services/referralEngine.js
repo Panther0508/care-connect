@@ -33,29 +33,56 @@ const openDB = async () => {
 };
 
 /**
- * Generate or retrieve a referral code for the user from Clerk publicMetadata
+ * Generate or retrieve a referral code for the user
+ * Implements "one person, one referral code" policy:
+ *   1. Check localStorage cache first (fastest)
+ *   2. Check Clerk publicMetadata
+ *   3. Generate new code only if neither exists
  */
 export const generateOrGetReferralCode = async (user) => {
   if (!user) return null;
+
+  // 1. Check localStorage for existing referral code (cached)
+  try {
+    const cached = localStorage.getItem('vitachain_referral_code');
+    if (cached) {
+      return cached;
+    }
+  } catch (e) {
+    console.warn('Could not read referral code from localStorage:', e);
+  }
 
   try {
     const metadata = user.publicMetadata || {};
     let code = metadata.referralCode;
 
-    if (!code) {
-      code = `VITA-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
-      await user.update({
-        publicMetadata: {
-          ...metadata,
-          referralCode: code,
-        },
-      });
+    // 2. Check Clerk publicMetadata
+    if (code) {
+      // Found in Clerk — cache in localStorage for future fast lookup
+      try {
+        localStorage.setItem('vitachain_referral_code', code);
+      } catch (e) { /* ignore */ }
+      return code;
     }
 
+    // 3. Neither source has a code — generate a new one
+    code = `VITA-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+    // Store in both Clerk and localStorage
+    await user.update({
+      publicMetadata: {
+        ...metadata,
+        referralCode: code,
+      },
+    });
+    try {
+      localStorage.setItem('vitachain_referral_code', code);
+    } catch (e) { /* ignore */ }
     return code;
   } catch (err) {
     console.error('Failed to generate/get referral code:', err);
-    return `TEMP-${user.id.slice(-6).toUpperCase()}`;
+    // Fallback: temporary code based on user ID
+    const fallback = `TEMP-${user.id.slice(-6).toUpperCase()}`;
+    return fallback;
   }
 };
 

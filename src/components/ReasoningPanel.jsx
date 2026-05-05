@@ -13,6 +13,8 @@ import {
   ChevronDown,
   ChevronRight
 } from 'lucide-react';
+import { useTranslation } from '../services/translation/useTranslation';
+import i18n from '../i18n';
 
 const STEP_ICONS = {
   search: Search,
@@ -33,6 +35,7 @@ const STEP_COLORS = {
 };
 
 export default function ReasoningPanel({ reasoningSteps, isOpen: initialOpen = false, onToggle }) {
+  const { t } = useTranslation();
   const [internalIsOpen, setInternalIsOpen] = useState(initialOpen);
 
   const handleToggle = () => {
@@ -59,12 +62,12 @@ export default function ReasoningPanel({ reasoningSteps, isOpen: initialOpen = f
           <div className="p-2 rounded-lg bg-slate-700/50">
             <Activity size={18} className="text-teal-400" />
           </div>
-          <span className="font-medium text-slate-100">AI Reasoning</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400">
-            {reasoningSteps.length} step{reasoningSteps.length !== 1 ? 's' : ''}
-          </span>
+           <span className="font-medium text-slate-100">{t('aiReasoning')}</span>
+         </div>
+         <div className="flex items-center gap-2">
+           <span className="text-xs text-slate-400">
+             {reasoningSteps.length} {reasoningSteps.length === 1 ? t('step') : t('steps')}
+           </span>
           {isOpen ? <ChevronDown size={20} /> : <ChevronRight size={20} />}
         </div>
       </button>
@@ -101,11 +104,11 @@ export default function ReasoningPanel({ reasoningSteps, isOpen: initialOpen = f
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <Icon size={16} className={color} />
-                        <span className="text-sm font-medium text-slate-200">
-                          {step.title}
-                        </span>
-                      </div>
-                      <p className="text-sm text-slate-400 leading-relaxed">
+                         <span className="text-base font-medium text-slate-200">
+                           {step.title}
+                         </span>
+                       </div>
+                       <p className="text-sm text-slate-400 leading-relaxed">
                         {step.description}
                       </p>
                       {step.sources && step.sources.length > 0 && (

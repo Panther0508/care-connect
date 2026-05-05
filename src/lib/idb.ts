@@ -1,6 +1,6 @@
 export function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("vitachain", 10); // Bumped to v10 for new referral + contact stores
+    const request = indexedDB.open("vitachain", 11); // Bumped to v11 for settings, appState, supportTickets stores
 
     request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
       const db = (event.target as IDBOpenDBRequest).result;
@@ -55,9 +55,15 @@ export function openDB(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains("translationCache")) {
         db.createObjectStore("translationCache", { keyPath: "key" });
       }
-      if (!db.objectStoreNames.contains("userProfile")) {
-        db.createObjectStore("userProfile", { keyPath: "userId" });
-      }
+        if (!db.objectStoreNames.contains("userProfile")) {
+          db.createObjectStore("userProfile", { keyPath: "userId" });
+        }
+        if (!db.objectStoreNames.contains("settings")) {
+          db.createObjectStore("settings", { keyPath: "key" });
+        }
+        if (!db.objectStoreNames.contains("appState")) {
+          db.createObjectStore("appState", { keyPath: "key" });
+        }
 
       // AI cache (v6-v7)
       if (!db.objectStoreNames.contains("gemmaCache")) {
@@ -203,10 +209,13 @@ export function openDB(): Promise<IDBDatabase> {
       if (!db.objectStoreNames.contains("referrals")) {
         db.createObjectStore("referrals", { keyPath: "id", autoIncrement: true });
       }
-      if (!db.objectStoreNames.contains("contactSubmissions")) {
-        db.createObjectStore("contactSubmissions", { keyPath: "id", autoIncrement: true });
-      }
-    };
+       if (!db.objectStoreNames.contains("contactSubmissions")) {
+         db.createObjectStore("contactSubmissions", { keyPath: "id", autoIncrement: true });
+       }
+       if (!db.objectStoreNames.contains("supportTickets")) {
+         db.createObjectStore("supportTickets", { keyPath: "id", autoIncrement: true });
+       }
+     };
 
 
     request.onsuccess = (event: Event) => {
@@ -1589,6 +1598,144 @@ export async function getCarePlanStreak(userId: string, conditionId: string): Pr
       resolve(streak);
     };
     request.onerror = () => reject(request.error);
+  });
+ }
+
+// ==================== Settings Storage ====================
+
+export interface AppSettings {
+  key: string;
+  value: any;
+  updatedAt: number;
+}
+
+export async function storeSetting(key: string, value: any): Promise<void> {
+  const db = await openDB();
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction("settings", "readwrite");
+    const store = transaction.objectStore("settings");
+    store.put({ key, value, updatedAt: Date.now() });
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+
+export async function getSetting<T>(key: string): Promise<T | null> {
+  const db = await openDB();
+  return new Promise<T | null>((resolve, reject) => {
+    const transaction = db.transaction("settings", "readonly");
+    const store = transaction.objectStore("settings");
+    const request = store.get(key);
+    request.onsuccess = () => {
+      const result = request.result as AppSettings | undefined;
+      resolve(result?.value ?? null);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// ==================== App State ====================
+
+export interface AppStateRecord {
+  key: string;
+  value: any;
+  updatedAt: number;
+}
+
+export async function storeAppState(key: string, value: any): Promise<void> {
+  const db = await openDB();
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction("appState", "readwrite");
+    const store = transaction.objectStore("appState");
+    store.put({ key, value, updatedAt: Date.now() });
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+  });
+}
+
+export async function getAppState<T>(key: string): Promise<T | null> {
+  const db = await openDB();
+  return new Promise<T | null>((resolve, reject) => {
+    const transaction = db.transaction("appState", "readonly");
+    const store = transaction.objectStore("appState");
+    const request = store.get(key);
+    request.onsuccess = () => {
+      const result = request.result as AppStateRecord | undefined;
+      resolve(result?.value ?? null);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// ==================== Support Tickets ====================
+
+export interface SupportTicket {
+  id?: number;
+  question: string;
+  timestamp: string;
+  status: 'open' | 'answered' | 'closed';
+  userRole: string;
+  answer?: string;
+  answeredAt?: string;
+}
+
+export async function addSupportTicket(ticket: Omit<SupportTicket, 'id'>): Promise<number> {
+  const db = await openDB();
+  return new Promise<number>((resolve, reject) => {
+    const transaction = db.transaction("supportTickets", "readwrite");
+    const store = transaction.objectStore("supportTickets");
+    const request = store.add(ticket);
+    request.onsuccess = () => resolve(request.result as number);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function getAllSupportTickets(): Promise<SupportTicket[]> {
+  const db = await openDB();
+  return new Promise<SupportTicket[]>((resolve, reject) => {
+    const transaction = db.transaction("supportTickets", "readonly");
+    const store = transaction.objectStore("supportTickets");
+    const request = store.getAll();
+    request.onsuccess = () => resolve(request.result || []);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function getOpenSupportTickets(limit?: number): Promise<SupportTicket[]> {
+  const db = await openDB();
+  return new Promise<SupportTicket[]>((resolve, reject) => {
+    const transaction = db.transaction("supportTickets", "readonly");
+    const store = transaction.objectStore("supportTickets");
+    const request = store.getAll();
+    request.onsuccess = () => {
+      const all = request.result as SupportTicket[];
+      const open = all.filter(t => t.status === 'open');
+      if (limit) {
+        open.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        resolve(open.slice(0, limit));
+      } else {
+        resolve(open);
+      }
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function updateSupportTicket(id: number, updates: Partial<SupportTicket>): Promise<void> {
+  const db = await openDB();
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction("supportTickets", "readwrite");
+    const store = transaction.objectStore("supportTickets");
+    const getRequest = store.get(id);
+    getRequest.onsuccess = () => {
+      const existing = getRequest.result;
+      if (existing) {
+        store.put({ ...existing, ...updates, id });
+      }
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+    };
+    getRequest.onerror = () => reject(getRequest.error);
   });
 }
 

@@ -13,6 +13,7 @@ import StepBiometrics from './steps/StepBiometrics';
 import StepDone from './steps/StepDone';
 import { updateUserMetadata } from '../../services/auth/userMetadata';
 import MagnifyingLoader from '../../components/MagnifyingLoader';
+import { storeAppState, getAppState } from '../../lib/idb';
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
@@ -158,8 +159,13 @@ export default function Onboarding() {
   };
 
   const handleFinish = async () => {
-    // Write critical flags immediately to localStorage before any async operations
-    // This guarantees they exist even if Clerk update fails or is delayed
+    // Persist onboarding flag to IndexedDB (non-blocking, fire-and-forget)
+    try {
+      await storeAppState('onboardingCompleted', true);
+    } catch (e) {
+      console.warn('Failed to store onboarding flag in IDB:', e);
+    }
+    // Also keep localStorage for backward compatibility (role check)
     try {
       if (data.role) {
         localStorage.setItem('user_role', data.role);
@@ -177,7 +183,23 @@ export default function Onboarding() {
     navigate('/dashboard', { replace: true });
   };
 
-   if (!isLoaded) {
+  const [isOnboarded, setIsOnboarded] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    // Check both IDB and localStorage for onboarding completion
+    const checkOnboarding = async () => {
+      const fromDB = await getAppState<boolean>('onboardingCompleted');
+      if (fromDB) {
+        setIsOnboarded(true);
+      } else {
+        const fromLocal = localStorage.getItem('onboarding_completed') === 'true';
+        setIsOnboarded(fromLocal);
+      }
+    };
+    checkOnboarding();
+  }, []);
+
+  if (!isLoaded) {
      return (
        <div className="min-h-screen flex items-center justify-center bg-[#0F172A]">
          <div className="glass-card p-8 rounded-2xl flex flex-col items-center gap-4">
@@ -188,12 +210,22 @@ export default function Onboarding() {
      );
    }
 
-  // If user is already onboarded (local fallback check), redirect to dashboard
-  // This prevents re-entering onboarding after completion
-  const isOnboarded = localStorage.getItem('onboarding_completed') === 'true';
-  if (isOnboarded) {
-    return <Navigate to="/dashboard" replace />;
-  }
+   // If user is already onboarded (checked via IDB), redirect to dashboard
+   // This prevents re-entering onboarding after completion
+   if (isOnboarded === null) {
+     // Still loading, keep showing loader
+     return (
+       <div className="min-h-screen flex items-center justify-center bg-[#0F172A]">
+         <div className="glass-card p-8 rounded-2xl flex flex-col items-center gap-4">
+           <MagnifyingLoader size={40} />
+           <p className="text-slate-400 text-sm">Loading your secure experience...</p>
+         </div>
+       </div>
+     );
+   }
+   if (isOnboarded) {
+     return <Navigate to="/dashboard" replace />;
+   }
 
   const renderStep = () => {
     switch (data.step) {

@@ -4,6 +4,19 @@
 import { motion } from "framer-motion";
 
 export default function QRCodeDisplay({ qrDataURL, credential, onDone, onScanAnother }) {
+  // Error state: credential failed to generate
+  if (!credential) {
+    return (
+      <div className="flex flex-col items-center justify-center space-y-6 py-10">
+        <img src="/avatars/vita-error.png" alt="Vita error avatar" className="w-16 h-16 rounded-full" />
+        <p className="text-slate-300 text-center max-w-xs">Passport generation failed. Please try again.</p>
+        <button onClick={onScanAnother} className="btn-primary px-6 py-3">
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   // Download QR as PNG
   const handleDownload = () => {
     const link = document.createElement('a');

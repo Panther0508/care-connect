@@ -15,7 +15,10 @@ import wasmUrl from '@automerge/automerge/automerge.wasm?url';
 // Initialize WASM - top-level await is supported via vite-plugin-top-level-await
 Automerge.initializeWasm(wasmUrl).catch(() => {});
 
-// Step 2: Configure HuggingFace Transformers BEFORE any transformers code runs
+// Step 2: Initialize i18next (must happen before any component uses translation)
+import './i18n';
+
+// Step 3: Configure HuggingFace Transformers BEFORE any transformers code runs
 // Local models should be allowed for embedding models (stored in /public/models/)
 import { env } from '@huggingface/transformers';
 env.allowLocalModels = false; // Default: disable local for remote models
@@ -75,6 +78,11 @@ initExerciseDatabase().catch(err => console.error('Failed to init exercise DB:',
 
 // Index RAG datasets on first startup (non-blocking)
 ensureAllIndexed().catch(err => console.error('RAG indexing failed:', err));
+
+// Migrate any existing localStorage user data to IndexedDB (non-blocking)
+import('./lib/dataMigration').then(({ runMigration }) => {
+  runMigration().catch(err => console.error('Data migration failed:', err));
+}).catch(err => console.error('Failed to load migration module:', err));
 
 const clerkProviderProps = PUBLISHABLE_KEY
   ? { publishableKey: PUBLISHABLE_KEY, rethrowOfflineNetworkErrors: true }

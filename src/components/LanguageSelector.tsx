@@ -1,13 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Globe } from 'lucide-react';
 import { useStatus } from '../hooks/useStatus';
+import { getSetting, storeSetting } from '../lib/idb';
 
 export default function LanguageSelector() {
   const { showStatus } = useStatus();
-  const [selectedLanguage, setSelectedLanguage] = useState(() => {
-    return localStorage.getItem('preferredLanguage') || 'en';
-  });
+  const [selectedLanguage, setSelectedLanguage] = useState('en');
   const [saving, setSaving] = useState(false);
+
+  // Load preferred language from IDB on mount
+  useEffect(() => {
+    getSetting<string>('preferredLanguage').then(lang => {
+      if (lang) setSelectedLanguage(lang);
+    });
+  }, []);
 
   // Supported languages with their display names
   const languages = [
@@ -38,10 +44,14 @@ export default function LanguageSelector() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      localStorage.setItem('preferredLanguage', selectedLanguage);
+      await storeSetting('preferredLanguage', selectedLanguage);
       // Trigger language change event for any listeners
       window.dispatchEvent(new CustomEvent('languageChanged', { detail: { language: selectedLanguage } }));
       showStatus('success', 'Language Updated', `Language changed to ${languages.find(l => l.code === selectedLanguage)?.name || selectedLanguage}`);
+      // Also update i18n if available
+      if ((window as any).i18n) {
+        (window as any).i18n.changeLanguage(selectedLanguage);
+      }
     } catch (err) {
       console.error(err);
       showStatus('error', 'Update Failed', 'Could not save language preference.');

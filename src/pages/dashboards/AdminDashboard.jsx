@@ -15,13 +15,21 @@ import {
   Settings,
   AlertTriangle,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  MessageSquare,
+  CheckCircle,
+  XCircle,
+  Clock,
 } from 'lucide-react';
+import { getAllSupportTickets, getOpenSupportTickets, updateSupportTicket } from '../../lib/idb';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [auditLogs, setAuditLogs] = useState([]);
+  const [supportTickets, setSupportTickets] = useState([]);
+  const [openTicketCount, setOpenTicketCount] = useState(0);
+  const [loadingTickets, setLoadingTickets] = useState(true);
 
   const isAdmin = user?.publicMetadata?.role === 'admin';
   const mfaEnabled = user?.twoFactorEnabled ?? false;
@@ -39,6 +47,43 @@ export default function AdminDashboard() {
     };
     loadAudit();
   }, [isAdmin]);
+
+  // Load support tickets
+  useEffect(() => {
+    const loadTickets = async () => {
+      if (!isAdmin) return;
+      try {
+        const [all, open] = await Promise.all([
+          getAllSupportTickets(),
+          getOpenSupportTickets(5),
+        ]);
+        // Sort by timestamp descending, take 5 most recent
+        const sorted = all
+          .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+          .slice(0, 5);
+        setSupportTickets(sorted);
+        setOpenTicketCount(open.length);
+      } catch (err) {
+        console.error('Failed to load support tickets:', err);
+      } finally {
+        setLoadingTickets(false);
+      }
+    };
+    loadTickets();
+  }, [isAdmin]);
+
+  const handleStatusToggle = async (ticketId, currentStatus) => {
+    const nextStatus = currentStatus === 'open' ? 'answered' : 'closed';
+    try {
+      await updateSupportTicket(ticketId, { status: nextStatus });
+      setSupportTickets((prev) =>
+        prev.map((t) => (t.id === ticketId ? { ...t, status: nextStatus } : t))
+      );
+      setOpenTicketCount((prev) => (nextStatus === 'open' ? prev + 1 : Math.max(0, prev - 1)));
+    } catch (err) {
+      console.error('Failed to update ticket status:', err);
+    }
+  };
 
   const metrics = [
     {
@@ -244,6 +289,74 @@ export default function AdminDashboard() {
           ))}
         </section>
       )}
+
+      {/* Support Tickets */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+            <MessageSquare size={20} className="text-teal-400" />
+            Support Tickets
+            {openTicketCount > 0 && (
+              <span className="px-2 py-0.5 bg-amber-500/20 text-amber-400 text-xs font-semibold rounded-full border border-amber-500/30">
+                {openTicketCount} open
+              </span>
+            )}
+          </h2>
+        </div>
+        {loadingTickets ? (
+          <div className="text-slate-400 text-sm py-4">Loading tickets...</div>
+        ) : supportTickets.length === 0 ? (
+          <div className="text-slate-400 text-sm py-4">No support tickets yet.</div>
+        ) : (
+          <div className="space-y-2">
+            {supportTickets.map((ticket) => {
+              const statusColor =
+                ticket.status === 'open'
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                  : ticket.status === 'answered'
+                  ? 'bg-teal-500/20 text-teal-300 border-teal-500/30'
+                  : 'bg-slate-500/20 text-slate-300 border-slate-500/30';
+              return (
+                <motion.div
+                  key={ticket.id}
+                  whileHover={{ x: 2 }}
+                  className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/40 hover:border-teal-500/40 transition-all"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm text-slate-300 line-clamp-2 mb-2">
+                        {ticket.message}
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-slate-500">
+                        <span className="capitalize">{ticket.userRole}</span>
+                        <span>•</span>
+                        <span>{new Date(ticket.timestamp).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className={`px-2 py-1 text-xs font-semibold rounded-full border ${statusColor}`}>
+                        {ticket.status}
+                      </span>
+                      {ticket.status !== 'closed' && (
+                        <button
+                          onClick={() => handleStatusToggle(ticket.id, ticket.status)}
+                          className="text-xs text-teal-400 hover:text-teal-300 flex items-center gap-1"
+                        >
+                          {ticket.status === 'open' ? (
+                            <>Mark as answered <CheckCircle size={12} /></>
+                          ) : (
+                            <>Close <XCircle size={12} /></>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
       {/* Admin Actions Grid */}
       <section className="space-y-3">

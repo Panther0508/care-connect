@@ -1,12 +1,13 @@
 import { ReactNode, useEffect, useState } from "react";
-import ModernBottomNav from "./ModernBottomNav";
 import { OnlineStatusPill } from "./OnlineStatusPill";
 import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { AnimatePresence, motion } from "framer-motion";
 import { useStatus } from "../hooks/useStatus";
 import OutbreakAlertNotifier from "./OutbreakAlertNotifier";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { useIDB } from "../hooks/useIDB";
+import StatusToastContainer from "./StatusToastContainer";
+import SideMenu from "./SideMenu";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -15,7 +16,7 @@ interface AppLayoutProps {
 export default function AppLayout({ children }: AppLayoutProps) {
   const isOnline = useOnlineStatus();
   const { showStatus } = useStatus();
-  const [footerVisible, setFooterVisible] = useState(true);
+  const [sideMenuOpen, setSideMenuOpen] = useState(false);
   // Initialize offline data and mesh orchestrator globally
   const { ready: idbReady } = useIDB();
 
@@ -44,38 +45,28 @@ export default function AppLayout({ children }: AppLayoutProps) {
       </div>
 
       <OnlineStatusPill />
+      <StatusToastContainer />
 
       {/* Global outbreak alert listener (no UI) */}
       <OutbreakAlertNotifier />
 
-      <main className={`relative z-10 min-h-screen ${footerVisible ? 'pb-20' : 'pb-0'}`}>
-        <div className="mx-auto w-full max-w-5xl px-4 pt-8 md:px-8">
+      {/* Side menu button (top-left) */}
+      <button
+        onClick={() => setSideMenuOpen(true)}
+        className="fixed top-4 left-4 z-40 p-3 rounded-full bg-slate-800/80 hover:bg-slate-700/80 backdrop-blur-md border border-white/10 text-slate-300 hover:text-white shadow-lg transition-all"
+        aria-label="Open navigation menu"
+      >
+        <Menu size={20} />
+      </button>
+
+      <main className={`relative z-10 min-h-screen pt-16`}>
+        <div className="mx-auto w-full max-w-5xl px-4 md:px-8">
           {children}
         </div>
       </main>
 
-      {/* Footer toggle button */}
-      <button
-        onClick={() => setFooterVisible(v => !v)}
-        className="fixed bottom-4 right-4 z-50 p-2 rounded-full bg-teal-600 hover:bg-teal-500 text-white shadow-lg transition-colors"
-        aria-label={footerVisible ? "Hide navigation" : "Show navigation"}
-      >
-        {footerVisible ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
-      </button>
-
-      {/* Modern Bottom Navigation with animation */}
-      <AnimatePresence>
-        {footerVisible && (
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          >
-            <ModernBottomNav />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Side Menu */}
+      <SideMenu open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
     </div>
   );
 }

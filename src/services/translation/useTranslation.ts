@@ -1,39 +1,35 @@
 import { useState, useEffect, useMemo } from 'react';
-import { translations, LanguageCode, supportedLanguages } from './translations';
+import { useTranslation as useI18n } from 'react-i18next';
+import { getSetting, storeSetting } from '../../lib/idb';
 
 const STORAGE_KEY = 'vita_language';
 
 export function useTranslation() {
-  // Get stored language or default to English
-  const [lang, setLang] = useState<LanguageCode>(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    return (stored as LanguageCode) || 'en';
-  });
+  const { t, i18n } = useI18n();
+  const [lang, setLang] = useState(i18n.language || 'en');
 
-  // Translate function
-  const t = useMemo(() => {
-    return (key: string, params?: Record<string, string | number>): string => {
-      const langDict = translations[lang] || translations.en;
-      let translation = langDict[key as keyof typeof langDict] || key;
-      
-      // Simple parameter interpolation
-      if (params) {
-        Object.entries(params).forEach(([k, v]) => {
-          translation = translation.replace(new RegExp(`{${k}}`, 'g'), String(v));
-        });
-      }
-      
-      return translation;
-    };
-  }, [lang]);
+  useEffect(() => {
+    // Sync language state when i18next changes
+    setLang(i18n.language || 'en');
+    // Also ensure our IDB store is in sync
+    if (i18n.language) {
+      storeSetting(STORAGE_KEY, i18n.language);
+    }
+  }, [i18n.language]);
 
-  // Change language
-  const changeLanguage = (newLang: LanguageCode) => {
-    localStorage.setItem(STORAGE_KEY, newLang);
-    setLang(newLang);
-    // Dispatch event for components listening to language change
-    window.dispatchEvent(new CustomEvent('language-change', { detail: { language: newLang } }));
+  const changeLanguage = async (newLang: string) => {
+    await i18n.changeLanguage(newLang);
+    // Explicitly store in IDB for consistency
+    await storeSetting(STORAGE_KEY, newLang);
   };
+
+  const supportedLanguages = [
+    { code: 'en', name: 'English' },
+    { code: 'ha', name: 'Hausa' },
+    { code: 'yo', name: 'Yoruba' },
+    { code: 'ig', name: 'Igbo' },
+    { code: 'sw', name: 'Swahili' },
+  ];
 
   return {
     t,

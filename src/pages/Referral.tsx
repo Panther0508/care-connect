@@ -3,6 +3,8 @@ import { useAuth } from '@clerk/clerk-react';
 import { useEffect, useState } from 'react';
 import { useStatus } from '../hooks/useStatus';
 import { Share2, Check, Gift, Users } from 'lucide-react';
+import { generateOrGetReferralCode } from '../services/referralEngine';
+import { getSetting, storeSetting } from '../lib/idb';
 
 export default function Referral() {
   const { user, isLoaded } = useAuth();
@@ -17,26 +19,13 @@ export default function Referral() {
       if (!isLoaded || !user) return;
 
       try {
-        // Check Clerk metadata for existing code
-        const metadata = user.publicMetadata as any;
-        let code = metadata?.referralCode;
-
-        if (!code) {
-          // Generate new immutable code and save to Clerk
-          code = `VITA-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
-          await user.update({
-            publicMetadata: {
-              ...metadata,
-              referralCode: code,
-            },
-          });
-        }
-
+        // Use centralized service that handles localStorage caching & Clerk
+        const code = await generateOrGetReferralCode(user);
         setReferralCode(code);
 
-        // Load referral count from localStorage (offline fallback)
-        const count = localStorage.getItem(`referral_count_${user.id}`);
-        setReferralCount(count ? parseInt(count, 10) : 0);
+        // Load referral count from IDB (instead of localStorage)
+        const count = await getSetting<number>(`referral_count_${user.id}`);
+        setReferralCount(count ?? 0);
       } catch (err) {
         console.error('Failed to load/generate referral code:', err);
         // Fallback: generate temporary code (not persisted)
@@ -155,16 +144,16 @@ export default function Referral() {
       {/* Debug: manual increment for testing */}
       {import.meta.env.DEV && (
         <div className="border-t border-slate-700 pt-4 mt-4">
-          <button
-            onClick={() => {
-              const newCount = referralCount + 1;
-              setReferralCount(newCount);
-              if (user) {
-                localStorage.setItem(`referral_count_${user.id}`, newCount.toString());
-              }
-            }}
-            className="text-xs text-slate-500 underline"
-          >
+        <button
+          onClick={async () => {
+            const newCount = referralCount + 1;
+            setReferralCount(newCount);
+            if (user) {
+              await storeSetting(`referral_count_${user.id}`, newCount);
+            }
+          }}
+          className="text-xs text-slate-500 underline"
+        >
             [Dev] Simulate successful referral
           </button>
         </div>

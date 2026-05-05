@@ -159,9 +159,10 @@ export default function AIAssistant() {
           const greeting = generateGreeting(p, clerkUser.fullName || "there");
           setMessages([{ role: "assistant", content: greeting }]);
         } else {
-          const stored = localStorage.getItem("vitachain_user_profile");
-          if (stored) {
-            const profile = JSON.parse(stored);
+          // Try to get user profile from IndexedDB
+          const userId = localStorage.getItem('vitachain_user_id') || 'default-user';
+          const profile = await getUserProfile(userId);
+          if (profile) {
             setUserProfile(profile);
             const p = getPersona("patient", profile);
             setPersona(p);
@@ -665,11 +666,11 @@ const handleSpeechInput = async () => {
                   )}
                   <div>
                     {/* Main message bubble */}
-                    <div className={`rounded-2xl px-4 py-3 ${isUser ? "bg-gradient-to-r from-teal-500/30 to-cyan-500/20 text-slate-100 border border-teal-500/20" : isSystem ? "bg-amber-500/10 text-amber-200 border border-amber-500/20 text-sm" : "glass-card text-slate-200"}`}>
+                     <div className={`rounded-2xl px-4 py-3 ${isUser ? "bg-gradient-to-r from-teal-500/30 to-cyan-500/20 text-slate-100 border border-teal-500/20" : isSystem ? "bg-amber-500/10 text-amber-200 border border-amber-500/20 text-sm" : "glass-card text-slate-200"}`}>
                       {isUser ? (
                         <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</div>
                       ) : (
-                        <div className="text-sm leading-relaxed whitespace-pre-wrap prose prose-invert max-w-none">
+                        <div className="text-base leading-relaxed whitespace-pre-wrap prose prose-invert max-w-none">
                           {msg.content.split("\n").map((line, i) =>
                             line.startsWith("**") && line.endsWith("**") ? (
                               <strong key={i} className="text-teal-300 font-semibold">{line.replace(/\*\*/g, "")}</strong>
@@ -743,13 +744,13 @@ const handleSpeechInput = async () => {
         <div ref={chatEndRef} />
       </div>
 
-      {messages.length > 0 && modelLoaded && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="px-4 pb-4 flex flex-wrap gap-2">
-          {QUICK_PROMPTS.map((prompt) => (
-            <button key={prompt.label} onClick={() => handleSend(prompt.label)} disabled={isProcessing} className="glass-card px-4 py-2.5 text-slate-200 rounded-xl text-xs font-medium transition-all hover:border-teal-400/30 disabled:opacity-50 disabled:cursor-not-allowed">{prompt.label}</button>
-          ))}
-        </motion.div>
-      )}
+         {messages.length > 0 && modelLoaded && (
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="px-4 pb-4 flex flex-wrap gap-2">
+           {QUICK_PROMPTS.map((prompt) => (
+             <button key={prompt.label} onClick={() => handleSend(prompt.label)} disabled={isProcessing} className="glass-card px-4 py-2.5 text-slate-200 rounded-xl text-sm font-medium transition-all hover:border-teal-400/30 disabled:opacity-50 disabled:cursor-not-allowed">{prompt.label}</button>
+           ))}
+         </motion.div>
+       )}
 
       <div className="sticky bottom-0 bg-slate-900/90 backdrop-blur-2xl border-t border-white/5 p-4">
         <AnimatePresence>
@@ -833,7 +834,7 @@ const handleSpeechInput = async () => {
               placeholder="Ask me anything about your health records..."
               disabled={isProcessing || !modelLoaded}
               rows={1}
-              className="glass-input w-full py-3 pr-12 text-sm resize-none min-h-[48px] max-h-32"
+              className="glass-input w-full py-3 pr-12 text-base resize-none min-h-[48px] max-h-32"
             />
             <button type="button" onClick={() => handleSend(currentInput)} disabled={isProcessing || !currentInput.trim() || !modelLoaded} className="absolute right-2 bottom-2 p-1.5 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               <Send size={16} />
