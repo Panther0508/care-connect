@@ -23,15 +23,20 @@ html { scroll-behavior: smooth; }
 /* Consistent box-sizing */
 *, *::before, *::after { box-sizing: border-box; }
 
+/* Base font size for accessibility - ensures text is readable */
+html {
+  font-size: 100%; /* 16px base */
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 
-
 @layer base {
   html {
     scroll-behavior: smooth;
+    font-size: 100%; /* 16px base for consistent scaling */
   }
   body {
     @apply bg-slate-900 text-slate-100 font-sans;
@@ -42,7 +47,35 @@ html { scroll-behavior: smooth; }
     background-color: #0F172A;
     position: relative;
     overflow-x: hidden;
+    font-size: 1rem; /* 16px base */
   }
+
+  /* Heading sizes for accessibility */
+  h1 { font-size: 2.25rem; } /* 36px */
+  h2 { font-size: 1.875rem; } /* 30px */
+  h3 { font-size: 1.5rem; } /* 24px */
+  h4 { font-size: 1.25rem; } /* 20px */
+  h5 { font-size: 1.125rem; } /* 18px */
+  h6 { font-size: 1rem; } /* 16px */
+
+  /* Touch targets minimum 44×44 px per WCAG 2.5.5 */
+  button, a, [role="button"], input[type="submit"] {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Auto-growing textareas in Chrome — JS fallback for Firefox/Safari */
+  textarea {
+    field-sizing: content;
+    min-height: 88px;
+    resize: vertical;
+  }
+
+  /* Smooth scrolling for the whole app */
+  html { scroll-behavior: smooth; }
+
+  /* Consistent box-sizing */
+  *, *::before, *::after { box-sizing: border-box; }
 
   /* Noise texture overlay */
   body::before {
@@ -257,18 +290,18 @@ html { scroll-behavior: smooth; }
   --glass-blur: 16px;
 }
 
-  /* Glass Input - Enhanced with floating labels capability */
-  .glass-input {
-    @apply w-full px-4 py-3.5 rounded-xl text-slate-100 transition-all duration-300;
-    background: rgba(30, 41, 59, 0.65);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(148, 163, 184, 0.12);
-    border-radius: 1rem;
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.65;
-  }
+/* Glass Input - Enhanced with floating labels capability */
+.glass-input {
+  @apply w-full px-4 py-3.5 rounded-xl text-slate-100 transition-all duration-300;
+  background: rgba(30, 41, 59, 0.65);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 1rem;
+  font-size: 1.125rem; /* Increased from 1rem to 1.125rem (18px) */
+  font-weight: 400;
+  line-height: 1.65;
+}
 
   .glass-input::placeholder {
     color: #64748B;
@@ -309,24 +342,24 @@ html { scroll-behavior: smooth; }
     padding: 0 4px;
   }
 
-  /* Primary Button - EXACT SPEC */
-  .btn-primary {
-    background: linear-gradient(135deg, #14B8A6, #0D9488);
-    color: white;
-    border: none;
-    border-radius: 1.5rem;
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    font-size: 0.875rem;
-    line-height: 1.5;
-    cursor: pointer;
-    transition: all 0.25s ease;
-    box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-  }
+/* Primary Button - EXACT SPEC */
+.btn-primary {
+  background: linear-gradient(135deg, #14B8A6, #0D9488);
+  color: white;
+  border: none;
+  border-radius: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  font-size: 1rem; /* Increased from 0.875rem to 1rem (16px) */
+  line-height: 1.5;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
 
   .btn-primary:hover:not(:disabled) {
     transform: scale(1.03);
@@ -419,23 +452,6 @@ html { scroll-behavior: smooth; }
   }
   .text-gray-500 {
     color: #475569 !important;
-  }
-
-  /* Auto-upgrade legacy card styles to glassmorphism standard */
-  .bg-slate-800\/40.border.border-slate-700\/30,
-  .bg-slate-800\/40.border.border-slate-700\/50,
-  .bg-slate-800\/40.border.border-slate-700\/40,
-  .bg-slate-900\/40.border.border-slate-700\/30,
-  .bg-slate-800\/30.border.border-slate-700\/30,
-  .bg-slate-800\/50.border.border-slate-700\/40,
-  .bg-slate-900\/50.border.border-slate-700\/30 {
-    @apply glass-card;
-  }
-
-  /* Auto-upgrade legacy input styles to glass-input standard */
-  .bg-slate-800\/50.border.border-slate-700\/30,
-  .bg-slate-900\/50.border.border-slate-700\/30 {
-    @apply glass-input;
   }
 
   /* Typography hierarchy */
@@ -582,77 +598,6 @@ html { scroll-behavior: smooth; }
     animation: pulse-glow 2s ease-in-out infinite;
   }
 
-  .text-heading {
-    @apply font-semibold tracking-tight;
-    letter-spacing: -0.02em;
-  }
-
-  .text-body {
-    font-weight: 400;
-    line-height: 1.65;
-  }
-
-  .text-stats {
-    font-variant-numeric: tabular-nums;
-    font-weight: 600;
-  }
-
-  /* Glow shadows */
-  .shadow-glow-primary {
-    box-shadow: 0 0 20px rgba(20, 184, 166, 0.3), 0 8px 32px rgba(0, 0, 0, 0.25);
-  }
-  .shadow-glow-secondary {
-    box-shadow: 0 0 15px rgba(20, 184, 166, 0.2), 0 4px 20px rgba(0, 0, 0, 0.15);
-  }
-  .shadow-glow-accent {
-    box-shadow: 0 0 20px rgba(245, 158, 11, 0.2), 0 8px 32px rgba(0, 0, 0, 0.25);
-  }
-  .shadow-glow-success {
-    box-shadow: 0 0 20px rgba(16, 189, 129, 0.2), 0 8px 32px rgba(0, 0, 0, 0.25);
-  }
-
-  /* Teal accent border */
-  .accent-border-l {
-    border-left: 2px solid #14B8A6;
-  }
-  .accent-border-rounded-l {
-    border-top-left-radius: 0.75rem;
-    border-bottom-left-radius: 0.75rem;
-  }
-
-  /* Text glow */
-  .text-glow {
-    text-shadow: 0 2px 8px rgba(20, 184, 166, 0.15);
-  }
-  .text-glow-amber {
-    text-shadow: 0 2px 8px rgba(245, 158, 11, 0.15);
-  }
-
-  /* Gradient text */
-  .gradient-text-teal-amber {
-    @apply bg-clip-text text-transparent;
-    background: linear-gradient(135deg, #14B8A6, #F59E0B);
-  }
-
-  /* Scale transform helpers */
-  .hover-scale-103 {
-    transition: transform 0.2s ease;
-  }
-  .hover-scale-103:hover {
-    transform: scale(1.03);
-  }
-
-  .hover-scale-105 {
-    transition: transform 0.2s ease;
-  }
-  .hover-scale-105:hover:not(:disabled) {
-    transform: scale(1.05);
-  }
-
-  .active-scale-97:active:not(:disabled) {
-    transform: scale(0.97);
-  }
-
   /* Premium scrollbar - exact spec */
   /* For WebKit browsers */
   ::-webkit-scrollbar {
@@ -739,4 +684,3 @@ html { scroll-behavior: smooth; }
     -webkit-backdrop-filter: none !important;
   }
 }
-
