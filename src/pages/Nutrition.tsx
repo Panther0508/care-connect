@@ -161,13 +161,13 @@ export default function Nutrition() {
               <div>
                 <p className="font-medium text-slate-200">{meal.name}</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] uppercase tracking-wider text-teal-500 bg-teal-500/10 px-2 py-0.5 rounded-full">{meal.type}</span>
+                  <span className="text-xs uppercase tracking-wider text-teal-500 bg-teal-500/10 px-2 py-0.5 rounded-full">{meal.type}</span>
                   <span className="text-xs text-slate-500">{meal.time}</span>
                 </div>
               </div>
               <div className="text-right">
                 <p className="font-bold text-slate-100">{meal.cals}</p>
-                <p className="text-[10px] text-slate-400">kcal</p>
+                <p className="text-xs text-slate-400">kcal</p>
               </div>
             </motion.div>
           ))}

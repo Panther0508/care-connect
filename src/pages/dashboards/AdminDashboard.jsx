@@ -178,10 +178,10 @@ export default function AdminDashboard() {
                 <div className="text-xl font-bold text-white mb-1">{metric.value}</div>
                 <div className="text-xs text-slate-400 font-medium">{metric.label}</div>
                 {metric.change && (
-                  <div className="text-[10px] text-emerald-400 mt-1">{metric.change} this month</div>
+                   <div className="text-xs text-emerald-400 mt-1">{metric.change} this month</div>
                 )}
                 {metric.sub && (
-                  <div className="text-[10px] text-slate-500 mt-1">{metric.sub}</div>
+                  <div className="text-xs text-slate-500 mt-1">{metric.sub}</div>
                 )}
               </motion.button>
             );

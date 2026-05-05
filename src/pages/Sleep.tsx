@@ -176,7 +176,7 @@ export default function SleepPage() {
               </button>
             ))}
           </div>
-          <div className="flex justify-between text-[10px] text-slate-500 mt-1 px-1">
+          <div className="flex justify-between text-xs text-slate-500 mt-1 px-1">
             <span>{QUALITY_LABELS[0]}</span>
             <span>{QUALITY_LABELS[4]}</span>
           </div>

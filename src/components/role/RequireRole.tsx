@@ -100,21 +100,8 @@ export function ProtectedRoute({ children, allowedRoles }: GuardProps) {
   const rolesArray = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
 
   if (!rolesArray.includes(storedRole)) {
-    const getDashboardForRole = (r: UserRole): string => {
-      switch (r) {
-        case 'patient':
-          return '/health';
-        case 'clinician':
-          return '/clinician-view';
-        case 'chw':
-          return '/outbreak';
-        case 'admin':
-          return '/admin';
-        default:
-          return '/';
-      }
-    };
-    return <Navigate to={getDashboardForRole(storedRole)} replace />;
+    // User is authenticated but lacks required role — show access denied
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return <>{children}</>;

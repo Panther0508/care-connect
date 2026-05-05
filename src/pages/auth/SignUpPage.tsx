@@ -33,6 +33,7 @@ export default function SignUpPage() {
 
         <div className="glass-card p-6">
           <SignUp
+            afterSignUpUrl="/verify-email"
             appearance={{
               elements: {
                 rootBox: "mx-auto w-full",

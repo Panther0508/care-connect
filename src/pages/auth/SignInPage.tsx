@@ -45,6 +45,15 @@ export default function SignInPage() {
               },
             }}
           />
+          <p className="text-center text-xs text-slate-400 mt-4">
+            Forgot your password?{' '}
+            <button
+              onClick={() => navigate("/forgot-password")}
+              className="text-teal-400 hover:underline"
+            >
+              Reset it
+            </button>
+          </p>
         </div>
 
         <p className="text-center text-slate-400 text-sm mt-6">

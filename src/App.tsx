@@ -16,6 +16,11 @@ const HomePage = lazy(() => import("./pages/HomePage"));
 const SignInPage = lazy(() => import("./pages/auth/SignInPage"));
 const SyncPatternsPage = lazy(() => import("./pages/SyncPatternsPage"));
 const SignUpPage = lazy(() => import("./pages/auth/SignUpPage"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
+const Unauthorized = lazy(() => import("./pages/Unauthorized"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 const Onboarding = lazy(() => import("./pages/onboarding"));
 const PatientDashboard = lazy(() => import("./pages/dashboards/PatientDashboard"));
 const ClinicianDashboard = lazy(() => import("./pages/dashboards/ClinicianDashboard"));
@@ -552,6 +557,12 @@ const App = () => {
               </AuthSyncGate>
             } />
 
+            {/* Auth utility routes */}
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+
             {/* Admin routes with security layers */}
             <Route path="/admin" element={
               <AuthSyncGate>
@@ -606,8 +617,8 @@ const App = () => {
                 </AuthSyncGate>
               } />
              
-             {/* Fallback */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+              {/* Fallback */}
+              <Route path="*" element={<NotFound />} />
           </Routes>
         </AnimatePresence>
       </Suspense>

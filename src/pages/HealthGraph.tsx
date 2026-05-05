@@ -350,7 +350,7 @@ export default function HealthGraph() {
                 <div className="p-4 bg-slate-800/40 rounded-xl border border-slate-700/30 text-sm text-slate-300 leading-relaxed">
                   {ocrExplanation}
                 </div>
-                <p className="text-[10px] text-slate-500 mt-2 italic">
+                <p className="text-xs text-slate-500 mt-2 italic">
                   AI-generated explanation for informational purposes only. Always verify with your healthcare provider.
                 </p>
               </div>

@@ -99,7 +99,7 @@ export default function ChatHistorySidebar({
                 <div className="text-xs text-slate-400 line-clamp-2 mb-2">
                   {entry.preview}
                 </div>
-                <div className="text-[10px] text-slate-500">
+                <div className="text-xs text-slate-500">
                   {new Date(entry.createdAt).toLocaleDateString()}{" "}
                   {new Date(entry.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                 </div>

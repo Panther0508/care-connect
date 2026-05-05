@@ -138,7 +138,35 @@ export default function ClinicianView() {
                   </div>
                 )}
 
-                {/* Encounter History */}
+                 {/* Nutrition Summary */}
+                 {scannedCredential.claims.healthSummary?.nutrition && (
+                   <div>
+                     <div className="text-xs text-slate-500 uppercase tracking-wider mb-2">Recent Nutrition (7 days)</div>
+                     <div className="grid grid-cols-2 gap-3 text-sm">
+                       <div>
+                         <div className="text-slate-500 text-xs">Calories</div>
+                         <div className="text-slate-200">{Math.round(scannedCredential.claims.healthSummary.nutrition.totalCalories)} kcal</div>
+                       </div>
+                       <div>
+                         <div className="text-slate-500 text-xs">Protein</div>
+                         <div className="text-slate-200">{Math.round(scannedCredential.claims.healthSummary.nutrition.totalProtein)} g</div>
+                       </div>
+                       <div>
+                         <div className="text-slate-500 text-xs">Carbs</div>
+                         <div className="text-slate-200">{Math.round(scannedCredential.claims.healthSummary.nutrition.totalCarbs)} g</div>
+                       </div>
+                       <div>
+                         <div className="text-slate-500 text-xs">Fat</div>
+                         <div className="text-slate-200">{Math.round(scannedCredential.claims.healthSummary.nutrition.totalFat)} g</div>
+                       </div>
+                     </div>
+                     <div className="text-xs text-slate-500 mt-2">
+                       {scannedCredential.claims.healthSummary.nutrition.mealCount} meals logged
+                     </div>
+                   </div>
+                 )}
+
+                 {/* Encounter History */}
                 {scannedCredential.claims.healthSummary?.encounters?.length > 0 && (
                   <div>
                     <div className="text-xs text-slate-500 uppercase tracking-wider mb-2">Recent Encounters</div>

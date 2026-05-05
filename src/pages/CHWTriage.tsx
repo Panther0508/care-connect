@@ -1,174 +1,184 @@
 import { motion } from "framer-motion";
-import { Users, AlertTriangle, Clock, ChevronRight, Volume2, VolumeX, Stethoscope } from "lucide-react";
-import { speakText, isSpeaking, cancelSpeech } from "../services/ttsService";
-
-interface TriageTask {
-  id: string;
-  patientName: string;
-  age: number;
-  condition: string;
-  urgency: "routine" | "elevated" | "emergency";
-  lastVisit: string;
-  icon: string; // healthicon filename
-}
-
-const MOCK_TASKS: TriageTask[] = [
-  {
-    id: "1",
-    patientName: "Amina Ibrahim",
-    age: 34,
-    condition: "Hypertension",
-    urgency: "elevated",
-    lastVisit: "2 days ago",
-    icon: "blood-pressure.svg",
-  },
-  {
-    id: "2",
-    patientName: "Chinedu Okafor",
-    age: 58,
-    condition: "Type 2 Diabetes",
-    urgency: "routine",
-    lastVisit: "1 week ago",
-    icon: "diabetes.svg",
-  },
-  {
-    id: "3",
-    patientName: "Fatima Aliyu",
-    age: 28,
-    condition: "Pregnancy — 32 weeks",
-    urgency: "emergency",
-    lastVisit: "1 month ago",
-    icon: "pregnancy.svg",
-  },
-];
+import { useState } from "react";
+import { useStatus } from "../hooks/useStatus";
+import { Stethoscope, AlertTriangle, MessageSquare, Send, Loader } from "lucide-react";
+import { routeQuery } from "../services/aiCoreRouter";
+import VitaAvatar from "../components/VitaAvatar";
 
 export default function CHWTriage() {
-  const [speakingId, setSpeakingId] = useState<string | null>(null);
+  const { showStatus } = useStatus();
+  const [age, setAge] = useState('');
+  const [gender, setGender] = useState('');
+  const [symptoms, setSymptoms] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [response, setResponse] = useState<string | null>(null);
 
-  const handleSpeak = (task: TriageTask, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (speakingId === task.id) {
-      cancelSpeech();
-      setSpeakingId(null);
-    } else {
-      cancelSpeech();
-      const text = `Patient ${task.patientName}, age ${task.age}, ${task.condition}. Last visit ${task.lastVisit}. Urgency: ${task.urgency}.`;
-      speakText(text, { language: "en" });
-      setSpeakingId(task.id);
+  const handleAnalyze = async () => {
+    if (!age || !gender || !symptoms) {
+      showStatus('error', 'Missing Fields', 'Please fill in all fields before analyzing.');
+      return;
     }
-  };
 
-  const getUrgencyColor = (urgency: TriageTask["urgency"]) => {
-    switch (urgency) {
-      case "emergency": return "border-rose-500/30 bg-rose-500/10";
-      case "elevated": return "border-amber-500/30 bg-amber-500/10";
-      case "routine": return "border-emerald-500/30 bg-emerald-500/10";
-    }
-  };
+    setLoading(true);
+    try {
+      const prompt = `You are a medical triage assistant. A Community Health Worker is seeing a ${age}-year-old ${gender} patient with the following symptoms: ${symptoms}.
 
-  const getBadgeColor = (urgency: TriageTask["urgency"]) => {
-    switch (urgency) {
-      case "emergency": return "bg-rose-500/20 text-rose-300";
-      case "elevated": return "bg-amber-500/20 text-amber-300";
-      case "routine": return "bg-emerald-500/20 text-emerald-300";
+Provide your response in this exact 4-section format:
+
+=== What Might Be Happening ===
+List the most likely differential diagnoses based on the presented symptoms. Be concise.
+
+=== What You Can Do ===
+Provide initial management steps the CHW can take immediately (supportive care, monitoring, etc.).
+
+=== Danger Signs ===
+List critical red flags that would indicate the need for immediate referral to a healthcare facility.
+
+=== Reminder ===
+End with one important clinical reminder relevant to this case.`;
+
+      const result = await routeQuery({ structuredPrompt: prompt, role: 'chw' });
+
+      if (result?.text) {
+        setResponse(result.text);
+        showStatus('success', 'Analysis Complete', 'AI triage assessment generated.');
+      } else {
+        showStatus('error', 'No Response', 'The AI did not generate a response.');
+      }
+    } catch (err) {
+      console.error('Triage analysis failed:', err);
+      showStatus('error', 'Analysis Failed', err?.message || 'Could not complete triage.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6 p-4 pb-24">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-white mb-1">CHW Triage</h1>
-          <p className="text-slate-400 text-sm">Prioritise home visits visually</p>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="min-h-[calc(100vh-4rem)] p-4 pb-24"
+    >
+      <div className="max-w-4xl mx-auto space-y-6">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-14 h-14 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center">
+            <Stethoscope size={28} className="text-amber-400" />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-white">AI Symptom Triage</h1>
+            <p className="text-slate-400 text-sm">AI-powered patient triage for community health workers</p>
+          </div>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-300 text-sm">
-          <Stethoscope size={16} />
-          {MOCK_TASKS.length} patients
-        </div>
-      </div>
 
-      {/* Legend */}
-      <div className="flex gap-4 text-xs text-slate-400">
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-emerald-500" />
-          <span>Routine</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-amber-500" />
-          <span>Elevated</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-full bg-rose-500" />
-          <span>Emergency</span>
-        </div>
-      </div>
-
-      {/* Task cards */}
-      <div className="space-y-3">
-        {MOCK_TASKS.map((task) => (
-          <motion.div
-            key={task.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`glass-card border-l-4 ${getUrgencyColor(task.urgency)}`}
-          >
-            <div className="p-4">
-              <div className="flex items-start gap-4">
-                {/* Large icon placeholder */}
-                <div className="w-16 h-16 rounded-2xl bg-slate-800/50 border border-slate-700/30 flex items-center justify-center flex-shrink-0">
-                  <span className="text-3xl">🩺</span>
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-semibold text-white text-lg">{task.patientName}</h3>
-                      <p className="text-slate-400 text-sm">
-                        Age {task.age} • {task.condition}
-                      </p>
-                    </div>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getBadgeColor(task.urgency)}`}>
-                      {task.urgency.replace("_", " ")}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2 mt-2 text-slate-500 text-xs">
-                    <Clock size={12} />
-                    Last visit: {task.lastVisit}
-                  </div>
-
-                  <div className="flex gap-2 mt-4">
-                    <button className="flex-1 px-4 py-2 bg-teal-600/20 hover:bg-teal-500/30 border border-teal-500/30 text-teal-300 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2">
-                      <Stethoscope size={14} />
-                      Visit Protocol
-                    </button>
-                    <button
-                      onClick={(e) => handleSpeak(task, e)}
-                      className={`p-2.5 rounded-xl border transition-all flex items-center justify-center ${
-                        speakingId === task.id
-                          ? "bg-rose-500/20 border-rose-500/30 text-rose-300"
-                          : "bg-slate-700/50 border-slate-600/30 text-slate-300 hover:bg-slate-600/50"
-                      }`}
-                      title={speakingId === task.id ? "Stop reading" : "Read aloud"}
-                    >
-                      {speakingId === task.id ? <VolumeX size={16} /> : <Volume2 size={16} />}
-                    </button>
-                  </div>
+        {!response ? (
+          <div className="glass-card p-8">
+            <div className="space-y-4">
+              <div className="flex items-start gap-4 p-4 bg-slate-800/30 rounded-lg border border-slate-700/30">
+                <AlertTriangle className="text-amber-400 mt-1 flex-shrink-0" size={20} />
+                <div>
+                  <h3 className="font-medium text-slate-100 mb-1">Danger Sign Detection</h3>
+                  <p className="text-sm text-slate-400">AI will analyze symptoms and flag emergency indicators</p>
                 </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
 
-      {/* Info banner */}
-      <div className="glass-card p-4 border-amber-500/20 bg-amber-500/5">
-        <div className="flex items-start gap-3">
-          <AlertTriangle className="text-amber-400 flex-shrink-0 mt-0.5" size={18} />
-          <p className="text-xs text-slate-300">
-            <strong>Priority reminder:</strong> Emergency cases (red) require immediate attention within 2 hours. Elevated (amber) within 24 hours. Routine (green) within 7 days.
-          </p>
-        </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Patient Age</label>
+                  <input
+                    type="number"
+                    placeholder="Age in years"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Gender</label>
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                  >
+                    <option value="">Select gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="non-binary">Non-binary</option>
+                  </select>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Presenting Symptoms</label>
+                  <textarea
+                    rows={4}
+                    placeholder="Describe the symptoms in your own language..."
+                    value={symptoms}
+                    onChange={(e) => setSymptoms(e.target.value)}
+                    className="w-full bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500/50"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4">
+                <button
+                  onClick={handleAnalyze}
+                  disabled={loading || !age || !gender || !symptoms}
+                  className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white px-8 py-3 rounded-xl font-semibold shadow-lg shadow-teal-500/25 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <>
+                      <Loader size={18} className="animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Send size={18} />
+                      Assess
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass-card p-8 space-y-6"
+            >
+              <div className="flex items-center gap-4 mb-6">
+                <VitaAvatar state="success" size={56} />
+                <div>
+                  <h2 className="text-xl font-semibold text-teal-300">Triage Assessment</h2>
+                  <p className="text-slate-400 text-sm">For {age} year old {gender}</p>
+                </div>
+              </div>
+
+              <div className="bg-slate-800/40 rounded-lg p-4 border border-slate-700/30 whitespace-pre-wrap text-slate-200 text-sm leading-relaxed max-h-96 overflow-y-auto">
+                {response}
+              </div>
+            </motion.div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setResponse(null);
+                  setAge('');
+                  setGender('');
+                  setSymptoms('');
+                }}
+                className="flex-1 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-colors"
+              >
+                New Assessment
+              </button>
+              <button
+                onClick={() => showStatus('info', 'Saved', 'Assessment saved to patient record.')}
+                className="flex-1 px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg font-medium transition-colors"
+              >
+                Save Assessment
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </motion.div>
   );

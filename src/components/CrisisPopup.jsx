@@ -110,7 +110,7 @@ export default function CrisisPopup({ visible, riskLevel, matchedPattern, onDism
                 Continue to App
               </button>
 
-              <p className="text-slate-500 text-[10px] mt-2">
+              <p className="text-slate-500 text-xs mt-2">
                 You can close this and continue using VitaChain whenever you're ready
               </p>
             </div>

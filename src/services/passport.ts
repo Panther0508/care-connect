@@ -3,7 +3,7 @@ import { getCurrentHealthState, initHealthGraph, setActiveUser } from './healthG
 import { loadModel, generatePreVisitSummary } from './medicalAI';
 import QRCode from 'qrcode';
 import { meshOrchestrator } from './meshOrchestrator';
-import { addPassportShare, addPassportScan } from '../lib/idb';
+import { addPassportShare, addPassportScan, getFoodLogsForRange } from '../lib/idb';
 
 let keyPair = null;
 let modelLoaded = false;
@@ -58,6 +58,9 @@ export async function getPatientDid() {
 }
 
 export async function generatePassport(specialistType, userId) {
+  // Ensure health graph is loaded for this user
+  await initPassport(userId);
+
   const healthState = getCurrentHealthState();
 
   let summaryText;
@@ -65,6 +68,37 @@ export async function generatePassport(specialistType, userId) {
     summaryText = await generatePreVisitSummary(healthState, specialistType);
   } else {
     summaryText = generateSimpleSummary(healthState, specialistType);
+  }
+
+  // Fetch recent nutrition data (last 7 days)
+  const today = new Date();
+  const weekAgo = new Date(today);
+  weekAgo.setDate(weekAgo.getDate() - 7);
+  const startDate = weekAgo.toISOString().split('T')[0];
+  const endDate = today.toISOString().split('T')[0];
+
+  let nutritionSummary = null;
+  try {
+    const foodLogs = await getFoodLogsForRange(userId, startDate, endDate);
+    if (foodLogs.length > 0) {
+      const totals = foodLogs.reduce(
+        (acc, log) => ({
+          totalCalories: acc.totalCalories + (log.calories || 0),
+          totalProtein: acc.totalProtein + (log.protein || 0),
+          totalCarbs: acc.totalCarbs + (log.carbs || 0),
+          totalFat: acc.totalFat + (log.fat || 0),
+          totalFiber: acc.totalFiber + (log.fiber || 0),
+          mealCount: acc.mealCount + 1,
+        }),
+        { totalCalories: 0, totalProtein: 0, totalCarbs: 0, totalFat: 0, totalFiber: 0, mealCount: 0 }
+      );
+      nutritionSummary = {
+        period: `Last 7 days (${startDate} to ${endDate})`,
+        ...totals,
+      };
+    }
+  } catch (err) {
+    console.warn('Failed to fetch nutrition data for passport:', err);
   }
 
   const claims = {
@@ -76,6 +110,7 @@ export async function generatePassport(specialistType, userId) {
       medications: healthState.medications,
       allergies: healthState.allergies,
       encounters: healthState.encounters.slice(-5),
+      nutrition: nutritionSummary,
     },
   };
 

@@ -1075,7 +1075,7 @@ const handleSpeechInput = async () => {
             )}
           </div>
         </form>
-        <p className="text-[10px] text-slate-500 text-center mt-3 leading-relaxed">Vita provides general health information and does not substitute professional medical advice.</p>
+        <p className="text-sm text-slate-500 text-center mt-3 leading-relaxed">Vita provides general health information and does not substitute professional medical advice.</p>
       </div>
 
     </div>

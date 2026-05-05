@@ -1,45 +1,62 @@
 import { motion } from "framer-motion";
-import { QrCode, Download, Share2, Shield, FileText, AlertTriangle } from "lucide-react";
+import { QrCode, Download, Share2, Shield, FileText, AlertTriangle, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useAuth } from "@clerk/clerk-react";
+import { getCurrentHealthState } from "../services/healthGraph";
+import { generatePassport } from "../services/passport";
 
 export default function Passport() {
-  const mockHealthData = {
-    conditions: ["Hypertension", "Type 2 Diabetes"],
-    medications: ["Metformin 500mg twice daily", "Lisinopril 10mg daily"],
-    allergies: ["Penicillin"],
-    lastCheckup: "2025-12-15",
-    bloodType: "O+",
-  };
+  const { user } = useAuth();
+  const [qrDataURL, setQrDataURL] = useState(null);
+  const [healthSummary, setHealthSummary] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function createPassport() {
+      if (!user) return;
+      try {
+        setLoading(true);
+        setError(null);
+        const healthState = getCurrentHealthState();
+        setHealthSummary({
+          conditions: healthState.conditions,
+          medications: healthState.medications,
+          allergies: healthState.allergies,
+          encounters: healthState.encounters,
+        });
+        const result = await generatePassport("Primary Care", user.id);
+        setQrDataURL(result.qrDataURL);
+      } catch (err) {
+        console.error("Passport generation failed:", err);
+        setError("Failed to generate passport QR");
+      } finally {
+        setLoading(false);
+      }
+    }
+    createPassport();
+  }, [user]);
 
   const handleDownload = () => {
-    // Generate and download verifiable credential JSON
-    const vc = {
-      "@context": ["https://www.w3.org/2018/credentials/v1"],
-      type: ["VerifiableCredential", "VitaHealthSummary"],
-      issuer: "did:vitachain:admin",
-      issuanceDate: new Date().toISOString(),
-      credentialSubject: {
-        id: "did:patient:self",
-        healthSummary: mockHealthData,
-      },
-    };
-    const blob = new Blob([JSON.stringify(vc, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "vitapassport-credential.json";
-    a.click();
-    URL.revokeObjectURL(url);
+    if (!qrDataURL) return;
+    const link = document.createElement("a");
+    link.download = "vitapassport-qr.png";
+    link.href = qrDataURL;
+    link.click();
   };
 
   const handleShare = async () => {
+    if (!qrDataURL) return;
     if (navigator.share) {
-      await navigator.share({
-        title: "My VitaPassport",
-        text: "Scan to view my health summary",
-        url: window.location.origin + "/passport?share=me",
-      });
+      try {
+        await navigator.share({
+          title: "My VitaPassport",
+          text: "Scan to view my health summary",
+          url: window.location.origin + "/passport?share=me",
+        });
+      } catch (e) { /* user cancelled */ }
     } else {
-      navigator.clipboard.writeText(window.location.origin + "/passport?share=me");
+      await navigator.clipboard.writeText(window.location.origin + "/passport?share=me");
     }
   };
 
@@ -60,14 +77,16 @@ export default function Passport() {
           <div className="flex gap-2">
             <button
               onClick={handleDownload}
-              className="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-700/70 border border-slate-700/30 text-slate-300 transition-all"
-              title="Download VC"
+              disabled={!qrDataURL}
+              className="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-700/70 border border-slate-700/30 text-slate-300 transition-all disabled:opacity-50"
+              title="Download QR"
             >
               <Download size={18} />
             </button>
             <button
               onClick={handleShare}
-              className="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-700/70 border border-slate-700/30 text-slate-300 transition-all"
+              disabled={!qrDataURL}
+              className="p-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-700/70 border border-slate-700/30 text-slate-300 transition-all disabled:opacity-50"
               title="Share"
             >
               <Share2 size={18} />
@@ -77,9 +96,18 @@ export default function Passport() {
 
         {/* QR Code card */}
         <div className="glass-card p-6 text-center mb-6">
-          <div className="inline-flex items-center justify-center w-48 h-48 bg-white rounded-xl mb-4">
-            <QrCode size={180} className="text-slate-900" />
-          </div>
+          {loading ? (
+            <div className="flex flex-col items-center justify-center w-48 h-48 mx-auto">
+              <Loader2 className="animate-spin text-teal-400 mb-2" size={32} />
+              <p className="text-sm text-slate-400">Generating secure QR...</p>
+            </div>
+          ) : error ? (
+            <div className="text-red-400 text-sm py-8">{error}</div>
+          ) : (
+            <div className="inline-flex items-center justify-center w-48 h-48 bg-white rounded-xl mb-4 overflow-hidden">
+              {qrDataURL && <img src={qrDataURL} alt="Health Passport QR" className="w-full h-full object-contain" />}
+            </div>
+          )}
           <p className="text-slate-400 text-xs">
             Scan this QR code to share your health summary with healthcare providers.
             <br />
@@ -97,54 +125,61 @@ export default function Passport() {
             <h2 className="text-lg font-semibold text-white">Health Summary</h2>
           </div>
 
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Conditions</h3>
-              <div className="flex flex-wrap gap-2">
-                {mockHealthData.conditions.map((cond, idx) => (
-                  <span key={idx} className="px-3 py-1 rounded-lg bg-rose-500/15 text-rose-300 text-sm border border-rose-500/20">
-                    {cond}
-                  </span>
-                ))}
-              </div>
-            </div>
+          {!healthSummary ? (
+            <div className="text-slate-400 text-sm">No health data available.</div>
+          ) : (
+            <div className="space-y-4">
+              {healthSummary.conditions?.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Conditions</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {healthSummary.conditions.map((c) => (
+                      <span key={c.id} className="px-3 py-1 rounded-lg bg-rose-500/15 text-rose-300 text-sm border border-rose-500/20">{c.name}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-            <div>
-              <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Medications</h3>
-              <ul className="space-y-1">
-                {mockHealthData.medications.map((med, idx) => (
-                  <li key={idx} className="text-slate-300 text-sm flex items-center gap-2">
-                    <div className="w-1 h-1 rounded-full bg-teal-400" />
-                    {med}
-                  </li>
-                ))}
-              </ul>
-            </div>
+              {healthSummary.medications?.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Medications</h3>
+                  <ul className="space-y-1">
+                    {healthSummary.medications.map((m) => (
+                      <li key={m.id} className="text-slate-300 text-sm flex items-center gap-2">
+                        <div className="w-1 h-1 rounded-full bg-teal-400" />
+                        {m.name} {m.dose} — {m.frequency}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
-            <div>
-              <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Allergies</h3>
-              <div className="flex flex-wrap gap-2">
-                {mockHealthData.allergies.map((allergy, idx) => (
-                  <span key={idx} className="px-3 py-1 rounded-lg bg-amber-500/15 text-amber-300 text-sm border border-amber-500/20">
-                    {allergy}
-                  </span>
-                ))}
-              </div>
-            </div>
+              {healthSummary.allergies?.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Allergies</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {healthSummary.allergies.map((a) => (
+                      <span key={a.id} className="px-3 py-1 rounded-lg bg-amber-500/15 text-amber-300 text-sm border border-amber-500/20">{a.substance}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-white/5">
-              <div>
-                <p className="text-xs text-slate-400">Blood Type</p>
-                <p className="font-semibold text-white">{mockHealthData.bloodType}</p>
-              </div>
-              <div>
-                <p className="text-xs text-slate-400">Last Checkup</p>
-                <p className="font-semibold text-white">
-                  {new Date(mockHealthData.lastCheckup).toLocaleDateString()}
-                </p>
-              </div>
+              {healthSummary.encounters?.length > 0 && (
+                <div>
+                  <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Recent Encounters</h3>
+                  <div className="space-y-2">
+                    {healthSummary.encounters.slice(-3).map((e) => (
+                      <div key={e.id} className="text-sm text-slate-300 border-l-2 border-slate-700 pl-3">
+                        <div>{e.facilityName}</div>
+                        <div className="text-xs text-slate-500">{e.date} — {e.reason}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
+          )}
         </div>
 
         {/* Security note */}
@@ -154,7 +189,7 @@ export default function Passport() {
             <div className="text-xs text-slate-300">
               <p className="font-medium text-amber-300 mb-1">Security Notice</p>
               <p>
-                Your QR code contains encrypted health data. Only share it with trusted healthcare providers.
+                Your QR code contains signed health data. Only share it with trusted healthcare providers.
                 You can revoke access at any time from Settings.
               </p>
             </div>

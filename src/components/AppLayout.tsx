@@ -162,7 +162,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 </button>
               </form>
 
-              <p className="text-[10px] text-slate-500 mt-4">
+              <p className="text-xs text-slate-500 mt-4">
                 Forgotten PIN? Contact support to reset your account.
               </p>
             </motion.div>

@@ -179,8 +179,8 @@ export default function AvatarCustomization() {
                   <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 rounded-xl">
                     <div className="text-center px-2">
                       <div className="text-xs text-amber-400 mb-1">🔒 Locked</div>
-                      <div className="text-[10px] text-slate-400">{accessory.unlockCondition.requirement}</div>
-                      <div className="text-[10px] text-teal-400 mt-1">{progress.current}/{progress.needed}</div>
+                       <div className="text-xs text-slate-400">{accessory.unlockCondition.requirement}</div>
+                       <div className="text-xs text-teal-400 mt-1">{progress.current}/{progress.needed}</div>
                     </div>
                   </div>
                 )}

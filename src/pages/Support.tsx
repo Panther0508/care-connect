@@ -171,7 +171,7 @@ export default function Support() {
                     </span>
                   </div>
                   <p className="text-slate-400 text-xs truncate">{ticket.message}</p>
-                  <p className="text-slate-500 text-[10px] mt-1">
+                  <p className="text-slate-500 text-xs mt-1">
                     {new Date(ticket.createdAt).toLocaleDateString()}
                   </p>
                 </div>

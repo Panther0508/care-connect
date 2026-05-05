@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { Users, ClipboardList, Activity, TrendingUp, MapPin } from "lucide-react";
+import { NavLink } from "react-router-dom";
+import { Users, ClipboardList, Activity, TrendingUp, MapPin, Sparkles } from "lucide-react";
 
 const STATS = [
   { label: "Patients Assigned", value: 48, icon: Users, color: "text-teal-400" },
@@ -27,9 +28,23 @@ export default function CHWDashboard() {
             <p className="text-xs text-slate-400">{stat.label}</p>
           </div>
         ))}
+        </div>
+
+      {/* Quick actions - AI Triage */}
+      <div className="space-y-3">
+        <h2 className="text-lg font-semibold text-white">Quick Actions</h2>
+        <div className="flex flex-wrap gap-2">
+          <NavLink
+            to="/chw-triage"
+            className="glass-card px-4 py-2 rounded-xl text-sm font-medium text-teal-400 hover:border-teal-500/25 hover:text-teal-300 transition-all flex items-center gap-2"
+          >
+            <Sparkles size={16} />
+            AI Triage
+          </NavLink>
+        </div>
       </div>
 
-      {/* Quick actions */}
+      {/* Today's Tasks */}
       <div className="space-y-3">
         <h2 className="text-lg font-semibold text-white">Today's Tasks</h2>
         <div className="glass-card divide-y divide-white/5">
