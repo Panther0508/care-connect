@@ -39,6 +39,7 @@ export interface Facility {
 
 let extractor: any = null;
 let extractorError = null;
+let extractorCooldownUntil = 0; // Cooldown timestamp after permanent failure
 
 // Simple keyword-based embedding fallback (offline-safe)
 function keywordEmbed(text: string): number[] {
@@ -56,7 +57,16 @@ function keywordEmbed(text: string): number[] {
 
 export async function initModel() {
   if (extractor) return extractor;
-  
+
+  // Cooldown check after permanent failure
+  if (extractorError && extractorCooldownUntil && Date.now() < extractorCooldownUntil) {
+    console.log('aiSearch embedder in cooldown, returning null');
+    return null;
+  }
+  if (extractorError && extractorCooldownUntil && Date.now() >= extractorCooldownUntil) {
+    extractorError = null; // reset to allow retry
+  }
+
   const maxAttempts = 3;
   let lastErr = null;
 
@@ -77,6 +87,8 @@ export async function initModel() {
   }
 
   extractorError = lastErr;
+  extractor = null;
+  extractorCooldownUntil = Date.now() + 20 * 60 * 1000; // 20 minutes cooldown
   console.error('❌ Embedder failed after 3 attempts, using keyword fallback');
   return null;
 }

@@ -18,6 +18,7 @@ let embedder = null;
 let embedderLoading = false;
 let embedderLoaded = false;
 let embedderError = null;
+let embedderCooldownUntil = 0; // Cooldown timestamp after permanent failure
 
 // Simple keyword-based embedding fallback (offline-safe)
 function keywordEmbed(text) {
@@ -129,6 +130,17 @@ export async function loadEmbedder() {
     if (embedderError) return null; // failed earlier
   }
 
+  // Cooldown check after permanent failure
+  if (embedderError && embedderCooldownUntil) {
+    if (Date.now() < embedderCooldownUntil) {
+      console.log('Advanced RAG embedder in cooldown until', new Date(embedderCooldownUntil).toISOString());
+      return null;
+    } else {
+      // Cooldown expired, reset error to allow retry
+      embedderError = null;
+    }
+  }
+
   embedderLoading = true;
   const maxAttempts = 3;
   let lastErr = null;
@@ -159,9 +171,12 @@ export async function loadEmbedder() {
     }
   }
 
+  // All attempts failed
   embedderError = lastErr;
   embedder = null;
   embedderLoaded = false;
+  embedderLoading = false; // Reset loading flag
+  embedderCooldownUntil = Date.now() + 20 * 60 * 1000; // 20 minutes cooldown
   console.error('❌ Embedder failed after 3 attempts, using keyword fallback');
   return null;
 }

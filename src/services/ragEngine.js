@@ -14,6 +14,7 @@ let embedder = null;
 let embedderLoading = false;
 let embedderLoaded = false;
 let embedderError = null;
+let embedderCooldownUntil = 0; // Cooldown timestamp after permanent failure
 
 const EMBEDDING_MODEL = 'Xenova/all-MiniLM-L6-v2';
 const VECTOR_DIM = 384; // all-MiniLM-L6-v2 produces 384-dim vectors
@@ -42,6 +43,17 @@ export async function loadEmbeddingModel() {
     while (embedderLoading) { await new Promise(r => setTimeout(r, 50)); }
     if (embedderLoaded) return embedder;
     if (embedderError) return null;
+  }
+
+  // Cooldown check after permanent failure
+  if (embedderError && embedderCooldownUntil) {
+    if (Date.now() < embedderCooldownUntil) {
+      console.log('RAG Engine embedder in cooldown until', new Date(embedderCooldownUntil).toISOString());
+      return null;
+    } else {
+      // Cooldown expired, reset error to allow retry
+      embedderError = null;
+    }
   }
 
   embedderLoading = true;
@@ -77,6 +89,8 @@ export async function loadEmbeddingModel() {
   embedderError = lastErr;
   embedder = null;
   embedderLoaded = false;
+  embedderLoading = false; // Reset loading flag
+  embedderCooldownUntil = Date.now() + 20 * 60 * 1000; // 20 minutes cooldown
   console.error('❌ Embedder failed after 3 attempts, using keyword fallback');
   return null;
 }

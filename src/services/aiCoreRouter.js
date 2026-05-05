@@ -37,9 +37,11 @@ let embedder = null;
 let embedderLoaded = false;
 let embedderLoading = false;
 let embedderError = null;
+let embedderCooldownUntil = 0; // Cooldown timestamp after permanent failure
 let generator = null;
 let generatorLoaded = false;
 let generatorLoading = false;
+let generatorError = null;
 let lastResult = null;
 let lastReasoning = [];
 
@@ -78,6 +80,17 @@ export async function loadEmbedder() {
     if (embedderError) return null; // failed earlier
   }
 
+  // Cooldown check after permanent failure
+  if (embedderError && embedderCooldownUntil) {
+    if (Date.now() < embedderCooldownUntil) {
+      console.log('[AI Router] Embedder in cooldown until', new Date(embedderCooldownUntil).toISOString());
+      return null;
+    } else {
+      // Cooldown expired, reset error to allow retry
+      embedderError = null;
+    }
+  }
+
   embedderLoading = true;
   const maxAttempts = 3;
   let lastErr = null;
@@ -87,6 +100,7 @@ export async function loadEmbedder() {
       console.log(`Loading embedder (attempt ${attempt}/${maxAttempts})...`);
       embedder = await getEmbeddingModel();
       embedderLoaded = true;
+      embedderLoading = false;
       console.log('✅ Embedder ready (all-MiniLM-L6-v2)');
       return embedder;
     } catch (err) {
@@ -104,9 +118,13 @@ export async function loadEmbedder() {
   embedderError = lastErr;
   embedder = null;
   embedderLoaded = false;
+  embedderLoading = false; // Reset loading flag
+  embedderCooldownUntil = Date.now() + 20 * 60 * 1000; // 20 minutes cooldown
   console.error('❌ Embedder failed after 3 attempts, using keyword fallback');
   return null;
 }
+
+
 
 export async function embedText(text) {
   await loadEmbedder();
@@ -674,85 +692,102 @@ export async function routeQuery({
     console.log('[AI Router] Tier 4 SKIPPED: VITE_HF_API_KEY not set');
   }
 
-   // 7d. TinyLlama 1.1B — final fallback (always available)
-   console.log('[AI Router] Tier 5: Attempting TinyLlama 1.1B (offline fallback)');
-   try {
-     const llm = await loadTinyLlama();
-     console.log('[AI Router] TinyLlama model loaded successfully');
-     const tokenizer = await getTokenizer('textGeneration');
+   // 7d. TinyLlama 1.1B — final fallback (offline only)
+   if (!isOnline) {
+     console.log('[AI Router] Tier 5: Attempting TinyLlama 1.1B (offline fallback)');
+     try {
+       const llm = await loadTinyLlama();
+       console.log('[AI Router] TinyLlama model loaded successfully');
+       const tokenizer = await getTokenizer('textGeneration');
 
-     const messages = [
-       { role: 'system', content: fullSystemPrompt },
-       { role: 'user', content: structuredPrompt }
-     ];
+       const messages = [
+         { role: 'system', content: fullSystemPrompt },
+         { role: 'user', content: structuredPrompt }
+       ];
 
-     let formattedPrompt;
-     if (tokenizer && tokenizer.apply_chat_template) {
-       formattedPrompt = tokenizer.apply_chat_template(messages, { tokenize: false, add_generation_prompt: true });
-     } else {
-       formattedPrompt = `<|system|>\n${fullSystemPrompt}<|user|>\n${structuredPrompt}<|assistant|>\n`;
-     }
+       let formattedPrompt;
+       if (tokenizer && tokenizer.apply_chat_template) {
+         formattedPrompt = tokenizer.apply_chat_template(messages, { tokenize: false, add_generation_prompt: true });
+       } else {
+         formattedPrompt = `<|system|>\n${fullSystemPrompt}<|user|>\n${structuredPrompt}<|assistant|>\n`;
+       }
 
-     const output = await llm(formattedPrompt, { max_new_tokens: 600, temperature: 0.3, do_sample: true });
-     const generated = output[0]?.generated_text || '';
-     const responseText = generated.replace(formattedPrompt, '').trim();
+       const output = await llm(formattedPrompt, { max_new_tokens: 600, temperature: 0.3, do_sample: true });
+       const generated = output[0]?.generated_text || '';
+       const responseText = generated.replace(formattedPrompt, '').trim();
 
-     // If the model output looks like it's repeating the prompt/template, give a clean fallback
-     if (responseText.length < 50 || responseText.includes('SECTION') || responseText.includes('=== ====')) {
-       console.log('[AI Router] Tier 5 DEGRADED: TinyLlama returned incomplete/template response');
-       const fallbackText = 'I am currently in offline mode with limited AI capabilities. Please check your internet connection for a more comprehensive response, or try again later when I can access my full medical knowledge base. For urgent medical concerns, contact a healthcare professional directly.';
-        await addTurn(userId, structuredPrompt, fallbackText, finalEmotion);
+       // If the model output looks like it's repeating the prompt/template, give a clean fallback
+       if (responseText.length < 50 || responseText.includes('SECTION') || responseText.includes('=== ====')) {
+         console.log('[AI Router] Tier 5 DEGRADED: TinyLlama returned incomplete/template response');
+         const fallbackText = 'I am currently in offline mode with limited AI capabilities. Please check your internet connection for a more comprehensive response, or try again later when I can access my full medical knowledge base. For urgent medical concerns, contact a healthcare professional directly.';
+         await addTurn(userId, structuredPrompt, fallbackText, finalEmotion);
+         const tinyResult = {
+           text: fallbackText,
+           reasoning: [{ type: 'conclusion', title: 'Offline Limited', description: 'TinyLlama offline model available but connectivity required for full responses' }],
+           citations: [],
+           emotionalState: finalEmotion,
+           model: 'tinyllama-1.1b',
+           source: 'offline',
+           evaluation: { overall: 0.5, components: { factual: 0.5, clarity: 0.7, safety: 0.8, completeness: 0.4 } },
+           quotaRemaining: 0
+         };
+         lastResult = tinyResult;
+         lastReasoning = tinyResult.reasoning;
+         return tinyResult;
+       }
+
+       console.log('[AI Router] Tier 5 SUCCESS: TinyLlama generated response (' + responseText.length + ' chars)');
+       const safeText = applyGuardrails(responseText, role);
+
+       await addTurn(userId, structuredPrompt, safeText, finalEmotion);
+
        const tinyResult = {
-         text: fallbackText,
-         reasoning: [{ type: 'conclusion', title: 'Offline Limited', description: 'TinyLlama offline model available but connectivity required for full responses' }],
+         text: safeText,
+         reasoning: [{ type: 'conclusion', title: 'TinyLlama Offline', description: 'On-device 1.1B model — always available without internet' }],
          citations: [],
          emotionalState: finalEmotion,
          model: 'tinyllama-1.1b',
          source: 'offline',
-         evaluation: { overall: 0.5, components: { factual: 0.5, clarity: 0.7, safety: 0.8, completeness: 0.4 } },
+         evaluation: { overall: 0.6, components: { factual: 0.6, clarity: 0.7, safety: 0.8, completeness: 0.5 } },
          quotaRemaining: 0
        };
        lastResult = tinyResult;
        lastReasoning = tinyResult.reasoning;
        return tinyResult;
+     } catch (err) {
+       console.error('[AI Router] Tier 5 FAILED: TinyLlama error:', err.message, '— ALL TIERS EXHAUSTED');
+       const fallbackText = 'All AI models are currently unavailable. Please check your internet connection and try again. For urgent medical questions, contact a healthcare provider directly.';
+       const errorResult = {
+         text: fallbackText,
+         reasoning: [],
+         citations: [],
+         emotionalState: finalEmotion,
+         model: 'none',
+         source: 'error',
+         evaluation: { overall: 0, components: { factual: 0, clarity: 0, safety: 0, completeness: 0 } },
+         quotaRemaining: 0
+       };
+       lastResult = errorResult;
+       lastReasoning = [];
+       return errorResult;
      }
-
-      console.log('[AI Router] Tier 5 SUCCESS: TinyLlama generated response (' + responseText.length + ' chars)');
-      const safeText = applyGuardrails(responseText, role);
-
-      await addTurn(userId, structuredPrompt, safeText, finalEmotion);
-
-      const tinyResult = {
-        text: safeText,
-        reasoning: [{ type: 'conclusion', title: 'TinyLlama Offline', description: 'On-device 1.1B model — always available without internet' }],
-        citations: [],
-        emotionalState: finalEmotion,
-        model: 'tinyllama-1.1b',
-        source: 'offline',
-        evaluation: { overall: 0.6, components: { factual: 0.6, clarity: 0.7, safety: 0.8, completeness: 0.5 } },
-        quotaRemaining: 0
-      };
-      lastResult = tinyResult;
-      lastReasoning = tinyResult.reasoning;
-      return tinyResult;
-    } catch (err) {
-      console.error('[AI Router] Tier 5 FAILED: TinyLlama error:', err.message, '— ALL TIERS EXHAUSTED');
-      const fallbackText = 'All AI models are currently unavailable. Please check your internet connection and try again. For urgent medical questions, contact a healthcare provider directly.';
-      const errorResult = {
-        text: fallbackText,
-        reasoning: [],
-        citations: [],
-        emotionalState: finalEmotion,
-        model: 'none',
-        source: 'error',
-        evaluation: { overall: 0, components: { factual: 0, clarity: 0, safety: 0, completeness: 0 } },
-        quotaRemaining: 0
-      };
-      lastResult = errorResult;
-      lastReasoning = [];
-      return errorResult;
-    }
-}
+   } else {
+     console.log('[AI Router] Tier 5 SKIPPED: Online mode, not using offline model');
+     const fallbackText = 'All AI services are currently unavailable. Please check your connection or try again later. For urgent medical concerns, contact a healthcare provider directly.';
+     const errorResult = {
+       text: fallbackText,
+       reasoning: [],
+       citations: [],
+       emotionalState: finalEmotion,
+       model: 'none',
+       source: 'error',
+       evaluation: { overall: 0, components: { factual: 0, clarity: 0, safety: 0, completeness: 0 } },
+       quotaRemaining: 0
+     };
+     lastResult = errorResult;
+     lastReasoning = [];
+     return errorResult;
+   }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // UTILITIES
