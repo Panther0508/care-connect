@@ -172,7 +172,7 @@ let dbInstance = null;
 async function openDB() {
   if (dbInstance) return dbInstance;
 return new Promise((resolve, reject) => {
-      const req = indexedDB.open('vitachain', 9); // unified version v9
+      const req = indexedDB.open('vitachain', 10); // unified version v10
     req.onupgradeneeded = (e) => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains('gemmaCache')) db.createObjectStore('gemmaCache', { keyPath: 'id' });
@@ -434,6 +434,13 @@ export async function routeQuery({
   useCache = true,
   extractedQuery = null
 }) {
+  // ─────────────────────────────────────────────────────────────────────────────
+  // CRITICAL: Log router invocation for debugging
+  // ─────────────────────────────────────────────────────────────────────────────
+  const isOnline = typeof navigator !== 'undefined' && navigator.onLine;
+  const quotaInfo = getQuotaRemaining();
+  console.log('[AI Router] routeQuery called. Online:', isOnline, 'Credits:', quotaInfo.used + '/' + DAILY_QUOTA, '(Remaining:', quotaInfo.remaining + ')', 'Role:', role || 'none');
+
   // Extract user question from structuredPrompt if not provided
   let finalExtractedQuery = extractedQuery;
   if (!finalExtractedQuery) {
@@ -469,16 +476,14 @@ export async function routeQuery({
   }
 
   // 5. Check online status & quota
-  const isOnline = typeof navigator !== 'undefined' && navigator.onLine;
-  const hasQuota = getQuotaRemaining().remaining > 0;
+  const hasQuota = quotaInfo.remaining > 0;
 
   // 6. ONLINE PRIMARY PATH (Gemma 4)
   if (isOnline && hasQuota) {
     const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
    if (geminiKey) {
+     console.log('[AI Router] Tier 1: Attempting Gemma 4 (Gemini API)');
      try {
-       // Fetch enrichment if not provided (use extracted query, not full prompt)
-       const enrichmentData = enrichment || (isOnline ? await enrichWithWebData(finalExtractedQuery) : null);
 
         // Build final enriched prompt
         const enrichedPrompt = enrichmentData
@@ -554,20 +559,23 @@ export async function routeQuery({
           };
          lastResult = result;
          lastReasoning = result.reasoning;
+         console.log('[AI Router] Tier 1 SUCCESS: Gemma 4 returned response (' + safeText.length + ' chars, Score: ' + evaluation.overall + ')');
          return result;
       } catch (err) {
-        console.warn('Gemma failed, falling back:', err.message);
+        console.warn('[AI Router] Tier 1 FAILED: Gemma 4 error:', err.message);
         // Fall through to fallback ladder
       }
     } else {
-      console.warn('VITE_GEMINI_API_KEY not set — skipping primary path');
+      console.warn('[AI Router] Tier 1 SKIPPED: VITE_GEMINI_API_KEY not set');
     }
   }
 
   // 7. FALLBACK LADDER
+  console.log('[AI Router] Entering fallback ladder. Online:', isOnline, 'Quota:', hasQuota);
 
   // 7a. Cache (if available)
   if (useCache) {
+    console.log('[AI Router] Tier 2: Attempting cached Gemma response');
     try {
       const queryVec = await embedText(structuredPrompt);
       const cached = await searchCachedResponses(queryVec, 0.85);
@@ -589,14 +597,17 @@ export async function routeQuery({
          };
          lastResult = cachedResult;
          lastReasoning = cachedResult.reasoning;
+         console.log('[AI Router] Tier 2 SUCCESS: Cache hit with score 0.85');
          return cachedResult;
       }
-    } catch (err) { console.warn('Cache lookup failed:', err); }
+      console.log('[AI Router] Tier 2 EMPTY: Cache miss - no semantic matches');
+    } catch (err) { console.warn('[AI Router] Tier 2 FAILED: Cache lookup error:', err.message); }
   }
 
   // 7b. OpenRouter (Gemma 4 free tier)
   const openRouterKey = import.meta.env.VITE_OPENROUTER_API_KEY;
   if (openRouterKey) {
+    console.log('[AI Router] Tier 3: Attempting OpenRouter Gemma-4');
     try {
       const result = await queryOpenRouter(structuredPrompt, fullSystemPrompt);
       const safeText = applyGuardrails(result.text, role);
@@ -615,13 +626,17 @@ export async function routeQuery({
        };
        lastResult = openRouterResult;
        lastReasoning = openRouterResult.reasoning;
+       console.log('[AI Router] Tier 3 SUCCESS: OpenRouter returned response (' + safeText.length + ' chars)');
        return openRouterResult;
-    } catch (err) { console.warn('OpenRouter failed:', err.message); }
+    } catch (err) { console.warn('[AI Router] Tier 3 FAILED: OpenRouter error:', err.message); }
+  } else {
+    console.log('[AI Router] Tier 3 SKIPPED: VITE_OPENROUTER_API_KEY not set');
   }
 
   // 7c. HuggingFace Medical-Llama3
   const hfKey = import.meta.env.VITE_HF_API_KEY;
   if (hfKey) {
+    console.log('[AI Router] Tier 4: Attempting HuggingFace Medical-Llama3');
     try {
       const result = await queryHuggingFaceCascade(structuredPrompt, fullSystemPrompt);
       const safeText = applyGuardrails(result.text, role);
@@ -640,13 +655,18 @@ export async function routeQuery({
        };
        lastResult = hfResult;
        lastReasoning = hfResult.reasoning;
+       console.log('[AI Router] Tier 4 SUCCESS: HuggingFace returned response (' + safeText.length + ' chars)');
        return hfResult;
-    } catch (err) { console.warn('HuggingFace failed:', err.message); }
+    } catch (err) { console.warn('[AI Router] Tier 4 FAILED: HuggingFace error:', err.message); }
+  } else {
+    console.log('[AI Router] Tier 4 SKIPPED: VITE_HF_API_KEY not set');
   }
 
    // 7d. TinyLlama 1.1B — final fallback (always available)
+   console.log('[AI Router] Tier 5: Attempting TinyLlama 1.1B (offline fallback)');
    try {
      const llm = await loadTinyLlama();
+     console.log('[AI Router] TinyLlama model loaded successfully');
      const tokenizer = await getTokenizer('textGeneration');
 
      const messages = [
@@ -667,6 +687,7 @@ export async function routeQuery({
 
      // If the model output looks like it's repeating the prompt/template, give a clean fallback
      if (responseText.length < 50 || responseText.includes('SECTION') || responseText.includes('=== ====')) {
+       console.log('[AI Router] Tier 5 DEGRADED: TinyLlama returned incomplete/template response');
        const fallbackText = 'I am currently in offline mode with limited AI capabilities. Please check your internet connection for a more comprehensive response, or try again later when I can access my full medical knowledge base. For urgent medical concerns, contact a healthcare professional directly.';
         await addTurn(userId, structuredPrompt, fallbackText, finalEmotion);
        const tinyResult = {
@@ -684,6 +705,7 @@ export async function routeQuery({
        return tinyResult;
      }
 
+      console.log('[AI Router] Tier 5 SUCCESS: TinyLlama generated response (' + responseText.length + ' chars)');
       const safeText = applyGuardrails(responseText, role);
 
       await addTurn(userId, structuredPrompt, safeText, finalEmotion);
@@ -702,7 +724,7 @@ export async function routeQuery({
       lastReasoning = tinyResult.reasoning;
       return tinyResult;
     } catch (err) {
-      console.error('TinyLlama failed:', err);
+      console.error('[AI Router] Tier 5 FAILED: TinyLlama error:', err.message, '— ALL TIERS EXHAUSTED');
       const fallbackText = 'All AI models are currently unavailable. Please check your internet connection and try again. For urgent medical questions, contact a healthcare provider directly.';
       const errorResult = {
         text: fallbackText,

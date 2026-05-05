@@ -4,7 +4,7 @@
 import { getMeshState } from '../lib/gossipProtocol';
 import type { MeshDoc } from '../lib/gossipProtocol';
 
-const OUTBREAK_THRESHOLD = 5; // Minimum unique searches to trigger alert
+export const OUTBREAK_THRESHOLD = 5; // Minimum unique searches to trigger alert
 const ALERT_COOLDOWN_DAYS = 7;
 const ALERT_COOLDOWN_MS = ALERT_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
 

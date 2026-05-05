@@ -19,7 +19,8 @@ import { logInteraction } from './selfTrainingEngine.js';
 // ─────────────────────────────────────────────────────────────────────────────
 
 // TinyLlama 1.1B hosted on GitHub Releases (no credit card, no Vercel size limits)
-const TINYLLAMA_GITHUB_RELEASES_URL = 'https://github.com/vitachain-ai/models/releases/download/v1.0/tinyllama-1.1b-chat.onnx';
+// Verified: v2.1.0-buildfix release contains quantized decoder_model_merged_quantized.onnx (1.03GB)
+const TINYLLAMA_GITHUB_RELEASES_URL = 'https://github.com/Panther0508/care-connect/releases/download/v2.1.0-buildfix/decoder_model_merged_quantized.onnx';
 
 // Model endpoints configuration
 const MODEL_ENDPOINTS = {

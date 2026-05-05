@@ -56,25 +56,25 @@ export const ROLE_INFO: Record<UserRole, RoleInfo> = {
   [ROLES.PATIENT]: {
     id: ROLES.PATIENT,
     label: 'Patient',
-    description: 'Manage your health records, share with clinicians, track your wellness journey.',
+    description: 'I want to track my own health, medications, and share my medical history with doctors.',
     icon: '🩺',
   },
   [ROLES.CLINICIAN]: {
     id: ROLES.CLINICIAN,
     label: 'Clinician',
-    description: 'Scan patient passports, view health summaries, add clinical notes with consent.',
+    description: 'I am a doctor, nurse, or pharmacist. I will scan patient passports, review clinical summaries, and generate referrals.',
     icon: '👨‍⚕️',
   },
   [ROLES.CHW]: {
     id: ROLES.CHW,
     label: 'Community Health Worker',
-    description: 'Monitor mesh activity, track outbreaks, register community health needs.',
+    description: 'I work in the field triaging patients, following WHO protocols, and logging community encounters.',
     icon: '🏥',
   },
   [ROLES.ADMIN]: {
     id: ROLES.ADMIN,
     label: 'Administrator',
-    description: 'Manage users, configure organization settings, view analytics and compliance.',
+    description: 'I manage users, view aggregate statistics, and monitor the system\'s evaluation dashboard.',
     icon: '⚙️',
   },
 };

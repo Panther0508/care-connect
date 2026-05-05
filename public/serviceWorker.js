@@ -1,7 +1,7 @@
 // public/serviceWorker.js
 // VitaChain Service Worker – offline support, AI model pre-caching, and background sync
 
-const CACHE_NAME = 'vitachain-cache-v4'; // Bumped version
+const CACHE_NAME = 'vitachain-cache-v6'; // Bumped version to force clean cache
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',

@@ -3,7 +3,7 @@
 
 export default {
   testDir: './tests',
-  testMatch: '**/*.spec.js',
+  testMatch: '**/*.spec.mjs',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -12,16 +12,11 @@ export default {
   timeout: 120000, // 2 min per test
 
   use: {
-    baseURL: 'http://localhost:4173',
+    baseURL: 'http://localhost:5173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     actionTimeout: 15000,
   },
 
-  webServer: {
-    command: 'npm run preview',
-    url: 'http://localhost:4173',
-    reuseExistingServer: true,
-    timeout: 60 * 1000,
-  },
+  // webServer is NOT used - test manages its own dev server
 };

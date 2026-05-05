@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import VitaAvatar from "../components/VitaAvatar";
 import MagnifyingLoader from "../components/MagnifyingLoader";
+import BarcodeScanner from "../components/BarcodeScanner";
 import {
   initHealthGraph,
   addCondition,
@@ -17,7 +18,11 @@ import {
   removeEncounter,
   getCurrentHealthState,
 } from "../services/healthGraph";
+import { getMedicationByBarcode } from "../services/medicationLookup";
+import { ChevronRight, Heart, ScanBarcode, Pill, AlertTriangle, Calendar, Plus, X } from 'lucide-react';
 import type { Condition, Medication, Allergy, Encounter } from "../lib/crdtHealthGraph";
+
+type ModalType = 'condition' | 'medication' | 'allergy' | 'encounter' | null;
 
 export default function HealthGraph() {
   const [conditions, setConditions] = useState<Condition[]>([]);
@@ -159,7 +164,7 @@ export default function HealthGraph() {
     modalType: ModalType,
     renderItem: (item: any) => React.ReactNode
   ) => (
-    <div className="glass-card p-5">
+    <div className="glass-card p-5 rounded-2xl">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
           {icon}
@@ -167,17 +172,17 @@ export default function HealthGraph() {
         </h2>
         <button
           onClick={() => openAddModal(modalType)}
-          className="flex items-center gap-1 px-3 py-1.5 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 rounded-lg text-sm transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 rounded-2xl text-sm transition-all duration-200 hover:scale-103 active:scale-97 min-h-[40px]"
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
+          <Plus className="w-4 h-4" />
           {addLabel}
         </button>
       </div>
 
       {items.length === 0 ? (
-        <p className="text-slate-500 text-sm italic">{emptyMessage}</p>
+        <div className="glass-card p-6 text-center rounded-2xl">
+          <p className="text-slate-400 text-sm">{emptyMessage}</p>
+        </div>
       ) : (
         <div className="space-y-3">
           {items.map((item) => (
@@ -185,17 +190,15 @@ export default function HealthGraph() {
               key={item.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-slate-800/40 border border-slate-700/30 rounded-lg p-3 relative group hover:border-slate-600/50 transition-colors"
+              className="glass-card p-4 rounded-xl relative group hover:border-teal-400/30 transition-all duration-200"
             >
               {renderItem(item)}
               <button
                 onClick={() => handleDelete(modalType!, item.id)}
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 hover:text-red-400"
+                className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 hover:text-rose-400 p-1 min-h-[32px] min-w-[32px] flex items-center justify-center"
                 title="Delete"
               >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <X className="w-4 h-4" />
               </button>
             </motion.div>
           ))}
@@ -204,20 +207,26 @@ export default function HealthGraph() {
     </div>
   );
 
-   if (loading) {
-     return (
-       <div className="flex items-center justify-center py-20">
-         <MagnifyingLoader size={32} />
-       </div>
-     );
-   }
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0F172A]">
+        <div className="glass-card p-8 rounded-2xl flex flex-col items-center gap-4">
+          <MagnifyingLoader size={40} />
+          <p className="text-slate-400 text-sm">Loading your health records...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <header className="flex items-center gap-6">
-        <VitaAvatar state="health" size={100} />
+    <div className="space-y-6 p-4 pb-24">
+      <header className="flex items-center gap-4 md:gap-6">
+        <div className="relative">
+          <VitaAvatar state="health" size={80} />
+          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-[#0F172A]" />
+        </div>
         <div>
-          <h1 className="text-3xl font-bold text-slate-100 mb-2">My Health Graph</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-100 mb-1">My Health Graph</h1>
           <p className="text-slate-400 text-sm">
             Your encrypted personal health record. All data stays on your device.
           </p>
@@ -226,11 +235,9 @@ export default function HealthGraph() {
 
       {renderSection(
         "Conditions",
-        <svg className="w-5 h-5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-        </svg>,
+        <Heart className="w-5 h-5 text-rose-400" />,
         conditions,
-        "No conditions recorded.",
+        "No conditions recorded yet.",
         "Add Condition",
         "condition",
         (c: Condition) => (
@@ -244,9 +251,7 @@ export default function HealthGraph() {
 
       {renderSection(
         "Medications",
-        <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-        </svg>,
+        <Pill className="w-5 h-5 text-emerald-400" />,
         medications,
         "No active medications.",
         "Add Medication",
@@ -262,9 +267,7 @@ export default function HealthGraph() {
 
       {renderSection(
         "Allergies",
-        <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>,
+        <AlertTriangle className="w-5 h-5 text-amber-400" />,
         allergies,
         "No allergies recorded.",
         "Add Allergy",
@@ -274,7 +277,7 @@ export default function HealthGraph() {
             <div className="font-medium text-slate-100">{a.substance}</div>
             <div className="text-xs text-slate-400">
               Reaction: {a.reaction} · Severity:{" "}
-              <span className={`capitalize ${a.severity === "severe" ? "text-red-400" : a.severity === "moderate" ? "text-amber-400" : "text-blue-400"}`}>
+              <span className={`capitalize ${a.severity === "severe" ? "text-rose-400" : a.severity === "moderate" ? "text-amber-400" : "text-teal-400"}`}>
                 {a.severity}
               </span>
             </div>
@@ -284,9 +287,7 @@ export default function HealthGraph() {
 
       {renderSection(
         "Encounters",
-        <svg className="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>,
+        <Calendar className="w-5 h-5 text-indigo-400" />,
         encounters,
         "No past encounters recorded.",
         "Add Encounter",
@@ -311,7 +312,7 @@ export default function HealthGraph() {
               name="conditionName"
               value={formData.conditionName}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400"
+              className="glass-input w-full rounded-2xl"
               placeholder="e.g., Type 2 Diabetes"
             />
           </div>
@@ -322,7 +323,7 @@ export default function HealthGraph() {
               name="diagnosedDate"
               value={formData.diagnosedDate}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400"
+              className="glass-input w-full rounded-2xl"
             />
           </div>
           <div>
@@ -332,19 +333,19 @@ export default function HealthGraph() {
               value={formData.conditionNotes}
               onChange={handleInputChange}
               rows={3}
-              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400 resize-none"
+              className="glass-input w-full rounded-2xl resize-none"
             />
           </div>
           <div className="pt-2">
-            <button onClick={handleAddCondition} className="w-full btn-primary">
+            <button onClick={handleAddCondition} className="w-full btn-primary rounded-2xl">
               Save Condition
             </button>
           </div>
         </div>
       </Modal>
 
-       {/* Modal for Medication */}
-       <Modal isOpen={modalOpen === 'medication'} onClose={closeModal} title="Add Medication">
+      {/* Modal for Medication */}
+      <Modal isOpen={modalOpen === 'medication'} onClose={closeModal} title="Add Medication">
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1">Medication Name</label>
@@ -352,7 +353,7 @@ export default function HealthGraph() {
               name="medicationName"
               value={formData.medicationName}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400"
+              className="glass-input w-full rounded-2xl"
               placeholder="e.g., Metformin"
             />
           </div>
@@ -363,7 +364,7 @@ export default function HealthGraph() {
                 name="medicationDose"
                 value={formData.medicationDose}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400"
+                className="glass-input w-full rounded-2xl"
                 placeholder="e.g., 500mg"
               />
             </div>
@@ -373,7 +374,7 @@ export default function HealthGraph() {
                 name="medicationFreq"
                 value={formData.medicationFreq}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400"
+                className="glass-input w-full rounded-2xl"
                 placeholder="e.g., twice daily"
               />
             </div>
@@ -386,7 +387,7 @@ export default function HealthGraph() {
                 name="medicationStart"
                 value={formData.medicationStart}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400"
+                className="glass-input w-full rounded-2xl"
               />
             </div>
             <div>
@@ -396,20 +397,20 @@ export default function HealthGraph() {
                 name="medicationEnd"
                 value={formData.medicationEnd}
                 onChange={handleInputChange}
-                className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400"
+                className="glass-input w-full rounded-2xl"
               />
             </div>
           </div>
           <div className="pt-2">
-            <button onClick={handleAddMedication} className="w-full btn-primary">
+            <button onClick={handleAddMedication} className="w-full btn-primary rounded-2xl">
               Add Medication
             </button>
           </div>
         </div>
       </Modal>
 
-       {/* Modal for Allergy */}
-       <Modal isOpen={modalOpen === 'allergy'} onClose={closeModal} title="Add Allergy">
+      {/* Modal for Allergy */}
+      <Modal isOpen={modalOpen === 'allergy'} onClose={closeModal} title="Add Allergy">
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1">Substance</label>
@@ -417,7 +418,7 @@ export default function HealthGraph() {
               name="allergySubstance"
               value={formData.allergySubstance}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400"
+              className="glass-input w-full rounded-2xl"
               placeholder="e.g., Penicillin"
             />
           </div>
@@ -427,7 +428,7 @@ export default function HealthGraph() {
               name="allergyReaction"
               value={formData.allergyReaction}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400"
+              className="glass-input w-full rounded-2xl"
               placeholder="e.g., Hives, difficulty breathing"
             />
           </div>
@@ -437,7 +438,7 @@ export default function HealthGraph() {
               name="allergySeverity"
               value={formData.allergySeverity}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400"
+              className="glass-input w-full rounded-2xl"
             >
               <option value="mild">Mild</option>
               <option value="moderate">Moderate</option>
@@ -445,15 +446,15 @@ export default function HealthGraph() {
             </select>
           </div>
           <div className="pt-2">
-            <button onClick={handleAddAllergy} className="w-full btn-primary">
+            <button onClick={handleAddAllergy} className="w-full btn-primary rounded-2xl">
               Add Allergy
             </button>
           </div>
         </div>
       </Modal>
 
-       {/* Modal for Encounter */}
-       <Modal isOpen={modalOpen === 'encounter'} onClose={closeModal} title="Add Encounter">
+      {/* Modal for Encounter */}
+      <Modal isOpen={modalOpen === 'encounter'} onClose={closeModal} title="Add Encounter">
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1">Date</label>
@@ -462,7 +463,7 @@ export default function HealthGraph() {
               name="encounterDate"
               value={formData.encounterDate}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400"
+              className="glass-input w-full rounded-2xl"
             />
           </div>
           <div>
@@ -471,7 +472,7 @@ export default function HealthGraph() {
               name="encounterFacility"
               value={formData.encounterFacility}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400"
+              className="glass-input w-full rounded-2xl"
               placeholder="e.g., City General Hospital"
             />
           </div>
@@ -481,7 +482,7 @@ export default function HealthGraph() {
               name="encounterReason"
               value={formData.encounterReason}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400"
+              className="glass-input w-full rounded-2xl"
               placeholder="e.g., Annual checkup"
             />
           </div>
@@ -492,11 +493,11 @@ export default function HealthGraph() {
               value={formData.encounterNotes}
               onChange={handleInputChange}
               rows={3}
-              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400 resize-none"
+              className="glass-input w-full rounded-2xl resize-none"
             />
           </div>
           <div className="pt-2">
-            <button onClick={handleAddEncounter} className="w-full btn-primary">
+            <button onClick={handleAddEncounter} className="w-full btn-primary rounded-2xl">
               Add Encounter
             </button>
           </div>
@@ -526,14 +527,15 @@ function Modal({
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        className="bg-slate-900 border border-slate-700/50 rounded-2xl w-full max-w-lg p-6 relative"
+        className="glass-card w-full max-w-lg p-6 relative rounded-2xl"
       >
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-5">
           <h3 className="text-lg font-semibold text-slate-100">{title}</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-200">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+          <button 
+            onClick={onClose} 
+            className="text-slate-400 hover:text-slate-200 p-2 rounded-xl hover:bg-slate-700/50 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+          >
+            <X className="w-5 h-5" />
           </button>
         </div>
         {children}

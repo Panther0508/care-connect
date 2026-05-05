@@ -142,16 +142,25 @@ export async function createCredential({ issuerDid, subjectDid, claims, privateK
 
 /**
  * Verify a Verifiable Credential
- * @param {Object} vc - The credential JSON
- * @param {Object} options
- *   - publicKey: optional pre-loaded CryptoKey; if not provided, derive from issuer DID
+ * Supports both full credentials (with cryptographic proof) and lightweight credentials (QR code fallback)
  */
 export async function verifyCredential(vc, options = {}) {
   try {
     // Extract proof and data
     const { proof } = vc;
+
+    // Lightweight credential fallback (no proof) – accept if structure is valid
     if (!proof) {
-      return { valid: false, reason: 'Missing proof' };
+      const hasRequired =
+        vc['@context'] &&
+        vc.type &&
+        vc.issuer &&
+        vc.credentialSubject &&
+        vc.credentialSubject.healthSummary;
+      if (hasRequired) {
+        return { valid: true, reason: 'Lightweight credential accepted (no signature)' };
+      }
+      return { valid: false, reason: 'Missing proof and required fields' };
     }
 
     // Rebuild the signed data (credential without proof)

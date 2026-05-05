@@ -26,6 +26,18 @@ import { getCurrentHealthState } from '../../services/healthGraph';
 import { askMedicalQuestion } from '../../services/medicalAI';
 import { getOutbreakAlerts, invalidateCache } from '../../services/realtimeData';
 
+// Skeleton Card Component for consistent loading states
+const SkeletonCard = ({ className = '' }: { className?: string }) => (
+  <div className={`glass-card p-4 skeleton-container ${className}`}>
+    <div className="skeleton-breathing" />
+    <div className="skeleton-content space-y-3">
+      <div className="h-4 skeleton rounded w-1/3" />
+      <div className="h-8 skeleton rounded w-1/2" />
+      <div className="h-3 skeleton rounded w-2/3" />
+    </div>
+  </div>
+);
+
 // Live Health Alerts Component
 const LiveHealthAlerts = () => {
   const [alertsData, setAlertsData] = useState<any>(null);
@@ -44,7 +56,7 @@ const LiveHealthAlerts = () => {
           setError(result.error || 'Data temporarily unavailable');
         }
       } catch (err) {
-        setError('Data temporarily unavailable');
+        setError('Failed to load health alerts. Please check your connection.');
         console.error('Failed to fetch outbreak alerts:', err);
       } finally {
         setLoading(false);
@@ -66,37 +78,52 @@ const LiveHealthAlerts = () => {
         setError(result.error || 'Data temporarily unavailable');
       }
     } catch (err) {
-      setError('Data temporarily unavailable');
+      setError('Failed to refresh. Please try again.');
       console.error('Failed to refresh outbreak alerts:', err);
     } finally {
       setLoading(false);
     }
   };
 
-   if (loading && !alertsData) {
-     return (
-       <div className="glass-card p-4 flex items-center justify-center" style={{ minHeight: '200px' }}>
-         <div className="text-center space-y-4">
-           <MagnifyingLoader size={48} />
-           <p className="text-slate-400">Loading health alerts...</p>
-         </div>
-       </div>
-     );
-   }
+  // Skeleton Loading State
+  if (loading && !alertsData) {
+    return (
+      <div className="glass-card p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className="h-5 w-5 skeleton rounded" />
+            <div className="h-5 skeleton rounded w-32" />
+          </div>
+          <div className="h-4 skeleton rounded w-16" />
+        </div>
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
+  // Error State with Retry
   if (error && !alertsData) {
     return (
-      <div className="glass-card p-4">
+      <div className="glass-card p-5">
         <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
           <AlertCircle size={20} className="text-amber-400" />
           Live Health Alerts
         </h2>
-        <p className="text-slate-400 pt-4">{error}</p>
+        <div className="mt-4 flex items-center gap-3 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20">
+          <AlertCircle size={20} className="text-rose-400 shrink-0" />
+          <p className="text-sm text-slate-300 flex-1">{error}</p>
+        </div>
         <button 
           onClick={handleRefresh}
-          className="mt-3 btn-primary px-4 py-2"
+          className="mt-4 btn-primary px-5 py-2.5 rounded-2xl text-sm font-medium hover:scale-103 active:scale-97 transition-all duration-200 focus:ring-2 focus:ring-teal-500/30"
         >
-          Try Again
+          <Sparkles size={16} />
+          Retry Loading
         </button>
       </div>
     );
@@ -109,18 +136,18 @@ const LiveHealthAlerts = () => {
   const timeAgo = Math.floor((Date.now() - updatedTimestamp) / (1000 * 60 * 60)); // hours ago
 
   return (
-    <div className="glass-card p-4">
-      <div className="flex justify-between items-start mb-3">
+    <div className="glass-card p-5">
+      <div className="flex justify-between items-start mb-4">
         <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
           <AlertCircle size={20} className="text-amber-400" />
           Live Health Alerts
         </h2>
         <button 
           onClick={handleRefresh}
-          className="text-sm text-teal-400 hover:text-teal-300 flex items-center gap-1"
+          className="text-sm text-teal-400 hover:text-teal-300 flex items-center gap-1.5 px-3 py-1.5 rounded-xl hover:bg-teal-500/10 transition-all duration-200 min-h-[36px]"
         >
+          <Activity size={14} />
           Refresh
-          <AlertCircle size={16} className="text-teal-400" />
         </button>
       </div>
       
@@ -129,14 +156,29 @@ const LiveHealthAlerts = () => {
         {alerts.length > 0 && (
           <div className="space-y-2">
             {alerts.map((alert: any, index: number) => (
-              <div key={index} className={`p-3 rounded-lg border-l-4 ${alert.level === 'warning' ? 'border-amber-400 bg-amber-50/50' : 'border-teal-400 bg-teal-50/50'}`}>
+              <div 
+                key={index} 
+                className={`p-4 rounded-xl border-l-4 ${
+                  alert.level === 'warning' 
+                    ? 'border-amber-400 bg-amber-500/10' 
+                    : 'border-teal-400 bg-teal-500/10'
+                }`}
+              >
                 <div className="flex items-start gap-3">
-                  <div className={`w-5 h-5 flex items-center justify-center ${alert.level === 'warning' ? 'bg-amber-500' : 'bg-teal-500'}/20 rounded-full shrink-0`}>
-                    {alert.level === 'warning' ? <AlertCircle size={12} className="text-amber-400" /> : <Activity size={12} className="text-teal-400" />}
+                  <div className={`w-8 h-8 flex items-center justify-center rounded-lg shrink-0 ${
+                    alert.level === 'warning' ? 'bg-amber-500/20' : 'bg-teal-500/20'
+                  }`}>
+                    {alert.level === 'warning' ? (
+                      <AlertCircle size={16} className="text-amber-400" />
+                    ) : (
+                      <Activity size={16} className="text-teal-400" />
+                    )}
                   </div>
-                  <div className="flex-1 text-sm">
-                    <p className="font-medium text-slate-100">{alert.message}</p>
-                    <p className="text-xs text-slate-500">{alert.type === 'covid' ? 'COVID-19 Alert' : 'Influenza Alert'}</p>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-slate-100">{alert.message}</p>
+                    <p className="text-xs text-slate-400 mt-0.5">
+                      {alert.type === 'covid' ? 'COVID-19 Alert' : 'Influenza Alert'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -148,55 +190,56 @@ const LiveHealthAlerts = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {/* COVID-19 Card */}
           <div className="glass-card p-4">
-            <div className="flex items-center mb-2">
-              <div className="w-8 h-8 rounded-xl bg-rose-500/20 flex items-center justify-center">
-                <Heart size={20} className="text-rose-400" />
+            <div className="flex items-center mb-3">
+              <div className="w-9 h-9 rounded-xl bg-rose-500/20 flex items-center justify-center">
+                <Heart size={18} className="text-rose-400" />
               </div>
-              <h3 className="flex-1 text-base font-medium text-slate-100 ml-3">COVID-19</h3>
+              <h3 className="flex-1 text-sm font-medium text-slate-100 ml-3">COVID-19</h3>
             </div>
             {covid ? (
               <>
-                <div className="text-2xl font-bold text-slate-100">
+                <div className="text-2xl font-bold text-slate-100 tabular-nums">
                   {covid.cases.toLocaleString()}
                 </div>
-                <p className="text-slate-400">Total Cases</p>
-                <div className="mt-2">
-                  <div className="text-slate-400">{covid.deaths.toLocaleString()}</div>
+                <p className="text-sm text-slate-400">Total Cases</p>
+                <div className="mt-3 pt-3 border-t border-slate-700/30">
+                  <div className="text-sm text-slate-300 tabular-nums">{covid.deaths.toLocaleString()}</div>
                   <p className="text-xs text-slate-500">Deaths</p>
                 </div>
               </>
             ) : (
-              <p className="text-slate-400 text-center">Data unavailable</p>
+              <p className="text-slate-400 text-sm text-center py-2">Data unavailable</p>
             )}
           </div>
           
           {/* Influenza Card */}
           <div className="glass-card p-4">
-            <div className="flex items-center mb-2">
-              <div className="w-8 h-8 rounded-xl bg-cyan-500/20 flex items-center justify-center">
-                <Activity size={20} className="text-cyan-400" />
+            <div className="flex items-center mb-3">
+              <div className="w-9 h-9 rounded-xl bg-cyan-500/20 flex items-center justify-center">
+                <Activity size={18} className="text-cyan-400" />
               </div>
-              <h3 className="flex-1 text-base font-medium text-slate-100 ml-3">Influenza</h3>
+              <h3 className="flex-1 text-sm font-medium text-slate-100 ml-3">Influenza</h3>
             </div>
             {influenza ? (
               <>
-                <div className="text-2xl font-bold text-slate-100">
+                <div className="text-2xl font-bold text-slate-100 tabular-nums">
                   {influenza.cases.toLocaleString()}
                 </div>
-                <p className="text-slate-400">Active Cases</p>
-                <div className="mt-2">
-                  <div className="text-slate-400">{influenza.type || 'Influenza'}</div>
+                <p className="text-sm text-slate-400">Active Cases</p>
+                <div className="mt-3 pt-3 border-t border-slate-700/30">
+                  <div className="text-sm text-slate-300">{influenza.type || 'Influenza'}</div>
                   <p className="text-xs text-slate-500">Strain</p>
                 </div>
               </>
             ) : (
-              <p className="text-slate-400 text-center">Data unavailable</p>
+              <p className="text-slate-400 text-sm text-center py-2">Data unavailable</p>
             )}
           </div>
         </div>
         
         {/* Last Updated */}
-        <div className="mt-3 pt-3 border-t border-slate-700/20 text-xs text-slate-500">
+        <div className="mt-4 pt-3 border-t border-slate-700/20 text-xs text-slate-500 flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           Last updated: {timeAgo > 0 ? `${timeAgo} hour${timeAgo > 1 ? 's' : ''} ago` : 'Just now'}
         </div>
       </div>
@@ -314,13 +357,13 @@ export default function PatientDashboard() {
      setAiResponse(null);
      try {
        const healthState = getCurrentHealthState();
-       const userId = user?.id || 'guest';
+       const userId = (user as any)?.id || 'guest';
        const result = await askMedicalQuestion(healthState, aiQuery.trim(), undefined, 'patient', userId);
        setAiResponse(result.text);
        setAiQuery("");
      } catch (err) {
        console.error(err);
-       setAiResponse("Sorry, I couldn't process that question right now.");
+       setAiResponse("Sorry, I couldn't process that question right now. Please try again.");
      } finally {
        setAiLoading(false);
      }
@@ -384,6 +427,7 @@ export default function PatientDashboard() {
     { label: "Share Passport", icon: Share2, route: "/passport", color: "from-rose-500/20 to-rose-600/20" },
     { label: "Check Medication", icon: Pill, route: "/ai", color: "from-cyan-500/20 to-cyan-600/20" },
     { label: "View Health Graph", icon: Activity, route: "/health", color: "from-teal-500/20 to-teal-600/20" },
+    { label: "Care Plan", icon: Heart, route: "/care-plans", color: "from-amber-500/20 to-amber-600/20" },
     { label: "Outbreak Map", icon: Shield, route: "/outbreak", color: "from-amber-500/20 to-amber-600/20" },
   ];
 
@@ -427,9 +471,10 @@ export default function PatientDashboard() {
           {/* Customise button */}
           <button 
             onClick={() => navigate("/avatar")}
-            className="ml-4 flex items-center gap-2 px-3 py-1.5 text-xs font-medium bg-teal-500/20 text-teal-400 rounded hover:bg-teal-500/30 transition-colors"
+            className="ml-4 flex items-center gap-2 px-4 py-2 text-sm font-medium bg-teal-500/20 text-teal-400 rounded-2xl hover:bg-teal-500/30 hover:scale-103 active:scale-97 transition-all duration-200 min-h-[44px] focus:ring-2 focus:ring-teal-500/30"
           >
-            ✨ Customise
+            <Sparkles size={16} />
+            Customise
           </button>
         </motion.div>
 
@@ -453,9 +498,6 @@ export default function PatientDashboard() {
           <LiveHealthAlerts />
         </motion.div>
 
-       {/* Live Health Alerts - New Component */}
-       {/* LiveHealthAlerts component will be rendered where the placeholder is */}
-
        {/* Wellness Ring - Featured Section */}
        <motion.div
          initial={{ opacity: 0, scale: 0.95 }}
@@ -476,12 +518,12 @@ export default function PatientDashboard() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + i * 0.1 }}
-                className="glass-card p-4 rounded-xl"
+                className="glass-card p-4 rounded-2xl"
               >
                 <div className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-2">{stat.label}</div>
-                <div className="text-xl font-bold text-slate-100" style={{ color: stat.color }}>
+                <div className="text-xl font-bold text-slate-100 tabular-nums" style={{ color: stat.color }}>
                   {stat.value}
-                  <span className="text-sm font-normal text-slate-500">{stat.unit}</span>
+                  <span className="text-sm font-normal text-slate-500 ml-1">{stat.unit}</span>
                 </div>
                 <div className="text-xs text-slate-500 mt-1">of {stat.target} goal</div>
                 <div className="mt-2 h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
@@ -497,13 +539,17 @@ export default function PatientDashboard() {
             ))}
           </div>
         </div>
-        <div className="mt-6 pt-6 border-t border-slate-700/50 flex items-center justify-between">
+        <div className="mt-6 pt-6 border-t border-slate-700/50 flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-sm text-emerald-400 font-medium">All vitals tracking normally</span>
           </div>
-          <button className="text-sm text-teal-400 hover:text-teal-300 font-medium transition-colors">
+          <button 
+            onClick={() => navigate("/health")}
+            className="text-sm text-teal-400 hover:text-teal-300 font-medium transition-all duration-200 hover:scale-103 active:scale-97 flex items-center gap-1 min-h-[36px]"
+          >
             View detailed analytics
+            <ChevronRight size={14} />
           </button>
         </div>
       </motion.div>
@@ -525,26 +571,26 @@ export default function PatientDashboard() {
             return (
               <motion.button
                 key={stat.label}
-                whileHover={{ scale: 1.02, y: -2 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 onClick={() => navigate("/health")}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + idx * 0.05 }}
-                className="relative glass-card p-4 text-left group"
+                className="relative glass-card p-4 text-left group text-left focus:ring-2 focus:ring-teal-500/30 rounded-2xl"
               >
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-2 ${stat.color} bg-opacity-20`}>
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${stat.color}`}>
                   <Icon size={20} />
                 </div>
-                <div className="text-3xl font-bold text-slate-100">
-                  <span className="tabular-nums">{stat.value}</span>
+                <div className="text-3xl font-bold text-slate-100 tabular-nums">
+                  {stat.value}
                 </div>
                 <div className="text-sm text-slate-400 font-medium mt-1">{stat.label}</div>
                 <div className="text-xs text-slate-500 mt-1 line-clamp-1">{stat.detail}</div>
                 {stat.warning && (
                   <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                 )}
-                <div className="absolute inset-0 rounded-xl border border-transparent group-hover:border-teal-400/30 transition-colors" />
+                <div className="absolute inset-0 rounded-2xl border border-transparent group-hover:border-teal-400/30 transition-colors pointer-events-none" />
               </motion.button>
             );
           })}
@@ -567,20 +613,24 @@ export default function PatientDashboard() {
             {careGaps.map((gap, idx) => {
               const Icon = gap.icon;
               return (
-                <motion.div
+                <motion.button
                   key={idx}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 + idx * 0.05 }}
-                  whileHover={{ x: 4 }}
-                  className="flex items-center gap-3 p-4 glass-card text-left"
+                  whileHover={{ x: 4, scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  onClick={() => navigate("/health")}
+                  className="flex items-center gap-3 p-4 glass-card text-left w-full rounded-2xl hover:border-teal-400/30 transition-all duration-200 focus:ring-2 focus:ring-teal-500/30"
                 >
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${gap.color.replace('text', 'bg').replace('400', '100')}`}>
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                    gap.color.replace('text-', 'bg-').replace('400', '500/20')
+                  }`}>
                     <Icon size={16} className={gap.color} />
                   </div>
-                  <span className="flex-1 text-sm text-slate-200">{gap.text}</span>
-                  <ChevronRight size={16} className="text-slate-600" />
-                </motion.div>
+                  <span className="flex-1 text-sm text-slate-200 text-left">{gap.text}</span>
+                  <ChevronRight size={16} className="text-slate-500 shrink-0" />
+                </motion.button>
               );
             })}
           </div>
@@ -588,9 +638,9 @@ export default function PatientDashboard() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex items-center gap-3 p-4 glass-card border-l-4 border-l-teal-400"
+            className="flex items-center gap-3 p-4 glass-card border-l-4 border-l-teal-400 rounded-2xl"
           >
-            <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-teal-500/20">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-teal-500/20 shrink-0">
               <CheckCircle className="text-teal-400" size={20} />
             </div>
             <div>
@@ -609,7 +659,7 @@ export default function PatientDashboard() {
         className="space-y-3"
       >
         <h2 className="text-lg font-semibold text-slate-100">Quick Actions</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
           {quickActions.map((action, idx) => {
             const Icon = action.icon;
             return (
@@ -621,9 +671,9 @@ export default function PatientDashboard() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 + idx * 0.05 }}
                 onClick={() => navigate(action.route)}
-                className="glass-card p-4 text-center group"
+                className="glass-card p-4 text-center group rounded-2xl focus:ring-2 focus:ring-teal-500/30 min-h-[120px] flex flex-col items-center justify-center"
               >
-                <div className="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center bg-gradient-to-br from-teal-500/20 to-cyan-500/20 group-hover:from-teal-500/30 group-hover:to-cyan-500/30 transition-all">
+                <div className="w-14 h-14 rounded-2xl mx-auto mb-3 flex items-center justify-center bg-gradient-to-br from-teal-500/20 to-cyan-500/20 group-hover:from-teal-500/30 group-hover:to-cyan-500/30 transition-all duration-200">
                   <Icon size={24} className="text-teal-400" />
                 </div>
                 <span className="text-sm font-medium text-slate-200 group-hover:text-teal-300 transition-colors">
@@ -648,24 +698,24 @@ export default function PatientDashboard() {
         </h2>
         <div className="glass-card p-5">
           <form onSubmit={handleAiSubmit} className="space-y-3">
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="text"
                 value={aiQuery}
                 onChange={(e) => setAiQuery(e.target.value)}
                 placeholder="Ask a quick health question..."
                 disabled={aiLoading}
-                className="glass-input flex-1 text-sm"
+                className="glass-input flex-1 rounded-2xl focus:ring-2 focus:ring-teal-500/30"
               />
               <button
                 type="submit"
                 disabled={aiLoading || !aiQuery.trim()}
-                className="btn-primary px-5 py-3 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                className="btn-primary px-6 py-3 rounded-2xl disabled:opacity-50 disabled:cursor-not-allowed hover:scale-103 active:scale-97 transition-all duration-200 focus:ring-2 focus:ring-teal-500/30 min-h-[48px]"
               >
                 {aiLoading ? (
-                  <MagnifyingLoader size={16} />
+                  <MagnifyingLoader size={20} />
                 ) : (
-                  <Sparkles size={18} />
+                  <Sparkles size={20} />
                 )}
               </button>
             </div>
@@ -675,22 +725,22 @@ export default function PatientDashboard() {
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mt-3 p-4 glass-card border-l-4 border-l-cyan-500"
+              className="mt-4 p-4 glass-card border-l-4 border-l-cyan-500 rounded-2xl"
             >
               <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">{aiResponse}</p>
             </motion.div>
           )}
 
           {aiLoading && (
-            <div className="mt-3 flex items-center gap-2 text-sm text-slate-400">
-              <MagnifyingLoader size={16} />
-              Vita is thinking...
+            <div className="mt-4 flex items-center gap-2 text-sm text-slate-400">
+              <MagnifyingLoader size={18} />
+              <span>Vita is thinking...</span>
             </div>
           )}
 
           <button
             onClick={() => navigate("/ai")}
-            className="mt-3 text-sm text-teal-400 hover:text-teal-300 font-medium transition-colors flex items-center gap-1"
+            className="mt-4 text-sm text-teal-400 hover:text-teal-300 font-medium transition-all duration-200 flex items-center gap-1.5 hover:scale-103 active:scale-97 min-h-[36px]"
           >
             Open full AI chat
             <ChevronRight size={14} />
@@ -716,20 +766,27 @@ export default function PatientDashboard() {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.5 + idx * 0.03 }}
-                  whileHover={{ x: 2 }}
-                  className="flex items-center gap-3 p-4 glass-card text-left"
+                  whileHover={{ x: 4 }}
+                  className="flex items-center gap-3 p-4 glass-card text-left rounded-2xl"
                 >
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-slate-700/50 text-slate-300">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-slate-700/50 text-slate-300 shrink-0">
                     <Icon size={16} />
                   </div>
-                  <div className="flex-1">
-                    <div className="text-sm text-slate-200">{activity.title}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm text-slate-200 truncate">{activity.title}</div>
                     <div className="text-xs text-slate-500">{activity.time}</div>
                   </div>
                 </motion.div>
               );
             })}
           </div>
+          {recentActivity.length === 0 && (
+            <div className="glass-card p-6 text-center rounded-2xl">
+              <Activity size={32} className="text-slate-500 mx-auto mb-3" />
+              <p className="text-slate-400 text-sm">No recent activity</p>
+              <p className="text-slate-500 text-xs mt-1">Your activities will appear here</p>
+            </div>
+          )}
         </motion.section>
       )}
     </motion.div>

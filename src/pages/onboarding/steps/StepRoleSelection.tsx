@@ -1,5 +1,6 @@
 import { ROLE_INFO, UserRole } from '../../../lib/roles';
 import { motion } from 'framer-motion';
+import { useStatus } from '../../../hooks/useStatus';
 
 interface StepRoleSelectionProps {
   onNext: () => void;
@@ -9,12 +10,16 @@ interface StepRoleSelectionProps {
 }
 
 export default function StepRoleSelection({ onNext, onBack, selectedRole, onSelect }: StepRoleSelectionProps) {
+  const { showStatus } = useStatus();
+
   const handleSelect = (role: UserRole) => {
     onSelect({ role });
   };
 
   const handleContinue = () => {
     if (selectedRole) {
+      const roleInfo = ROLE_INFO[selectedRole as UserRole];
+      showStatus('success', 'Role Selected', `You selected ${roleInfo.label}. This determines which features you will see. You cannot change your role after setup.`);
       onNext();
     }
   };

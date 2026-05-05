@@ -1,0 +1,288 @@
+// Clinical Decision Rules Reference
+// 15 validated prediction scores for clinical decision support
+// Each rule includes inputs, scoring thresholds, and recommendations
+
+[
+  {
+    "id": "wells_pe",
+    "name": "Wells Criteria for Pulmonary Embolism",
+    "description": "Assess clinical probability of pulmonary embolism in adults",
+    "version": "2000",
+    "category": "cardiovascular",
+    "inputs": [
+      {"id": "clinical_dvt_signs", "label": "Clinical signs of DVT (leg swelling, pain with palpation)", "type": "boolean", "points": 3},
+      {"id": "pe_most_likely", "label": "PE is #1 diagnosis or equally likely", "type": "boolean", "points": 3},
+      {"id": "hr_over_100", "label": "Heart rate > 100 bpm", "type": "boolean", "points": 1.5},
+      {"id": "immobilization", "label": "Immobilization/surgery in past 4 weeks", "type": "boolean", "points": 1.5},
+      {"id": "previous_dvt_pe", "label": "Previous DVT/PE", "type": "boolean", "points": 1.5},
+      {"id": "hemoptysis", "label": "Hemoptysis", "type": "boolean", "points": 1},
+      {"id": "malignancy", "label": "Active malignancy (on treatment/terminal)", "type": "boolean", "points": 1}
+    ],
+    "scoring": {
+      "high": {"min": 6, "label": "High probability (~60%)", "recommendation": "Proceed to CT pulmonary angiography or V/Q scan"},
+      "moderate": {"min": 2, "max": 5.9, "label": "Moderate probability (~15%)", "recommendation": "Consider D-dimer; if positive, proceed to imaging"},
+      "low": {"max": 1.9, "label": "Low probability (~3%)", "recommendation": "Consider alternative diagnoses; D-dimer if suspicion remains"}
+    },
+    "source": "Wells PS et al. NEJM 1998;339:80-5"
+  },
+  {
+    "id": "wells_dvt",
+    "name": "Wells Score for Deep Vein Thrombosis",
+    "description": "Estimate pre-test probability of DVT",
+    "version": "1997",
+    "category": "cardiovascular",
+    "inputs": [
+      {"id": "active_cancer", "label": "Active cancer (treatment ongoing, within 6 months, or palliative)", "type": "boolean", "points": 1},
+      {"id": "paralysis", "label": "Paralysis, paresis, or recent plaster immobilization of lower extremities", "type": "boolean", "points": 1},
+      {"id": "recently_bedridden", "label": "Recently bedridden >3 days or major surgery within 4 weeks", "type": "boolean", "points": 1},
+      {"id": "localized_pain", "label": "Localized tenderness along distribution of deep venous system", "type": "boolean", "points": 1},
+      {"id": "swelling", "label": "Entire leg swollen", "type": "boolean", "points": 1},
+      {"id": "calf_swelling", "label": "Calf swelling >3cm compared to asymptomatic leg", "type": "boolean", "points": 1},
+      {"id": "pitting_edema", "label": "Pitting edema confined to symptomatic leg", "type": "boolean", "points": 1},
+      {"id": "collateral_veins", "label": "Collateral superficial veins (nonvaricose)", "type": "boolean", "points": 1},
+      {"id": "previous_dvt", "label": "Previously documented DVT", "type": "boolean", "points": 1},
+      {"id": "alternative_dx_less_likely", "label": "Alternative diagnosis as likely or more likely than DVT", "type": "boolean", "points": -2}
+    ],
+    "scoring": {
+      "high": {"min": 3, "label": "High (score ≥3)", "recommendation": "D-dimer optional; proceed to imaging if positive"},
+      "low": {"max": 2, "label": "Low (score <3)", "recommendation": "D-dimer first; if negative, no imaging needed"}
+    },
+    "source": "Wells PS et al. JAMA 1997;278:955-9"
+  },
+  {
+    "id": "cha2ds2_vasc",
+    "name": "CHA2DS2-VASc Score",
+    "description": "Estimate stroke risk in patients with atrial fibrillation",
+    "version": "2009",
+    "category": "cardiovascular",
+    "inputs": [
+      {"id": "chf", "label": "Congestive heart failure/LV dysfunction", "type": "boolean", "points": 1},
+      {"id": "hypertension", "label": "Hypertension", "type": "boolean", "points": 1},
+      {"id": "age_75", "label": "Age ≥75 years", "type": "boolean", "points": 2},
+      {"id": "diabetes", "label": "Diabetes mellitus", "type": "boolean", "points": 1},
+      {"id": "stroke_tia", "label": "Stroke/TIA/thromboembolism history", "type": "boolean", "points": 2},
+      {"id": "vascular_disease", "label": "Vascular disease (prior MI, PAD, aortic plaque)", "type": "boolean", "points": 1},
+      {"id": "age_65", "label": "Age 65-74 years", "type": "boolean", "points": 1},
+      {"id": "sex_female", "label": "Sex category (female)", "type": "boolean", "points": 1}
+    ],
+    "scoring": {
+      "high": {"min": 2, "label": "Score ≥2 (men) or ≥3 (women)", "recommendation": "Anticoagulation recommended"},
+      "low": {"max": 1, "label": "Score 0 (men) or 1 (women)", "recommendation": "No anticoagulation needed"}
+    },
+    "source": "Lip GYH et al. Eur Heart J 2010;31:1479-86"
+  },
+  {
+    "id": "has_bled",
+    "name": "HAS-BLED Score",
+    "description": "Estimate risk of major bleeding in patients on anticoagulation",
+    "version": "2009",
+    "category": "cardiovascular",
+    "inputs": [
+      {"id": "hypertension", "label": "Uncontrolled (>160 mmHg) systolic BP", "type": "boolean", "points": 1},
+      {"id": "abnormal_renal", "label": "Abnormal renal/liver function", "type": "boolean", "points": 1},
+      {"id": "stroke_history", "label": "History of stroke", "type": "boolean", "points": 1},
+      {"id": "bleeding_history", "label": "History of bleeding", "type": "boolean", "points": 1},
+      {"id": "labile_inr", "label": "Labile INRs (unstable/high INRs)", "type": "boolean", "points": 1},
+      {"id": "elderly", "label": "Age >65 years", "type": "boolean", "points": 1},
+      {"id": "drugs_alcohol", "label": "Drugs/alcohol (1 point each)", "type": "select", "options": [{"value": 0, "label": "None"}, {"value": 1, "label": "Drugs"}, {"value": 2, "label": "Alcohol"}], "points": "value"}
+    ],
+    "scoring": {
+      "high": {"min": 3, "label": "Score ≥3", "recommendation": "High bleeding risk; consider alternatives or closer monitoring"},
+      "moderate": {"min": 1, "max": 2, "label": "Score 1-2", "recommendation": "Moderate risk; assess modifiable factors"},
+      "low": {"max": 0, "label": "Score 0", "recommendation": "Low risk; standard monitoring appropriate"}
+    },
+    "source": "Pisters R et al. Chest 2010;138:1093-100"
+  },
+  {
+    "id": "curb_65",
+    "name": "CURB-65 Score",
+    "description": "Assess severity and guide site-of-care decisions in community-acquired pneumonia",
+    "version": "2005",
+    "category": "respiratory",
+    "inputs": [
+      {"id": "confusion", "label": "New confusion (abbreviated mental test ≤8)", "type": "boolean", "points": 1},
+      {"id": "urea", "label": "Blood urea nitrogen >7 mmol/L (>20 mg/dL)", "type": "boolean", "points": 1},
+      {"id": "respiratory_rate", "label": "Respiratory rate ≥30 breaths/min", "type": "boolean", "points": 1},
+      {"id": "bp_low", "label": "Low blood pressure (systolic <90 or diastolic ≤60 mmHg)", "type": "boolean", "points": 1},
+      {"id": "age", "label": "Age ≥65 years", "type": "boolean", "points": 1}
+    ],
+    "scoring": {
+      "class_i": {"max": 0, "label": "0 points - Class I", "recommendation": "Low risk; outpatient treatment appropriate"},
+      "class_ii": {"min": 1, "max": 1, "label": "1 point - Class II", "recommendation": "Low-moderate risk; short inpatient stay or supervised outpatient"},
+      "class_iii", {"min": 2, "label": "2-3 points - Class III", "recommendation": "Moderate risk; consider brief hospitalization"},
+      "class_iv", {"min": 4, "max": 5, "label": "4-5 points - Class IV", "recommendation": "High risk; ICU-level care consideration"}
+    },
+    "source": "Lim WS et al. Lancet 2003;361:1383-8"
+  },
+  {
+    "id": "heart_score",
+    "name": "HEART Score",
+    "description": "Risk stratify patients with chest pain in the emergency department",
+    "version": "2008",
+    "category": "cardiovascular",
+    "inputs": [
+      {"id": "history", "label": "History highly suspicious for ACS", "type": "select", "options": [{"value": 0, "label": "Non-suspicious"}, {"value": 1, "label": "Moderately suspicious"}, {"value": 2, "label": "Highly suspicious"}]},
+      {"id": "ecg", "label": "ECG findings significant for ischemia", "type": "select", "options": [{"value": 0, "label": "Normal"}, {"value": 1, "label": "Non-specific repolarization"}, {"value": 2, "label": "Significant ST depression/T wave inversion"}]},
+      {"id": "age", "label": "Age", "type": "select", "options": [{"value": 0, "label": "<45"}, {"value": 1, "label": "45-65"}, {"value": 2, "label": ">65"}]},
+      {"id": "risk_factors", "label": "Risk factors (≥3)", "type": "select", "options": [{"value": 0, "label": "0-1"}, {"value": 1, "label": "2"}, {"value": 2, "label": "≥3"}]},
+      {"id": "troponin", "label": "Elevated cardiac biomarkers", "type": "select", "options": [{"value": 0, "label": "Normal"}, {"value": 1, "label": "1-3x URLN"}, {"value": 2, "label": ">3x URLN"}]}
+    ],
+    "scoring": {
+      "low": {"max": 3, "label": "0-3 points", "recommendation": "Low risk (~1% MACE); consider early discharge"},
+      "moderate": {"min": 4, "max": 6, "label": "4-6 points", "recommendation": "Moderate risk (~4% MACE); observation/stress testing"},
+      "high": {"min": 7, "max": 10, "label": "7-10 points", "recommendation": "High risk (~16% MACE); admit and cardiology consult"}
+    },
+    "source": "Six AJ et al. N Engl J Med 2008;358:1563-71"
+  },
+  {
+    "id": "gcs",
+    "name": "Glasgow Coma Scale",
+    "description": "Measure level of consciousness in acute neurological conditions",
+    "version": "1974",
+    "category": "neurological",
+    "inputs": [
+      {"id": "eye_opening", "label": "Eye opening", "type": "select", "options": [{"value": 4, "label": "Spontaneous"}, {"value": 3, "label": "To speech"}, {"value": 2, "label": "To pain"}, {"value": 1, "label": "None"}]},
+      {"id": "verbal_response", "label": "Verbal response", "type": "select", "options": [{"value": 5, "label": "Oriented"}, {"value": 4, "label": "Confused conversation"}, {"value": 3, "label": "Inappropriate words"}, {"value": 2, "label": "Incomprehensible sounds"}, {"value": 1, "label": "None"}]},
+      {"id": "motor_response", "label": "Motor response", "type": "select", "options": [{"value": 6, "label": "Obeys commands"}, {"value": 5, "label": "Localizes pain"}, {"value": 4, "label": "Withdraws from pain"}, {"value": 3, "label": "Abnormal flexion"}, {"value": 2, "label": "Abnormal extension"}, {"value": 1, "label": "None"}]}
+    ],
+    "scoring": {
+      "mild", {"max": 14, "label": "13-15", "recommendation": "Mild brain injury"},
+      "moderate", {"min": 9, "max": 12, "label": "9-12", "recommendation": "Moderate brain injury"},
+      "severe", {"min": 3, "max": 8, "label": "3-8", "recommendation": "Severe brain injury"}
+    },
+    "source": "Teasdale G et al. Lancet 1974;2:81-4"
+  },
+  {
+    "id": "qsofa",
+    "name": "qSOFA (Quick SOFA)",
+    "description": "Rapid bedside screening for sepsis outside ICU",
+    "version": "2016",
+    "category": "critical_care",
+    "inputs": [
+      {"id": "altered_mental_status", "label": "Altered mental status (GCS <15)", "type": "boolean", "points": 1},
+      {"id": "sbp_leq_100", "label": "SBP ≤100 mmHg", "type": "boolean", "points": 1},
+      {"id": "rr_geq_22", "label": "Respiratory rate ≥22 breaths/min", "type": "boolean", "points": 1}
+    ],
+    "scoring": {
+      "high_risk", {"min": 2, "label": "≥2 points", "recommendation": "Consider sepsis; obtain lactate, blood cultures, broaden antibiotics"},
+      "low_risk", {"max": 1, "label": "0-1 point", "recommendation": "Unlikely sepsis; continue monitoring"}
+    },
+    "source": "Singer M et al. JAMA 2016;315:801-10"
+  },
+  {
+    "id": "alvarado_score",
+    "name": "Alvarado Score",
+    "description": "Assess likelihood of acute appendicitis",
+    "version": "1986",
+    "category": "surgical",
+    "inputs": [
+      {"id": "migration_pain", "label": "Migration of pain to RLQ", "type": "boolean", "points": 1},
+      {"id": "anorexia", "label": "Anorexia", "type": "boolean", "points": 1},
+      {"id": "nausea_vomiting", "label": "Nausea/vomiting", "type": "boolean", "points": 1},
+      {"id": "rlq_tenderness", "label": "RLQ tenderness", "type": "boolean", "points": 2},
+      {"id": "rebound_tenderness", "label": "Rebound tenderness", "type": "boolean", "points": 1},
+      {"id": "fever", "label": "Temperature ≥37.3°C", "type": "boolean", "points": 1},
+      {"id": "leukocytosis", "label": "Leukocytosis (left shift)", "type": "boolean", "points": 1},
+      {"id": "elevated_neutrophils", "label": "Elevated neutrophils", "type": "boolean", "points": 1}
+    ],
+    "scoring": {
+      "high_probability", {"min": 7, "label": "7-10 points", "recommendation": "High probability appendicitis; surgical consultation"},
+      "intermediate", {"min": 5, "max": 6, "label": "5-6 points", "recommendation": "Intermediate probability; observe or imaging"},
+      "low_probability", {"max": 4, "label": "0-4 points", "recommendation": "Low probability; consider alternative diagnoses"}
+    },
+    "source": "Alvarado A. Ann Surg 1986;204:263-5"
+  },
+  {
+    "id": "child_pugh",
+    "name": "Child-Pugh Score",
+    "description": "Assess severity of liver disease and surgical risk",
+    "version": "1964",
+    "category": "gastrointestinal",
+    "inputs": [
+      {"id": "encephalopathy", "label": "Encephalopathy", "type": "select", "options": [{"value": 1, "label": "None"}, {"value": 2, "label": "Grade 1-2"}, {"value": 3, "label": "Grade 3-4"}]},
+      {"id": "ascites", "label": "Ascites", "type": "select", "options": [{"value": 1, "label": "None"}, {"value": 2, "label": "Slight"}, {"value": 3, "label": "Moderate"}]},
+      {"id": "bilirubin", "label": "Serum bilirubin (mg/dL)", "type": "select", "options": [{"value": 1, "label": "<2"}, {"value": 2, "label": "2-3"}, {"value": 3, "label": ">3"}]},
+      {"id": "albumin", "label": "Serum albumin (g/dL)", "type": "select", "options": [{"value": 1, "label": ">3.5"}, {"value": 2, "label": "2.8-3.5"}, {"value": 3, "label": "<2.8"}]},
+      {"id": "prothrombin", "label": "Prothrombin time (seconds over control)", "type": "select", "options": [{"value": 1, "label": "<4"}, {"value": 2, "label": "4-6"}, {"value": 3, "label": ">6"}]}
+    ],
+    "scoring": {
+      "class_a", {"max": 6, "label": "5-6 points", "recommendation": "Well-compensated; surgery relatively safe"},
+      "class_b", {"min": 7, "max": 9, "label": "7-9 points", "recommendation": "Significant functional compromise; careful perioperative management"},
+      "class_c", {"min": 10, "max": 15, "label": "10-15 points", "recommendation": "Decompensated disease; high surgical risk"}
+    },
+    "source": "Pugh RN et al. Br J Surg 1974;61:679-84"
+  },
+  {
+    "id": "centor_criteria",
+    "name": "Centor Criteria (Modified/McIsaac)",
+    "description": "Estimate probability of streptococcal pharyngitis",
+    "version": "2002",
+    "category": "infectious_disease",
+    "inputs": [
+      {"id": "fever", "label": "Fever >38°C", "type": "boolean", "points": 1},
+      {"id": "absence_cough", "label": "Absence of cough", "type": "boolean", "points": 1},
+      {"id": "tender_anterior_nodes", "label": "Tender anterior cervical lymphadenopathy", "type": "boolean", "points": 1},
+      {"id": "tonsillar_exudates", "label": "Tonsillar exudates or swelling", "type": "boolean", "points": 1},
+      {"id": "age_3_14", "label": "Age 3-14 years", "type": "boolean", "points": 1},
+      {"id": "age_15_44", "label": "Age 15-44 years", "type": "boolean", "points": 0},
+      {"id": "age_45_plus", "label": "Age ≥45 years", "type": "boolean", "points": -1}
+    ],
+    "scoring": {
+      "low", {"max": 0, "label": "≤0 points", "recommendation": "No testing or antibiotics needed"},
+      "moderate", {"min": 1, "max": 2, "label": "1-2 points", "recommendation": "Testing optional; if positive, treat"},
+      "high", {"min": 3, "max": 4, "label": "3-4 points", "recommendation": "Test and treat if positive"}
+    },
+    "source": "McIsaac WA et al. JAMA 2002;288:2837-42"
+  },
+  {
+    "id": "pre_eclampsia_risk",
+    "name": "Pre-eclampsia Risk Assessment",
+    "description": "Identify women at increased risk for pre-eclampsia",
+    "version": "2019",
+    "category": "obstetrics",
+    "inputs": [
+      {"id": "nulliparity", "label": "Nulliparity", "type": "boolean", "points": 1},
+      {"id": "obesity", "label": "BMI >30", "type": "boolean", "points": 1},
+      {"id": "age_over_35", "label": "Age >35 years", "type": "boolean", "points": 1},
+      {"id": "personal_history_pe", "label": "Personal history of pre-eclampsia", "type": "boolean", "points": 2},
+      {"id": "family_history_pe", "label": "Family history of pre-eclampsia", "type": "boolean", "points": 1},
+      {"id": "multiple_pregnancy", "label": "Multiple pregnancy", "type": "boolean", "points": 1},
+      {"id": "chronic_hypertension", "label": "Chronic hypertension", "type": "boolean", "points": 1},
+      {"id": "diabetes", "label": "Pre-gestational diabetes", "type": "boolean", "points": 1}
+    ],
+    "scoring": {
+      "high_risk", {"min": 3, "label": "≥3 points", "recommendation": "Consider low-dose aspirin 75-150mg daily from 11-36 weeks"},
+      "moderate_risk", {"min": 1, "max": 2, "label": "1-2 points", "recommendation": "Routine antenatal care"},
+      "low_risk", {"max": 0, "label": "0 points", "recommendation": "Standard prenatal care"}
+    },
+    "source": "ACOG Practice Bulletin No. 202; WHO recommendations 2019"
+  },
+  {
+    "id": "apache_ii",
+    "name": "APACHE II (Simplified)",
+    "description": "Assess severity of disease and predict mortality in ICU",
+    "version": "1985",
+    "category": "critical_care",
+    "inputs": [
+      {"id": "temperature", "label": "Temperature (°C)", "type": "select", "options": [{"value": 0, "label": "≥41 or <29.9"}, {"value": 1, "label": "38.0-40.9 or 32.0-33.9"}, {"value": 2, "label": "36.0-37.9 or 34.0-35.9"}, {"value": 3, "label": "34.0-35.9 or 36.0-37.9"}, {"value": 4, "label": "35.0-35.9 or 36.0-37.9"}]},
+      {"id": "mean_arterial_pressure", "label": "Mean arterial pressure", "type": "select", "options": [{"value": 0, "label": "≤49"}, {"value": 2, "label": "50-69"}, {"value": 4, "label": "70-109"}, {"value": 2, "label": "110-129"}, {"value": 1, "label": "≥130"}]},
+      {"id": "heart_rate", "label": "Heart rate", "type": "select", "options": [{"value": 0, "label": "≥180"}, {"value": 4, "label": "140-179"}, {"value": 3, "label": "110-139"}, {"value": 2, "label": "70-109"}, {"value": 1, "label": "≤59"}, {"value": 0, "label": "50-69"}]},
+      {"id": "respiratory_rate", "label": "Respiratory rate", "type": "select", "options": [{"value": 0, "label": "≥50"}, {"value": 3, "label": "35-49"}, {"value": 1, "label": "25-34"}, {"value": 0, "label": "12-24"}, {"value": 1, "label": "≤11"}]},
+      {"id": "oxygenation", "label": "PaO2 (mmHg) or A-a gradient", "type": "select", "options": [{"value": 0, "label": "≥60"}, {"value": 3, "label": "45-59"}, {"value": 4, "label": "35-44"}, {"value": 5, "label": "20-34"}, {"value": 6, "label": "<20"}]},
+      {"id": "arterial_ph", "label": "Arterial pH", "type": "select", "options": [{"value": 0, "label": "≥7.6 or <7.3"}, {"value": 4, "label": "7.5-7.59 or 7.3-7.39"}, {"value": 2, "label": "7.4-7.49"}, {"value": 1, "label": "7.30-7.39"}]},
+      {"id": "serum_sodium", "label": "Serum sodium (mmol/L)", "type": "select", "options": [{"value": 0, "label": "≤129 or ≥155"}, {"value": 2, "label": "130-149"}, {"value": 4, "label": "140-149"}]},
+      {"id": "serum_potassium", "label": "Serum potassium (mmol/L)", "type": "select", "options": [{"value": 0, "label": "≤2.9 or ≥6.9"}, {"value": 1, "label": "3.0-5.4"}, {"value": 2, "label": "5.5-6.8"}]},
+      {"id": "serum_creatinine", "label": "Serum creatinine (mg/dL)", "type": "select", "options": [{"value": 0, "label": "≥3.5"}, {"value": 2, "label": "2.0-3.4"}, {"value": 3, "label": "1.2-1.9"}, {"value": 4, "label": "0.6-1.1"}]},
+      {"id": "hematocrit", "label": "Hematocrit (%)", "type": "select", "options": [{"value": 0, "label": "≤20 or ≥60"}, {"value": 2, "label": "21-34.9 or 55-59"}, {"value": 4, "label": "35.0-54.9"}]},
+      {"id": "white_blood_cell", "label": "WBC (x10^3/mm3)", "type": "select", "options": [{"value": 0, "label": "≤1.9 or ≥39.9"}, {"value": 1, "label": "2.0-15.9"}, {"value": 2, "label": "16.0-39.9"}]},
+      {"id": "age_points", "label": "Age points", "type": "number", "points": "value"},
+      {"id": "comorbidity_points", "label": "Chronic disease points", "type": "number", "points": "value"}
+    ],
+    "scoring": {
+      "low_mortality", {"max": 9, "label": "0-9 points", "recommendation": "Low predicted mortality (<4%)"},
+      "moderate_mortality", {"min": 10, "max": 19, "label": "10-19 points", "recommendation": "Moderate predicted mortality (8-15%)"},
+      "high_mortality", {"min": 20, "label": "≥20 points", "recommendation": "High predicted mortality (40-100%)"}
+    },
+    "source": "Knaus WA et al. JAMA 1985;255:3084-90"
+  }
+]

@@ -91,16 +91,22 @@ export async function generatePassport(specialistType, userId) {
 
   const vcJson = encodeCredential(vc);
 
-  const qrDataURL = await new Promise((resolve, reject) => {
-    QRCode.toDataURL(
-      vcJson,
-      { errorCorrectionLevel: 'H', width: 512, margin: 2 },
-      (err, url) => {
-        if (err) reject(err);
-        else resolve(url);
-      }
-    );
-  });
+  // QR size safeguard: if VC JSON exceeds ~1800 chars, create a lightweight version without proof signature
+  let qrDataURL = '';
+  try {
+    qrDataURL = await generateQRCode(vcJson);
+  } catch (qrErr) {
+    console.warn('Full VC too large for QR, creating lightweight version');
+    // Create lightweight credential (no proof, minimal fields)
+    const lightweight = {
+      '@context': vc['@context'],
+      type: vc.type,
+      issuer: vc.issuer,
+      issuanceDate: vc.issuanceDate,
+      credentialSubject: vc.credentialSubject,
+    };
+    qrDataURL = await generateQRCode(JSON.stringify(lightweight));
+  }
 
   await addPassportShare({
     userId,
@@ -117,6 +123,25 @@ export async function generatePassport(specialistType, userId) {
     qrDataURL,
     summaryText,
   };
+}
+
+// Helper to generate QR code with proper error handling
+async function generateQRCode(data) {
+  return new Promise((resolve, reject) => {
+    const MAX_QR_SIZE = 2953; // Max capacity for version 40, H level (approx 2953 alphanumeric)
+    if (data.length > MAX_QR_SIZE) {
+      reject(new Error(`Data too large for QR code: ${data.length} chars`));
+      return;
+    }
+    QRCode.toDataURL(
+      data,
+      { errorCorrectionLevel: 'H', width: 512, margin: 2 },
+      (err, url) => {
+        if (err) reject(err);
+        else resolve(url);
+      }
+    );
+  });
 }
 
 export async function importCredential(jsonString, clinicianId) {

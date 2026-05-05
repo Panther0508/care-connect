@@ -1,0 +1,387 @@
+// src/data/drug-counseling.json
+// Comprehensive drug database with NDC codes for counseling and quick lookup
+
+{
+  "drugs": [
+    {
+      "ndc": "0006-3717-01",
+      "name": "Lisinopril",
+      "genericName": "Lisinopril",
+      "brandNames": ["Prinivil", "Zestril"],
+      "dosageForm": "Tablet",
+      "strength": "10mg",
+      "manufacturer": "Merck",
+      "notes": "ACE inhibitor for hypertension and heart failure. Monitor potassium and renal function. May cause cough."
+    },
+    {
+      "ndc": "0002-4144-01",
+      "name": "Amlodipine Besylate",
+      "genericName": "Amlodipine",
+      "brandNames": ["Norvasc"],
+      "dosageForm": "Tablet",
+      "strength": "5mg",
+      "manufacturer": "Pfizer",
+      "notes": "Calcium channel blocker for hypertension and angina. May cause peripheral edema."
+    },
+    {
+      "ndc": "00093-2833-01",
+      "name": "Metformin Hydrochloride",
+      "genericName": "Metformin",
+      "brandNames": ["Glucophage"],
+      "dosageForm": "Tablet",
+      "strength": "500mg",
+      "manufacturer": "Teva",
+      "notes": "Biguanide for type 2 diabetes. Take with meals to reduce GI upset. Risk of lactic acidosis."
+    },
+    {
+      "ndc": "0002-0452-01",
+      "name": "Atorvastatin Calcium",
+      "genericName": "Atorvastatin",
+      "brandNames": ["Lipitor"],
+      "dosageForm": "Tablet",
+      "strength": "20mg",
+      "manufacturer": "Pfizer",
+      "notes": "Statin for cholesterol lowering. Monitor liver function. Avoid grapefruit juice."
+    },
+    {
+      "ndc": "00093-0158-01",
+      "name": "Losartan Potassium",
+      "genericName": "Losartan",
+      "brandNames": ["Cozaar"],
+      "dosageForm": "Tablet",
+      "strength": "50mg",
+      "manufacturer": "Sandoz",
+      "notes": "ARB for hypertension. Safer than ACE inhibitors for cough. Monitor potassium."
+    },
+    {
+      "ndc": "0002-4995-01",
+      "name": "Simvastatin",
+      "genericName": "Simvastatin",
+      "brandNames": ["Zocor"],
+      "dosageForm": "Tablet",
+      "strength": "40mg",
+      "manufacturer": "Merck",
+      "notes": "Statin for hyperlipidemia. Avoid in elderly. Watch for muscle pain."
+    },
+    {
+      "ndc": "0071-0155-01",
+      "name": "Levothyroxine Sodium",
+      "genericName": "Levothyroxine",
+      "brandNames": ["Synthroid", "Levoxyl"],
+      "dosageForm": "Tablet",
+      "strength": "50mcg",
+      "manufacturer": "Barr",
+      "notes": "Thyroid hormone replacement. Take on empty stomach. Monitor TSH levels."
+    },
+    {
+      "ndc": "0002-2775-01",
+      "name": "Omeprazole",
+      "genericName": "Omeprazole",
+      "brandNames": ["Prilosec"],
+      "dosageForm": "Capsule",
+      "strength": "20mg",
+      "manufacturer": "Pratt",
+      "notes": "PPI for GERD and ulcers. Take before breakfast. Long-term use may affect B12/magnesium."
+    },
+    {
+      "ndc": "00093-1338-01",
+      "name": "Sertraline Hydrochloride",
+      "genericName": "Sertraline",
+      "brandNames": ["Zoloft"],
+      "dosageForm": "Tablet",
+      "strength": "50mg",
+      "manufacturer": "Teva",
+      "notes": "SSRI antidepressant. May cause nausea, insomnia initially. Monitor for suicidal ideation."
+    },
+    {
+      "ndc": "0007-1707-01",
+      "name": "Gabapentin",
+      "genericName": "Gabapentin",
+      "brandNames": ["Neurontin"],
+      "dosageForm": "Capsule",
+      "strength": "300mg",
+      "manufacturer": "Teva",
+      "notes": "Anticonvulsant for nerve pain and seizures. Titrate slowly. May cause dizziness."
+    },
+    {
+      "ndc": "00023-1300-01",
+      "name": "Hydrochlorothiazide",
+      "genericName": "Hydrochlorothiazide",
+      "brandNames": ["Microzide"],
+      "dosageForm": "Tablet",
+      "strength": "12.5mg",
+      "manufacturer": "Mylan",
+      "notes": "Thiazide diuretic for hypertension. Monitor electrolytes. May increase uric acid."
+    },
+    {
+      "ndc": "00093-2044-01",
+      "name": "Glipizide",
+      "genericName": "Glipizide",
+      "brandNames": ["Glucotrol"],
+      "dosageForm": "Tablet",
+      "strength": "5mg",
+      "manufacturer": "Teva",
+      "notes": "Sulfonylurea for type 2 diabetes. Risk of hypoglycemia. Take before meals."
+    },
+    {
+      "ndc": "0002-0780-01",
+      "name": "Warfarin Sodium",
+      "genericName": "Warfarin",
+      "brandNames": ["Coumadin"],
+      "dosageForm": "Tablet",
+      "strength": "5mg",
+      "manufacturer": "Bristol-Myers Squibb",
+      "notes": "Anticoagulant. Regular INR monitoring required. Watch for bleeding. Consistent vitamin K intake."
+    },
+    {
+      "ndc": "00006-1195-01",
+      "name": "Alprazolam",
+      "genericName": "Alprazolam",
+      "brandNames": ["Xanax"],
+      "dosageForm": "Tablet",
+      "strength": "0.5mg",
+      "manufacturer": "Mylan",
+      "notes": "Benzodiazepine for anxiety. Risk of dependence. Avoid alcohol."
+    },
+    {
+      "ndc": "00093-0081-01",
+      "name": "Trazodone Hydrochloride",
+      "genericName": "Trazodone",
+      "brandNames": ["Desyrel"],
+      "dosageForm": "Tablet",
+      "strength": "50mg",
+      "manufacturer": "Teva",
+      "notes": "Antidepressant also used for insomnia. May cause sedation."
+    },
+    {
+      "ndc": "00023-1450-01",
+      "name": "Lovastatin",
+      "genericName": "Lovastatin",
+      "brandNames": ["Mevacor"],
+      "dosageForm": "Tablet",
+      "strength": "20mg",
+      "manufacturer": "Teva",
+      "notes": "Statin for hyperlipidemia. Take with evening meal for better absorption."
+    },
+    {
+      "ndc": "0007-1068-01",
+      "name": "Diltiazem Hydrochloride",
+      "genericName": "Diltiazem",
+      "brandNames": ["Cardizem"],
+      "dosageForm": "Tablet",
+      "strength": "120mg",
+      "manufacturer": "Watson",
+      "notes": "Calcium channel blocker for hypertension and angina. May cause constipation."
+    },
+    {
+      "ndc": "00093-9100-01",
+      "name": "Escitalopram Oxalate",
+      "genericName": "Escitalopram",
+      "brandNames": ["Lexapro"],
+      "dosageForm": "Tablet",
+      "strength": "10mg",
+      "manufacturer": "Teva",
+      "notes": "SSRI antidepressant. May cause nausea. Monitor for serotonin syndrome."
+    },
+    {
+      "ndc": "00024-0975-01",
+      "name": "Clopidogrel Bisulfate",
+      "genericName": "Clopidogrel",
+      "brandNames": ["Plavix"],
+      "dosageForm": "Tablet",
+      "strength": "75mg",
+      "manufacturer": "Mylan",
+      "notes": "Antiplatelet agent. Risk of bleeding. Avoid PPIs if possible."
+    },
+    {
+      "ndc": "00002-0132-01",
+      "name": "Insulin Glargine",
+      "genericName": "Insulin Glargine",
+      "brandNames": ["Lantus"],
+      "dosageForm": "Injection",
+      "strength": "100units/mL",
+      "manufacturer": "Sanofi",
+      "notes": "Long-acting insulin. Once daily at same time. Do not mix in same syringe."
+    },
+    {
+      "ndc": "0007-1353-01",
+      "name": "Montelukast Sodium",
+      "genericName": "Montelukast",
+      "brandNames": ["Singulair"],
+      "dosageForm": "Tablet",
+      "strength": "10mg",
+      "manufacturer": "Teva",
+      "notes": "Leukotriene modifier for asthma/allergies. May cause mood changes. Take in evening."
+    },
+    {
+      "ndc": "00023-1680-01",
+      "name": "Allopurinol",
+      "genericName": "Allopurinol",
+      "brandNames": ["Zyloprim"],
+      "dosageForm": "Tablet",
+      "strength": "100mg",
+      "manufacturer": "Teva",
+      "notes": "Xanthine oxidase inhibitor for gout. May cause rash. Start low dose."
+    },
+    {
+      "ndc": "00093-2176-01",
+      "name": "Tramadol Hydrochloride",
+      "genericName": "Tramadol",
+      "brandNames": ["Ultram"],
+      "dosageForm": "Tablet",
+      "strength": "50mg",
+      "manufacturer": "Teva",
+      "notes": "Opioid analgesic. Risk of dependence and seizures. Avoid alcohol."
+    },
+    {
+      "ndc": "00002-5222-01",
+      "name": "Insulin Lispro",
+      "genericName": "Insulin Lispro",
+      "brandNames": ["Humalog"],
+      "dosageForm": "Injection",
+      "strength": "100units/mL",
+      "manufacturer": "Lilly",
+      "notes": "Rapid-acting insulin. Take 15 min before meals. Monitor blood glucose closely."
+    },
+    {
+      "ndc": "0002-0642-01",
+      "name": "Fluoxetine Hydrochloride",
+      "genericName": "Fluoxetine",
+      "brandNames": ["Prozac"],
+      "dosageForm": "Capsule",
+      "strength": "20mg",
+      "manufacturer": "Teva",
+      "notes": "SSRI antidepressant with long half-life. May cause insomnia. Monitor for activation."
+    },
+    {
+      "ndc": "0007-4069-01",
+      "name": "Carvedilol",
+      "genericName": "Carvedilol",
+      "brandNames": ["Coreg"],
+      "dosageForm": "Tablet",
+      "strength": "12.5mg",
+      "manufacturer": "GlaxoSmithKline",
+      "notes": "Beta blocker for heart failure and hypertension. Take with food. May cause dizziness."
+    },
+    {
+      "ndc": "00093-9150-01",
+      "name": "Venlafaxine Hydrochloride",
+      "genericName": "Venlafaxine",
+      "brandNames": ["Effexor"],
+      "dosageForm": "Capsule",
+      "strength": "37.5mg",
+      "manufacturer": "Teva",
+      "notes": "SNRI antidepressant. Do not crush extended-release. May increase blood pressure."
+    },
+    {
+      "ndc": "0002-1343-01",
+      "name": "Furosemide",
+      "genericName": "Furosemide",
+      "brandNames": ["Lasix"],
+      "dosageForm": "Tablet",
+      "strength": "40mg",
+      "manufacturer": "A-S Medication",
+      "notes": "Loop diuretic for edema. Take in morning to avoid nocturia. Monitor electrolytes."
+    },
+    {
+      "ndc": "00093-0082-01",
+      "name": "Citalopram Hydrobromide",
+      "genericName": "Citalopram",
+      "brandNames": ["Celexa"],
+      "dosageForm": "Tablet",
+      "strength": "20mg",
+      "manufacturer": "Teva",
+      "notes": "SSRI antidepressant. Max 20mg/day in elderly due to QT prolongation risk."
+    },
+    {
+      "ndc": "0093-0112-01",
+      "name": "Levetiracetam",
+      "genericName": "Levetiracetam",
+      "brandNames": ["Keppra"],
+      "dosageForm": "Tablet",
+      "strength": "500mg",
+      "manufacturer": "Mylan",
+      "notes": "Anticonvulsant for seizures. May cause mood/behavior changes. Adjust for renal function."
+    },
+    {
+      "ndc": "00024-1005-01",
+      "name": "Rosuvastatin Calcium",
+      "genericName": "Rosuvastatin",
+      "brandNames": ["Crestor"],
+      "dosageForm": "Tablet",
+      "strength": "10mg",
+      "manufacturer": "AstraZeneca",
+      "notes": "High-intensity statin. May cause muscle pain. Monitor liver enzymes."
+    },
+    {
+      "ndc": "00093-0058-01",
+      "name": "Pregabalin",
+      "genericName": "Pregabalin",
+      "brandNames": ["Lyrica"],
+      "dosageForm": "Capsule",
+      "strength": "75mg",
+      "manufacturer": "Pfizer",
+      "notes": "Anticonvulsant for neuropathic pain. Risk of dizziness and weight gain."
+    },
+    {
+      "ndc": "00006-0205-01",
+      "name": "Metoprolol Tartrate",
+      "genericName": "Metoprolol",
+      "brandNames": ["Lopressor"],
+      "dosageForm": "Tablet",
+      "strength": "50mg",
+      "manufacturer": "Mylan",
+      "notes": "Beta blocker for angina and hypertension. Take with food. Taper gradually."
+    },
+    {
+      "ndc": "0007-1722-01",
+      "name": "Spironolactone",
+      "genericName": "Spironolactone",
+      "brandNames": ["Aldactone"],
+      "dosageForm": "Tablet",
+      "strength": "25mg",
+      "manufacturer": "Watson",
+      "notes": "Potassium-sparing diuretic. Monitor potassium. May cause gynecomastia in males."
+    },
+    {
+      "ndc": "00093-1257-01",
+      "name": "Bupropion Hydrochloride",
+      "genericName": "Bupropion",
+      "brandNames": ["Wellbutrin"],
+      "dosageForm": "Tablet",
+      "strength": "150mg",
+      "manufacturer": "Teva",
+      "notes": "Atypical antidepressant. May cause insomnia. Lower seizure threshold."
+    },
+    {
+      "ndc": "0007-1001-01",
+      "name": "Propranolol Hydrochloride",
+      "genericName": "Propranolol",
+      "brandNames": ["Inderal"],
+      "dosageForm": "Tablet",
+      "strength": "10mg",
+      "manufacturer": "Teva",
+      "notes": "Non-selective beta blocker for tremor, migraine, hypertension. May cause fatigue."
+    },
+    {
+      "ndc": "00006-1958-01",
+      "name": "Levothyroxine Sodium",
+      "genericName": "Levothyroxine",
+      "brandNames": ["Levoxyl", "Tirosint"],
+      "dosageForm": "Tablet",
+      "strength": "75mcg",
+      "manufacturer": "Mylan",
+      "notes": "Thyroid hormone. Dose adjustment based on TSH. Take consistently same way."
+    },
+    {
+      "ndc": "00006-1184-01",
+      "name": "Levetiracetam",
+      "genericName": "Levetiracetam",
+      "brandNames": ["Keppra"],
+      "dosageForm": "Oral Solution",
+      "strength": "100mg/mL",
+      "manufacturer": "UCB",
+      "notes": "Anticonvulsant liquid for patients with swallowing difficulty."
+    }
+  ]
+}

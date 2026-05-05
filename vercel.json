@@ -4,6 +4,9 @@
   "rewrites": [
     { "source": "/((?!api).*)", "destination": "/index.html" }
   ],
+  "env": {
+    "VITE_E2E_MODE": "true"
+  },
   "headers": [
     {
       "source": "/(.*)",

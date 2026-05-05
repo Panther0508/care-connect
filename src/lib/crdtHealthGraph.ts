@@ -1,17 +1,8 @@
 // src/lib/crdtHealthGraph.ts
 // CRDT-based health record manager using Automerge v2.2+
+// WASM is initialized in main.tsx before this module loads
 
 import * as automerge from '@automerge/automerge/slim';
-
-// Ensure Automerge is initialized before any Automerge operation
-try {
-  // @ts-ignore
-  automerge.use();
-} catch (e) {
-  if (!e.message?.includes('already')) {
-    console.error('Automerge init failed in crdtHealthGraph:', e);
-  }
-}
 
 export interface Condition {
   id: string;

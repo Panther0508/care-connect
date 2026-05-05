@@ -249,24 +249,24 @@ export default function AdminDashboard() {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold text-white">Admin Actions</h2>
         <div className="grid grid-cols-2 gap-3">
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={() => navigate("/settings")}
-            className="bg-slate-800/40 hover:bg-slate-700/60 rounded-2xl p-4 border border-slate-700/40 hover:border-blue-500/40 transition-all text-left"
-          >
-            <div className="text-2xl mb-2">⚙️</div>
-            <div className="font-medium text-white">Org Settings</div>
-            <div className="text-xs text-slate-400 mt-1">White-label & configuration</div>
-          </motion.button>
-          <motion.button
-            whileTap={{ scale: 0.98 }}
-            onClick={() => navigate("/audit-log")}
-            className="bg-slate-800/40 hover:bg-slate-700/60 rounded-2xl p-4 border border-slate-700/40 hover:border-blue-500/40 transition-all text-left"
-          >
-            <div className="text-2xl mb-2">📋</div>
-            <div className="font-medium text-white">Audit Log</div>
-            <div className="text-xs text-slate-400 mt-1">Compliance & access logs</div>
-          </motion.button>
+           <motion.button
+             whileTap={{ scale: 0.98 }}
+             onClick={() => navigate("/settings")}
+             className="glass-card hover:bg-slate-700/60 rounded-2xl p-4 border border-slate-700/40 hover:border-blue-500/40 transition-all text-left"
+           >
+             <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-slate-800/50 flex items-center justify-center"><Settings size={20} className="text-slate-400" /></div>
+             <div className="font-medium text-white">Org Settings</div>
+             <div className="text-xs text-slate-400 mt-1">White-label & configuration</div>
+           </motion.button>
+           <motion.button
+             whileTap={{ scale: 0.98 }}
+             onClick={() => navigate("/audit-log")}
+             className="glass-card hover:bg-slate-700/60 rounded-2xl p-4 border border-slate-700/40 hover:border-blue-500/40 transition-all text-left"
+           >
+             <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-slate-800/50 flex items-center justify-center"><FileText size={20} className="text-slate-400" /></div>
+             <div className="font-medium text-white">Audit Log</div>
+             <div className="text-xs text-slate-400 mt-1">Compliance & access logs</div>
+           </motion.button>
         </div>
       </section>
 

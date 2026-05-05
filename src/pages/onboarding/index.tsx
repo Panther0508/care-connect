@@ -179,8 +179,11 @@ export default function Onboarding() {
 
    if (!isLoaded) {
      return (
-       <div className="min-h-screen flex items-center justify-center bg-slate-900">
-         <MagnifyingLoader size={40} />
+       <div className="min-h-screen flex items-center justify-center bg-[#0F172A]">
+         <div className="glass-card p-8 rounded-2xl flex flex-col items-center gap-4">
+           <MagnifyingLoader size={40} />
+           <p className="text-slate-400 text-sm">Loading your secure experience...</p>
+         </div>
        </div>
      );
    }
@@ -229,10 +232,10 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800 flex flex-col">
+    <div className="min-h-screen bg-[#0F172A] flex flex-col">
       {/* Progress Indicator */}
       <div className="px-4 py-6">
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-3">
           {(() => {
             // Determine total steps based on role
             const isAdmin = data.role === 'admin';
@@ -241,13 +244,28 @@ export default function Onboarding() {
             return steps.map((stepNum) => (
               <div
                 key={stepNum}
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all ${
-                  stepNum <= data.step
-                    ? 'bg-teal-500 text-white'
-                    : 'bg-slate-700 text-slate-400'
-                }`}
+                className="flex items-center gap-3"
               >
-                {stepNum}
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 ${
+                    stepNum <= data.step
+                      ? 'bg-teal-500 text-white shadow-lg shadow-teal-500/30'
+                      : 'bg-slate-700/50 text-slate-400 border border-slate-600/30'
+                  }`}
+                >
+                  {stepNum <= data.step ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  ) : (
+                    stepNum
+                  )}
+                </div>
+                {stepNum < totalSteps && (
+                  <div className={`w-8 h-0.5 transition-all duration-300 ${
+                    stepNum < data.step ? 'bg-teal-500' : 'bg-slate-700'
+                  }`} />
+                )}
               </div>
             ));
           })()}

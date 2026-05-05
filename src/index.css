@@ -407,10 +407,40 @@ html { scroll-behavior: smooth; }
 }
 
 @layer utilities {
+  /* Color palette enforcement — override disallowed colors */
+  .bg-black, .bg-gray-900, .bg-slate-950, .bg-neutral-900 {
+    background-color: #0F172A !important;
+  }
+  .text-white, .text-gray-100 {
+    color: #F1F5F9 !important;
+  }
+  .text-gray-400 {
+    color: #94A3B8 !important;
+  }
+  .text-gray-500 {
+    color: #475569 !important;
+  }
+
+  /* Auto-upgrade legacy card styles to glassmorphism standard */
+  .bg-slate-800\/40.border.border-slate-700\/30,
+  .bg-slate-800\/40.border.border-slate-700\/50,
+  .bg-slate-800\/40.border.border-slate-700\/40,
+  .bg-slate-900\/40.border.border-slate-700\/30,
+  .bg-slate-800\/30.border.border-slate-700\/30,
+  .bg-slate-800\/50.border.border-slate-700\/40,
+  .bg-slate-900\/50.border.border-slate-700\/30 {
+    @apply glass-card;
+  }
+
+  /* Auto-upgrade legacy input styles to glass-input standard */
+  .bg-slate-800\/50.border.border-slate-700\/30,
+  .bg-slate-900\/50.border.border-slate-700\/30 {
+    @apply glass-input;
+  }
+
   /* Typography hierarchy */
-  .text-display {
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    font-weight: 800;
+  .text-heading {
+    @apply font-semibold tracking-tight;
     letter-spacing: -0.02em;
   }
 

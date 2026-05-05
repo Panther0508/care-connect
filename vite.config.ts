@@ -2,6 +2,7 @@ import { defineConfig, Plugin } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import wasm from "vite-plugin-wasm";
+import topLevelAwait from "vite-plugin-top-level-await";
 
 // Simple API mock middleware for e2e tests
 function apiMockMiddleware(): Plugin {
@@ -45,7 +46,7 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
-  plugins: [react(), wasm(), apiMockMiddleware()],
+  plugins: [react(), wasm(), topLevelAwait(), apiMockMiddleware()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

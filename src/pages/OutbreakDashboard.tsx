@@ -9,7 +9,7 @@ import type { Facility } from "../services/aiSearch";
 import { MapContainer, TileLayer, CircleMarker, Popup, HeatmapLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useStatus } from "../hooks/useStatus";
-import { getOutbreakAlerts, type OutbreakAlert } from "../services/meshOutbreakDetector";
+import { getOutbreakAlerts, OUTBREAK_THRESHOLD, type OutbreakAlert } from "../services/meshOutbreakDetector";
 import { AlertTriangle, Activity, MapPin, Clock, CheckCircle } from "lucide-react";
 
 export default function OutbreakDashboard() {

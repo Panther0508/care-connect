@@ -6,6 +6,7 @@ import { useStatus } from '../hooks/useStatus';
 import { changePassphrase } from '../services/healthGraph';
 import Referral from './Referral';
 import Support from './Support';
+import LanguageSelector from '../components/LanguageSelector';
 import { Settings as SettingsIcon, User, Lock, Bell, CreditCard, Download, Trash2, Globe } from 'lucide-react';
 
 type Tab = 'profile' | 'security' | 'notifications' | 'subscription' | 'export' | 'delete' | 'referral' | 'support' | 'language';
@@ -324,9 +325,9 @@ function NotificationsTab() {
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-white">Notification Preferences</h3>
       <div className="space-y-3">
-        {Object.entries(prefs).map(([key, label]) => (
+        {Object.entries(prefs).map(([key, value]) => (
           <div key={key} className="flex items-center justify-between">
-            <span className="text-slate-300">{label.replace('_', ' ')}</span>
+            <span className="text-slate-300">{key.replace('_', ' ')}</span>
             <button
               onClick={() => toggle(key as keyof typeof prefs)}
               className={`w-11 h-6 rounded-full p-1 transition-colors ${prefs[key as keyof typeof prefs] ? 'bg-teal-600' : 'bg-slate-600'}`}

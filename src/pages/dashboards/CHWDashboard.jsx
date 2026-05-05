@@ -15,11 +15,11 @@ export default function CHWDashboard() {
     { id: 2, type: 'Malaria', severity: 'medium', location: 'Lagos', cases: 45 },
   ];
 
-  const stats = [
-    { label: 'Mesh Syncs', value: meshStats?.searchCount || 0, icon: '📡' },
-    { label: 'Facilities', value: facilityConfirmations.length, icon: '🏥' },
-    { label: 'Needs Logged', value: needs.length, icon: '📋' },
-  ];
+   const stats = [
+     { label: 'Mesh Syncs', value: meshStats?.searchCount || 0, icon: '/images/icons/healthicons/telemedicine.svg' },
+     { label: 'Facilities', value: facilityConfirmations.length, icon: '/images/icons/healthicons/hospital.svg' },
+     { label: 'Needs Logged', value: needs.length, icon: '/images/icons/healthicons/document.svg' },
+   ];
 
   return (
     <motion.div
@@ -34,19 +34,19 @@ export default function CHWDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-3">
         <div className="bg-slate-800/50 rounded-xl p-3 text-center border border-slate-700/50">
-          <div className="text-2xl mb-1">📡</div>
+          <div className="w-8 h-8 mx-auto mb-1"><img src={stats[0].icon} alt="" className="w-full h-full" /></div>
           <div className="text-xl font-bold">{meshSyncCount}</div>
           <div className="text-xs text-slate-400">Mesh Syncs</div>
         </div>
         <div className="bg-slate-800/50 rounded-xl p-3 text-center border border-slate-700/50">
-          <div className="text-2xl mb-1">🏥</div>
+          <div className="w-8 h-8 mx-auto mb-1"><img src={stats[1].icon} alt="" className="w-full h-full" /></div>
           <div className="text-xl font-bold">{facilityConfirmations}</div>
           <div className="text-xs text-slate-400">Facilities</div>
         </div>
         <div className="bg-slate-800/50 rounded-xl p-3 text-center border border-slate-700/50">
-          <div className="text-2xl mb-1">📋</div>
+          <div className="w-8 h-8 mx-auto mb-1"><img src={stats[2].icon} alt="" className="w-full h-full" /></div>
           <div className="text-xl font-bold">{needs.length}</div>
           <div className="text-xs text-slate-400">Needs Logged</div>
         </div>

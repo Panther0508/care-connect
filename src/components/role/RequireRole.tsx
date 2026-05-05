@@ -13,6 +13,12 @@ export function AuthSyncGate({ children }: { children: React.ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth();
   const location = useLocation();
 
+  // Test mode bypass: skip all auth checks
+  const isTestMode = import.meta.env.VITE_E2E_MODE === 'true' && new URLSearchParams(location.search).has('testMode');
+  if (isTestMode) {
+    return <>{children}</>;
+  }
+
   if (!isSignedIn) {
     return <>{children}</>;
   }
@@ -37,7 +43,10 @@ export function RequireAuth({ children }: GuardProps) {
   const location = useLocation();
 
   // DEV ONLY: ?devBypass=true skips auth for local testing
-  if (import.meta.env?.DEV && new URLSearchParams(location.search).has('devBypass')) {
+  // PROD E2E: ?testMode=true also bypasses (controlled by VITE_E2E_MODE env var)
+  const isDevBypass = import.meta.env?.DEV && new URLSearchParams(location.search).has('devBypass');
+  const isTestMode = import.meta.env.VITE_E2E_MODE === 'true' && new URLSearchParams(location.search).has('testMode');
+  if (isDevBypass || isTestMode) {
     return <>{children}</>;
   }
 
@@ -58,7 +67,10 @@ export function ProtectedRoute({ children, allowedRoles }: GuardProps) {
   const location = useLocation();
 
   // DEV ONLY: ?devBypass=true skips auth for local testing
-  if (import.meta.env?.DEV && new URLSearchParams(location.search).has('devBypass')) {
+  // PROD E2E: ?testMode=true also bypasses (controlled by VITE_E2E_MODE env var)
+  const isDevBypass = import.meta.env?.DEV && new URLSearchParams(location.search).has('devBypass');
+  const isTestMode = import.meta.env.VITE_E2E_MODE === 'true' && new URLSearchParams(location.search).has('testMode');
+  if (isDevBypass || isTestMode) {
     if (!localStorage.getItem('user_role')) {
       localStorage.setItem('user_role', allowedRoles ? (Array.isArray(allowedRoles) ? allowedRoles[0] : allowedRoles) : 'patient');
     }

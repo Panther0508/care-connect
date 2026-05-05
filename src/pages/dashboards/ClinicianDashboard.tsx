@@ -18,10 +18,9 @@ import {
   Activity,
   Sparkles,
   Search,
-  Pill
+  Pill,
+  BookOpen
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { getReferrals } from '../../lib/idb';
 
 export default function ClinicianDashboard() {
   const { user } = useAuth();
@@ -85,11 +84,12 @@ export default function ClinicianDashboard() {
     navigate("/ai");
   };
 
-   const quickActions = [
-     { label: "Scan QR Code", icon: Scan, route: "/clinician-view", color: "from-emerald-500/20 to-emerald-600/20" },
-     { label: "My Profile", icon: UserPlus, route: "/clinician/profile", color: "from-blue-500/20 to-blue-600/20" },
-     { label: "Check Interactions", icon: Sparkles, route: "/ai", color: "from-amber-500/20 to-amber-600/20" },
-   ];
+const quickActions = [
+      { label: "Scan QR Code", icon: Scan, route: "/clinician-view", color: "from-emerald-500/20 to-emerald-600/20" },
+      { label: "My Profile", icon: UserPlus, route: "/clinician/profile", color: "from-blue-500/20 to-blue-600/20" },
+      { label: "Check Interactions", icon: Sparkles, route: "/ai", color: "from-amber-500/20 to-amber-600/20" },
+      { label: "Literature Search", icon: BookOpen, route: "/literature", color: "from-purple-500/20 to-purple-600/20" },
+    ];
 
   return (
     <motion.div
