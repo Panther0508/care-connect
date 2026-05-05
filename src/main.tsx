@@ -16,8 +16,9 @@ import wasmUrl from '@automerge/automerge/automerge.wasm?url';
 Automerge.initializeWasm(wasmUrl).catch(() => {});
 
 // Step 2: Configure HuggingFace Transformers BEFORE any transformers code runs
+// Local models should be allowed for embedding models (stored in /public/models/)
 import { env } from '@huggingface/transformers';
-env.allowLocalModels = false;
+env.allowLocalModels = false; // Default: disable local for remote models
 env.useBrowserCache = true;
 
 // Step 3: Standard React imports

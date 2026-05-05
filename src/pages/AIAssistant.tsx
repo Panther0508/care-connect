@@ -255,19 +255,58 @@ export default function AIAssistant() {
     }
   };
 
-  const handleSpeechInput = async () => {
-    if (isRecording) {
-      try {
-        const result = await transcribeFromMic({ language: "en" });
-        setCurrentInput(result.text);
-      } catch (err) {
-        console.error("Speech recognition failed:", err);
-      }
-      setIsRecording(false);
-    } else {
-      setIsRecording(true);
-    }
-  };
+const handleSpeechInput = async () => {
+     try {
+       if (isRecording) {
+         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+         const mediaRecorder = new MediaRecorder(stream);
+         const audioChunks: Blob[] = [];
+         
+         mediaRecorder.ondataavailable = (event) => {
+           audioChunks.push(event.data);
+         };
+         
+         mediaRecorder.onstop = async () => {
+           const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+           try {
+             const result = await transcribeFromMic({ language: "en" });
+             setCurrentInput(result.text);
+           } catch (transcribeErr) {
+             console.error("Transcription failed, using Web Speech fallback:", transcribeErr);
+             if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+               const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+               const recognition = new SpeechRecognition();
+               recognition.lang = 'en-US';
+               recognition.onresult = (event) => {
+                 setCurrentInput(event.results[0][0].transcript);
+               };
+               recognition.start();
+             }
+           }
+           stream.getTracks().forEach(track => track.stop());
+         };
+         
+         mediaRecorder.start();
+         setTimeout(() => mediaRecorder.stop(), 3000);
+       }
+     } catch (err) {
+       console.warn("Speech recognition unavailable:", err);
+       if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+         try {
+           const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+           const recognition = new SpeechRecognition();
+           recognition.lang = 'en-US';
+           recognition.onresult = (event) => {
+             setCurrentInput(event.results[0][0].transcript);
+           };
+           recognition.start();
+         } catch (webErr) {
+           console.warn("Web Speech also failed:", webErr);
+         }
+       }
+     }
+     setIsRecording(!isRecording);
+   };
 
   const handleTextToSpeech = async (text: string) => {
     if (isSpeaking()) {

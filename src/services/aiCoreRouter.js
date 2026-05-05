@@ -171,19 +171,31 @@ export async function loadTinyLlama() {
 let dbInstance = null;
 async function openDB() {
   if (dbInstance) return dbInstance;
-return new Promise((resolve, reject) => {
+  
+  if (typeof indexedDB === 'undefined') {
+    throw new Error('IndexedDB not available in this environment');
+  }
+  
+  return new Promise((resolve, reject) => {
+    try {
       const req = indexedDB.open('vitachain', 10); // unified version v10
-    req.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains('gemmaCache')) db.createObjectStore('gemmaCache', { keyPath: 'id' });
-      if (!db.objectStoreNames.contains('emotionThreads')) db.createObjectStore('emotionThreads', { keyPath: 'userId' });
-      if (!db.objectStoreNames.contains('trainingPairs')) db.createObjectStore('trainingPairs', { keyPath: 'id', autoIncrement: true });
-      // NEW STORES for evaluation
-      if (!db.objectStoreNames.contains('evaluationLogs')) db.createObjectStore('evaluationLogs', { keyPath: 'id', autoIncrement: true });
-      if (!db.objectStoreNames.contains('queryLogs')) db.createObjectStore('queryLogs', { keyPath: 'id', autoIncrement: true });
-    };
-    req.onsuccess = (e) => { dbInstance = e.target.result; resolve(dbInstance); };
-    req.onerror = (e) => reject(e.target.error);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('gemmaCache')) db.createObjectStore('gemmaCache', { keyPath: 'id' });
+        if (!db.objectStoreNames.contains('emotionThreads')) db.createObjectStore('emotionThreads', { keyPath: 'userId' });
+        if (!db.objectStoreNames.contains('trainingPairs')) db.createObjectStore('trainingPairs', { keyPath: 'id', autoIncrement: true });
+        if (!db.objectStoreNames.contains('evaluationLogs')) db.createObjectStore('evaluationLogs', { keyPath: 'id', autoIncrement: true });
+        if (!db.objectStoreNames.contains('queryLogs')) db.createObjectStore('queryLogs', { keyPath: 'id', autoIncrement: true });
+      };
+      req.onsuccess = (e) => { dbInstance = e.target.result; resolve(dbInstance); };
+      req.onerror = (e) => {
+        console.error('IDB open error:', e.target.error);
+        reject(e.target.error);
+      };
+    } catch (err) {
+      console.error('IDB init failed:', err);
+      reject(err);
+    }
   });
 }
 
@@ -485,78 +497,78 @@ export async function routeQuery({
      console.log('[AI Router] Tier 1: Attempting Gemma 4 (Gemini API)');
      try {
 
-        // Build final enriched prompt
-        const enrichedPrompt = enrichmentData
-          ? `${structuredPrompt}\n\n─── MEDICAL LITERATURE ───\n${formatEnrichmentForPrompt(enrichmentData)}`
-          : structuredPrompt;
+// Build final enriched prompt
+         const enrichedPrompt = enrichment
+           ? `${structuredPrompt}\n\n─── MEDICAL LITERATURE ───\n${formatEnrichmentForPrompt(enrichment)}`
+           : structuredPrompt;
 
-        // Call Gemma 4
-        const response = await callGemmaAPI(enrichedPrompt, fullSystemPrompt);
-        incrementQuota();
+         // Call Gemma 4
+         const response = await callGemmaAPI(enrichedPrompt, fullSystemPrompt);
+         incrementQuota();
 
-        // Extract citations
-        const citations = response.citations || enrichmentData?.allCitations || [];
+         // Extract citations
+         const citations = response.citations || enrichment?.allCitations || [];
 
-        // Cache embedding + response
-        try {
-          const queryVec = await embedText(structuredPrompt);
-          await storeGemmaResponse(structuredPrompt, queryVec, response.text, citations, enrichmentData?.allSources || [], []);
-        } catch (cacheErr) { /* silent */ }
+         // Cache embedding + response
+         try {
+           const queryVec = await embedText(structuredPrompt);
+           await storeGemmaResponse(structuredPrompt, queryVec, response.text, citations, enrichment?.allSources || [], []);
+         } catch (cacheErr) { /* silent */ }
 
-        // Safety guardrails
-        const safeText = applyGuardrails(response.text, role);
+         // Safety guardrails
+         const safeText = applyGuardrails(response.text, role);
 
-        // Evaluation
-        const evaluation = evaluateResponse({
-          text: safeText,
-          role,
-          model: response.model,
-          sources: citations.length > 0 ? 'enriched' : 'none',
-          hasCitations: citations.length > 0,
-          hasUncertainty: /(?:may|might|suggests?|typically|usually|often|according to|studies? show?)/i.test(safeText),
-          wordCount: safeText.split(/\s+/).length,
-          readabilityScore: estimateReadability(safeText),
-          emotionalTone: analyzeTone(safeText),
-          warningIndicators: detectWarnings(safeText)
-        });
+         // Evaluation
+         const evaluation = evaluateResponse({
+           text: safeText,
+           role,
+           model: response.model,
+           sources: citations.length > 0 ? 'enriched' : 'none',
+           hasCitations: citations.length > 0,
+           hasUncertainty: /(?:may|might|suggests?|typically|usually|often|according to|studies? show?)/i.test(safeText),
+           wordCount: safeText.split(/\s+/).length,
+           readabilityScore: estimateReadability(safeText),
+           emotionalTone: analyzeTone(safeText),
+           warningIndicators: detectWarnings(safeText)
+         });
 
-        // Log evaluation
-        await storeEvaluationScore({
-          ...evaluation,
-          modelUsed: response.model,
-          role,
-          queryHash: simpleHash(structuredPrompt.substring(0, 200))
-        });
+         // Log evaluation
+         await storeEvaluationScore({
+           ...evaluation,
+           modelUsed: response.model,
+           role,
+           queryHash: simpleHash(structuredPrompt.substring(0, 200))
+         });
 
-        // Self-training log
-        logInteraction({
-          prompt: structuredPrompt,
-          response: safeText,
-          role,
-          emotionalState: finalEmotion,
-          sources: enrichmentData?.allSources || [],
-          reasoning: [],
-          citations,
-          modelUsed: response.model,
-          embedding: null
-        });
+         // Self-training log
+         logInteraction({
+           prompt: structuredPrompt,
+           response: safeText,
+           role,
+           emotionalState: finalEmotion,
+           sources: enrichment?.allSources || [],
+           reasoning: [],
+           citations,
+           modelUsed: response.model,
+           embedding: null
+         });
 
          // Emotional turn
          await addTurn(userId, structuredPrompt, safeText, finalEmotion);
 
-          const result = {
-            text: safeText,
-            reasoning: [
-              { type: 'search', title: 'Web & Literature Search', description: `Web: ${enrichmentData.searchSource} (${enrichmentData.web?.length || 0} results), PubMed: ${enrichmentData.pubmed?.length || 0} articles` },
-              { type: 'clinical', title: 'Gemma 4 via Gemini API', description: 'Primary online model with multi-source enrichment' }
-            ],
-            citations,
-            emotionalState: finalEmotion,
-            model: response.model,
-            source: 'online',
-            evaluation,
-            quotaRemaining: getQuotaRemaining().remaining
-          };
+           const result = {
+             text: safeText,
+             reasoning: [
+               { type: 'search', title: 'Web & Literature Search', description: `Web: ${enrichment?.searchSource || 'none'} (${enrichment?.web?.length || 0} results), PubMed: ${enrichment?.pubmed?.length || 0} articles` },
+               { type: 'clinical', title: 'Gemma 4 via Gemini API', description: 'Primary online model with multi-source enrichment' }
+             ],
+             citations,
+             emotionalState: finalEmotion,
+             model: response.model,
+             source: 'online',
+             evaluation,
+             quotaRemaining: getQuotaRemaining().remaining
+           };
          lastResult = result;
          lastReasoning = result.reasoning;
          console.log('[AI Router] Tier 1 SUCCESS: Gemma 4 returned response (' + safeText.length + ' chars, Score: ' + evaluation.overall + ')');
