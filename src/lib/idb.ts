@@ -1291,6 +1291,28 @@ export async function updateChatEntry(id: number, updates: Partial<ChatEntry>): 
   });
 }
 
+export async function deleteChatEntry(id: number): Promise<void> {
+  const db = await openDB();
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction("chatHistory", "readwrite");
+    const store = transaction.objectStore("chatHistory");
+    const request = store.delete(id);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function clearAllChatHistory(): Promise<void> {
+  const db = await openDB();
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction("chatHistory", "readwrite");
+    const store = transaction.objectStore("chatHistory");
+    const request = store.clear();
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+}
+
 // ==================== Referral Storage ====================
 
 export interface Referral {

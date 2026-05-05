@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
@@ -6,6 +6,11 @@ import VitaAvatar from "../components/VitaAvatar";
 import CrisisPopup from "../components/CrisisPopup";
 import ReasoningPanel from "../components/ReasoningPanel";
 import CitationBadge from "../components/CitationBadge";
+import ChatHistorySidebar from "../components/ChatHistorySidebar";
+import MessageActions from "../components/MessageActions";
+import QuotaIndicator from "../components/QuotaIndicator";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   loadModel,
   isModelReady,
@@ -17,13 +22,13 @@ import {
 } from "../services/medicalAI";
 import { checkInteractionsSimple } from "../services/medicationChecker";
 import { getCurrentHealthState } from "../services/healthGraph";
-import { getAllRxNorm, getAllVectors, retrieveContext, getAllChatHistory, storeChatEntry } from "../lib/idb";
+import { getAllRxNorm, getAllVectors, retrieveContext, getAllChatHistory, storeChatEntry, deleteChatEntry } from "../lib/idb";
 import { useStatus } from "../hooks/useStatus";
 import { getPersona, buildSystemPrompt, generateGreeting } from "../services/personaEngine";
 import { scanMessage, scanAIResponse } from "../services/crisisDetector";
 import { showCrisisPopup, dismissCrisisPopup, registerCrisisHandler } from "../services/crisisManager";
 import {
-  X, Send, Mic, ArrowLeft, AlertCircle, CheckCircle, FileText, Image, Calendar, Pill, Globe, Volume2, VolumeX, Camera, Clock, Plus
+  X, Send, Mic, ArrowLeft, AlertCircle, CheckCircle, FileText, Image, Calendar, Pill, Globe, Volume2, VolumeX, Camera, Clock, Plus, Menu
 } from "lucide-react";
 import { getUserProfile } from "../lib/idb";
 import { useRole } from "../hooks/auth/useRole";
@@ -66,6 +71,26 @@ const QUICK_PROMPTS = [
   { label: "Generate passport summary", handler: "passport" },
 ];
 
+// Context-aware dynamic prompts
+const DYNAMIC_PROMPTS = {
+  after_summary: [
+    { label: "Explain my conditions", handler: "explain_conditions" },
+    { label: "What should I monitor?", handler: "monitor" },
+  ],
+  after_meds: [
+    { label: "Check interactions", handler: "interaction" },
+    { label: "Set reminder for meds", handler: "reminder" },
+  ],
+  after_gaps: [
+    { label: "Book a check-up", handler: "appointment" },
+    { label: "Add missing records", handler: "add_records" },
+  ],
+  general: [
+    { label: "Tell me more", handler: "tell_more" },
+    { label: "Simplify this", handler: "simplify" },
+  ]
+};
+
 export default function AIAssistant() {
   const navigate = useNavigate();
   const { showStatus, dismissStatus } = useStatus();
@@ -106,33 +131,89 @@ export default function AIAssistant() {
   const [activeModel, setActiveModel] = useState<'online' | 'cached' | 'offline' | null>(null);
   const [quotaRemaining, setQuotaRemaining] = useState(1500);
   const [modelType, setModelType] = useState<'gemma4-31b' | 'tinyllama-1.1b'>('gemma4-31b');
-  const chatEndRef = useRef<HTMLDivElement>(null);
-  // Chat history sidebar
-  const [showHistory, setShowHistory] = useState(false);
-  const [chatHistory, setChatHistory] = useState<any[]>([]);
+   const [chatEndRef, setChatEndRef] = useState<HTMLDivElement | null>(null);
+   // Chat history sidebar
+   const [showSidebar, setShowSidebar] = useState(false);
+   const [chatHistory, setChatHistory] = useState<any[]>([]);
+   // Streaming state
+   const [isStreaming, setIsStreaming] = useState(false);
+   const [currentChunk, setCurrentChunk] = useState("");
+   // Dynamic quick actions based on context
+   const [dynamicQuickActions, setDynamicQuickActions] = useState<Array<{label: string, handler: string}>>([]);
 
   // Update model status periodically
-  useEffect(() => {
-    const updateModelStatus = () => {
-      const quota = getQuotaRemaining();
-      setQuotaRemaining(quota.remaining);
-      if (quota.used > 0 && quota.used <= 1500) {
-        setActiveModel('online');
-      }
-    };
-    updateModelStatus();
-    const interval = setInterval(updateModelStatus, 30000); // Update every 30s
-    return () => clearInterval(interval);
-  }, []);
+   // Update dynamic quick actions based on conversation context
+   const updateDynamicQuickActions = useCallback((msgs: Message[]) => {
+     if (msgs.length === 0) {
+       setDynamicQuickActions([]);
+       return;
+     }
+
+     // Find last assistant message
+     const lastAssistantMsg = [...msgs].reverse().find(m => m.role === 'assistant');
+     if (!lastAssistantMsg) {
+       setDynamicQuickActions([]);
+       return;
+     }
+
+     const content = lastAssistantMsg.content.toLowerCase();
+     const actions: Array<{label: string, handler: string}> = [];
+
+     // Context detection
+     if (content.includes('summary') || content.includes('health summary')) {
+       actions.push(...DYNAMIC_PROMPTS.after_summary);
+     } else if (content.includes('medication') || content.includes('drug') || content.includes('interaction')) {
+       actions.push(...DYNAMIC_PROMPTS.after_meds);
+     } else if (content.includes('gap') || content.includes('missing') || content.includes('record')) {
+       actions.push(...DYNAMIC_PROMPTS.after_gaps);
+     } else {
+       // Always show some context-aware options after any response
+       actions.push(...DYNAMIC_PROMPTS.general.slice(0, 1)); // Only "Tell me more"
+     }
+
+     setDynamicQuickActions(actions);
+   }, []);
+
+   // Update dynamic actions whenever messages change
+   useEffect(() => {
+     updateDynamicQuickActions(messages);
+   }, [messages, updateDynamicQuickActions]);
 
   const getLanguageName = (code: string) => {
     const lang = SUPPORTED_LANGUAGES.find(l => l.code === code);
     return lang ? lang.name : code;
   };
 
-  useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  // Map dynamic prompt handlers to actual question text
+  const getDynamicPromptText = (handler: string): string => {
+    switch (handler) {
+      case 'explain_conditions': return 'Can you explain my conditions in more detail?';
+      case 'monitor': return 'What symptoms or indicators should I monitor?';
+      case 'interaction': return 'Check medication interactions for my current meds';
+      case 'reminder': return 'Help me set up medication reminders';
+      case 'appointment': return 'I want to book a check-up appointment';
+      case 'add_records': return 'What health records am I missing?';
+      case 'tell_more': return 'Tell me more about this';
+      case 'simplify': return 'Can you explain that in simpler terms?';
+      default: return handler;
+    }
+  };
+
+   useEffect(() => {
+     const loadChatHistory = async () => {
+       try {
+         const entries = await getAllChatHistory();
+         setChatHistory(entries);
+       } catch (err) {
+         console.error('Failed to load chat history:', err);
+       }
+     };
+     loadChatHistory();
+   }, []);
+
+   useEffect(() => {
+     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+   }, [messages]);
 
   useEffect(() => {
     registerCrisisHandler((state: any) => {
@@ -528,31 +609,81 @@ const handleSpeechInput = async () => {
           return;
         }
 
-         // Default: free-form question
-         const aiResult = await askMedicalQuestion(healthState, text, systemPrompt, userRole, userId);
-         const responseDetection = scanAIResponse(aiResult.text);
-         if (responseDetection.requiresImmediatePopup) {
-           setCrisisVisible(true);
-           setCrisisState({ riskLevel: responseDetection.riskLevel, matchedPattern: responseDetection.matchedPatterns?.[0] });
+        // Default: free-form question - use streaming
+        setIsStreaming(true);
+
+        // Create placeholder message for streaming
+        const tempId = Date.now();
+        addMessage("assistant", "", { tempId });
+
+        try {
+          // Stream the response
+          const streamGen = askMedicalQuestionStream(healthState, text, systemPrompt, userRole, userId);
+          let fullText = "";
+          let metadata: any = {};
+
+          for await (const chunk of streamGen) {
+            if (chunk.type === 'text') {
+              fullText += chunk.content;
+              // Update the last message with current text
+              setMessages(prev => {
+                const newMsgs = [...prev];
+                const lastIdx = newMsgs.length - 1;
+                if (newMsgs[lastIdx]?.tempId === tempId) {
+                  newMsgs[lastIdx] = { ...newMsgs[lastIdx], content: fullText };
+                }
+                return newMsgs;
+              });
+            } else if (chunk.type === 'metadata') {
+              metadata = chunk;
+            } else if (chunk.type === 'error') {
+              throw new Error(chunk.error);
+            }
+          }
+
+          // Finalize message with metadata
+          setMessages(prev => {
+            const newMsgs = [...prev];
+            const lastIdx = newMsgs.length - 1;
+            if (newMsgs[lastIdx]?.tempId === tempId) {
+              newMsgs[lastIdx] = {
+                role: 'assistant',
+                content: fullText,
+                reasoning: metadata.reasoning,
+                citations: metadata.citations,
+                emotionalState: metadata.emotionalState,
+                model: metadata.model
+              };
+            }
+            return newMsgs;
+          });
+
+          // Update model status from last route result
+          const lastRes = getLastRouteResult();
+          if (lastRes?.source === 'online') setActiveModel('online');
+          else if (lastRes?.source === 'cached-gemma') setActiveModel('cached');
+          else if (lastRes?.source === 'offline') setActiveModel('offline');
+         } catch (err) {
+           console.error('Streaming error:', err);
+           // Replace placeholder with error message
+           setMessages(prev => {
+             const newMsgs = [...prev];
+             const lastIdx = newMsgs.length - 1;
+             if (newMsgs[lastIdx]?.tempId === tempId) {
+               newMsgs[lastIdx] = { role: 'assistant', content: "Sorry, I encountered an error. Please try again." };
+             }
+             return newMsgs;
+           });
+         } finally {
+           setIsStreaming(false);
+           setIsProcessing(false);
          }
-         addMessage("assistant", aiResult.text, {
-           reasoning: aiResult.reasoning,
-           citations: aiResult.citations,
-           emotionalState: aiResult.emotionalState,
-           model: aiResult.model
-         });
-         // Update model status from last route result
-         const lastRes = getLastRouteResult();
-         if (lastRes?.source === 'online') setActiveModel('online');
-         else if (lastRes?.source === 'cached-gemma') setActiveModel('cached');
-         else if (lastRes?.source === 'offline') setActiveModel('offline');
-    } catch (err) {
-      console.error(err);
-      addMessage("assistant", "Sorry, I couldn't process that. Please try again.");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+       } catch (err) {
+         console.error(err);
+         addMessage("assistant", "Sorry, I couldn't process that. Please try again.");
+         setIsProcessing(false);
+       }
+     };
 
   const handleDismissCrisis = () => {
     dismissCrisisPopup();
@@ -597,45 +728,45 @@ const handleSpeechInput = async () => {
         userProfile={userProfile}
       />
 
-       <header className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-2xl border-b border-white/5 px-4 py-4">
-         <div className="flex items-center gap-4">
-           <button onClick={() => navigate(-1)} className="p-2.5 -ml-2 rounded-xl hover:bg-white/5 transition-colors text-slate-300 hover:text-slate-100">
-             <ArrowLeft size={22} />
-           </button>
-           <div className="relative">
-             <VitaAvatar state="online" size={44} />
-             <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-slate-900 bg-teal-500" />
-           </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <h1 className="text-white font-bold text-lg leading-tight">Vita AI</h1>
-                {activeModel && (
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                    activeModel === 'online' ? 'bg-teal-500/20 text-teal-400' :
-                    activeModel === 'cached' ? 'bg-amber-500/20 text-amber-400' :
-                    'bg-slate-500/20 text-slate-400'
-                  }`}>
-                    {activeModel === 'online' ? `Gemma-4` : activeModel === 'cached' ? 'Gemma-4 (cached)' : 'TinyLlama'}
-                  </span>
-                )}
-              </div>
-              <p className="text-slate-400 text-xs">
-                {activeModel === 'online' && `Gemma 4 31B | ${quotaRemaining.toLocaleString()}/1,500 today`}
-                {activeModel === 'cached' && `Gemma 4 (cached) | responses from ${new Date().toLocaleDateString()}`}
-                {activeModel === 'offline' && 'TinyLlama 1.1B | offline'}
-                {!activeModel && 'On-device medical assistant'}
-              </p>
-            </div>
-            {/* Chat history button */}
+        <header className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-2xl border-b border-white/5 px-4 py-4">
+          <div className="flex items-center gap-4">
+            {/* Sidebar toggle */}
             <button
-              onClick={() => { setShowHistory(true); loadChatHistory(); }}
-              className="p-2.5 rounded-xl bg-slate-800/70 text-slate-400 hover:text-slate-300 transition-colors"
-              title="Chat History"
+              onClick={() => setShowSidebar(true)}
+              className="p-2.5 -ml-2 rounded-xl hover:bg-white/5 transition-colors text-slate-300 hover:text-slate-100"
+              aria-label="Open chat history"
             >
-              <Clock size={20} />
+              <Menu size={22} />
             </button>
-         </div>
-       </header>
+
+            <button onClick={() => navigate(-1)} className="p-2.5 -ml-2 rounded-xl hover:bg-white/5 transition-colors text-slate-300 hover:text-slate-100">
+              <ArrowLeft size={22} />
+            </button>
+            <div className="relative">
+              <VitaAvatar state="online" size={44} />
+              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-slate-900 bg-teal-500" />
+            </div>
+             <div className="flex-1 min-w-0">
+               <div className="flex items-center gap-2">
+                 <h1 className="text-xl font-bold text-white leading-tight">Vita AI</h1>
+                 {activeModel && (
+                   <QuotaIndicator
+                     remaining={quotaRemaining}
+                     limit={1500}
+                     model={activeModel === 'online' || activeModel === 'cached' ? 'gemma4-31b' : 'tinyllama-1.1b'}
+                     source={activeModel}
+                   />
+                 )}
+               </div>
+               <p className="text-slate-400 text-xs">
+                 {activeModel === 'online' && `Gemma 4 31B • Online mode • ${quotaRemaining.toLocaleString()}/1,500 queries`}
+                 {activeModel === 'cached' && `Gemma 4 (cached) • Offline-capable • Responses cached`}
+                 {activeModel === 'offline' && 'TinyLlama 1.1B • Fully offline'}
+                 {!activeModel && 'Loading AI model...'}
+               </p>
+             </div>
+          </div>
+        </header>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
         {!modelLoaded && (
@@ -649,55 +780,62 @@ const handleSpeechInput = async () => {
           </motion.div>
         )}
 
-        <AnimatePresence mode="pop-layout">
-          {messages.map((msg, idx) => {
-            const isUser = msg.role === "user";
-            const isSystem = msg.role === "system";
-            const isAssistant = msg.role === "assistant";
-            return (
-              <motion.div key={idx} initial={{ opacity: 0, y: 15, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className={`flex ${isUser ? "justify-end" : "justify-start"}`} data-message-role={msg.role}>
-                <div className={`flex gap-3 max-w-full sm:max-w-[88%] ${isUser ? "flex-row-reverse" : "flex-row"}`}>
-                  {!isUser && !isSystem && (
-                    <div className="flex-shrink-0 mt-0.5">
-                      <div className="w-8 h-8 rounded-xl bg-slate-800/70 border border-slate-700/50 flex items-center justify-center">
-                        <span className="text-xs">AI</span>
-                      </div>
-                    </div>
-                  )}
-                  <div>
-                    {/* Main message bubble */}
+         <AnimatePresence mode="pop-layout">
+           {messages.map((msg, idx) => {
+             const isUser = msg.role === "user";
+             const isSystem = msg.role === "system";
+             const isAssistant = msg.role === "assistant";
+             return (
+               <motion.div key={idx} initial={{ opacity: 0, y: 15, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className={`flex ${isUser ? "justify-end" : "justify-start"}`} data-message-role={msg.role}>
+                 <div className={`flex gap-3 max-w-full sm:max-w-[88%] ${isUser ? "flex-row-reverse" : "flex-row"}`}>
+                   {!isUser && !isSystem && (
+                     <div className="flex-shrink-0 mt-0.5">
+                       <div className="w-8 h-8 rounded-xl bg-slate-800/70 border border-slate-700/50 flex items-center justify-center">
+                         <span className="text-xs">AI</span>
+                       </div>
+                     </div>
+                   )}
+                   <div>
+                     {/* Main message bubble */}
                      <div className={`rounded-2xl px-4 py-3 ${isUser ? "bg-gradient-to-r from-teal-500/30 to-cyan-500/20 text-slate-100 border border-teal-500/20" : isSystem ? "bg-amber-500/10 text-amber-200 border border-amber-500/20 text-sm" : "glass-card text-slate-200"}`}>
-                      {isUser ? (
-                        <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</div>
-                      ) : (
-                        <div className="text-base leading-relaxed whitespace-pre-wrap prose prose-invert max-w-none">
-                          {msg.content.split("\n").map((line, i) =>
-                            line.startsWith("**") && line.endsWith("**") ? (
-                              <strong key={i} className="text-teal-300 font-semibold">{line.replace(/\*\*/g, "")}</strong>
-                            ) : line.startsWith("* ") ? (
-                              <div key={i} className="ml-3 flex items-start gap-2"><span className="text-teal-400 mt-1.5 flex-shrink-0">•</span><span>{line.substring(2)}</span></div>
-                            ) : line.trim() === "" ? (
-                              <div key={i} className="h-2" />
-                            ) : (
-                              <div key={i}>{line}</div>
-                            )
-                          )}
-                        </div>
-                      )}
-                    </div>
+                       {isUser ? (
+                         <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</div>
+                       ) : (
+                         <div className="text-base leading-relaxed prose prose-invert max-w-none prose-p:mb-2 prose-headings:mt-3 prose-headings:mb-1 prose-ul:my-2 prose-ol:my-2 prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-700 prose-code:text-teal-300">
+                           <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                             {msg.content}
+                           </ReactMarkdown>
+                         </div>
+                       )}
+                     </div>
 
-                    {/* Emotional state indicator for assistant */}
-                    {isAssistant && msg.emotionalState && (
-                      <div className="mt-1.5 ml-2 flex items-center gap-1.5">
-                        <span title={`Emotional state: ${msg.emotionalState}`}>{EMOJI_MAP[msg.emotionalState] || '⚪'}</span>
-                        {msg.emotionalState !== 'neutral' && (
-                          <span className="text-xs text-slate-400 capitalize">{msg.emotionalState}</span>
-                        )}
-                      </div>
-                    )}
+                     {/* Message actions for assistant messages */}
+                     {isAssistant && !isStreaming && (
+                       <div className="mt-1.5 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <MessageActions content={msg.content} />
+                       </div>
+                     )}
 
-                    {/* Reasoning panel */}
-                    {isAssistant && msg.reasoning && msg.reasoning.length > 0 && (
+                     {/* Emotional state indicator for assistant */}
+                     {isAssistant && msg.emotionalState && (
+                       <div className="mt-1.5 ml-2 flex items-center gap-1.5">
+                         <span title={`Emotional state: ${msg.emotionalState}`}>{EMOJI_MAP[msg.emotionalState] || '⚪'}</span>
+                         {msg.emotionalState !== 'neutral' && (
+                           <span className="text-xs text-slate-400 capitalize">{msg.emotionalState}</span>
+                         )}
+                       </div>
+                     )}
+
+                     {/* Streaming indicator */}
+                     {isStreaming && (
+                       <div className="mt-2 ml-2 flex items-center gap-2 text-xs text-teal-400">
+                         <div className="w-2 h-2 bg-teal-400 rounded-full animate-pulse" />
+                         <span>Thinking and writing...</span>
+                       </div>
+                     )}
+
+                     {/* Reasoning panel */}
+                     {isAssistant && msg.reasoning && msg.reasoning.length > 0 && (
                       <div className="mt-2 ml-2">
                         <ReasoningPanel reasoningSteps={msg.reasoning} />
                       </div>
@@ -718,7 +856,7 @@ const handleSpeechInput = async () => {
           })}
         </AnimatePresence>
 
-        {isProcessing && (
+        {isProcessing && !isStreaming && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-3">
             <div className="w-8 h-8 rounded-xl bg-slate-800/70 border border-slate-700/50 flex items-center justify-center flex-shrink-0">
               <div className="w-4 h-4 border border-teal-400 border-t-transparent rounded-full animate-spin" />
@@ -745,12 +883,53 @@ const handleSpeechInput = async () => {
       </div>
 
          {messages.length > 0 && modelLoaded && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="px-4 pb-4 flex flex-wrap gap-2">
-           {QUICK_PROMPTS.map((prompt) => (
-             <button key={prompt.label} onClick={() => handleSend(prompt.label)} disabled={isProcessing} className="glass-card px-4 py-2.5 text-slate-200 rounded-xl text-sm font-medium transition-all hover:border-teal-400/30 disabled:opacity-50 disabled:cursor-not-allowed">{prompt.label}</button>
-           ))}
-         </motion.div>
-       )}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="px-4 pb-4">
+            <p className="text-xs text-slate-500 mb-2">Quick actions</p>
+            <div className="flex flex-wrap gap-2">
+              {/* Static quick prompts */}
+              {QUICK_PROMPTS.map((prompt) => (
+                <button
+                  key={prompt.label}
+                  onClick={() => handleSend(prompt.label)}
+                  disabled={isProcessing || isStreaming}
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-teal-500/15 to-cyan-500/10 hover:from-teal-500/25 hover:to-cyan-500/20 border border-teal-500/40 hover:border-teal-400/60 text-slate-100 text-base font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(20,184,166,0.25)] hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  {prompt.label}
+                </button>
+              ))}
+              {/* Dynamic context-aware prompts */}
+              {dynamicQuickActions.map((prompt, idx) => (
+                <button
+                  key={`dynamic-${idx}-${prompt.handler}`}
+                  onClick={() => handleSend(getDynamicPromptText(prompt.handler))}
+                  disabled={isProcessing || isStreaming}
+                  className="px-5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-700/70 border border-slate-600/50 hover:border-teal-500/40 text-slate-200 text-base font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  {prompt.label}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+      {/* Chat history sidebar */}
+      <ChatHistorySidebar
+        open={showSidebar}
+        onClose={() => setShowSidebar(false)}
+        history={chatHistory}
+        onSelectChat={(entry) => {
+          // Load selected chat history into messages
+          setMessages(entry.messages || []);
+        }}
+        onDeleteChat={async (id) => {
+          await deleteChatEntry(id);
+          setChatHistory(prev => prev.filter(e => e.id !== id));
+        }}
+        onNewChat={() => {
+          setMessages([]);
+          setCurrentInput("");
+        }}
+      />
 
       <div className="sticky bottom-0 bg-slate-900/90 backdrop-blur-2xl border-t border-white/5 p-4">
         <AnimatePresence>
@@ -868,37 +1047,6 @@ const handleSpeechInput = async () => {
         </form>
         <p className="text-[10px] text-slate-500 text-center mt-3 leading-relaxed">Vita provides general health information and does not substitute professional medical advice.</p>
       </div>
-
-      {/* Chat history overlay and drawer */}
-      {showHistory && (
-        <>
-          <div className="fixed inset-0 z-40 bg-black/50" onClick={() => setShowHistory(false)}></div>
-          <motion.div
-            initial={{ x: '-100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
-            className="fixed inset-y-0 left-0 z-50 w-80 max-w-[80vw] bg-slate-900/95 backdrop-blur-xl border-r border-white/10 flex flex-col"
-          >
-            <div className="p-4 border-b border-white/5 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-slate-100">Chat History</h2>
-              <button onClick={() => setShowHistory(false)} className="p-1 rounded hover:bg-white/5 text-slate-400">✕</button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {chatHistory.length === 0 ? (
-                <p className="text-slate-500 text-sm text-center">No past conversations.</p>
-              ) : (
-                chatHistory.map(entry => (
-                  <div key={entry.id} className="glass-card p-3 cursor-pointer hover:border-teal-500/30" onClick={() => { setShowHistory(false); }}>
-                    <div className="font-medium text-slate-200 text-sm">{entry.title}</div>
-                    <div className="text-xs text-slate-400 mt-1">{new Date(entry.createdAt).toLocaleDateString()}</div>
-                    <div className="text-xs text-slate-500 line-clamp-2 mt-2">{entry.preview}</div>
-                  </div>
-                ))
-              )}
-            </div>
-          </motion.div>
-        </>
-      )}
 
     </div>
   );

@@ -104,6 +104,37 @@ export async function askMedicalQuestion(healthState, question, personaSystemPro
 }
 
 /**
+ * Ask medical question with streaming response
+ * Returns an async iterable that yields text chunks and finally metadata
+ */
+export async function* askMedicalQuestionStream(healthState, question, personaSystemPrompt = null, role = 'patient', userId = 'guest') {
+  try {
+    const taskPrompt = buildPatientTaskPrompt(healthState, question);
+    const { structuredPrompt } = buildStructuredPrompt(role, taskPrompt, { healthContext: healthState });
+    const result = await routeQuery({ structuredPrompt, role, userId, extractedQuery: question });
+
+    // Simulate streaming by chunking the response text
+    const chunks = splitTextIntoChunks(result.text);
+    for (const chunk of chunks) {
+      yield { type: 'text', content: chunk };
+      await delay(50); // 50ms delay between chunks for visual effect
+    }
+
+    // Yield metadata at the end
+    yield {
+      type: 'metadata',
+      reasoning: result.reasoning,
+      citations: result.citations,
+      emotionalState: result.emotionalState,
+      model: result.model
+    };
+  } catch (error) {
+    // Maintain same error handling pattern as existing function
+    yield { type: 'error', error: error.message };
+  }
+}
+
+/**
  * Legacy: Simple rule-based interaction check
  */
 export async function checkMedicationInteraction(medications) {
@@ -143,4 +174,21 @@ Question: ${userQuestion}
 
 Provide clear, compassionate, evidence-based response in plain language. Definemedical terms. Highlight key takeaways. Cite sources from medical literature.`;
   return prompt;
+}
+
+// Helper functions for streaming simulation
+function splitTextIntoChunks(text) {
+  const chunks = [];
+  let index = 0;
+  while (index < text.length) {
+    // Random chunk size between 10-20 characters
+    const chunkSize = 10 + Math.floor(Math.random() * 11);
+    chunks.push(text.slice(index, index + chunkSize));
+    index += chunkSize;
+  }
+  return chunks;
+}
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
