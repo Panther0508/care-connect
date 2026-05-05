@@ -1,15 +1,22 @@
 // src/lib/initAutomerge.ts
 // Centralized Automerge v2 initialization — MUST be executed before any Automerge usage
 import * as automerge from '@automerge/automerge/slim';
+import wasmUrl from '@automerge/automerge/automerge.wasm?url';
 
-// Call use() immediately upon module evaluation (synchronously)
-try {
-  // @ts-ignore — automerge.use may not be in typings but exists at runtime
-  automerge.use();
-  console.log('✅ Automerge initialized');
-} catch (e) {
-  // Ignore "already called" errors — that means it was initialized elsewhere
-  if (!e.message?.includes('already')) {
-    console.warn('Automerge init failed:', e);
+// Initialize WASM before any document operations
+let initialized = false;
+export async function initAutomerge() {
+  if (initialized) return;
+  try {
+    await automerge.initializeWasm(wasmUrl);
+    initialized = true;
+  } catch (e) {
+    // Ignore "already initialized" errors
+    if (!String(e).includes('already')) {
+      console.warn('Automerge init failed:', e);
+    }
   }
 }
+
+// Auto-initialize when module loads
+initAutomerge().catch(() => {});

@@ -2,24 +2,18 @@
 // ENTRY POINT — CRITICAL INITIALIZATION ORDER
 // ═══════════════════════════════════════════════════════════════════════════════
 // MUST execute in this exact order before ANY other code:
-// 1. Call automerge.use() synchronously (Automerge v2 requirement)
+// 1. Initialize Automerge WASM (Automerge v2.2 requirement)
 // 2. Configure HuggingFace env
 // 3. Then import React and other modules
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// Step 1: Initialize Automerge FIRST — before any module that uses Automerge
-// This must be a direct synchronous call at module top-level
-import * as automerge from '@automerge/automerge/slim';
-try {
-  // @ts-ignore — use() is required for v2 proxy-based change tracking
-  automerge.use();
-  console.log('✅ Automerge initialized (main.tsx synchronous)');
-} catch (e) {
-  // Ignore "already called" — means initialized elsewhere (shouldn't happen)
-  if (!e.message?.includes('already')) {
-    console.error('❌ Automerge init failed:', e);
-  }
-}
+// Step 1: Initialize Automerge WASM FIRST — before any module that uses Automerge
+// This uses the proper v2.2+ API: initializeWasm()
+import { next as Automerge } from '@automerge/automerge/slim';
+import wasmUrl from '@automerge/automerge/automerge.wasm?url';
+
+// Initialize WASM - top-level await is supported via vite-plugin-top-level-await
+Automerge.initializeWasm(wasmUrl).catch(() => {});
 
 // Step 2: Configure HuggingFace Transformers BEFORE any transformers code runs
 import { env } from '@huggingface/transformers';
@@ -49,7 +43,6 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker.getRegistrations().then((registrations) => {
     for (const registration of registrations) {
       registration.unregister();
-      console.log("Unregistered stale service worker:", registration.scope);
     }
   });
 }
@@ -71,7 +64,6 @@ if ("serviceWorker" in navigator) {
           });
         }
       });
-      console.log('ServiceWorker registered:', registration);
     })
     .catch((err) => console.log("ServiceWorker registration failed:", err));
 }

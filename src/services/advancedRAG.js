@@ -4,7 +4,10 @@
 
 import { pipeline, env } from '@huggingface/transformers';
 
-env.allowLocalModels = false;
+// Configure for LOCAL embedding model only — no remote CDN fetches
+env.localModelPath = '/models/';  // Local model directory
+env.allowRemoteModels = false;   // Block HuggingFace CDN
+env.allowLocalModels = true;     // Allow local /models/ path
 env.useBrowserCache = true;
 // Note: env.fetch override is set globally in main.tsx before any imports
 
@@ -114,7 +117,7 @@ const DATASETS = {
   }
 };
 
-let dbVersion = 9; // Bumped to match unified vitachain schema
+let dbVersion = 10; // Bumped to match unified vitachain schema
 
 // Load embedding model
 export async function loadEmbedder() {

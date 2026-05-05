@@ -7,6 +7,7 @@ import { pipeline, env } from '@huggingface/transformers';
 // Configure - fetch override is set globally in main.tsx
 env.allowLocalModels = false;
 env.useBrowserCache = true;
+env.localModelPath = '/models/';  // Local model directory
 
 // Model cache
 const models = {
@@ -30,9 +31,8 @@ const modelLoading = {
 const MODEL_CONFIGS = {
   textGeneration: {
     // GitHub Releases direct download — user-requested model hosting location
-    // If the exact release asset is not yet published, replace with actual URL when ready:
-    // https://github.com/Panther0508/care-connect/releases/download/v1.0.0-model/decoder_model_merged_quantized.onnx
-    model: 'https://github.com/Panther0508/care-connect/releases/download/v1.0.0-model/decoder_model_merged_quantized.onnx',
+    // Confirmed release: v2.1.0-buildfix with 1.03GB quantized ONNX model
+    model: 'https://github.com/Panther0508/care-connect/releases/download/v2.1.0-buildfix/decoder_model_merged_quantized.onnx',
     task: 'text-generation',
     options: { model_type: 'llama' }
   },
