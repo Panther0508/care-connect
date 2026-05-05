@@ -32,22 +32,22 @@ export default function Settings() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6 p-4 pb-24">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-1">Settings</h1>
-        <p className="text-slate-400">Manage your account and preferences</p>
+        <h1 className="text-2xl font-bold text-white leading-tight mb-1">Settings</h1>
+        <p className="text-slate-400 text-sm">Manage your account and preferences</p>
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+              className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all border ${
                 activeTab === tab.id
-                  ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30'
-                  : 'bg-slate-800/40 text-slate-300 hover:bg-slate-700/40 border border-transparent'
+                  ? 'bg-teal-500/15 border-teal-500/40 text-teal-100'
+                  : 'bg-slate-800/50 border-slate-700/30 text-slate-300 hover:bg-slate-700/50 hover:border-teal-500/30'
               }`}
             >
               <Icon size={16} />
@@ -58,7 +58,7 @@ export default function Settings() {
       </div>
 
       {/* Tab Content */}
-      <div className="bg-slate-800/40 rounded-2xl p-6 border border-slate-700/50 min-h-[400px]">
+      <div className="glass-card p-6 min-h-[400px]">
         {activeTab === 'profile' && <ProfileTab />}
         {activeTab === 'security' && <SecurityTab />}
         {activeTab === 'notifications' && <NotificationsTab />}
@@ -68,11 +68,11 @@ export default function Settings() {
         {activeTab === 'language' && <LanguageSelector />}
         {activeTab === 'export' && <ExportTab />}
         {activeTab === 'delete' && <DeleteTab />}
-       </div>
+      </div>
 
       {/* Legal Links Footer */}
       <div className="mt-8 pt-6 border-t border-white/5 text-center">
-        <p className="text-slate-500 text-sm">
+        <p className="text-slate-500 text-xs">
           <span className="mx-2">© 2026 VitaChain.</span>
           <a href="/terms" className="text-teal-400 hover:underline mx-1">Terms</a>
           <span className="text-slate-600 mx-1">•</span>
