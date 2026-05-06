@@ -170,14 +170,19 @@ export default function AppLayout({ children }: AppLayoutProps) {
         )}
       </AnimatePresence>
 
-      {/* Side menu button (top-left) */}
-      <button
-        onClick={() => setSideMenuOpen(true)}
-        className="fixed top-4 left-4 z-40 p-3 rounded-full bg-slate-800/80 hover:bg-slate-700/80 backdrop-blur-md border border-white/10 text-slate-300 hover:text-white shadow-lg transition-all"
-        aria-label="Open navigation menu"
-      >
-        <Menu size={20} />
-      </button>
+       {/* Side menu button (top-left) + Brand */}
+       <div className="fixed top-4 left-4 z-40 flex items-center gap-3">
+         <button
+           onClick={() => setSideMenuOpen(true)}
+           className="p-3 rounded-full bg-slate-800/80 hover:bg-slate-700/80 backdrop-blur-md border border-white/10 text-slate-300 hover:text-white shadow-lg transition-all"
+           aria-label="Open navigation menu"
+         >
+           <Menu size={20} />
+         </button>
+         <a href="/" className="text-lg font-bold text-white tracking-tight hidden sm:block">
+           VitaChain
+         </a>
+       </div>
 
       <main className={`relative z-10 min-h-screen pt-16`}>
         <div className="mx-auto w-full max-w-5xl px-4 md:px-8">

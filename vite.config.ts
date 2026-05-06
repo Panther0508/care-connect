@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import wasm from "vite-plugin-wasm";
 import topLevelAwait from "vite-plugin-top-level-await";
+import { VitePWA } from "vite-plugin-pwa";
 
 // Simple API mock middleware for e2e tests
 function apiMockMiddleware(): Plugin {
@@ -46,7 +47,51 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
-  plugins: [react(), wasm(), topLevelAwait(), apiMockMiddleware()],
+  plugins: [
+    react(),
+    wasm(),
+    topLevelAwait(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.jpg', 'icon-192.png', 'icon-512.png'],
+      manifest: {
+        name: 'VitaChain — Your Health, Your Guardian',
+        short_name: 'VitaChain',
+        description: 'Offline‑first, self‑sovereign AI health guardian for the Global South.',
+        theme_color: '#0F172A',
+        background_color: '#0F172A',
+        display: 'standalone',
+        icons: [
+          { src: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+        ],
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-cache',
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'gstatic-fonts-cache',
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+        ],
+      },
+    }),
+    apiMockMiddleware(),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

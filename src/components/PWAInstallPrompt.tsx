@@ -3,7 +3,7 @@ import { usePWAInstall } from "../hooks/usePWAInstall";
 export default function PWAInstallPrompt() {
   const { isInstallable, isIOS, installApp } = usePWAInstall();
 
-  if (!isInstallable) return null;
+  if (!isInstallable && !isIOS) return null;
 
   return (
     <div className="glass-card p-4 text-center">

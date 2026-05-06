@@ -87,6 +87,16 @@ export default function Passport() {
 
   return (
     <div className="w-full">
+      {/* Loading overlay with upgraded spinner */}
+      {loading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4">
+            <LoadingSpinner size={80} />
+            <p className="text-teal-300 font-semibold text-lg">Generating secure QR...</p>
+          </div>
+        </div>
+      )}
+
       <div className="p-4 pb-24">
         <ScrollReveal>
           <div className="flex items-center justify-between mb-6">

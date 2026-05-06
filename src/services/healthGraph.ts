@@ -22,10 +22,7 @@ import {
 
 import {
   deriveKey,
-  encrypt,
-  decrypt,
   generateSalt,
-  EncryptedPayload,
 } from '../lib/encryption';
 
 import {
@@ -57,12 +54,15 @@ export async function setActiveUser(userId: string, passphrase: string = DEMO_PA
   if (record) {
     currentSalt = record.salt;
     currentKey = await deriveKey(passphrase, currentSalt);
-    const decrypted = await decrypt(record.iv, record.encryptedBlob, currentKey);
-    const bytes = new TextEncoder().encode(decrypted);
     try {
-      currentDoc = deserializeDoc(new Uint8Array(bytes));
+      const plaintext = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv: record.iv },
+        currentKey,
+        record.encryptedBlob
+      );
+      currentDoc = deserializeDoc(new Uint8Array(plaintext));
     } catch (e) {
-      console.warn('Failed to deserialize health graph, creating fresh:', e);
+      console.warn('Failed to decrypt/deserialize health graph, creating fresh:', e);
       currentDoc = createHealthDoc();
       await persistCurrentDoc();
     }
@@ -101,8 +101,14 @@ async function persistCurrentDoc(): Promise<void> {
   }
 
   const serialized = serializeDoc(currentDoc);
-  const plaintext = new TextDecoder().decode(serialized);
-  const { iv, ciphertext } = await encrypt(plaintext, currentKey);
+
+  // Encrypt directly from Uint8Array (no string conversion corruption)
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    currentKey,
+    serialized
+  );
 
   const record: HealthGraphRecord = {
     key: `healthgraph_${currentUserId}`,

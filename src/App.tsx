@@ -491,7 +491,7 @@ const App = () => {
                </AuthSyncGate>
              } />
              
-             <Route path="/reservation/:facilityId" element={
+             <Route path="/reservation/:facilityId?" element={
               <AuthSyncGate>
                 <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
                   <PageWrapper><ReservationPage /></PageWrapper>

@@ -9,6 +9,7 @@ import CitationBadge from "../components/CitationBadge";
 import ChatHistorySidebar from "../components/ChatHistorySidebar";
 import MessageActions from "../components/MessageActions";
 import QuotaIndicator from "../components/QuotaIndicator";
+import ScrollReveal from "../components/ScrollReveal";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {

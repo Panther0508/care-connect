@@ -22,21 +22,24 @@ export default function ReservationPage() {
   const [codeDisplay, setCodeDisplay] = useState("");
   const code = "CONF-7X3A";
 
-  useEffect(() => {
-    const fetchFacility = async () => {
-      if (!facilityId) return;
-      setLoading(true);
-      try {
-        const data = await getFacility(facilityId);
-        if (data) setFacility(data);
-      } catch (err) {
-        console.error('Failed to fetch facility:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchFacility();
-  }, [facilityId]);
+   useEffect(() => {
+     const fetchFacility = async () => {
+       if (!facilityId) {
+         setLoading(false);
+         return;
+       }
+       setLoading(true);
+       try {
+         const data = await getFacility(facilityId);
+         if (data) setFacility(data);
+       } catch (err) {
+         console.error('Failed to fetch facility:', err);
+       } finally {
+         setLoading(false);
+       }
+     };
+     fetchFacility();
+   }, [facilityId]);
 
   useEffect(() => {
     if (!loading && facility) {
