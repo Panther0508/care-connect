@@ -8,7 +8,6 @@ import { Menu, X, Lock } from "lucide-react";
 import { useIDB } from "../hooks/useIDB";
 import StatusToastContainer from "./StatusToastContainer";
 import SideMenu from "./SideMenu";
-import ModernBottomNav from "./ModernBottomNav";
 import { getSetting, storeSetting } from "../lib/idb";
 
 interface AppLayoutProps {
@@ -19,8 +18,27 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const isOnline = useOnlineStatus();
   const { showStatus } = useStatus();
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
-  // Initialize offline data and mesh orchestrator globally
   const { ready: idbReady } = useIDB();
+  
+  // Header hide on scroll
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [headerVisible, setHeaderVisible] = useState(true);
+  
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      // Hide header when scrolling down, show when scrolling up
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setHeaderVisible(false);
+      } else if (currentScrollY < lastScrollY) {
+        setHeaderVisible(true);
+      }
+      setLastScrollY(currentScrollY);
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   // Guest Mode PIN gate state
   const [guestModeEnabled, setGuestModeEnabled] = useState(false);
@@ -189,31 +207,32 @@ export default function AppLayout({ children }: AppLayoutProps) {
         )}
       </AnimatePresence>
 
-       {/* Side menu button (top-left) + Brand */}
-       <div className="fixed top-4 left-4 z-40 flex items-center gap-3">
-         <button
-           onClick={() => setSideMenuOpen(true)}
-           className="p-3 rounded-full bg-slate-800/80 hover:bg-slate-700/80 backdrop-blur-md border border-white/10 text-slate-300 hover:text-white shadow-lg transition-all"
-           aria-label="Open navigation menu"
-         >
-           <Menu size={20} />
-         </button>
-         <a href="/" className="text-lg font-bold text-white tracking-tight hidden sm:block">
-           VitaChain
-         </a>
-       </div>
+        {/* Side menu button (top-left) + Brand */}
+        <div 
+          className={`fixed top-4 left-4 z-40 flex items-center gap-3 transition-transform duration-300 ${
+            headerVisible ? 'translate-y-0 opacity-100' : '-translate-y-20 opacity-0'
+          }`}
+        >
+          <button
+            onClick={() => setSideMenuOpen(true)}
+            className="p-3 rounded-full bg-slate-800/80 hover:bg-slate-700/80 backdrop-blur-md border border-white/10 text-slate-300 hover:text-white shadow-lg transition-all"
+            aria-label="Open navigation menu"
+          >
+            <Menu size={20} />
+          </button>
+          <a href="/" className="text-lg font-bold text-white tracking-tight hidden sm:block">
+            VitaChain
+          </a>
+        </div>
 
-       <main className={`relative z-10 min-h-screen`}>
-         <div className="mx-auto w-full max-w-5xl px-4 md:px-8">
-           {children}
-         </div>
-       </main>
+        <main className={`relative z-10 min-h-screen`}>
+          <div className="mx-auto w-full max-w-5xl px-4 md:px-8">
+            {children}
+          </div>
+        </main>
 
-       {/* Modern Bottom Navigation (mobile) */}
-       <ModernBottomNav />
-
-      {/* Side Menu */}
-      <SideMenu open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
+       {/* Side Menu */}
+       <SideMenu open={sideMenuOpen} onOpenChange={setSideMenuOpen} />
     </div>
   );
 }

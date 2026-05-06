@@ -69,6 +69,149 @@ function incrementQuota() {
 }
 
 // GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// REASONING STEP TRACKING (for DeepSeek-style collapsible panel)
+// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+
+/**
+ * Create a reasoning step object
+ * @param {number} stepNum
+ * @param {string} action
+ * @param {string} icon - emoji or identifier
+ * @param {string} detail
+ * @param {number} duration_ms
+ * @param {string[]} source_urls
+ * @param {string} status - "complete" | "running" | "error" | "pending"
+ */
+function createReasoningStep(stepNum, action, icon, detail, duration_ms, source_urls = [], status = "complete") {
+  return { step: stepNum, action, icon, detail, duration_ms, source_urls, status };
+}
+
+/**
+ * Emit a reasoning step via onStep callback (for streaming)
+ */
+function emitStep(onStep, step) {
+  if (onStep && typeof onStep === 'function') {
+    onStep(step);
+  }
+}
+
+/**
+ * Build a complete reasoning steps array for a given execution path
+ */
+function buildReasoningSteps({
+  enrichmentData,
+  modelCallDuration,
+  modelName,
+  modelSource,
+  cacheHit = false,
+  cacheSource = null,
+  evaluationDuration = 0,
+  guardrailsDuration = 0,
+  embeddingDuration = 0,
+  threadingDuration = 0,
+  onStep
+}) {
+  const steps = [];
+  let currentStep = 1;
+  let cumulativeTime = 0;
+
+  const addStep = (action, icon, detail, duration, source_urls = [], status = "complete") => {
+    const step = createReasoningStep(currentStep++, action, icon, detail, duration, source_urls, status);
+    steps.push(step);
+    emitStep(onStep, step);
+    cumulativeTime += duration;
+    return step;
+  };
+
+  // Step 1: Query analysis
+  addStep("Analyzing question", "??", "Parsing user query and extracting key medical terms", 120);
+
+  // Step 2: Enrichment (web/pubmed/etc)
+  if (enrichmentData) {
+    const webCount = enrichmentData.web?.length || 0;
+    const pubmedCount = enrichmentData.pubmed?.length || 0;
+    const trialCount = enrichmentData.clinicalTrials?.length || 0;
+    const fdaCount = enrichmentData.openFDA?.length || 0;
+    const totalSources = webCount + pubmedCount + trialCount + fdaCount;
+
+    const sourceDetail = [
+      webCount > 0 ? `Web: ${webCount}` : null,
+      pubmedCount > 0 ? `PubMed: ${pubmedCount}` : null,
+      trialCount > 0 ? `Trials: ${trialCount}` : null,
+      fdaCount > 0 ? `FDA: ${fdaCount}` : null
+    ].filter(Boolean).join(', ');
+
+    addStep(
+      "Searching medical sources",
+      "??",
+      `Retrieving evidence from multiple trusted sources (${sourceDetail})`,
+      Math.round(enrichmentDuration || 800),
+      enrichmentData.allCitations?.map(c => c.url) || []
+    );
+  } else {
+    addStep("Skipping enrichment", "??", "No external sources consulted (offline/cached mode)", 0);
+  }
+
+  // Step 3: Emotional threading
+  if (threadingDuration > 0) {
+    addStep("Analyzing conversation context", "??", "Processing emotional history and conversation thread", threadingDuration);
+  }
+
+  // Step 4: AI model inference
+  let modelIcon = "??";
+  let modelAction = "Generating response";
+  if (modelSource === 'cached-gemma') {
+    modelIcon = "??";
+    modelAction = "Retrieving from cache";
+  } else if (modelSource === 'openrouter') {
+    modelIcon = "??";
+    modelAction = "Querying fallback model";
+  } else if (modelSource === 'huggingface') {
+    modelIcon = "??";
+    modelAction = "Running HuggingFace inference";
+  } else if (modelSource === 'error') {
+    modelIcon = "?";
+    modelAction = "All models failed";
+  }
+
+  addStep(
+    modelAction,
+    modelIcon,
+    `${modelName} processing your query`,
+    modelCallDuration,
+    [],
+    cacheHit ? "complete" : modelSource === 'error' ? "error" : "complete"
+  );
+
+  // Step 5: Guardrails
+  if (guardrailsDuration > 0) {
+    addStep("Applying safety guardrails", "???", "Screening response for safety and medical accuracy", guardrailsDuration);
+  }
+
+  // Step 6: Embedding for cache (if needed)
+  if (embeddingDuration > 0) {
+    addStep("Caching response", "??", "Storing embedding and response for future retrieval", embeddingDuration);
+  }
+
+  // Step 7: Evaluation (internal)
+  if (evaluationDuration > 0) {
+    addStep("Quality evaluation", "??", "Scoring response for accuracy, clarity, and safety", evaluationDuration);
+  }
+
+  // Step 8: Final completion
+  addStep(
+    "Response ready",
+    "?",
+    modelSource === 'error' ? "All AI paths exhausted - using fallback response" : "Final answer prepared",
+    Math.round(guardrailsDuration || 50),
+    [],
+    modelSource === 'error' ? "error" : "complete"
+  );
+
+  return steps;
+}
+
+// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
 // EMBEDDING (for semantic cache) - with offline fallback
 // GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
 export async function loadEmbedder() {
@@ -453,7 +596,8 @@ async function callGemmaAPI(prompt, systemPrompt) {
  * @param {object} options.enrichment GÇö pre-fetched enrichment data (optional, fetched if not provided)
  * @param {boolean} options.useCache GÇö allow cache lookup (default: true)
  * @param {string} options.extractedQuery GÇö Original user query for web search (default: first 200 chars of structuredPrompt)
- * @returns {Promise<object>} { text, reasoning, citations, emotionalState, model, source, evaluation }
+ * @param {function} options.onStep GÇö Callback fired when each reasoning step completes (for streaming UI)
+ * @returns {Promise<object>} { text, reasoningSteps[], citations[], emotionalState, model, source, evaluation }
  */
 export async function routeQuery({
   structuredPrompt,
@@ -462,8 +606,20 @@ export async function routeQuery({
   emotionalContext = {},
   enrichment = null,
   useCache = true,
-  extractedQuery = null
+  extractedQuery = null,
+  onStep = null
 }) {
+  // REASONING STEP TRACKING SETUP
+  const reasoningSteps = [];
+  let stepCounter = 1;
+
+  function recordStep(action, icon, detail, duration_ms, source_urls = [], status = "complete") {
+    const step = createReasoningStep(stepCounter++, action, icon, detail, duration_ms, source_urls, status);
+    reasoningSteps.push(step);
+    emitStep(onStep, step);
+    return step;
+  }
+
   // GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
   // CRITICAL: Log router invocation for debugging
   // GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
@@ -485,10 +641,39 @@ export async function routeQuery({
     }
    }
 
-   // Fetch enrichment if not pre-provided
-   if (!enrichment) {
-     enrichment = await enrichWithWebData(finalExtractedQuery);
-   }
+    // Fetch enrichment if not pre-provided
+    let enrichmentDuration = 0;
+    if (!enrichment) {
+      const t0 = Date.now();
+      enrichment = await enrichWithWebData(finalExtractedQuery);
+      enrichmentDuration = Date.now() - t0;
+    }
+
+    // Record enrichment step
+    if (enrichment && (enrichment.web?.length > 0 || enrichment.pubmed?.length > 0 || enrichment.clinicalTrials?.length > 0)) {
+      const webCount = enrichment.web?.length || 0;
+      const pubmedCount = enrichment.pubmed?.length || 0;
+      const trialCount = enrichment.clinicalTrials?.length || 0;
+      const fdaCount = enrichment.openFDA?.length || 0;
+      const totalSources = webCount + pubmedCount + trialCount + fdaCount;
+
+      const sourceDetailArray = [];
+      if (webCount > 0) sourceDetailArray.push(`Web: ${webCount}`);
+      if (pubmedCount > 0) sourceDetailArray.push(`PubMed: ${pubmedCount}`);
+      if (trialCount > 0) sourceDetailArray.push(`Trials: ${trialCount}`);
+      if (fdaCount > 0) sourceDetailArray.push(`FDA: ${fdaCount}`);
+
+      recordStep(
+        "Searching medical sources",
+        "??",
+        `Retrieved ${totalSources} source${totalSources !== 1 ? 's' : ''} from trusted databases`,
+        enrichmentDuration,
+        enrichment.allCitations?.map(c => c.url) || [],
+        "complete"
+      );
+    } else {
+      recordStep("Skipping enrichment", "??", "No external sources available (offline/cached mode)", 0, [], "pending");
+    }
 
    const { emotionResult = { state: 'neutral', confidence: 0.8 }, threadTurns = [], trendSummary = null } = emotionalContext;
 
@@ -496,15 +681,19 @@ export async function routeQuery({
   const detectedEmotion = detectEmotion(structuredPrompt);
   const finalEmotion = detectedEmotion.state;
 
-  // 2. Get emotional threading
-  const historyTurns = threadTurns.length > 0 ? threadTurns : await getThreadContext(userId);
-  const emotionalHistory = historyTurns.length > 0 ? buildEmotionalHistoryPrompt(historyTurns) : null;
+   // 2. Get emotional threading
+   const historyTurns = threadTurns.length > 0 ? threadTurns : await getThreadContext(userId);
+   const emotionalHistory = historyTurns.length > 0 ? buildEmotionalHistoryPrompt(historyTurns) : null;
 
-  // 3. Get trend
-  const trend = await getEmotionalTrend(userId);
-  const finalTrendSummary = trendSummary || getEmotionalTrendSummary(trend);
+   // 3. Get trend (fast, includes in threading time)
+   const trend = await getEmotionalTrend(userId);
+   const finalTrendSummary = trendSummary || getEmotionalTrendSummary(trend);
 
-  // 4. Assemble full system prompt with emotional context
+    // Record emotional threading step (approximate timing)
+    const threadingDuration = historyTurns ? historyTurns.length * 5 : 20;
+    recordStep("Analyzing conversation context", "??", `Processing ${historyTurns?.length || 0} previous interactions`, Math.max(threadingDuration, 30));
+
+   // 4. Assemble full system prompt with emotional context
   let fullSystemPrompt = structuredPrompt;
   if (emotionalHistory) {
     fullSystemPrompt += `\n\nGöÇGöÇGöÇ CONVERSATION HISTORY GöÇGöÇGöÇ\n${emotionalHistory}`;
@@ -513,91 +702,130 @@ export async function routeQuery({
   // 5. Check online status & quota
   const hasQuota = quotaInfo.remaining > 0;
 
-  // 6. ONLINE PRIMARY PATH (Gemma 4)
-  if (isOnline && hasQuota) {
-    const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
-   if (geminiKey) {
-     console.log('[AI Router] Tier 1: Attempting Gemma 4 (Gemini API)');
-     try {
+    // 6. ONLINE PRIMARY PATH (Gemma 4)
+    if (isOnline && hasQuota) {
+      const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      if (geminiKey) {
+        console.log('[AI Router] Tier 1: Attempting Gemma 4 (Gemini API)');
+        try {
+          // Build final enriched prompt
+          const enrichedPrompt = enrichment
+            ? `${structuredPrompt}\n\nGöÇGöÇGöÇ MEDICAL LITERATURE GöÇGöÇGöÇ\n${formatEnrichmentForPrompt(enrichment)}`
+            : structuredPrompt;
 
-// Build final enriched prompt
-         const enrichedPrompt = enrichment
-           ? `${structuredPrompt}\n\nGöÇGöÇGöÇ MEDICAL LITERATURE GöÇGöÇGöÇ\n${formatEnrichmentForPrompt(enrichment)}`
-           : structuredPrompt;
+          // Call Gemma 4 with timing
+          const modelStart = Date.now();
+          const response = await callGemmaAPI(enrichedPrompt, fullSystemPrompt);
+          const modelDuration = Date.now() - modelStart;
+          incrementQuota();
 
-         // Call Gemma 4
-         const response = await callGemmaAPI(enrichedPrompt, fullSystemPrompt);
-         incrementQuota();
+          // Record AI inference step
+          recordStep(
+            "Generating AI response",
+            "??",
+            response.model
+              ? `Primary model (${response.model}) processing enriched query`
+              : "Primary model processing enriched query",
+            modelDuration,
+            [],
+            "complete"
+          );
 
-         // Extract citations
-         const citations = response.citations || enrichment?.allCitations || [];
+          // Extract citations
+          const citations = response.citations || enrichment?.allCitations || [];
 
-         // Cache embedding + response
-         try {
-           const queryVec = await embedText(structuredPrompt);
-           await storeGemmaResponse(structuredPrompt, queryVec, response.text, citations, enrichment?.allSources || [], []);
-         } catch (cacheErr) { /* silent */ }
+          // Cache embedding + response (with timing)
+          let embeddingDuration = 0;
+          try {
+            const embedStart = Date.now();
+            const queryVec = await embedText(structuredPrompt);
+            await storeGemmaResponse(structuredPrompt, queryVec, response.text, citations, enrichment?.allSources || [], []);
+            embeddingDuration = Date.now() - embedStart;
+          } catch (cacheErr) { /* silent */ }
 
-         // Safety guardrails
-         const safeText = applyGuardrails(response.text, role);
+          if (embeddingDuration > 0) {
+            recordStep("Storing to knowledge cache", "??", "Caching response and embedding for future queries", embeddingDuration);
+          }
 
-         // Evaluation
-         const evaluation = evaluateResponse({
-           text: safeText,
-           role,
-           model: response.model,
-           sources: citations.length > 0 ? 'enriched' : 'none',
-           hasCitations: citations.length > 0,
-           hasUncertainty: /(?:may|might|suggests?|typically|usually|often|according to|studies? show?)/i.test(safeText),
-           wordCount: safeText.split(/\s+/).length,
-           readabilityScore: estimateReadability(safeText),
-           emotionalTone: analyzeTone(safeText),
-           warningIndicators: detectWarnings(safeText)
-         });
+          // Safety guardrails
+          const guardStart = Date.now();
+          const safeText = applyGuardrails(response.text, role);
+          const guardrailsDuration = Date.now() - guardStart;
 
-         // Log evaluation
-         await storeEvaluationScore({
-           ...evaluation,
-           modelUsed: response.model,
-           role,
-           queryHash: simpleHash(structuredPrompt.substring(0, 200))
-         });
+          if (guardrailsDuration > 10) {
+            recordStep("Applying safety filters", "???", "Screening for medical accuracy and safety", guardrailsDuration);
+          }
 
-         // Self-training log
-         logInteraction({
-           prompt: structuredPrompt,
-           response: safeText,
-           role,
-           emotionalState: finalEmotion,
-           sources: enrichment?.allSources || [],
-           reasoning: [],
-           citations,
-           modelUsed: response.model,
-           embedding: null
-         });
+          // Evaluation (with timing)
+          const evalStart = Date.now();
+          const evaluation = evaluateResponse({
+            text: safeText,
+            role,
+            model: response.model,
+            sources: citations.length > 0 ? 'enriched' : 'none',
+            hasCitations: citations.length > 0,
+            hasUncertainty: /(?:may|might|suggests?|typically|usually|often|according to|studies? show?)/i.test(safeText),
+            wordCount: safeText.split(/\s+/).length,
+            readabilityScore: estimateReadability(safeText),
+            emotionalTone: analyzeTone(safeText),
+            warningIndicators: detectWarnings(safeText)
+          });
+          const evaluationDuration = Date.now() - evalStart;
 
-         // Emotional turn
-         await addTurn(userId, structuredPrompt, safeText, finalEmotion);
+          if (evaluationDuration > 10) {
+            recordStep("Scoring response quality", "??", "Evaluating accuracy, clarity, and safety", evaluationDuration);
+          }
 
-           const result = {
-             text: safeText,
-             reasoning: [
-               { type: 'search', title: 'Web & Literature Search', description: `Web: ${enrichment?.searchSource || 'none'} (${enrichment?.web?.length || 0} results), PubMed: ${enrichment?.pubmed?.length || 0} articles` },
-               { type: 'clinical', title: 'Gemma 4 via Gemini API', description: 'Primary online model with multi-source enrichment' }
-             ],
-             citations,
-             emotionalState: finalEmotion,
-             model: response.model,
-             source: 'online',
-             evaluation,
-             quotaRemaining: getQuotaRemaining().remaining
-           };
-         lastResult = result;
-         lastReasoning = result.reasoning;
-         console.log('[AI Router] Tier 1 SUCCESS: Gemma 4 returned response (' + safeText.length + ' chars, Score: ' + evaluation.overall + ')');
-         return result;
-      } catch (err) {
-        console.warn('[AI Router] Tier 1 FAILED: Gemma 4 error:', err.message);
+          // Log evaluation
+          await storeEvaluationScore({
+            ...evaluation,
+            modelUsed: response.model,
+            role,
+            queryHash: simpleHash(structuredPrompt.substring(0, 200))
+          });
+
+          // Self-training log
+          logInteraction({
+            prompt: structuredPrompt,
+            response: safeText,
+            role,
+            emotionalState: finalEmotion,
+            sources: enrichment?.allSources || [],
+            reasoning: reasoningSteps,
+            citations,
+            modelUsed: response.model,
+            embedding: null
+          });
+
+          // Emotional turn
+          await addTurn(userId, structuredPrompt, safeText, finalEmotion);
+
+          // Final step
+           recordStep(
+             "Response complete",
+             "?",
+             `Final answer prepared from ${response.model}`,
+             0,
+             [],
+             "complete"
+           );
+
+          const result = {
+            text: safeText,
+            reasoningSteps,
+            citations,
+            emotionalState: finalEmotion,
+            model: response.model,
+            source: 'online',
+            evaluation,
+            quotaRemaining: getQuotaRemaining().remaining
+          };
+          lastResult = result;
+          lastReasoning = reasoningSteps;
+          console.log('[AI Router] Tier 1 SUCCESS: Gemma 4 returned response (' + safeText.length + ' chars, Score: ' + evaluation.overall + ')');
+          return result;
+        } catch (err) {
+          console.warn('[AI Router] Tier 1 FAILED: Gemma 4 error:', err.message);
         // Fall through to fallback ladder
       }
     } else {
@@ -605,175 +833,235 @@ export async function routeQuery({
     }
   }
 
-  // 7. FALLBACK LADDER
-  console.log('[AI Router] Entering fallback ladder. Online:', isOnline, 'Quota:', hasQuota);
+   // 7. FALLBACK LADDER
+   console.log('[AI Router] Entering fallback ladder. Online:', isOnline, 'Quota:', hasQuota);
 
-  // 7a. Cache (if available)
-  if (useCache) {
-    console.log('[AI Router] Tier 2: Attempting cached Gemma response');
-    try {
-      const queryVec = await embedText(structuredPrompt);
-      const cached = await searchCachedResponses(queryVec, 0.85);
-      if (cached.length > 0) {
-        const top = cached[0];
-        const safeText = applyGuardrails(top.response, role);
+   // Record that primary failed
+   recordStep("Primary model unavailable", "??", "Gemma 4 unreachable, attempting fallbacks", 0, [], "running");
 
-         await addTurn(userId, structuredPrompt, safeText, finalEmotion);
+   // 7a. Cache (if available)
+   if (useCache) {
+     console.log('[AI Router] Tier 2: Attempting cached Gemma response');
+     try {
+       const embedStart = Date.now();
+       const queryVec = await embedText(structuredPrompt);
+       const cached = await searchCachedResponses(queryVec, 0.85);
+       const embedDuration = Date.now() - embedStart;
 
-         const cachedResult = {
-           text: safeText + `\n\n[Cached response from ${new Date(top.timestamp).toLocaleDateString()}]`,
-           reasoning: [{ type: 'clinical', title: 'Cached Gemma Response', description: 'Retrieved from local semantic cache' }],
-           citations: top.citations || [],
-           emotionalState: finalEmotion,
-           model: 'gemma4-31b',
-           source: 'cached-gemma',
-           evaluation: { overall: 0.85, components: { factual: 0.9, clarity: 0.8, safety: 0.9, completeness: 0.8 } },
-           quotaRemaining: getQuotaRemaining().remaining
-         };
-         lastResult = cachedResult;
-         lastReasoning = cachedResult.reasoning;
-         console.log('[AI Router] Tier 2 SUCCESS: Cache hit with score 0.85');
-         return cachedResult;
-      }
-      console.log('[AI Router] Tier 2 EMPTY: Cache miss - no semantic matches');
-    } catch (err) { console.warn('[AI Router] Tier 2 FAILED: Cache lookup error:', err.message); }
-  }
+       if (cached.length > 0) {
+         const top = cached[0];
+         const guardStart = Date.now();
+         const safeText = applyGuardrails(top.response, role);
+         const guardDuration = Date.now() - guardStart;
 
-  // 7b. OpenRouter (Gemma 4 free tier)
-  const openRouterKey = import.meta.env.VITE_OPENROUTER_API_KEY;
-  if (openRouterKey) {
-    console.log('[AI Router] Tier 3: Attempting OpenRouter Gemma-4');
-    try {
-      const result = await queryOpenRouter(structuredPrompt, fullSystemPrompt);
-      const safeText = applyGuardrails(result.text, role);
+          await addTurn(userId, structuredPrompt, safeText, finalEmotion);
 
-       await addTurn(userId, structuredPrompt, safeText, finalEmotion);
+          // Cache hit steps
+          recordStep("Querying semantic cache", "??", "Searching for similar past responses", embedDuration);
+          if (guardDuration > 5) {
+            recordStep("Applying safety filters", "???", "Screening cached response", guardDuration);
+          }
+          recordStep("Cache hit ? response retrieved", "?", `Retrieved from cache (${new Date(top.timestamp).toLocaleDateString()})`, 0, [], "complete");
 
-       const openRouterResult = {
-         text: safeText,
-         reasoning: [{ type: 'clinical', title: 'OpenRouter Gemma-4', description: 'Fallback via OpenRouter free inference' }],
-         citations: [],
-         emotionalState: finalEmotion,
-         model: result.model,
-         source: 'openrouter',
-         evaluation: { overall: 0.75, components: { factual: 0.8, clarity: 0.75, safety: 0.85, completeness: 0.7 } },
-         quotaRemaining: getQuotaRemaining().remaining
-       };
-       lastResult = openRouterResult;
-       lastReasoning = openRouterResult.reasoning;
-       console.log('[AI Router] Tier 3 SUCCESS: OpenRouter returned response (' + safeText.length + ' chars)');
-       return openRouterResult;
-    } catch (err) { console.warn('[AI Router] Tier 3 FAILED: OpenRouter error:', err.message); }
-  } else {
-    console.log('[AI Router] Tier 3 SKIPPED: VITE_OPENROUTER_API_KEY not set');
-  }
-
-  // 7c. HuggingFace Medical-Llama3
-  const hfKey = import.meta.env.VITE_HF_API_KEY;
-  if (hfKey) {
-    console.log('[AI Router] Tier 4: Attempting HuggingFace Medical-Llama3');
-    try {
-      const result = await queryHuggingFaceCascade(structuredPrompt, fullSystemPrompt);
-      const safeText = applyGuardrails(result.text, role);
-
-       await addTurn(userId, structuredPrompt, safeText, finalEmotion);
-
-       const hfResult = {
-         text: safeText,
-         reasoning: [{ type: 'clinical', title: 'Medical-Llama3 via HF', description: 'HuggingFace inference fallback' }],
-         citations: [],
-         emotionalState: finalEmotion,
-         model: result.model,
-         source: 'huggingface',
-         evaluation: { overall: 0.7, components: { factual: 0.75, clarity: 0.7, safety: 0.8, completeness: 0.65 } },
-         quotaRemaining: getQuotaRemaining().remaining
-       };
-       lastResult = hfResult;
-       lastReasoning = hfResult.reasoning;
-       console.log('[AI Router] Tier 4 SUCCESS: HuggingFace returned response (' + safeText.length + ' chars)');
-       return hfResult;
-    } catch (err) { console.warn('[AI Router] Tier 4 FAILED: HuggingFace error:', err.message); }
-  } else {
-    console.log('[AI Router] Tier 4 SKIPPED: VITE_HF_API_KEY not set');
-  }
-
-   // 7d. TinyLlama 1.1B ? final fallback (always available, offline-capable)
-   console.log('[AI Router] Tier 5: Attempting TinyLlama 1.1B (offline fallback)');
-   try {
-       const llm = await loadTinyLlama();
-       console.log('[AI Router] TinyLlama model loaded successfully');
-       const tokenizer = await getTokenizer('textGeneration');
-
-       const messages = [
-         { role: 'system', content: fullSystemPrompt },
-         { role: 'user', content: structuredPrompt }
-       ];
-
-       let formattedPrompt;
-       if (tokenizer && tokenizer.apply_chat_template) {
-         formattedPrompt = tokenizer.apply_chat_template(messages, { tokenize: false, add_generation_prompt: true });
-       } else {
-         formattedPrompt = `<|system|>\n${fullSystemPrompt}<|user|>\n${structuredPrompt}<|assistant|>\n`;
+          const cachedResult = {
+            text: safeText + `\n\n[Cached response from ${new Date(top.timestamp).toLocaleDateString()}]`,
+            reasoningSteps,
+            citations: top.citations || [],
+            emotionalState: finalEmotion,
+            model: 'gemma4-31b (cached)',
+            source: 'cached-gemma',
+            evaluation: { overall: 0.85, components: { factual: 0.9, clarity: 0.8, safety: 0.9, completeness: 0.8 } },
+            quotaRemaining: getQuotaRemaining().remaining
+          };
+          lastResult = cachedResult;
+          lastReasoning = reasoningSteps;
+          console.log('[AI Router] Tier 2 SUCCESS: Cache hit with score 0.85');
+          return cachedResult;
        }
+       console.log('[AI Router] Tier 2 EMPTY: Cache miss - no semantic matches');
+        recordStep("Cache miss", "?", "No matching cached query found", embedDuration);
+     } catch (err) { console.warn('[AI Router] Tier 2 FAILED: Cache lookup error:', err.message); }
+   }
 
-       const output = await llm(formattedPrompt, { max_new_tokens: 600, temperature: 0.3, do_sample: true });
-       const generated = output[0]?.generated_text || '';
-       const responseText = generated.replace(formattedPrompt, '').trim();
+   // 7b. OpenRouter (Gemma 4 free tier)
+   const openRouterKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+   if (openRouterKey) {
+     console.log('[AI Router] Tier 3: Attempting OpenRouter Gemma-4');
+     try {
+       const modelStart = Date.now();
+       const result = await queryOpenRouter(structuredPrompt, fullSystemPrompt);
+       const modelDuration = Date.now() - modelStart;
 
-       // If the model output looks like it's repeating the prompt/template, give a clean fallback
-       if (responseText.length < 50 || responseText.includes('SECTION') || responseText.includes('=== ====')) {
-         console.log('[AI Router] Tier 5 DEGRADED: TinyLlama returned incomplete/template response');
-         const fallbackText = 'I am currently in offline mode with limited AI capabilities. Please check your internet connection for a more comprehensive response, or try again later when I can access my full medical knowledge base. For urgent medical concerns, contact a healthcare professional directly.';
-         await addTurn(userId, structuredPrompt, fallbackText, finalEmotion);
-         const tinyResult = {
-           text: fallbackText,
-           reasoning: [{ type: 'conclusion', title: 'Offline Limited', description: 'TinyLlama offline model available but connectivity required for full responses' }],
-           citations: [],
-           emotionalState: finalEmotion,
-           model: 'tinyllama-1.1b',
-           source: 'offline',
-           evaluation: { overall: 0.5, components: { factual: 0.5, clarity: 0.7, safety: 0.8, completeness: 0.4 } },
-           quotaRemaining: 0
-         };
-         lastResult = tinyResult;
-         lastReasoning = tinyResult.reasoning;
-         return tinyResult;
-       }
+       const guardStart = Date.now();
+       const safeText = applyGuardrails(result.text, role);
+       const guardDuration = Date.now() - guardStart;
 
-       console.log('[AI Router] Tier 5 SUCCESS: TinyLlama generated response (' + responseText.length + ' chars)');
-       const safeText = applyGuardrails(responseText, role);
+        await addTurn(userId, structuredPrompt, safeText, finalEmotion);
 
-       await addTurn(userId, structuredPrompt, safeText, finalEmotion);
+        // Record fallback steps
+        recordStep("Calling OpenRouter fallback", "??", `OpenRouter API: ${result.model}`, modelDuration);
+        if (guardDuration > 5) {
+          recordStep("Applying safety filters", "???", "Screening response for safety", guardDuration);
+        }
+        recordStep("Response received", "?", "Fallback model returned answer", 0, [], "complete");
 
-       const tinyResult = {
-         text: safeText,
-         reasoning: [{ type: 'conclusion', title: 'TinyLlama Offline', description: 'On-device 1.1B model GÇö always available without internet' }],
-         citations: [],
-         emotionalState: finalEmotion,
-         model: 'tinyllama-1.1b',
-         source: 'offline',
-         evaluation: { overall: 0.6, components: { factual: 0.6, clarity: 0.7, safety: 0.8, completeness: 0.5 } },
-         quotaRemaining: 0
-       };
-       lastResult = tinyResult;
-       lastReasoning = tinyResult.reasoning;
-       return tinyResult;
-      } catch (err) {
-        console.error('[AI Router] Tier 5 FAILED: TinyLlama error:', err.message, '? ALL TIERS EXHAUSTED');
-        const fallbackText = 'All AI models are currently unavailable. Please check your internet connection and try again. For urgent medical questions, contact a healthcare provider directly.';
-        const errorResult = {
-          text: fallbackText,
-          reasoning: [],
+        const openRouterResult = {
+          text: safeText,
+          reasoningSteps,
           citations: [],
           emotionalState: finalEmotion,
-          model: 'none',
-          source: 'error',
-          evaluation: { overall: 0, components: { factual: 0, clarity: 0, safety: 0, completeness: 0 } },
+          model: result.model,
+          source: 'openrouter',
+          evaluation: { overall: 0.75, components: { factual: 0.8, clarity: 0.75, safety: 0.85, completeness: 0.7 } },
+          quotaRemaining: getQuotaRemaining().remaining
+        };
+        lastResult = openRouterResult;
+        lastReasoning = reasoningSteps;
+        console.log('[AI Router] Tier 3 SUCCESS: OpenRouter returned response (' + safeText.length + ' chars)');
+        return openRouterResult;
+     } catch (err) { console.warn('[AI Router] Tier 3 FAILED: OpenRouter error:', err.message); }
+   } else {
+     console.log('[AI Router] Tier 3 SKIPPED: VITE_OPENROUTER_API_KEY not set');
+   }
+
+   // 7c. HuggingFace Medical-Llama3
+   const hfKey = import.meta.env.VITE_HF_API_KEY;
+   if (hfKey) {
+     console.log('[AI Router] Tier 4: Attempting HuggingFace Medical-Llama3');
+     try {
+       const modelStart = Date.now();
+       const result = await queryHuggingFaceCascade(structuredPrompt, fullSystemPrompt);
+       const modelDuration = Date.now() - modelStart;
+
+       const guardStart = Date.now();
+       const safeText = applyGuardrails(result.text, role);
+       const guardDuration = Date.now() - guardStart;
+
+        await addTurn(userId, structuredPrompt, safeText, finalEmotion);
+
+        // Record fallback steps
+        recordStep("Calling HuggingFace fallback", "??", `HuggingFace model: ${result.model}`, modelDuration);
+        if (guardDuration > 5) {
+          recordStep("Applying safety filters", "???", "Screening response for safety", guardDuration);
+        }
+        recordStep("Response received", "?", "HuggingFace model returned answer", 0, [], "complete");
+
+        const hfResult = {
+          text: safeText,
+          reasoningSteps,
+          citations: [],
+          emotionalState: finalEmotion,
+          model: result.model,
+          source: 'huggingface',
+          evaluation: { overall: 0.7, components: { factual: 0.75, clarity: 0.7, safety: 0.8, completeness: 0.65 } },
+          quotaRemaining: getQuotaRemaining().remaining
+        };
+        lastResult = hfResult;
+        lastReasoning = reasoningSteps;
+        console.log('[AI Router] Tier 4 SUCCESS: HuggingFace returned response (' + safeText.length + ' chars)');
+        return hfResult;
+     } catch (err) { console.warn('[AI Router] Tier 4 FAILED: HuggingFace error:', err.message); }
+   } else {
+     console.log('[AI Router] Tier 4 SKIPPED: VITE_HF_API_KEY not set');
+   }
+
+    // 7d. TinyLlama 1.1B ? final fallback (always available, offline-capable)
+    console.log('[AI Router] Tier 5: Attempting TinyLlama 1.1B (offline fallback)');
+    try {
+        const loadStart = Date.now();
+        const llm = await loadTinyLlama();
+        const tokenizer = await getTokenizer('textGeneration');
+        const loadDuration = Date.now() - loadStart;
+
+        recordStep("Loading offline model", "??", "Initializing TinyLlama 1.1B on-device model", loadDuration);
+
+        const messages = [
+          { role: 'system', content: fullSystemPrompt },
+          { role: 'user', content: structuredPrompt }
+        ];
+
+        let formattedPrompt;
+        if (tokenizer && tokenizer.apply_chat_template) {
+          formattedPrompt = tokenizer.apply_chat_template(messages, { tokenize: false, add_generation_prompt: true });
+        } else {
+          formattedPrompt = `<|system|>\n${fullSystemPrompt}<|user|>\n${structuredPrompt}<|assistant|>\n`;
+        }
+
+        const inferStart = Date.now();
+        const output = await llm(formattedPrompt, { max_new_tokens: 600, temperature: 0.3, do_sample: true });
+        const inferDuration = Date.now() - inferStart;
+
+        const generated = output[0]?.generated_text || '';
+        const responseText = generated.replace(formattedPrompt, '').trim();
+
+        // If the model output looks like it's repeating the prompt/template, give a clean fallback
+        if (responseText.length < 50 || responseText.includes('SECTION') || responseText.includes('=== ====')) {
+          console.log('[AI Router] Tier 5 DEGRADED: TinyLlama returned incomplete/template response');
+          recordStep("Offline model degraded", "??", "TinyLlama returned unusable output", inferDuration);
+
+          const fallbackText = 'I am currently in offline mode with limited AI capabilities. Please check your internet connection for a more comprehensive response, or try again later when I can access my full medical knowledge base. For urgent medical concerns, contact a healthcare professional directly.';
+          await addTurn(userId, structuredPrompt, fallbackText, finalEmotion);
+
+          recordStep("Using limited offline response", "?", "Offline mode ? full responses require internet", 0, [], "warning");
+
+          const tinyResult = {
+            text: fallbackText,
+            reasoningSteps,
+            citations: [],
+            emotionalState: finalEmotion,
+            model: 'tinyllama-1.1b',
+            source: 'offline',
+            evaluation: { overall: 0.5, components: { factual: 0.5, clarity: 0.7, safety: 0.8, completeness: 0.4 } },
+            quotaRemaining: 0
+          };
+          lastResult = tinyResult;
+          lastReasoning = reasoningSteps;
+          return tinyResult;
+        }
+
+        console.log('[AI Router] Tier 5 SUCCESS: TinyLlama generated response (' + responseText.length + ' chars)');
+        recordStep("Generating offline response", "??", "TinyLlama 1.1B producing on-device answer", inferDuration);
+
+        const guardStart = Date.now();
+        const safeText = applyGuardrails(responseText, role);
+        const guardDuration = Date.now() - guardStart;
+        if (guardDuration > 5) {
+          recordStep("Applying safety filters", "???", "Screening offline response", guardDuration);
+        }
+
+        await addTurn(userId, structuredPrompt, safeText, finalEmotion);
+
+        recordStep("Offline response ready", "?", "All online paths exhausted; serving from local model", 0, [], "complete");
+
+        const tinyResult = {
+          text: safeText,
+          reasoningSteps,
+          citations: [],
+          emotionalState: finalEmotion,
+          model: 'tinyllama-1.1b',
+          source: 'offline',
+          evaluation: { overall: 0.6, components: { factual: 0.6, clarity: 0.7, safety: 0.8, completeness: 0.5 } },
           quotaRemaining: 0
         };
-        lastResult = errorResult;
-        lastReasoning = [];
-        return errorResult;
+        lastResult = tinyResult;
+        lastReasoning = reasoningSteps;
+        return tinyResult;
+       } catch (err) {
+         console.error('[AI Router] Tier 5 FAILED: TinyLlama error:', err.message, '? ALL TIERS EXHAUSTED');
+         const fallbackText = 'All AI models are currently unavailable. Please check your internet connection and try again. For urgent medical questions, contact a healthcare provider directly.';
+         const errorResult = {
+           text: fallbackText,
+           reasoningSteps,
+           citations: [],
+           emotionalState: finalEmotion,
+           model: 'none',
+           source: 'error',
+           evaluation: { overall: 0, components: { factual: 0, clarity: 0, safety: 0, completeness: 0 } },
+           quotaRemaining: 0
+         };
+         lastResult = errorResult;
+         lastReasoning = reasoningSteps;
+         return errorResult;
       }
 } // close routeQuery function
 

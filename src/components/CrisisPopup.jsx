@@ -16,6 +16,7 @@ export default function CrisisPopup({ visible, riskLevel, matchedPattern, onDism
     <AnimatePresence>
       {visible && (
         <motion.div
+          data-testid="crisis-popup"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -80,19 +81,20 @@ export default function CrisisPopup({ visible, riskLevel, matchedPattern, onDism
               </p>
 
               {/* Single large emergency button */}
-              <motion.button
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => {
-                  window.location.href = `tel:${emergencyNumbers.emergency}`;
-                }}
-                className="w-full py-6 px-6 rounded-2xl font-bold text-white text-base transition-all flex items-center justify-center gap-3 shadow-lg"
-                style={{
-                  background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-                  boxShadow: '0 8px 32px rgba(239, 68, 68, 0.4)',
-                  minHeight: '120px'
-                }}
-              >
+               <motion.button
+                 data-testid="emergency-call-button"
+                 whileHover={{ scale: 1.03 }}
+                 whileTap={{ scale: 0.97 }}
+                 onClick={() => {
+                   window.location.href = `tel:${emergencyNumbers.emergency}`;
+                 }}
+                 className="w-full py-6 px-6 rounded-2xl font-bold text-white text-base transition-all flex items-center justify-center gap-3 shadow-lg"
+                 style={{
+                   background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                   boxShadow: '0 8px 32px rgba(239, 68, 68, 0.4)',
+                   minHeight: '120px'
+                 }}
+               >
                 <span role="img" aria-label="phone" className="text-3xl">📞</span>
                 <div className="flex flex-col">
                   <span>Call Emergency Services</span>

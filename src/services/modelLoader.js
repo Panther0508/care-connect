@@ -30,9 +30,9 @@ const modelLoading = {
 
 const MODEL_CONFIGS = {
   textGeneration: {
-    // GitHub Releases direct download — user-requested model hosting location
-    // Confirmed release: v2.1.0-buildfix with 1.03GB quantized ONNX model
-    model: 'https://github.com/Panther0508/care-connect/releases/download/v2.1.0-buildfix/decoder_model_merged_quantized.onnx',
+    // Load from local /models/ directory (offline-first)
+    // The TinyLlama model files are in public/models/Xenova/TinyLlama-1.1B-Chat-v1.0/
+    model: '/models/Xenova/TinyLlama-1.1B-Chat-v1.0',
     task: 'text-generation',
     options: { model_type: 'llama' }
   },
@@ -79,10 +79,11 @@ async function loadModel(type, onProgress) {
 
   modelLoading[type] = true;
 
-  // Per-model env configuration (user requirement: TinyLlama remote, embedding local-only)
+  // Per-model env configuration
   if (type === 'textGeneration') {
-    env.allowRemoteModels = true;   // GitHub Releases download allowed
-    env.allowLocalModels = false;   // Do not attempt local filesystem
+    // TinyLlama must load from local /models/ for offline support
+    env.allowRemoteModels = false;  // Do not fetch from remote
+    env.allowLocalModels = true;    // Allow local /models/ path
   } else if (type === 'embedding' || type === 'featureExtraction') {
     env.allowRemoteModels = false;  // Load from local /models/ only
     env.allowLocalModels = true;    // Permit local /models/ path

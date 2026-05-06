@@ -102,6 +102,10 @@ export async function fireAllModelsInParallel(prompt, systemPrompt) {
     modelIds.push('medllama3-8b');
   }
 
+  // ALWAYS fire TinyLlama locally (offline-capable) - NO GUARD
+  promises.push(runTinyLlama(prompt, systemPrompt));
+  modelIds.push('tinyllama-1.1b');
+
   // Execute all in parallel with error handling
   const results = await Promise.allSettled(promises);
 

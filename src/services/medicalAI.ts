@@ -107,11 +107,11 @@ export async function askMedicalQuestion(healthState, question, personaSystemPro
  * Ask medical question with streaming response
  * Returns an async iterable that yields text chunks and finally metadata
  */
-export async function* askMedicalQuestionStream(healthState, question, personaSystemPrompt = null, role = 'patient', userId = 'guest') {
+export async function* askMedicalQuestionStream(healthState, question, personaSystemPrompt = null, role = 'patient', userId = 'guest', onStep = null) {
   try {
     const taskPrompt = buildPatientTaskPrompt(healthState, question);
     const { structuredPrompt } = buildStructuredPrompt(role, taskPrompt, { healthContext: healthState });
-    const result = await routeQuery({ structuredPrompt, role, userId, extractedQuery: question });
+    const result = await routeQuery({ structuredPrompt, role, userId, extractedQuery: question, onStep });
 
     // Simulate streaming by chunking the response text
     const chunks = splitTextIntoChunks(result.text);
@@ -123,7 +123,7 @@ export async function* askMedicalQuestionStream(healthState, question, personaSy
     // Yield metadata at the end
     yield {
       type: 'metadata',
-      reasoning: result.reasoning,
+      reasoning: result.reasoningSteps,
       citations: result.citations,
       emotionalState: result.emotionalState,
       model: result.model

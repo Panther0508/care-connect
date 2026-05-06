@@ -60,10 +60,19 @@ type MessageRole = "user" | "assistant" | "system";
 interface Message {
   role: MessageRole;
   content: string;
-  reasoning?: Array<{ type: string; title: string; description: string; sources?: string[] }>;
-  citations?: Array<{ type: string; title: string; url: string; snippet?: string; source: string }>;
+  reasoningSteps?: Array<{
+    step: number;
+    action: string;
+    icon: string;
+    detail: string;
+    duration_ms: number;
+    source_urls?: string[];
+    status: "complete" | "running" | "error" | "pending";
+  }>;
+  citations?: Array<{ index: number; url: string; title: string; snippet: string }>;
   emotionalState?: string;
   model?: string;
+  responseTimeMs?: number;
 }
 
 const QUICK_PROMPTS = [
@@ -121,6 +130,15 @@ export default function AIAssistant() {
   const [showTTS, setShowTTS] = useState(false);
   const [isSpeakingNow, setIsSpeakingNow] = useState(false);
   const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
+  const [streamingSteps, setStreamingSteps] = useState<Array<{
+    step: number;
+    action: string;
+    icon: string;
+    detail: string;
+    duration_ms: number;
+    source_urls?: string[];
+    status: "complete" | "running" | "error" | "pending";
+  }>>([]);
 
   // Load voice mode setting
   useEffect(() => {
@@ -488,8 +506,9 @@ const handleSpeechInput = async () => {
        }
      }
 
-     setCurrentInput("");
-     setIsProcessing(true);
+      setCurrentInput("");
+      setIsProcessing(true);
+      const requestStartTime = Date.now();
 
     // CRISIS DETECTION Layer 1 & 2
     const detectionResult = scanMessage(text);
@@ -520,12 +539,13 @@ const handleSpeechInput = async () => {
            setCrisisVisible(true);
            setCrisisState({ riskLevel: responseDetection.riskLevel, matchedPattern: responseDetection.matchedPatterns?.[0] });
          }
-         addMessage("assistant", summary, {
-           reasoning: summaryResult.reasoning,
-           citations: summaryResult.citations,
-           emotionalState: summaryResult.emotionalState,
-           model: summaryResult.model
-         });
+           addMessage("assistant", summary, {
+             reasoningSteps: summaryResult.reasoningSteps,
+             citations: summaryResult.citations,
+             emotionalState: summaryResult.emotionalState,
+             model: summaryResult.model,
+             responseTimeMs: Date.now() - requestStartTime
+           });
           // Update model status from last route result
           const lastRes = getLastRouteResult();
           if (lastRes?.source === 'online') setActiveModel('online');
@@ -583,45 +603,48 @@ const handleSpeechInput = async () => {
             try {
               const retrieved = await retrieveRagContext(text, datasetMatch.dataset, 5);
               let aiResult;
-              if (retrieved && retrieved.length > 0) {
-                const augmentedMessages = buildAugmentedPrompt(text, retrieved.slice(0, 3), systemPrompt || "");
-                aiResult = await askMedicalQuestion(healthState, text, augmentedMessages[0].content, userRole, userId);
-              } else {
-                aiResult = await askMedicalQuestion(healthState, text, systemPrompt, userRole, userId);
-              }
-              addMessage("assistant", aiResult.text, {
-                reasoning: aiResult.reasoning,
-                citations: aiResult.citations,
-                emotionalState: aiResult.emotionalState,
-                model: aiResult.model
-              });
+               if (retrieved && retrieved.length > 0) {
+                 const augmentedMessages = buildAugmentedPrompt(text, retrieved.slice(0, 3), systemPrompt || "");
+                 aiResult = await askMedicalQuestion(healthState, text, augmentedMessages[0].content, userRole, userId);
+               } else {
+                 aiResult = await askMedicalQuestion(healthState, text, systemPrompt, userRole, userId);
+                }
+                addMessage("assistant", aiResult.text, {
+                  reasoningSteps: aiResult.reasoningSteps,
+                  citations: aiResult.citations,
+                  emotionalState: aiResult.emotionalState,
+                  model: aiResult.model,
+                  responseTimeMs: Date.now() - requestStartTime
+                });
                const lastRes = getLastRouteResult();
                if (lastRes?.source === 'online') setActiveModel('online');
                else if (lastRes?.source === 'cached-gemma') setActiveModel('cached');
                else setActiveModel('offline');
                if (lastRes?.quotaRemaining !== undefined) setQuotaRemaining(lastRes.quotaRemaining);
-             } catch (innerErr) {
-              console.error('RAG path error:', innerErr);
-              const aiResult = await askMedicalQuestion(healthState, text, systemPrompt, userRole, userId);
-              addMessage("assistant", aiResult.text, {
-                reasoning: aiResult.reasoning,
-                citations: aiResult.citations,
-                emotionalState: aiResult.emotionalState,
-                model: aiResult.model
-              });
+              } catch (innerErr) {
+               console.error('RAG path error:', innerErr);
+                const aiResult = await askMedicalQuestion(healthState, text, systemPrompt, userRole, userId);
+                addMessage("assistant", aiResult.text, {
+                  reasoningSteps: aiResult.reasoningSteps,
+                  citations: aiResult.citations,
+                  emotionalState: aiResult.emotionalState,
+                  model: aiResult.model,
+                  responseTimeMs: Date.now() - requestStartTime
+                });
               setActiveModel('offline');
             } finally {
               setIsProcessing(false);
             }
-          }).catch(async () => {
-            // Fallback if loadEmbeddingModel fails
-            const aiResult = await askMedicalQuestion(healthState, text, systemPrompt, userRole, userId);
-            addMessage("assistant", aiResult.text, {
-              reasoning: aiResult.reasoning,
-              citations: aiResult.citations,
-              emotionalState: aiResult.emotionalState,
-              model: aiResult.model
-            });
+           }).catch(async () => {
+             // Fallback if loadEmbeddingModel fails
+             const aiResult = await askMedicalQuestion(healthState, text, systemPrompt, userRole, userId);
+                addMessage("assistant", aiResult.text, {
+                  reasoningSteps: aiResult.reasoningSteps,
+                  citations: aiResult.citations,
+                  emotionalState: aiResult.emotionalState,
+                  model: aiResult.model,
+                  responseTimeMs: Date.now() - requestStartTime
+                });
             setActiveModel('offline');
             setIsProcessing(false);
           });
@@ -631,13 +654,31 @@ const handleSpeechInput = async () => {
         // Default: free-form question - use streaming
         setIsStreaming(true);
 
-        // Create placeholder message for streaming
+        // Create placeholder message for streaming with empty reasoningSteps
         const tempId = Date.now();
-        addMessage("assistant", "", { tempId });
+        addMessage("assistant", "", { tempId, reasoningSteps: [] });
 
         try {
-          // Stream the response
-          const streamGen = askMedicalQuestionStream(healthState, text, systemPrompt, userRole, userId);
+          // Stream the response with onStep callback for real-time reasoning
+          const streamGen = askMedicalQuestionStream(healthState, text, systemPrompt, userRole, userId, (step) => {
+            // Append incoming step to the placeholder message
+            setMessages(prev => {
+              const newMsgs = [...prev];
+              const lastIdx = newMsgs.length - 1;
+              if (newMsgs[lastIdx]?.tempId === tempId) {
+                const currentSteps = newMsgs[lastIdx]?.reasoningSteps || [];
+                // Avoid duplicate step numbers
+                if (!currentSteps.some((s: any) => s.step === step.step)) {
+                  newMsgs[lastIdx] = {
+                    ...newMsgs[lastIdx],
+                    reasoningSteps: [...currentSteps, step]
+                  };
+                }
+              }
+              return newMsgs;
+            });
+          });
+
           let fullText = "";
           let metadata: any = {};
 
@@ -660,7 +701,7 @@ const handleSpeechInput = async () => {
             }
           }
 
-          // Finalize message with metadata
+          // Finalize message with metadata (use final reasoningSteps from metadata if provided)
           setMessages(prev => {
             const newMsgs = [...prev];
             const lastIdx = newMsgs.length - 1;
@@ -668,10 +709,11 @@ const handleSpeechInput = async () => {
               newMsgs[lastIdx] = {
                 role: 'assistant',
                 content: fullText,
-                reasoning: metadata.reasoning,
+                reasoningSteps: metadata.reasoning || newMsgs[lastIdx]?.reasoningSteps || [],
                 citations: metadata.citations,
                 emotionalState: metadata.emotionalState,
-                model: metadata.model
+                model: metadata.model,
+                responseTimeMs: Date.now() - requestStartTime
               };
             }
             return newMsgs;
@@ -837,31 +879,36 @@ const handleSpeechInput = async () => {
                         </motion.div>
                       )}
 
-                      {/* Streaming indicator */}
-                      {isStreaming && (
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          className="mt-2 ml-2 flex items-center gap-2 text-xs text-teal-400"
-                        >
-                          <motion.div
-                            className="w-2 h-2 bg-teal-400 rounded-full"
-                            animate={{ scale: [1, 1.3, 1], opacity: [0.6, 1, 0.6] }}
-                            transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
-                          />
-                          <span>Thinking and writing...</span>
-                        </motion.div>
-                      )}
+                       {/* Streaming indicator - only show on the latest assistant message being streamed */}
+                       {isAssistant && isStreaming && idx === messages.length - 1 && (
+                         <motion.div
+                           initial={{ opacity: 0 }}
+                           animate={{ opacity: 1 }}
+                           className="mt-2 ml-2 flex items-center gap-2 text-xs text-teal-400"
+                         >
+                           <motion.div
+                             className="w-2 h-2 bg-teal-400 rounded-full"
+                             animate={{ scale: [1, 1.3, 1], opacity: [0.6, 1, 0.6] }}
+                             transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                           />
+                           <span>Thinking and writing...</span>
+                         </motion.div>
+                       )}
 
                       {/* Reasoning panel */}
-                      {isAssistant && msg.reasoning && msg.reasoning.length > 0 && (
+                      {isAssistant && msg.reasoningSteps && msg.reasoningSteps.length > 0 && (
                         <motion.div
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: "auto" }}
                           transition={{ delay: 0.25, duration: 0.3 }}
                           className="mt-2 ml-2 overflow-hidden"
                         >
-                          <ReasoningPanel reasoningSteps={msg.reasoning} />
+                          <ReasoningPanel
+                            reasoningSteps={msg.reasoningSteps}
+                            modelUsed={msg.model || 'AI Model'}
+                            responseTime={msg.responseTimeMs || 0}
+                            citations={msg.citations}
+                          />
                         </motion.div>
                       )}
 
