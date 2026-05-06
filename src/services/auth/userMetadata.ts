@@ -12,31 +12,22 @@ export async function updateUserMetadata(
     onboardingCompletedAt?: string;
   }
 ): Promise<void> {
-  // Store role immediately in localStorage (synchronous, best-effort)
-  if (metadata.role) {
-    try {
-      localStorage.setItem('user_role', metadata.role);
-    } catch (e) {
-      console.warn('Failed to write user_role to localStorage:', e);
-    }
-  }
-
-  // Also store onboarding completion flag (multiple keys for redundancy)
-  if (metadata.hasCompletedOnboarding) {
-    try {
-      localStorage.setItem('onboarding_completed', 'true');
-      localStorage.setItem('vitachain_onboarded', 'true');
-    } catch (e) {
-      console.warn('Failed to write onboarding flags to localStorage:', e);
-    }
-  }
-
-  // Best-effort async cache to IndexedDB for offline use
+  // Store role to IndexedDB (async, non-blocking)
   if (metadata.role) {
     try {
       await setItem(ROLE_CACHE_KEY, metadata.role);
     } catch (e) {
-      // IndexedDB might be unavailable; ignore
+      console.warn('Failed to cache user_role in IDB:', e);
+    }
+  }
+
+  // Store onboarding flags to IndexedDB (async, non-blocking)
+  if (metadata.hasCompletedOnboarding) {
+    try {
+      await setItem('onboardingCompleted', true);
+      await setItem('onboarding_completed', true); // also store legacy key for compatibility
+    } catch (e) {
+      console.warn('Failed to cache onboarding flags in IDB:', e);
     }
   }
 
@@ -48,11 +39,11 @@ export async function getUserRole(user: User): Promise<string | null> {
   const clerkRole = user.publicMetadata?.role as string | undefined;
   if (clerkRole) return clerkRole;
 
-  // Fallback to cached role from onboarding
+  // Fallback to cached role from onboarding (IndexedDB)
   const cachedRole = await getItem<string>(ROLE_CACHE_KEY);
   if (cachedRole) return cachedRole;
 
-  // Fallback to localStorage
+  // Fallback to localStorage (synchronous, but this is last resort)
   const localRole = localStorage.getItem('user_role');
   if (localRole) return localRole;
 

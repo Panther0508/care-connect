@@ -28,41 +28,53 @@ export async function searchWeb(query, maxResults = 5) {
     return cached;
   }
 
-  // Tier 1: LangSearch
-  try {
-    const langKey = import.meta.env.VITE_LANGSEARCH_API_KEY;
-    if (langKey) {
-      const results = await searchLangSearch(normalizedQuery, maxResults);
-      if (results.length > 0) {
-        await cacheResults(normalizedQuery, results);
-        return results;
-      }
-    }
-  } catch (err) {
-    console.warn('LangSearch failed:', err.message);
-  }
+   // Tier 1: LangSearch
+   try {
+     const langKey = import.meta.env.VITE_LANGSEARCH_API_KEY;
+     if (langKey) {
+       const results = await searchLangSearch(normalizedQuery, maxResults);
+       if (results.length > 0) {
+         try {
+           await cacheResults(normalizedQuery, results);
+         } catch (cacheErr) {
+           console.warn('Cache write failed (non-critical):', cacheErr);
+         }
+         return results;
+       }
+     }
+   } catch (err) {
+     console.warn('LangSearch failed:', err.message);
+   }
 
-  // Tier 2: DuckDuckGo Instant Answer
-  try {
-    const ddgResults = await searchDuckDuckGo(normalizedQuery, maxResults);
-    if (ddgResults.length > 0) {
-      await cacheResults(normalizedQuery, ddgResults);
-      return ddgResults;
-    }
-  } catch (err) {
-    console.warn('DuckDuckGo failed:', err.message);
-  }
+   // Tier 2: DuckDuckGo Instant Answer
+   try {
+     const ddgResults = await searchDuckDuckGo(normalizedQuery, maxResults);
+     if (ddgResults.length > 0) {
+       try {
+         await cacheResults(normalizedQuery, ddgResults);
+       } catch (cacheErr) {
+         console.warn('Cache write failed (non-critical):', cacheErr);
+       }
+       return ddgResults;
+     }
+   } catch (err) {
+     console.warn('DuckDuckGo failed:', err.message);
+   }
 
-  // Tier 3: Wikipedia API (free, no key required)
-  try {
-    const wikiResults = await searchWikipedia(normalizedQuery, maxResults);
-    if (wikiResults.length > 0) {
-      await cacheResults(normalizedQuery, wikiResults);
-      return wikiResults;
-    }
-  } catch (err) {
-    console.warn('Wikipedia search failed:', err.message);
-  }
+   // Tier 3: Wikipedia API (free, no key required)
+   try {
+     const wikiResults = await searchWikipedia(normalizedQuery, maxResults);
+     if (wikiResults.length > 0) {
+       try {
+         await cacheResults(normalizedQuery, wikiResults);
+       } catch (cacheErr) {
+         console.warn('Cache write failed (non-critical):', cacheErr);
+       }
+       return wikiResults;
+     }
+   } catch (err) {
+     console.warn('Wikipedia search failed:', err.message);
+   }
 
   // All tiers failed — return empty array
   console.error('All search tiers failed for query:', normalizedQuery);

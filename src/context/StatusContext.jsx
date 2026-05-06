@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback, useRef } from 'react';
+import React, { createContext, useState, useCallback, useRef, useEffect } from 'react';
 
 export const StatusContext = createContext();
 
@@ -6,9 +6,23 @@ export const StatusProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
   const progressIntervals = useRef({});
 
+  // Clear all intervals and timeouts on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(progressIntervals.current).forEach((timer) => {
+        if (timer) {
+          clearInterval(timer.interval);
+          clearTimeout(timer.timeout);
+        }
+      });
+      progressIntervals.current = {};
+    };
+  }, []);
+
   const dismissStatus = useCallback((id) => {
     if (progressIntervals.current[id]) {
-      clearInterval(progressIntervals.current[id]);
+      clearInterval(progressIntervals.current[id].interval);
+      clearTimeout(progressIntervals.current[id].timeout);
       delete progressIntervals.current[id];
     }
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -24,7 +38,8 @@ export const StatusProvider = ({ children }) => {
       if (updated.length > 3) {
         const oldest = updated[0];
         if (progressIntervals.current[oldest.id]) {
-          clearInterval(progressIntervals.current[oldest.id]);
+          clearInterval(progressIntervals.current[oldest.id].interval);
+          clearTimeout(progressIntervals.current[oldest.id].timeout);
           delete progressIntervals.current[oldest.id];
         }
         return updated.slice(1);
@@ -46,15 +61,15 @@ export const StatusProvider = ({ children }) => {
       );
     }, 40);
 
-    progressIntervals.current[id] = interval;
-
+    let timeout = null;
     if (duration > 0) {
-      const timeout = setTimeout(() => {
+      timeout = setTimeout(() => {
         dismissStatus(id);
       }, duration);
-      // Store timeout for cleanup if needed
-      progressIntervals.current[id] = { interval, timeout };
     }
+
+    // Store both timer IDs for cleanup
+    progressIntervals.current[id] = { interval, timeout };
 
     return id;
   }, [dismissStatus]);

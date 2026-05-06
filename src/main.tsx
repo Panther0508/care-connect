@@ -48,7 +48,11 @@ if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/serviceWorker.js", { updateViaCache: 'none' })
     .then((registration) => {
       if (registration.waiting) {
-        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        try {
+          registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        } catch (err) {
+          console.warn('Failed to send SKIP_WAITING to waiting SW:', err);
+        }
       }
       registration.addEventListener('updatefound', () => {
         const newWorker = registration.installing;

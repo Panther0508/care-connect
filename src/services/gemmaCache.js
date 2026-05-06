@@ -9,7 +9,7 @@ const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
 // Open DB connection
 function openDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('vitachain', 10); // Unified to v10
+    const request = indexedDB.open('vitachain', 12); // Unified to v12
     request.onupgradeneeded = (e) => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains('gemmaCache')) {

@@ -42,7 +42,7 @@ let embedderReady = false;
 async function openDB() {
   if (dbInstance) return dbInstance;
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open('vitachain', 10); // bumped for hybrid engine
+     const req = indexedDB.open('vitachain', 12); // bumped for hybrid engine
     req.onupgradeneeded = (e) => {
       const db = e.target.result;
       if (!db.objectStoreNames.contains('searchCache')) {

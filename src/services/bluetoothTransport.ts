@@ -58,7 +58,10 @@ export async function startBluetoothMesh(): Promise<void> {
  * Stop the mesh transport
  */
 export function stopBluetoothMesh(): void {
-  if (broadcastInterval) clearInterval(broadcastInterval);
+  if (broadcastInterval) {
+    clearInterval(broadcastInterval);
+    broadcastInterval = null;
+  }
   channel.close();
   stopWebBluetooth();
 }

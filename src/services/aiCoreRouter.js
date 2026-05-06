@@ -107,7 +107,7 @@ export async function loadEmbedder() {
       lastErr = err;
       console.warn(`G‹·n+≈ Embedder attempt ${attempt} failed:`, err?.message || err);
       if (attempt < maxAttempts) {
-        const delay = attempt === 1 ? 2000 : attempt === 2 ? 4000 : 6000;
+        const delay = attempt === 1 ? 2000 : attempt === 2 ? 4000 : 3600000; // 1 hour on 3rd attempt
         console.log(`Retrying in ${delay}ms...`);
         await new Promise(r => setTimeout(r, delay));
       }
@@ -196,7 +196,7 @@ async function openDB() {
   
   return new Promise((resolve, reject) => {
     try {
-      const req = indexedDB.open('vitachain', 10); // unified version v10
+       const req = indexedDB.open('vitachain', 12); // unified version v12
       req.onupgradeneeded = (e) => {
         const db = e.target.result;
         if (!db.objectStoreNames.contains('gemmaCache')) db.createObjectStore('gemmaCache', { keyPath: 'id' });

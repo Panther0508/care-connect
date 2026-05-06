@@ -8,7 +8,7 @@ import { Menu, X, Lock } from "lucide-react";
 import { useIDB } from "../hooks/useIDB";
 import StatusToastContainer from "./StatusToastContainer";
 import SideMenu from "./SideMenu";
-import { getSetting } from "../lib/idb";
+import { getSetting, storeSetting } from "../lib/idb";
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -28,24 +28,32 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const [pinError, setPinError] = useState("");
   const [verifying, setVerifying] = useState(false);
 
-  useEffect(() => {
-    const checkGuestMode = async () => {
-      if (!idbReady) return;
-      try {
-        const enabled = await getSetting<boolean>('guest_mode_enabled');
-        if (enabled) {
-          const verified = sessionStorage.getItem('guest_verified');
-          if (!verified) {
-            setGuestModeEnabled(true);
-            setShowPinGate(true);
-          }
-        }
-      } catch (err) {
-        console.error('Failed to check guest mode:', err);
-      }
-    };
-    checkGuestMode();
-  }, [idbReady]);
+   useEffect(() => {
+     const checkGuestMode = async () => {
+       if (!idbReady) return;
+       try {
+         const enabled = await getSetting<boolean>('guest_mode_enabled');
+         if (enabled) {
+           // Check IndexedDB for recent verification instead of sessionStorage
+           const verifiedRecord = await getSetting<{ts: number}>('guest_verified_session');
+           const now = Date.now();
+           // Consider verification valid for 5 minutes (300000 ms)
+           if (verifiedRecord && (now - (verifiedRecord.ts || 0) < 300000)) {
+             // Already verified recently, no need to show PIN gate
+             setGuestModeEnabled(false);
+             setShowPinGate(false);
+           } else {
+             // Need to verify
+             setGuestModeEnabled(true);
+             setShowPinGate(true);
+           }
+         }
+       } catch (err) {
+         console.error('Failed to check guest mode:', err);
+       }
+     };
+     checkGuestMode();
+   }, [idbReady]);
 
   useEffect(() => {
     const handleOnline = () => {
@@ -82,20 +90,21 @@ export default function AppLayout({ children }: AppLayoutProps) {
      }
    };
 
-   const handlePinSubmit = async (e: React.FormEvent) => {
-     e.preventDefault();
-     setPinError("");
-     setVerifying(true);
-     const isValid = await verifyPin(pinInput);
-     setVerifying(false);
-     if (isValid) {
-       sessionStorage.setItem('guest_verified', 'true');
-       setShowPinGate(false);
-     } else {
-       setPinError("Incorrect PIN");
-       setPinInput("");
-     }
-   };
+    const handlePinSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setPinError("");
+      setVerifying(true);
+      const isValid = await verifyPin(pinInput);
+      setVerifying(false);
+      if (isValid) {
+        // Store verification in IndexedDB with timestamp (valid 5 minutes)
+        await storeSetting('guest_verified_session', { ts: Date.now() });
+        setShowPinGate(false);
+      } else {
+        setPinError("Incorrect PIN");
+        setPinInput("");
+      }
+    };
 
    return (
     <div className="min-h-screen w-full relative overflow-hidden bg-gradient-to-b from-slate-900 via-slate-900 to-teal-950">

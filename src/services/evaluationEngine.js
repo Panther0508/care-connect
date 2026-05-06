@@ -124,7 +124,7 @@ export async function logEvaluation(evalData) {
   try {
     // Actual storage is handled by aiCoreRouter's storeEvaluationScore using openDB v9
     // This is kept for API compatibility; version bump to v9 for consistency
-    const db = await indexedDB.open('vitachain', 10);
+     const db = await indexedDB.open('vitachain', 12);
   } catch (e) {
     console.warn('Evaluation log skipped:', e);
   }

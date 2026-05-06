@@ -1,12 +1,16 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
+import { useStatus } from "../hooks/useStatus";
+import { ROLE_INFO, ROLES, type UserRole } from "../lib/roles";
 
 export default function Onboarding() {
   const { isSignedIn, isLoaded } = useAuth();
   const navigate = useNavigate();
+  const { showStatus } = useStatus();
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -22,6 +26,12 @@ export default function Onboarding() {
   }, [isLoaded, isSignedIn, navigate]);
 
   const handleComplete = () => {
+    if (!selectedRole) {
+      showStatus('error', 'Role Required', 'Please select a role to continue');
+      return;
+    }
+    // Store role and completion flag
+    localStorage.setItem("user_role", selectedRole);
     localStorage.setItem("onboarding_completed", "true");
     navigate("/dashboard");
   };
@@ -59,16 +69,52 @@ export default function Onboarding() {
           ))}
         </div>
 
-        {/* Onboarding steps */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-card p-8"
-        >
-          <h2 className="text-xl font-semibold text-white mb-4">Add Your Health Basics</h2>
-          <p className="text-slate-400 text-sm mb-6">
-            Enter your key health information to get personalized insights and AI assistance.
-          </p>
+         {/* Onboarding steps */}
+         <motion.div
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           className="glass-card p-8"
+         >
+           <h2 className="text-xl font-semibold text-white mb-4">Select Your Role</h2>
+           <p className="text-slate-400 text-sm mb-6">
+             Choose the role that best describes how you'll use VitaChain.
+           </p>
+
+           {/* Role selection cards */}
+           <div className="grid grid-cols-2 gap-3 mb-8">
+             {(Object.values(ROLES) as UserRole[]).map(role => {
+               const info = ROLE_INFO[role];
+               const isSelected = selectedRole === role;
+               return (
+                 <button
+                   key={role}
+                   onClick={() => {
+                     setSelectedRole(role);
+                     showStatus('success', 'Role Selected', `${info.label} role chosen`);
+                   }}
+                   className={`p-4 rounded-xl border text-left transition-all ${
+                     isSelected
+                       ? 'bg-teal-500/20 border-teal-500/40 text-teal-100'
+                       : 'bg-slate-800/50 border-slate-700/30 text-slate-300 hover:border-teal-500/30'
+                   }`}
+                 >
+                   <div className="text-2xl mb-2">{info.icon}</div>
+                   <div className="font-medium mb-1">{info.label}</div>
+                   <div className="text-xs text-slate-400 line-clamp-2">{info.description}</div>
+                   {isSelected && (
+                     <div className="mt-2 flex items-center text-teal-400 text-sm">
+                       <Check size={14} className="mr-1" /> Selected
+                     </div>
+                   )}
+                 </button>
+               );
+             })}
+           </div>
+
+           <h2 className="text-xl font-semibold text-white mb-4">Health Basics</h2>
+           <p className="text-slate-400 text-sm mb-6">
+             Enter your key health information to get personalized insights and AI assistance.
+           </p>
 
           {/* Form fields */}
           <div className="space-y-5">

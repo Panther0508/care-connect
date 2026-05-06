@@ -104,6 +104,10 @@ export async function initMeshOrchestrator(): Promise<void> {
  * Record a search query
  */
 export function recordSearch(term: string): void {
+  if (!meshDoc) {
+    console.warn('meshOrchestrator: meshDoc not initialized, dropping search record');
+    return;
+  }
   meshDoc = gossipRecordSearch(meshDoc, term);
   storeSearchLog({ term, timestamp: new Date().toISOString() }).catch(console.error);
   schedulePersist();
@@ -116,6 +120,10 @@ export function recordSearch(term: string): void {
  * Record a facility confirmation
  */
 export function recordConfirmation(facilityId: string): void {
+  if (!meshDoc) {
+    console.warn('meshOrchestrator: meshDoc not initialized, dropping confirmation');
+    return;
+  }
   meshDoc = gossipRecordConfirmation(meshDoc, facilityId);
   schedulePersist();
   scheduleBroadcast();
@@ -125,6 +133,10 @@ export function recordConfirmation(facilityId: string): void {
  * Record a stockout alert
  */
 export function recordStockout(drugName: string, facilityId: string): void {
+  if (!meshDoc) {
+    console.warn('meshOrchestrator: meshDoc not initialized, dropping stockout');
+    return;
+  }
   meshDoc = gossipRecordStockout(meshDoc, drugName, facilityId);
   schedulePersist();
   scheduleBroadcast();
@@ -134,6 +146,10 @@ export function recordStockout(drugName: string, facilityId: string): void {
  * Handle incoming peer update (called by bluetoothTransport)
  */
 export function handlePeerUpdate(remoteMesh: MeshDoc): void {
+  if (!meshDoc) {
+    console.warn('meshOrchestrator: meshDoc not initialized, cannot merge peer update');
+    return;
+  }
   meshDoc = mergeMeshes(meshDoc, remoteMesh);
   schedulePersist();
   // Broadcast handled by periodic interval; don't broadcast immediately to avoid loops
@@ -150,6 +166,10 @@ export function mergeWithRemote(local: MeshDoc, remote: MeshDoc): MeshDoc {
  * Get the current mesh document (raw)
  */
 export function getCurrentMesh(): MeshDoc {
+  if (!meshDoc) {
+    console.warn('meshOrchestrator: meshDoc not initialized, returning empty mesh');
+    return createMeshDoc();
+  }
   return meshDoc;
 }
 
@@ -157,23 +177,21 @@ export function getCurrentMesh(): MeshDoc {
  * Get aggregated mesh data for dashboard display
  */
 export function getAggregatedMeshData() {
+  if (!meshDoc) {
+    console.warn('meshOrchestrator: meshDoc not initialized, returning empty state');
+    return getGossipState(createMeshDoc());
+  }
   return getGossipState(meshDoc);
-}
-
-/**
- * Schedule a persisted save (throttled)
- */
-function schedulePersist(): void {
-  if (persistTimeout) clearTimeout(persistTimeout);
-  persistTimeout = window.setTimeout(() => {
-    saveToStorage();
-  }, PERSIST_DELAY_MS);
 }
 
 /**
  * Save current mesh state to IndexedDB
  */
 async function saveToStorage(): Promise<void> {
+  if (!meshDoc) {
+    console.warn('meshOrchestrator: meshDoc not initialized, skipping persist');
+    return;
+  }
   try {
     const serialized = serializeMesh(meshDoc);
     await storeIDBMeshState('gossip', serialized);

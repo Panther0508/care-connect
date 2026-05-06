@@ -117,7 +117,7 @@ async function loadModel(type, onProgress) {
       lastErr = err;
       console.warn(`⚠️ Model load attempt ${attempt} failed for ${type}:`, err?.message || err);
       if (attempt < maxAttempts) {
-        const delay = attempt === 1 ? 2000 : attempt === 2 ? 4000 : 6000;
+        const delay = attempt === 1 ? 2000 : attempt === 2 ? 4000 : 3600000; // 1 hour on 3rd attempt
         console.log(`Retrying in ${delay}ms...`);
         await new Promise(r => setTimeout(r, delay));
       }

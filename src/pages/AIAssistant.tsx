@@ -24,7 +24,7 @@ import {
 } from "../services/medicalAI";
 import { checkInteractionsSimple } from "../services/medicationChecker";
 import { getCurrentHealthState } from "../services/healthGraph";
-import { getAllRxNorm, getAllVectors, retrieveContext, getAllChatHistory, storeChatEntry, deleteChatEntry, getSetting } from "../lib/idb";
+import { getAllRxNorm, getAllVectors, retrieveContext, getAllChatHistory, storeChatEntry, deleteChatEntry, getSetting, getItem } from "../lib/idb";
 import { useStatus } from "../hooks/useStatus";
 import { getPersona, buildSystemPrompt, generateGreeting } from "../services/personaEngine";
 import { scanMessage, scanAIResponse } from "../services/crisisDetector";
@@ -268,7 +268,7 @@ export default function AIAssistant() {
           setMessages([{ role: "assistant", content: greeting }]);
         } else {
           // Try to get user profile from IndexedDB
-          const userId = localStorage.getItem('vitachain_user_id') || 'default-user';
+           const userId = (await getItem<string>('user_id')) || 'default-user';
           const profile = await getUserProfile(userId);
           if (profile) {
             setUserProfile(profile);
@@ -1116,31 +1116,31 @@ const handleSpeechInput = async () => {
               </div>
             </motion.div>
           )}
-          {showReminders && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">
-              <div className="flex items-center gap-2 text-sm">
-                <Clock className="w-4 h-4 text-teal-400" />
-                 <input value={reminderForm.medicationName} onChange={(e) => setReminderForm({ ...reminderForm, medicationName: e.target.value })} placeholder="Medication" className="flex-1 bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700" />
-                 <input type="time" value={reminderForm.time} onChange={(e) => setReminderForm({ ...reminderForm, time: e.target.value })} className="bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700" />
-                 <button onClick={handleQuickReminder} className="text-sm px-4 py-2 rounded-lg bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 transition-all">Set</button>
-              </div>
-            </motion.div>
-          )}
-          {showAppointments && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">
-              <div className="flex items-center gap-2 text-sm">
-                <Calendar className="w-4 h-4 text-teal-400" />
-                <select value={appointmentForm.specialistType} onChange={(e) => setAppointmentForm({ ...appointmentForm, specialistType: e.target.value })} className="bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700">
-                  <option value="general">General</option>
-                  <option value="cardiologist">Cardiologist</option>
-                  <option value="endocrinologist">Endocrinologist</option>
-                </select>
-                <input type="date" value={appointmentForm.date} onChange={(e) => setAppointmentForm({ ...appointmentForm, date: e.target.value })} className="bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700" />
-                <input type="time" value={appointmentForm.time} onChange={(e) => setAppointmentForm({ ...appointmentForm, time: e.target.value })} className="bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700" />
-                <button onClick={handleQuickAppointment} className="text-sm px-4 py-2 rounded-lg bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 transition-all">Schedule</button>
-              </div>
-            </motion.div>
-          )}
+           {showReminders && (
+             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">
+               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 text-sm">
+                 <Clock className="w-4 h-4 text-teal-400 flex-shrink-0" />
+                  <input value={reminderForm.medicationName} onChange={(e) => setReminderForm({ ...reminderForm, medicationName: e.target.value })} placeholder="Medication" className="flex-1 bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700 min-w-0" />
+                  <input type="time" value={reminderForm.time} onChange={(e) => setReminderForm({ ...reminderForm, time: e.target.value })} className="bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700 flex-shrink-0" />
+                  <button onClick={handleQuickReminder} className="text-sm px-4 py-2 rounded-lg bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 transition-all flex-shrink-0">Set</button>
+               </div>
+             </motion.div>
+           )}
+           {showAppointments && (
+             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">
+               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 text-sm">
+                 <Calendar className="w-4 h-4 text-teal-400 flex-shrink-0" />
+                 <select value={appointmentForm.specialistType} onChange={(e) => setAppointmentForm({ ...appointmentForm, specialistType: e.target.value })} className="bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700 flex-shrink-0">
+                   <option value="general">General</option>
+                   <option value="cardiologist">Cardiologist</option>
+                   <option value="endocrinologist">Endocrinologist</option>
+                 </select>
+                 <input type="date" value={appointmentForm.date} onChange={(e) => setAppointmentForm({ ...appointmentForm, date: e.target.value })} className="bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700 flex-shrink-0" />
+                 <input type="time" value={appointmentForm.time} onChange={(e) => setAppointmentForm({ ...appointmentForm, time: e.target.value })} className="bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700 flex-shrink-0" />
+                 <button onClick={handleQuickAppointment} className="text-sm px-4 py-2 rounded-lg bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 transition-all flex-shrink-0">Schedule</button>
+               </div>
+             </motion.div>
+           )}
         </AnimatePresence>
 
         <form onSubmit={(e) => { e.preventDefault(); handleSend(currentInput); }} className="flex items-end gap-3">
@@ -1167,21 +1167,21 @@ const handleSpeechInput = async () => {
             >
               <Plus size={18} />
             </button>
-            {showToolMenu && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="absolute bottom-full right-0 mb-2 w-12 bg-slate-800/90 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-lg z-50 overflow-hidden"
-              >
-                <div className="flex flex-col py-2">
-                  <button type="button" onClick={() => { setShowTranslation(!showTranslation); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Translate"><Globe size={18} /></button>
-                  <button type="button" onClick={() => { setShowSpeech(!showSpeech); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Voice input"><Mic size={18} /></button>
-                  <button type="button" onClick={() => { setShowImageUpload(!showImageUpload); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Upload image"><Camera size={18} /></button>
-                  <button type="button" onClick={() => { setShowReminders(!showReminders); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Medication reminder"><Pill size={18} /></button>
-                  <button type="button" onClick={() => { setShowAppointments(!showAppointments); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Schedule appointment"><Calendar size={18} /></button>
-                </div>
-              </motion.div>
-            )}
+             {showToolMenu && (
+               <motion.div
+                 initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                 animate={{ opacity: 1, scale: 1, y: 0 }}
+                 className="absolute bottom-full left-0 right-0 mb-2 mx-auto w-48 bg-slate-800/90 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-lg z-50 overflow-hidden sm:w-48 sm:right-0 sm:left-auto"
+               >
+                 <div className="flex flex-col py-2">
+                   <button type="button" onClick={() => { setShowTranslation(!showTranslation); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Translate"><Globe size={18} /></button>
+                   <button type="button" onClick={() => { setShowSpeech(!showSpeech); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Voice input"><Mic size={18} /></button>
+                   <button type="button" onClick={() => { setShowImageUpload(!showImageUpload); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Upload image"><Camera size={18} /></button>
+                   <button type="button" onClick={() => { setShowReminders(!showReminders); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Medication reminder"><Pill size={18} /></button>
+                   <button type="button" onClick={() => { setShowAppointments(!showAppointments); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Schedule appointment"><Calendar size={18} /></button>
+                 </div>
+               </motion.div>
+             )}
           </div>
         </form>
         <p className="text-sm text-slate-500 text-center mt-3 leading-relaxed">Vita provides general health information and does not substitute professional medical advice.</p>

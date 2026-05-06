@@ -23,32 +23,77 @@ export async function initPassport(userId?: string, passphrase = 'vita-demo-2026
   }
 }
 
+const KEYPAIR_LOCK_KEY = 'vitachain_keygen_lock';
+const KEYPAIR_STORAGE_KEY = 'passport_key_pair';
+const LOCK_WAIT_MS = 100;
+const LOCK_TIMEOUT_MS = 30000; // 30s max wait
+
 async function ensureKeyPair() {
   if (keyPair) return keyPair;
 
-  const stored = localStorage.getItem('passport_key_pair');
-  if (stored) {
-    try {
-      const { publicKey, privateKey } = JSON.parse(stored);
-    } catch (e) {
-      console.warn('Failed to import saved key pair, generating new one');
+  // Check if another tab is already generating keys
+  const waitForLock = async (): Promise<boolean> => {
+    const start = Date.now();
+    while (localStorage.getItem(KEYPAIR_LOCK_KEY)) {
+      if (Date.now() - start > LOCK_TIMEOUT_MS) {
+        console.warn('Key generation lock timeout - proceeding anyway');
+        return false;
+      }
+      await new Promise(r => setTimeout(r, LOCK_WAIT_MS));
     }
-  }
+    return true;
+  };
 
-  keyPair = await generateKeyPair();
-  const publicKeyBytes = await exportPublicKey(keyPair);
-  const privateKeyBytes = await exportPrivateKey(keyPair);
+  // Wait for any concurrent generation to finish
+  await waitForLock();
+
+  // Double-check after acquiring lock (another tab may have completed)
+  if (keyPair) return keyPair;
+
+  // Acquire lock
+  localStorage.setItem(KEYPAIR_LOCK_KEY, '1');
 
   try {
-    localStorage.setItem('passport_key_pair', JSON.stringify({
-      publicKey: Array.from(publicKeyBytes),
-      privateKey: Array.from(privateKeyBytes),
-    }));
-  } catch (e) {
-    console.warn('Could not save key pair to localStorage');
-  }
+    // Re-check after acquiring lock
+    if (keyPair) return keyPair;
 
-  return keyPair;
+    const stored = localStorage.getItem(KEYPAIR_STORAGE_KEY);
+    if (stored) {
+      try {
+        const { publicKey, privateKey } = JSON.parse(stored);
+        const privateKeyCrypto = await importPrivateKey({
+          buffer: new Uint8Array(privateKey).buffer
+        });
+        const publicKeyCrypto = await importPublicKey({
+          buffer: new Uint8Array(publicKey).buffer
+        });
+        keyPair = { publicKey: publicKeyCrypto, privateKey: privateKeyCrypto };
+        console.log('✅ Loaded existing key pair from storage');
+        return keyPair;
+      } catch (e) {
+        console.warn('Failed to import saved key pair, generating new one:', e);
+      }
+    }
+
+    // Generate fresh key pair
+    keyPair = await generateKeyPair();
+    const publicKeyBytes = await exportPublicKey(keyPair);
+    const privateKeyBytes = await exportPrivateKey(keyPair);
+
+    try {
+      localStorage.setItem(KEYPAIR_STORAGE_KEY, JSON.stringify({
+        publicKey: Array.from(publicKeyBytes),
+        privateKey: Array.from(privateKeyBytes),
+      }));
+    } catch (e) {
+      console.warn('Could not save key pair to localStorage');
+    }
+
+    return keyPair;
+  } finally {
+    // Always release lock
+    localStorage.removeItem(KEYPAIR_LOCK_KEY);
+  }
 }
 
 export async function getPatientDid() {

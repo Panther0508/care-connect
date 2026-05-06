@@ -29,6 +29,7 @@ import {
   loadHealthGraph,
   saveHealthGraph,
   HealthGraphRecord,
+  setItem,
 } from '../lib/idb';
 
 // In-memory state per user (since we handle one active user at a time)
@@ -284,14 +285,12 @@ export async function changePassphrase(userId: string, oldPass: string, newPass:
     throw e;
   }
 
-  // Update the stored passphrase for future sessions (store encrypted under a static key? For demo: store plain in localStorage)
-  // In a real app, this would be securely stored or derived from user's authentication.
-  try {
-    // For demo, store the new passphrase in localStorage so setActiveUser can use it
-    localStorage.setItem('vita_user_passphrase', newPass);
-  } catch (e) {
-    console.warn('Could not store passphrase for next session:', e);
-  }
+   // Update the stored passphrase for future sessions in IndexedDB
+   try {
+     await setItem('user_passphrase', newPass);
+   } catch (e) {
+     console.warn('Could not store passphrase for next session:', e);
+   }
 
   // Keep global state as new key/salt
   // (Already set)

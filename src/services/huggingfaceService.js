@@ -30,24 +30,25 @@ export async function queryHuggingFace(prompt, systemPrompt = '', modelId = null
     ? `${systemPrompt}\n\nUser: ${prompt}\nAssistant:`
     : prompt;
 
-  try {
-    const response = await fetch(`${BASE_URL}/${encodeURIComponent(model)}`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        inputs: fullPrompt,
-        parameters: {
-          max_new_tokens: 800,
-          temperature: 0.3,
-          top_p: 0.9,
-          do_sample: true,
-          return_full_text: false
-        }
-      })
-    });
+   try {
+     const response = await fetch('/api/proxy', {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({
+         targetUrl: `${BASE_URL}/${encodeURIComponent(model)}`,
+         method: 'POST',
+         body: {
+           inputs: fullPrompt,
+           parameters: {
+             max_new_tokens: 800,
+             temperature: 0.3,
+             top_p: 0.9,
+             do_sample: true,
+             return_full_text: false
+           }
+         }
+       })
+     });
 
     if (!response.ok) {
       if (response.status === 503) {

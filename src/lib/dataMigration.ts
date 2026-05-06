@@ -10,35 +10,48 @@ export async function runMigration(): Promise<boolean> {
   const alreadyDone = localStorage.getItem(MIGRATION_KEY);
   if (alreadyDone) return true;
 
-  try {
-    const userId = localStorage.getItem('vitachain_user_id') || 'default-user';
+   try {
+     const userId = localStorage.getItem('vitachain_user_id') || 'default-user';
 
-    // 1. Migrate user profile from localStorage (if present)
-    const storedProfile = localStorage.getItem('vitachain_user_profile');
-    if (storedProfile) {
-      try {
-        const profileData = JSON.parse(storedProfile);
-        const profile: UserProfile = {
-          userId: profileData.userId || userId,
-          displayName: profileData.displayName || '',
-          phone: profileData.phone || '',
-          gender: profileData.gender || '',
-          biologicalSex: profileData.biologicalSex || '',
-          dateOfBirth: profileData.dateOfBirth || null,
-          height: profileData.height || null,
-          weight: profileData.weight || null,
-          activityLevel: profileData.activityLevel || '',
-          avatarUrl: profileData.avatarUrl || '',
-          preferredLanguage: profileData.preferredLanguage || 'en',
-          enableCycleTracking: profileData.enableCycleTracking || false,
-          createdAt: profileData.createdAt || Date.now(),
-          updatedAt: Date.now()
-        };
-        await storeUserProfile(profile);
-      } catch (e) {
-        console.warn('Failed to migrate user profile:', e);
-      }
-    }
+     // Store user_id in IDB for async access
+     await storeSetting('user_id', userId);
+
+     // 1. Migrate user profile from localStorage (if present)
+     const storedProfile = localStorage.getItem('vitachain_user_profile');
+     if (storedProfile) {
+       try {
+         const profileData = JSON.parse(storedProfile);
+         const profile: UserProfile = {
+           userId: profileData.userId || userId,
+           displayName: profileData.displayName || '',
+           phone: profileData.phone || '',
+           gender: profileData.gender || '',
+           biologicalSex: profileData.biologicalSex || '',
+           dateOfBirth: profileData.dateOfBirth || null,
+           height: profileData.height || null,
+           weight: profileData.weight || null,
+           activityLevel: profileData.activityLevel || '',
+           avatarUrl: profileData.avatarUrl || '',
+           preferredLanguage: profileData.preferredLanguage || 'en',
+           enableCycleTracking: profileData.enableCycleTracking || false,
+           createdAt: profileData.createdAt || Date.now(),
+           updatedAt: Date.now()
+         };
+         await storeUserProfile(profile);
+       } catch (e) {
+         console.warn('Failed to migrate user profile:', e);
+       }
+     }
+
+     // 1b. Migrate passphrase if present (legacy storage)
+     const legacyPassphrase = localStorage.getItem('vita_user_passphrase');
+     if (legacyPassphrase) {
+       try {
+         await storeSetting('user_passphrase', legacyPassphrase);
+       } catch (e) {
+         console.warn('Failed to migrate passphrase:', e);
+       }
+     }
 
     // 2. Migrate settings (biometric, notification prefs)
     const biometricEnabled = localStorage.getItem('biometric_enabled');

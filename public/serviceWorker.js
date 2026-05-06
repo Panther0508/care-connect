@@ -6,6 +6,7 @@ const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
+  // Avatars
   '/avatars/vita-default.png',
   '/avatars/vita-error.png',
   '/avatars/vita-success.png',
@@ -13,8 +14,18 @@ const ASSETS_TO_CACHE = [
   '/avatars/vita-empty.png',
   '/avatars/vita-alert.png',
   '/avatars/vita-offline.png',
-  // TinyLlama ONNX model — GitHub Releases (uncomment when URL is live)
-  // 'https://github.com/Panther0508/care-connect/releases/download/v1.0.0-model/decoder_model_merged_quantized.onnx',
+  '/avatars/vita-share.png',
+  '/avatars/vita-search.png',
+  '/avatars/vita-privacy.png',
+  '/avatars/vita-celebrate.png',
+  '/avatars/vita-health.png',
+  '/avatars/vita-users.png',
+  // Health icons
+  '/images/icons/healthicons/health.svg',
+  '/images/icons/healthicons/health_alt.svg',
+  '/images/icons/healthicons/health_worker.svg',
+  '/images/icons/healthicons/community_healthworker.svg',
+  '/images/icons/healthicons/mental_health.svg',
 ];
 
   // HuggingFace CDN URLs for models (@huggingface/transformers v4)

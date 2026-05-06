@@ -18,22 +18,36 @@ export default async function handler(req, res) {
     return;
   }
 
-  const { targetUrl } = req.body;
+   const { targetUrl, method = 'POST', headers = {}, body } = req.body;
 
-  if (!targetUrl || typeof targetUrl !== 'string') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.status(400).json({ error: 'targetUrl is required' });
-    return;
-  }
+   if (!targetUrl || typeof targetUrl !== 'string') {
+     res.setHeader('Access-Control-Allow-Origin', '*');
+     res.status(400).json({ error: 'targetUrl is required' });
+     return;
+   }
 
-  try {
-    const response = await fetch(targetUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; VitaChain/1.0)',
-        'Accept': 'application/json, text/plain, */*',
-      },
-      timeout: 15000,
-    });
+   try {
+     // Build forwarded headers
+     const forwardedHeaders = {
+       'User-Agent': 'Mozilla/5.0 (compatible; VitaChain/1.0)',
+       'Accept': 'application/json, text/plain, */*',
+       ...headers,
+     };
+
+     // Add HuggingFace Authorization if target is HF and we have a key
+     if (targetUrl.includes('api-inference.huggingface.co') || targetUrl.includes('huggingface.co')) {
+       const hfKey = process.env.VITE_HF_API_KEY || process.env.HF_API_KEY;
+       if (hfKey) {
+         forwardedHeaders['Authorization'] = `Bearer ${hfKey}`;
+       }
+     }
+
+     const response = await fetch(targetUrl, {
+       method: method,
+       headers: forwardedHeaders,
+       body: body !== undefined ? JSON.stringify(body) : undefined,
+       timeout: 15000,
+     });
 
     const contentType = response.headers.get('content-type');
     let data;

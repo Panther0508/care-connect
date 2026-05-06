@@ -27,9 +27,9 @@ html { scroll-behavior: smooth; }
 @tailwind components;
 @tailwind utilities;
 
-/* Base font size enforcement per Phase 4 spec */
-html { font-size: 112.5%; /* 18px base for enhanced readability */ }
-body { font-size: 1.0625rem; line-height: 1.625; }
+/* Base font size enforcement per spec — 16px for comfortable readability */
+html { font-size: 100%; /* 16px base */ }
+body { font-size: 1rem; line-height: 1.6; }
 
 h1 { font-size: 2.75rem; font-weight: 700; }
 h2 { font-size: 2.25rem; font-weight: 700; }
@@ -50,23 +50,23 @@ h2 { font-size: 2.25rem; font-weight: 700; letter-spacing: -0.02em; font-family:
 h3 { font-size: 1.75rem; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif; }
 h4 { font-size: 1.375rem; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif; }
 
- @layer base {
-   html {
-     scroll-behavior: smooth;
-     font-size: 112.5%; /* 18px base for enhanced readability */
-   }
-   body {
-     @apply bg-slate-900 text-slate-100 font-sans;
-     -webkit-font-smoothing: antialiased;
-     -moz-osx-font-smoothing: grayscale;
-     font-variant-numeric: tabular-nums;
-     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-     background-color: #0F172A;
-     position: relative;
-     overflow-x: hidden;
-     font-size: 1.0625rem; /* 17px base for readability */
-     line-height: 1.625;
-   }
+  @layer base {
+    html {
+      scroll-behavior: smooth;
+      font-size: 100%; /* 16px base per spec */
+    }
+    body {
+      @apply bg-slate-900 text-slate-100 font-sans;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      font-variant-numeric: tabular-nums;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background-color: #0F172A;
+      position: relative;
+      overflow-x: hidden;
+      font-size: 1rem; /* 16px */
+      line-height: 1.6;
+    }
 
    /* Heading sizes for accessibility - increased sizes */
    h1 { font-size: 2.75rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
