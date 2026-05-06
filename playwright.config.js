@@ -18,5 +18,10 @@ export default {
     actionTimeout: 15000,
   },
 
-  // webServer is NOT used - test manages its own dev server
+  webServer: {
+    command: 'npm run dev',
+    port: 5173,
+    reuseExistingServer: true,
+    timeout: 120000,
+  },
 };

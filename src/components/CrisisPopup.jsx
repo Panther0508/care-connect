@@ -1,8 +1,6 @@
 // src/components/CrisisPopup.jsx
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import vitaAvatar from '../components/VitaAvatar.jsx';
-
 /**
  * Crisis Popup - Full-screen overlay for crisis situations
  * Cannot be dismissed by clicking outside

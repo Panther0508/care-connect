@@ -58,7 +58,7 @@ export default function Landing() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-300 text-xs font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teal-500/10 border border-teal-500/20 text-teal-300 text-sm font-medium mb-6">
               <Sparkles size={12} />
               AI-Powered Health Intelligence
             </div>
@@ -102,10 +102,10 @@ export default function Landing() {
               { icon: Globe2, label: "Multi-Language Support" },
               { icon: Users, label: "Family Profiles" },
             ].map((item, idx) => (
-              <div
-                key={idx}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/40 border border-slate-700/30 text-slate-300 text-xs"
-              >
+               <div
+                 key={idx}
+                 className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/40 border border-slate-700/30 text-slate-300 text-sm"
+               >
                 <item.icon size={14} className="text-teal-400" />
                 {item.label}
               </div>
@@ -161,7 +161,7 @@ export default function Landing() {
                   <feature.icon className="text-white" size={20} />
                 </div>
                 <h3 className="font-semibold text-white mb-2">{feature.title}</h3>
-                <p className="text-slate-400 text-sm leading-relaxed">{feature.description}</p>
+                <p className="text-slate-400 text-base leading-relaxed">{feature.description}</p>
               </motion.div>
             ))}
           </div>
@@ -190,7 +190,7 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-white/5 py-8 px-4 text-center text-slate-500 text-xs">
+       <footer className="relative z-10 border-t border-white/5 py-8 px-4 text-center text-slate-500 text-sm">
         <p>© 2026 VitaChain. Built with care in Nigeria.</p>
       </footer>
     </div>

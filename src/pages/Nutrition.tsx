@@ -48,7 +48,7 @@ export default function Nutrition() {
             <Flame className="w-5 h-5 text-rose-400" />
           </div>
           <p className="text-2xl font-bold text-slate-100">1,900</p>
-          <p className="text-xs text-slate-400">kcal consumed</p>
+           <p className="text-base text-slate-400">kcal consumed</p>
         </GlassCard>
         
         <GlassCard className="p-4 flex flex-col items-center justify-center text-center">
@@ -56,7 +56,7 @@ export default function Nutrition() {
             <Droplets className="w-5 h-5 text-blue-400" />
           </div>
           <p className="text-2xl font-bold text-slate-100">{waterGlasses} / {goalWater}</p>
-          <p className="text-xs text-slate-400">glasses of water</p>
+           <p className="text-base text-slate-400">glasses of water</p>
           <div className="flex gap-2 mt-2">
             <button 
               onClick={() => setWaterGlasses(Math.max(0, waterGlasses - 1))}
@@ -147,7 +147,7 @@ export default function Nutrition() {
       <GlassCard className="p-5">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-slate-100">Recent Meals</h2>
-          <button className="text-xs text-teal-400 hover:text-teal-300">Add Meal</button>
+           <button className="text-sm text-teal-400 hover:text-teal-300">Add Meal</button>
         </div>
         <div className="space-y-3">
           {RECENT_MEALS.map((meal, index) => (
@@ -161,13 +161,13 @@ export default function Nutrition() {
               <div>
                 <p className="font-medium text-slate-200">{meal.name}</p>
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs uppercase tracking-wider text-teal-500 bg-teal-500/10 px-2 py-0.5 rounded-full">{meal.type}</span>
-                  <span className="text-xs text-slate-500">{meal.time}</span>
+                   <span className="text-sm uppercase tracking-wider text-teal-500 bg-teal-500/10 px-2 py-0.5 rounded-full">{meal.type}</span>
+                   <span className="text-sm text-slate-500">{meal.time}</span>
                 </div>
               </div>
               <div className="text-right">
                 <p className="font-bold text-slate-100">{meal.cals}</p>
-                <p className="text-xs text-slate-400">kcal</p>
+                 <p className="text-sm text-slate-400">kcal</p>
               </div>
             </motion.div>
           ))}

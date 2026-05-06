@@ -11,6 +11,7 @@ import RewardsPanel from '../components/RewardsPanel';
 import { BadgeGrid } from '../components/BadgeGrid';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { Lightbulb, Dumbbell, Apple, Star } from 'lucide-react';
 
 export default function RewardsPage() {
   const [points, setPoints] = useState(0);
@@ -290,7 +291,7 @@ export default function RewardsPage() {
             >
               <div className="flex items-center justify-start mb-3">
                 <div className="w-8 h-8 rounded-full bg-teal-500/20 flex items-center justify-center">
-                  💡
+                  <Lightbulb size={18} className="text-teal-400" />
                 </div>
                 <h4 className="font-medium text-slate-100 ml-3">Health Tip</h4>
               </div>
@@ -321,7 +322,7 @@ export default function RewardsPage() {
             >
               <div className="flex items-center justify-start mb-3">
                 <div className="w-8 h-8 rounded-full bg-teal-500/20 flex items-center justify-center">
-                  💪
+                  <Dumbbell size={18} className="text-teal-400" />
                 </div>
                 <h4 className="font-medium text-slate-100 ml-3">Workout Plan</h4>
               </div>
@@ -352,7 +353,7 @@ export default function RewardsPage() {
             >
               <div className="flex items-center justify-start mb-3">
                 <div className="w-8 h-8 rounded-full bg-teal-500/20 flex items-center justify-center">
-                  🥗
+                  <Apple size={18} className="text-teal-400" />
                 </div>
                 <h4 className="font-medium text-slate-100 ml-3">Nutrition Guide</h4>
               </div>
@@ -383,7 +384,7 @@ export default function RewardsPage() {
             >
               <div className="flex items-center justify-start mb-3">
                 <div className="w-8 h-8 rounded-full bg-teal-500/20 flex items-center justify-center">
-                  ⭐
+                  <Star size={18} className="text-teal-400" />
                 </div>
                 <h4 className="font-medium text-slate-100 ml-3">Premium Feature</h4>
               </div>

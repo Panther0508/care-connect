@@ -18,6 +18,7 @@ import {
   generatePreVisitSummary,
   checkMedicationInteractionLLM,
   askMedicalQuestion,
+  askMedicalQuestionStream,
   checkMedicationInteraction
 } from "../services/medicalAI";
 import { checkInteractionsSimple } from "../services/medicationChecker";
@@ -32,6 +33,7 @@ import {
 } from "lucide-react";
 import { getUserProfile } from "../lib/idb";
 import { useRole } from "../hooks/auth/useRole";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 // Phase 2 services
 import { translateText } from "../services/translationService";
@@ -798,17 +800,14 @@ const handleSpeechInput = async () => {
           </div>
         </header>
 
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-        {!modelLoaded && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-24 text-center px-6">
-            <div className="relative mb-6">
-              <VitaAvatar state="loading" size={96} />
-              <motion.div className="absolute -inset-4 rounded-full border border-teal-500/30" animate={{ rotate: 360 }} transition={{ duration: 3, repeat: Infinity, ease: "linear" }} />
-            </div>
-            <p className="text-amber-400 font-semibold text-lg mb-2">Loading AI Engine</p>
-            <p className="text-slate-500 text-sm">Downloading TinyLlama 1.1B — first load only.</p>
-          </motion.div>
-        )}
+       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+         {!modelLoaded && (
+           <div className="flex flex-col items-center justify-center py-24 text-center px-6">
+             <LoadingSpinner size={96} />
+             <p className="text-amber-400 font-semibold text-lg mb-2">Loading AI Engine</p>
+             <p className="text-slate-500 text-sm">Downloading TinyLlama 1.1B — first load only.</p>
+           </div>
+         )}
 
          <AnimatePresence mode="pop-layout">
            {messages.map((msg, idx) => {

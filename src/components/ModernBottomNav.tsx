@@ -135,9 +135,9 @@ export default function ModernBottomNav() {
                      >
                        <Icon size={18} />
                      </motion.div>
-                      <span className="text-sm font-medium leading-none tracking-tight">
-                        {label}
-                      </span>
+                       <span className="text-base font-medium leading-none tracking-tight">
+                         {label}
+                       </span>
                      {isActive && (
                        <>
                          <motion.div
@@ -178,7 +178,7 @@ export default function ModernBottomNav() {
                    <line x1="3" y1="18" x2="21" y2="18" />
                  </svg>
                </motion.div>
-                <span className="text-sm font-medium leading-none tracking-tight">More</span>
+                 <span className="text-base font-medium leading-none tracking-tight">More</span>
              </button>
            </li>
          </ul>

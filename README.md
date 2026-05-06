@@ -110,7 +110,7 @@ This project is licensed under the GNU Affero General Public License v3.0 - see 
 ## Contact
 
 **Nmesirionye Ngbaronye**
-- Email: ngbaronyeoswald@gmail.com
+- Email: nmesirionyengbaronye@gmail.com
 - GitHub: [@Panther0508](https://github.com/Panther0508)
 
 ## Problem Statement

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { getCurrentHealthState } from "../services/healthGraph";
 import { generatePassport } from "../services/passport";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export default function Passport() {
   const { user } = useAuth();
@@ -72,7 +73,7 @@ export default function Passport() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-white mb-1">VitaPassport</h1>
-            <p className="text-slate-400 text-sm">Your portable health summary</p>
+            <p className="text-base text-slate-400">Your portable health summary</p>
           </div>
           <div className="flex gap-2">
             <button
@@ -96,19 +97,19 @@ export default function Passport() {
 
         {/* QR Code card */}
         <div className="glass-card p-6 text-center mb-6">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center w-48 h-48 mx-auto">
-              <Loader2 className="animate-spin text-teal-400 mb-2" size={32} />
-              <p className="text-sm text-slate-400">Generating secure QR...</p>
-            </div>
-          ) : error ? (
+         {loading ? (
+           <div className="flex flex-col items-center justify-center w-48 h-48 mx-auto">
+             <LoadingSpinner size={48} />
+             <p className="text-sm text-slate-400">Generating secure QR...</p>
+           </div>
+         ) : error ? (
             <div className="text-red-400 text-sm py-8">{error}</div>
           ) : (
             <div className="inline-flex items-center justify-center w-48 h-48 bg-white rounded-xl mb-4 overflow-hidden">
               {qrDataURL && <img src={qrDataURL} alt="Health Passport QR" className="w-full h-full object-contain" />}
             </div>
           )}
-          <p className="text-slate-400 text-xs">
+           <p className="text-slate-400 text-sm">
             Scan this QR code to share your health summary with healthcare providers.
             <br />
             <span className="text-amber-400 flex items-center justify-center gap-1 mt-2">
@@ -131,7 +132,7 @@ export default function Passport() {
             <div className="space-y-4">
               {healthSummary.conditions?.length > 0 && (
                 <div>
-                  <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Conditions</h3>
+                   <h3 className="text-base font-medium text-slate-400 uppercase tracking-wide mb-2">Conditions</h3>
                   <div className="flex flex-wrap gap-2">
                     {healthSummary.conditions.map((c) => (
                       <span key={c.id} className="px-3 py-1 rounded-lg bg-rose-500/15 text-rose-300 text-sm border border-rose-500/20">{c.name}</span>
@@ -142,7 +143,7 @@ export default function Passport() {
 
               {healthSummary.medications?.length > 0 && (
                 <div>
-                  <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Medications</h3>
+                   <h3 className="text-base font-medium text-slate-400 uppercase tracking-wide mb-2">Medications</h3>
                   <ul className="space-y-1">
                     {healthSummary.medications.map((m) => (
                       <li key={m.id} className="text-slate-300 text-sm flex items-center gap-2">
@@ -156,7 +157,7 @@ export default function Passport() {
 
               {healthSummary.allergies?.length > 0 && (
                 <div>
-                  <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Allergies</h3>
+                   <h3 className="text-base font-medium text-slate-400 uppercase tracking-wide mb-2">Allergies</h3>
                   <div className="flex flex-wrap gap-2">
                     {healthSummary.allergies.map((a) => (
                       <span key={a.id} className="px-3 py-1 rounded-lg bg-amber-500/15 text-amber-300 text-sm border border-amber-500/20">{a.substance}</span>
@@ -167,12 +168,12 @@ export default function Passport() {
 
               {healthSummary.encounters?.length > 0 && (
                 <div>
-                  <h3 className="text-xs font-medium text-slate-400 uppercase tracking-wide mb-2">Recent Encounters</h3>
+                   <h3 className="text-base font-medium text-slate-400 uppercase tracking-wide mb-2">Recent Encounters</h3>
                   <div className="space-y-2">
                     {healthSummary.encounters.slice(-3).map((e) => (
                       <div key={e.id} className="text-sm text-slate-300 border-l-2 border-slate-700 pl-3">
                         <div>{e.facilityName}</div>
-                        <div className="text-xs text-slate-500">{e.date} — {e.reason}</div>
+                        <div className="text-sm text-slate-500">{e.date} — {e.reason}</div>
                       </div>
                     ))}
                   </div>
@@ -186,7 +187,7 @@ export default function Passport() {
         <div className="glass-card p-4 border-amber-500/20 bg-amber-500/5">
           <div className="flex gap-3">
             <Shield className="text-amber-400 flex-shrink-0 mt-0.5" size={18} />
-            <div className="text-xs text-slate-300">
+             <div className="text-sm text-slate-300">
               <p className="font-medium text-amber-300 mb-1">Security Notice</p>
               <p>
                 Your QR code contains signed health data. Only share it with trusted healthcare providers.

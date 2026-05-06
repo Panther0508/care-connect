@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '../services/translation/useTranslation';
@@ -7,10 +7,12 @@ import { changePassphrase } from '../services/healthGraph';
 import Referral from './Referral';
 import Support from './Support';
 import LanguageSelector from '../components/LanguageSelector';
-import { Settings as SettingsIcon, User, Lock, Bell, CreditCard, Download, Trash2, Globe, Mic } from 'lucide-react';
+import { Settings as SettingsIcon, User, Lock, Bell, CreditCard, Download, Trash2, Globe, Mic, Camera } from 'lucide-react';
 import { getSetting, storeSetting } from '../lib/idb';
+import { getUserProfile, storeUserProfile, type UserProfile } from '../lib/idb';
+import PWAInstallPrompt from '../components/PWAInstallPrompt';
 
-type Tab = 'profile' | 'security' | 'notifications' | 'subscription' | 'export' | 'delete' | 'referral' | 'support' | 'language' | 'voice';
+type Tab = 'profile' | 'security' | 'notifications' | 'subscription' | 'export' | 'delete' | 'referral' | 'support' | 'language' | 'voice' | 'install';
 
 export default function Settings() {
   const { t } = useTranslation();
@@ -26,6 +28,7 @@ export default function Settings() {
     { id: 'support', label: 'Help & Support', icon: SettingsIcon },
     { id: 'language', label: 'Language', icon: Globe },
     { id: 'voice', label: 'Voice Mode', icon: Mic },
+    { id: 'install', label: 'Install', icon: Download },
     { id: 'export', label: 'Export', icon: Download },
     { id: 'delete', label: 'Delete', icon: Trash2 },
   ];
@@ -38,24 +41,26 @@ export default function Settings() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
+      <div className="flex gap-2 overflow-x-auto pb-2 relative">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition-all border ${
+              className={`flex-shrink-0 min-w-[90px] flex items-center gap-2 px-4 py-3 rounded-xl text-base font-medium whitespace-nowrap transition-all border ${
                 activeTab === tab.id
                   ? 'bg-teal-500/15 border-teal-500/40 text-teal-100'
                   : 'bg-slate-800/50 border-slate-700/30 text-slate-300 hover:bg-slate-700/50 hover:border-teal-500/30'
               }`}
             >
-              <Icon size={16} />
+              <Icon size={18} />
               {tab.label}
             </button>
           );
         })}
+        {/* Gradient fade indicator on right edge */}
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-950 via-slate-950/80 to-transparent" />
       </div>
 
       {/* Tab Content */}
@@ -67,6 +72,8 @@ export default function Settings() {
         {activeTab === 'referral' && <Referral />}
         {activeTab === 'support' && <Support />}
         {activeTab === 'language' && <LanguageSelector />}
+        {activeTab === 'voice' && <VoiceTab />}
+        {activeTab === 'install' && <PWAInstallPrompt />}
         {activeTab === 'export' && <ExportTab />}
         {activeTab === 'delete' && <DeleteTab />}
       </div>
@@ -89,32 +96,148 @@ export default function Settings() {
 function ProfileTab() {
   const { user, isLoaded } = useAuth();
   const { showStatus } = useStatus();
-  const [form, setForm] = useState({ firstName: '', lastName: '' });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [form, setForm] = useState({
+    displayName: '',
+    phone: '',
+    gender: '' as 'male' | 'female' | 'non-binary' | 'other' | 'prefer-not-to-say' | '',
+    otherGender: '',
+    biologicalSex: '' as 'male' | 'female' | '',
+    dateOfBirth: '',
+    height: '',
+    weight: '',
+    activityLevel: '' as 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active' | '',
+    preferredLanguage: 'en',
+    avatarUrl: '',
+  });
   const [saving, setSaving] = useState(false);
+  const [photoChanging, setPhotoChanging] = useState(false);
 
+  // Load IDB profile on mount
   useEffect(() => {
-    if (isLoaded && user) {
-      setForm({
-        firstName: user.firstName || '',
-        lastName: user.lastName || '',
-      });
+    async function load() {
+      if (!user?.id) return;
+      try {
+        const profile = await getUserProfile(user.id);
+        if (profile) {
+          setForm({
+            displayName: profile.displayName || '',
+            phone: profile.phone || '',
+            gender: profile.gender || '',
+            otherGender: '',
+            biologicalSex: profile.biologicalSex || '',
+            dateOfBirth: profile.dateOfBirth || '',
+            height: profile.height?.toString() || '',
+            weight: profile.weight?.toString() || '',
+            activityLevel: profile.activityLevel || '',
+            preferredLanguage: profile.preferredLanguage || 'en',
+            avatarUrl: profile.avatarUrl || '',
+          });
+        }
+      } catch (e) {
+        console.error('Failed to load profile:', e);
+      }
     }
-  }, [isLoaded, user]);
+    load();
+  }, [user]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Fallback: populate displayName from Clerk if empty
+  useEffect(() => {
+    if (isLoaded && user && !form.displayName) {
+      setForm(prev => ({ ...prev, displayName: user.fullName || '' }));
+    }
+  }, [isLoaded, user, form.displayName]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhotoSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setPhotoChanging(true);
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(file);
+      });
+      // Update state
+      setForm(prev => ({ ...prev, avatarUrl: dataUrl }));
+      // Also store immediately to IDB (merge with existing)
+      const current = await getUserProfile(user.id);
+      const toStore: UserProfile = {
+        userId: user.id,
+        displayName: current?.displayName || form.displayName,
+        phone: current?.phone || form.phone,
+        gender: (current?.gender || form.gender) as any,
+        biologicalSex: (current?.biologicalSex || form.biologicalSex) as any,
+        dateOfBirth: current?.dateOfBirth || form.dateOfBirth,
+        height: current?.height ?? (form.height ? Number(form.height) : null),
+        weight: current?.weight ?? (form.weight ? Number(form.weight) : null),
+        activityLevel: (current?.activityLevel || form.activityLevel) as any,
+        avatarUrl: dataUrl,
+        preferredLanguage: current?.preferredLanguage || form.preferredLanguage,
+        enableCycleTracking: current?.enableCycleTracking || false,
+        createdAt: current?.createdAt || Date.now(),
+        updatedAt: Date.now(),
+      };
+      await storeUserProfile(toStore);
+      showStatus('success', 'Photo Updated', 'Your profile photo has been changed.');
+    } catch (err) {
+      console.error('Photo upload failed:', err);
+      showStatus('error', 'Upload Failed', 'Could not update photo.');
+    } finally {
+      setPhotoChanging(false);
+    }
   };
 
   const handleSave = async () => {
     if (!user) return;
     setSaving(true);
     try {
-      await user.update({ firstName: form.firstName, lastName: form.lastName });
-      showStatus('success', 'Profile Updated', 'Your changes have been saved.');
+      const profile: UserProfile = {
+        userId: user.id,
+        displayName: form.displayName,
+        phone: form.phone,
+        gender: form.gender as any,
+        biologicalSex: form.biologicalSex as any,
+        dateOfBirth: form.dateOfBirth || null,
+        height: form.height ? Number(form.height) : null,
+        weight: form.weight ? Number(form.weight) : null,
+        activityLevel: form.activityLevel as any,
+        avatarUrl: form.avatarUrl,
+        preferredLanguage: form.preferredLanguage,
+        enableCycleTracking: false,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+      await storeUserProfile(profile);
+      // Sync to Clerk publicMetadata (best-effort)
+      try {
+        await user.update({
+          publicMetadata: {
+            displayName: form.displayName,
+            phone: form.phone,
+            gender: form.gender,
+            biologicalSex: form.biologicalSex,
+            dateOfBirth: form.dateOfBirth,
+            height: form.height,
+            weight: form.weight,
+            activityLevel: form.activityLevel,
+            preferredLanguage: form.preferredLanguage,
+            avatarUrl: form.avatarUrl,
+          }
+        });
+      } catch (e) {
+        console.warn('Clerk publicMetadata update failed (non-critical):', e);
+      }
+      showStatus('success', 'Profile Saved', 'Your profile has been updated.');
     } catch (err) {
-      console.error(err);
-      showStatus('error', 'Update Failed', 'Could not update profile. Please try again.');
+      console.error('Save failed:', err);
+      showStatus('error', 'Save Failed', 'Could not save profile.');
     } finally {
       setSaving(false);
     }
@@ -124,53 +247,183 @@ function ProfileTab() {
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-white">Profile</h3>
 
+      {/* Avatar & Photo Upload */}
       <div className="flex items-center gap-4 mb-6">
         <div className="w-20 h-20 rounded-full bg-slate-700 flex items-center justify-center overflow-hidden border-2 border-teal-500/30">
-          {user?.imageUrl ? (
+          {form.avatarUrl ? (
+            <img src={form.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+          ) : user?.imageUrl ? (
             <img src={user.imageUrl} alt="Avatar" className="w-full h-full object-cover" />
           ) : (
-            <span className="text-3xl text-slate-400">?</span>
+            <span className="text-3xl text-slate-400">{form.displayName?.charAt(0) || '?'}</span>
           )}
         </div>
         <div>
-          <div className="font-medium text-white">{user?.fullName || 'Set your name'}</div>
+          <div className="font-medium text-white">{form.displayName || 'Set your name'}</div>
           <div className="text-sm text-slate-400">{user?.emailAddresses?.[0]?.emailAddress}</div>
-          <button className="mt-2 text-xs text-teal-400 hover:underline">Change Photo</button>
+          <label className="mt-2 inline-block text-base text-teal-400 hover:underline cursor-pointer">
+            <input
+              type="file"
+              accept="image/png, image/jpeg, image/webp"
+              className="hidden"
+              onChange={handlePhotoSelect}
+              disabled={photoChanging}
+            />
+            {photoChanging ? 'Changing...' : 'Change Photo'}
+          </label>
         </div>
       </div>
 
       <div className="grid gap-4">
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1">First Name</label>
+          <label className="block text-base font-medium text-slate-300 mb-1">Display Name</label>
           <input
-            name="firstName"
-            value={form.firstName}
+            name="displayName"
+            value={form.displayName}
             onChange={handleChange}
-            className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400"
+            placeholder="Your display name"
+            className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-base text-slate-100 focus:border-teal-400"
           />
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1">Last Name</label>
+          <label className="block text-base font-medium text-slate-300 mb-1">Phone Number</label>
           <input
-            name="lastName"
-            value={form.lastName}
+            name="phone"
+            value={form.phone}
             onChange={handleChange}
-            className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-sm text-slate-100 focus:border-teal-400"
+            placeholder="+234801234567"
+            className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-base text-slate-100 focus:border-teal-400"
           />
+          <p className="text-slate-500 text-sm mt-1">Nigerian or international format</p>
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-1">Email</label>
-          <input
-            disabled
-            value={user?.emailAddresses?.[0]?.emailAddress || ''}
-            className="w-full px-3 py-2 bg-slate-900/50 border border-slate-700/30 rounded-lg text-sm text-slate-500"
-          />
-          <p className="text-xs text-slate-500 mt-1">Email cannot be changed here.</p>
+          <label className="block text-base font-medium text-slate-300 mb-2">Gender</label>
+          <div className="flex gap-2 overflow-x-auto pb-2">
+            {(['male','female','non-binary','other','prefer-not-to-say'] as const).map(g => (
+              <button
+                key={g}
+                type="button"
+                onClick={() => setForm(prev => ({ ...prev, gender: g }))}
+                className={`flex-shrink-0 px-4 py-2 rounded-lg text-base font-medium border transition-all ${
+                  form.gender === g
+                    ? 'bg-teal-500/20 border-teal-500/40 text-teal-100'
+                    : 'bg-slate-800/50 border-slate-700/30 text-slate-300'
+                }`}
+              >
+                {g.charAt(0).toUpperCase() + g.slice(1).replace('-',' ')}
+              </button>
+            ))}
+          </div>
+          {form.gender === 'other' && (
+            <input
+              name="otherGender"
+              value={form.otherGender}
+              onChange={handleChange}
+              placeholder="Specify gender"
+              className="w-full px-3 py-2 mt-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-base text-slate-100 focus:border-teal-400"
+            />
+          )}
         </div>
+
+        <div>
+          <label className="block text-base font-medium text-slate-300 mb-2">Biological Sex</label>
+          <div className="flex gap-2">
+            {['male','female'].map(sex => (
+              <button
+                key={sex}
+                type="button"
+                onClick={() => setForm(prev => ({ ...prev, biologicalSex: sex }))}
+                className={`flex-1 py-2 rounded-lg text-base font-medium border transition-all ${
+                  form.biologicalSex === sex
+                    ? 'bg-teal-500/20 border-teal-500/40 text-teal-100'
+                    : 'bg-slate-800/50 border-slate-700/30 text-slate-300'
+                }`}
+              >
+                {sex.charAt(0).toUpperCase() + sex.slice(1)}
+              </button>
+            ))}
+          </div>
+          <p className="text-slate-500 text-sm mt-1">Used for fitness calculations</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-base font-medium text-slate-300 mb-1">Date of Birth</label>
+            <input
+              name="dateOfBirth"
+              type="date"
+              value={form.dateOfBirth}
+              onChange={handleChange}
+              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-base text-slate-100 focus:border-teal-400"
+            />
+          </div>
+          <div>
+            <label className="block text-base font-medium text-slate-300 mb-1">Preferred Language</label>
+            <select
+              name="preferredLanguage"
+              value={form.preferredLanguage}
+              onChange={handleChange}
+              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-base text-slate-100 focus:border-teal-400"
+            >
+              <option value="en">English</option>
+              <option value="ig">Igbo</option>
+              <option value="ha">Hausa</option>
+              <option value="yo">Yoruba</option>
+              <option value="pcm">Nigerian Pidgin</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-base font-medium text-slate-300 mb-1">Height (cm)</label>
+            <input
+              name="height"
+              type="number"
+              min="50"
+              max="300"
+              value={form.height}
+              onChange={handleChange}
+              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-base text-slate-100 focus:border-teal-400"
+            />
+          </div>
+          <div>
+            <label className="block text-base font-medium text-slate-300 mb-1">Weight (kg)</label>
+            <input
+              name="weight"
+              type="number"
+              min="20"
+              max="500"
+              value={form.weight}
+              onChange={handleChange}
+              className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-base text-slate-100 focus:border-teal-400"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-base font-medium text-slate-300 mb-1">Activity Level</label>
+          <select
+            name="activityLevel"
+            value={form.activityLevel}
+            onChange={handleChange}
+            className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/30 rounded-lg text-base text-slate-100 focus:border-teal-400"
+          >
+            <option value="">Select activity level</option>
+            <option value="sedentary">Sedentary</option>
+            <option value="light">Light</option>
+            <option value="moderate">Moderate</option>
+            <option value="active">Active</option>
+            <option value="very_active">Very Active</option>
+          </select>
+        </div>
+
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-4 py-2 bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white rounded-lg font-medium transition-colors"
+          className="px-4 py-2 bg-teal-600 hover:bg-teal-500 disabled:opacity-50 text-white rounded-lg font-medium transition-colors mt-4"
         >
           {saving ? 'Saving...' : 'Save Changes'}
         </button>

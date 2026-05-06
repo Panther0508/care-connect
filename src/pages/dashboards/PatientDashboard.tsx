@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { TrendingUp, Activity, Heart, Pill, Target } from "lucide-react";
 import { getCurrentHealthState } from "../../services/healthGraph";
+import PWAInstallPrompt from "../../components/PWAInstallPrompt";
 
 export default function PatientDashboard() {
   const health = getCurrentHealthState();
@@ -19,17 +20,17 @@ export default function PatientDashboard() {
         <div className="glass-card p-4 text-center">
           <Activity className="text-teal-400 mx-auto mb-2" size={24} />
           <p className="text-xl font-bold text-white">{health.conditions?.length || 0}</p>
-          <p className="text-xs text-slate-400">Conditions</p>
+           <p className="text-base text-slate-400">Conditions</p>
         </div>
         <div className="glass-card p-4 text-center">
           <Pill className="text-emerald-400 mx-auto mb-2" size={24} />
           <p className="text-xl font-bold text-white">{health.medications?.length || 0}</p>
-          <p className="text-xs text-slate-400">Medications</p>
+           <p className="text-base text-slate-400">Medications</p>
         </div>
         <div className="glass-card p-4 text-center">
           <Target className="text-amber-400 mx-auto mb-2" size={24} />
           <p className="text-xl font-bold text-white">{health.allergies?.length || 0}</p>
-          <p className="text-xs text-slate-400">Allergies</p>
+           <p className="text-base text-slate-400">Allergies</p>
         </div>
       </div>
 
@@ -42,7 +43,7 @@ export default function PatientDashboard() {
         <p className="text-slate-300 text-sm mb-3">
           Log your blood pressure and take your medication on time.
         </p>
-        <button className="text-xs text-teal-400 hover:underline">Mark complete</button>
+        <button className="text-base text-teal-400 hover:underline">Mark complete</button>
       </div>
 
       {/* Insights */}
@@ -65,21 +66,24 @@ export default function PatientDashboard() {
       <div className="grid grid-cols-2 gap-3">
         <a href="/medications" className="glass-card p-4 hover:border-teal-500/30 transition-all text-center">
           <Pill className="text-teal-400 mx-auto mb-2" size={20} />
-          <p className="text-sm font-medium text-white">Meds</p>
+           <p className="text-base font-medium text-white">Meds</p>
         </a>
         <a href="/ai" className="glass-card p-4 hover:border-teal-500/30 transition-all text-center">
           <Activity className="text-cyan-400 mx-auto mb-2" size={20} />
-          <p className="text-sm font-medium text-white">Ask AI</p>
+           <p className="text-base font-medium text-white">Ask AI</p>
         </a>
         <a href="/cycle" className="glass-card p-4 hover:border-teal-500/30 transition-all text-center">
           <Heart className="text-rose-400 mx-auto mb-2" size={20} />
-          <p className="text-sm font-medium text-white">Cycle</p>
+           <p className="text-base font-medium text-white">Cycle</p>
         </a>
         <a href="/rewards" className="glass-card p-4 hover:border-teal-500/30 transition-all text-center">
           <Target className="text-amber-400 mx-auto mb-2" size={20} />
-          <p className="text-sm font-medium text-white">Rewards</p>
+           <p className="text-base font-medium text-white">Rewards</p>
         </a>
-      </div>
-    </motion.div>
+       </div>
+
+       {/* PWA Install Prompt */}
+       <PWAInstallPrompt />
+     </motion.div>
   );
 }

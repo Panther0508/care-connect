@@ -718,3 +718,15 @@ h4 { font-size: 1.125rem; font-weight: 600; font-family: 'Plus Jakarta Sans', sa
 .cl-header-title, .cl-header-subtitle, .cl-form-field-label {
   font-size: 1rem !important;
 }
+
+/* Global minimum font size for text paired with icons */
+/* Ensures readability: icons + labels, nav items, feature badges */
+.icon-label,
+[class*="flex-col"].icon-text,
+nav a span,
+nav button span,
+.feature-badge,
+.badge-text {
+  font-size: clamp(14px, 0.875rem, 16px) !important;
+  min-height: 1rem;
+}

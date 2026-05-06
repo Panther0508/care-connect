@@ -4,6 +4,7 @@ import VitaAvatar from "./VitaAvatar";
 export default function LoadingSpinner({ size = 80, className = "" }) {
   return (
     <div
+      data-testid="loading-spinner"
       className={`relative flex items-center justify-center ${className}`}
       style={{ width: size, height: size }}
     >
