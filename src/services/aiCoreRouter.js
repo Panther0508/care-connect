@@ -692,10 +692,9 @@ export async function routeQuery({
     console.log('[AI Router] Tier 4 SKIPPED: VITE_HF_API_KEY not set');
   }
 
-   // 7d. TinyLlama 1.1B GÇö final fallback (offline only)
-   if (!isOnline) {
-     console.log('[AI Router] Tier 5: Attempting TinyLlama 1.1B (offline fallback)');
-     try {
+   // 7d. TinyLlama 1.1B ? final fallback (always available, offline-capable)
+   console.log('[AI Router] Tier 5: Attempting TinyLlama 1.1B (offline fallback)');
+   try {
        const llm = await loadTinyLlama();
        console.log('[AI Router] TinyLlama model loaded successfully');
        const tokenizer = await getTokenizer('textGeneration');
@@ -754,40 +753,23 @@ export async function routeQuery({
        lastResult = tinyResult;
        lastReasoning = tinyResult.reasoning;
        return tinyResult;
-     } catch (err) {
-       console.error('[AI Router] Tier 5 FAILED: TinyLlama error:', err.message, 'GÇö ALL TIERS EXHAUSTED');
-       const fallbackText = 'All AI models are currently unavailable. Please check your internet connection and try again. For urgent medical questions, contact a healthcare provider directly.';
-       const errorResult = {
-         text: fallbackText,
-         reasoning: [],
-         citations: [],
-         emotionalState: finalEmotion,
-         model: 'none',
-         source: 'error',
-         evaluation: { overall: 0, components: { factual: 0, clarity: 0, safety: 0, completeness: 0 } },
-         quotaRemaining: 0
-       };
-      lastResult = errorResult;
-      lastReasoning = [];
-      return errorResult;
-    }
-  } else {
-    console.log('[AI Router] Tier 5 SKIPPED: Online mode, not using offline model');
-    const fallbackText = 'All AI services are currently unavailable. Please check your connection or try again later. For urgent medical concerns, contact a healthcare provider directly.';
-    const errorResult = {
-      text: fallbackText,
-      reasoning: [],
-      citations: [],
-      emotionalState: finalEmotion,
-      model: 'none',
-      source: 'error',
-      evaluation: { overall: 0, components: { factual: 0, clarity: 0, safety: 0, completeness: 0 } },
-      quotaRemaining: 0
-    };
-    lastResult = errorResult;
-    lastReasoning = [];
-    return errorResult;
-   }
+      } catch (err) {
+        console.error('[AI Router] Tier 5 FAILED: TinyLlama error:', err.message, '? ALL TIERS EXHAUSTED');
+        const fallbackText = 'All AI models are currently unavailable. Please check your internet connection and try again. For urgent medical questions, contact a healthcare provider directly.';
+        const errorResult = {
+          text: fallbackText,
+          reasoning: [],
+          citations: [],
+          emotionalState: finalEmotion,
+          model: 'none',
+          source: 'error',
+          evaluation: { overall: 0, components: { factual: 0, clarity: 0, safety: 0, completeness: 0 } },
+          quotaRemaining: 0
+        };
+        lastResult = errorResult;
+        lastReasoning = [];
+        return errorResult;
+      }
 } // close routeQuery function
 
 // GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
