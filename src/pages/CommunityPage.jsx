@@ -119,7 +119,7 @@ export function CommunityPage() {
         <p className="text-slate-400">
           Connect with others on similar health journeys
         </p>
-        <Link to="/community/new" className="inline-block mt-4 px-4 py-2 bg-teal-500 text-white rounded hover:bg-teal-600">
+        <Link to="/community" className="inline-block mt-4 px-4 py-2 bg-teal-500 text-white rounded hover:bg-teal-600">
           New Post
         </Link>
       </div>

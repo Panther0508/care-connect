@@ -4,6 +4,7 @@ import { searchOnline } from './onlineSearch';
 import { meshOrchestrator } from './meshOrchestrator';
 
 // Embedding model: LOCAL ONLY — no remote CDN fetches
+env.localModelPath = '/models/';
 env.allowRemoteModels = false;   // Block HuggingFace CDN
 env.allowLocalModels = true;     // Allow /models/ path
 env.useBrowserCache = true;

@@ -483,9 +483,14 @@ export async function routeQuery({
     if (!finalExtractedQuery) {
       finalExtractedQuery = structuredPrompt.substring(0, 200).split('\n')[0];
     }
-  }
+   }
 
-  const { emotionResult = { state: 'neutral', confidence: 0.8 }, threadTurns = [], trendSummary = null } = emotionalContext;
+   // Fetch enrichment if not pre-provided
+   if (!enrichment) {
+     enrichment = await enrichWithWebData(finalExtractedQuery);
+   }
+
+   const { emotionResult = { state: 'neutral', confidence: 0.8 }, threadTurns = [], trendSummary = null } = emotionalContext;
 
   // 1. Detect emotion (always)
   const detectedEmotion = detectEmotion(structuredPrompt);

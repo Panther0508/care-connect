@@ -118,7 +118,7 @@ const DATASETS = {
   }
 };
 
-let dbVersion = 10; // Bumped to match unified vitachain schema
+let dbVersion = 12; // Unified vitachain schema version
 
 // Load embedding model
 export async function loadEmbedder() {

@@ -10,7 +10,7 @@ import QRScanner from '../components/QRScanner';
 import { generatePassport, initPassport } from '../services/passport';
 import { getCurrentHealthState } from '../services/healthGraph';
 import MagnifyingLoader from '../components/MagnifyingLoader';
-import { Clipboard } from 'lucide-react';
+import { Clipboard, Link } from 'lucide-react';
 
 export default function Passport() {
   const [step, setStep] = useState('select'); // 'select' | 'review' | 'qr' | 'scan'
@@ -89,9 +89,9 @@ export default function Passport() {
           <p className="text-slate-400 mb-4">
             You need to add some health records before generating a passport.
           </p>
-          <a href="/health" className="btn-primary inline-block">
-            Add Health Data
-          </a>
+           <Link to="/health" className="btn-primary inline-block">
+             Add Health Data
+           </Link>
         </div>
       </div>
     );

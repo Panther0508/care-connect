@@ -8,6 +8,7 @@ import { Menu, X, Lock } from "lucide-react";
 import { useIDB } from "../hooks/useIDB";
 import StatusToastContainer from "./StatusToastContainer";
 import SideMenu from "./SideMenu";
+import ModernBottomNav from "./ModernBottomNav";
 import { getSetting, storeSetting } from "../lib/idb";
 
 interface AppLayoutProps {
@@ -171,9 +172,18 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 </button>
               </form>
 
-              <p className="text-xs text-slate-500 mt-4">
-                Forgotten PIN? Contact support to reset your account.
-              </p>
+               <p className="text-xs text-slate-500 mt-4">
+                 Forgotten PIN? Contact support to reset your account.
+               </p>
+               
+               {/* Escape hatch: Continue in Guest Mode with limited functionality */}
+               <button
+                 type="button"
+                 onClick={() => setShowPinGate(false)}
+                 className="text-xs text-slate-500 hover:text-slate-300 underline mt-2"
+               >
+                 Continue in Guest Mode
+               </button>
             </motion.div>
           </motion.div>
         )}
@@ -193,11 +203,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
          </a>
        </div>
 
-      <main className={`relative z-10 min-h-screen pt-16`}>
-        <div className="mx-auto w-full max-w-5xl px-4 md:px-8">
-          {children}
-        </div>
-      </main>
+       <main className={`relative z-10 min-h-screen`}>
+         <div className="mx-auto w-full max-w-5xl px-4 md:px-8">
+           {children}
+         </div>
+       </main>
+
+       {/* Modern Bottom Navigation (mobile) */}
+       <ModernBottomNav />
 
       {/* Side Menu */}
       <SideMenu open={sideMenuOpen} onOpenChange={setSideMenuOpen} />

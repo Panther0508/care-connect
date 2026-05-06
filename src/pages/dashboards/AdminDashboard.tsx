@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Users, FileText, AlertTriangle, Eye, Settings, Database } from "lucide-react";
 import { useAuth } from "@clerk/clerk-react";
+import { Link } from "react-router-dom";
 
 const ADMIN_STATS = [
   { label: "Total Users", value: "1,247", icon: Users, trend: "+12%", color: "text-teal-400" },
@@ -41,17 +42,17 @@ export default function AdminDashboard() {
 
       {/* Admin quick actions */}
       <div className="grid sm:grid-cols-2 gap-3">
-        <a href="/audit-log" className="glass-card p-4 hover:border-teal-500/30 transition-all">
-          <Settings className="text-teal-400 mb-2" size={20} />
-          <h3 className="font-medium text-white">Audit Log</h3>
-           <p className="text-sm text-slate-300 mt-1">System event history</p>
-        </a>
-        <a href="/training" className="glass-card p-4 hover:border-teal-500/30 transition-all">
-          <Users className="text-amber-400 mb-2" size={20} />
-          <h3 className="font-medium text-white">Training</h3>
-           <p className="text-sm text-slate-300 mt-1">Assign learning modules</p>
-        </a>
-      </div>
+         <Link to="/audit-log" className="glass-card p-4 hover:border-teal-500/30 transition-all text-center">
+           <Settings className="text-teal-400 mb-2" size={20} />
+           <h3 className="font-medium text-white">Audit Log</h3>
+            <p className="text-sm text-slate-300 mt-1">System event history</p>
+         </Link>
+         <Link to="/training" className="glass-card p-4 hover:border-teal-500/30 transition-all text-center">
+           <Users className="text-amber-400 mb-2" size={20} />
+           <h3 className="font-medium text-white">Training</h3>
+            <p className="text-sm text-slate-300 mt-1">Assign learning modules</p>
+         </Link>
+       </div>
 
       {/* Alerts */}
       <div className="glass-card p-4 border-rose-500/20">

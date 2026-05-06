@@ -231,7 +231,7 @@ export default function RewardsPage() {
         >
           <div className="flex justify-between items-start mb-3">
             <h3 className="font-semibold text-slate-100">Local Leaderboard</h3>
-            <Link to="/rewards/leaderboard" className="text-sm text-teal-400 hover:underline">
+            <Link to="/rewards" className="text-sm text-teal-400 hover:underline">
               View All
             </Link>
           </div>

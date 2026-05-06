@@ -176,7 +176,8 @@ const App = () => {
     <AppLayout>
       <Suspense fallback={<LoadingFallback message="Loading page..." />}>
         <AnimatePresence mode="wait">
-          <Routes location={location} key={location.pathname}>
+           <ErrorBoundary>
+             <Routes location={location} key={location.pathname}>
             {/* Public routes */}
             <Route path="/" element={<ConditionalRoot />} />
             <Route path="/sign-in" element={<SignInPage />} />
@@ -645,9 +646,9 @@ const App = () => {
                 </AuthSyncGate>
               } />
              
-              {/* Fallback */}
-              <Route path="*" element={<NotFound />} />
-          </Routes>
+               {/* Fallback */}
+               <Route path="*" element={<NotFound />} />
+           </Routes></ErrorBoundary>
         </AnimatePresence>
       </Suspense>
       <SpeedInsights />

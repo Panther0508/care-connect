@@ -26,8 +26,8 @@ export function useHealthGraph() {
         // First time: use demo passphrase
         await setActiveUser(userId, 'vita-demo-2026');
       } else {
-        // Decrypt to get actual passphrase (simplified for now)
-        const passphrase = encryptedPassphrase; // TODO: actually decrypt
+         // Decrypt to get actual passphrase
+         const passphrase = decryptPassphrase(encryptedPassphrase);
         await setActiveUser(userId, passphrase);
       }
 

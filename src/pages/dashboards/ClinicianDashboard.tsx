@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Calendar, FileText, Users, MessageSquare, TrendingUp, Clock, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const APPOINTMENTS = [
   { id: "1", patient: "Amina Ibrahim", time: "10:00 AM", type: "Follow-up", status: "confirmed" },
@@ -37,14 +38,13 @@ export default function ClinicianDashboard() {
         </div>
       </div>
 
-      {/* Today's schedule */}
-      <div className="glass-card p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-white">Today's Schedule</h2>
-          <a href="/clinician-view" className="text-xs text-teal-400 hover:underline">
-            View all
-          </a>
-        </div>
+        <div className="glass-card p-5">
+         <div className="flex items-center justify-between mb-4">
+           <h2 className="text-lg font-semibold text-white">Today's Schedule</h2>
+           <Link to="/clinician-view" className="text-xs text-teal-400 hover:underline">
+             View all
+           </Link>
+         </div>
         <div className="space-y-3">
           {APPOINTMENTS.map((apt) => (
             <div key={apt.id} className="p-3 rounded-xl bg-slate-800/30 border border-slate-700/30 flex items-center justify-between">
@@ -81,15 +81,15 @@ export default function ClinicianDashboard() {
 
       {/* Quick actions */}
       <div className="grid grid-cols-2 gap-3">
-        <a href="/referral-generator" className="glass-card p-4 hover:border-teal-500/30 transition-all text-center">
-          <FileText className="text-teal-400 mx-auto mb-2" size={24} />
-          <p className="text-sm font-medium text-white">New Referral</p>
-        </a>
-        <a href="/ai" className="glass-card p-4 hover:border-teal-500/30 transition-all text-center">
-          <MessageSquare className="text-cyan-400 mx-auto mb-2" size={24} />
-          <p className="text-sm font-medium text-white">Ask AI Assistant</p>
-        </a>
-      </div>
+         <Link to="/referral-generator" className="glass-card p-4 hover:border-teal-500/30 transition-all text-center">
+           <FileText className="text-teal-400 mx-auto mb-2" size={24} />
+           <p className="text-sm font-medium text-white">New Referral</p>
+         </Link>
+         <Link to="/ai" className="glass-card p-4 hover:border-teal-500/30 transition-all text-center">
+           <MessageSquare className="text-cyan-400 mx-auto mb-2" size={24} />
+           <p className="text-sm font-medium text-white">Ask AI Assistant</p>
+         </Link>
+       </div>
     </motion.div>
   );
 }

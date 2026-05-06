@@ -6,7 +6,6 @@ import VitaAvatar from "../components/VitaAvatar";
 import CrisisPopup from "../components/CrisisPopup";
 import ReasoningPanel from "../components/ReasoningPanel";
 import CitationBadge from "../components/CitationBadge";
-import ChatHistorySidebar from "../components/ChatHistorySidebar";
 import MessageActions from "../components/MessageActions";
 import QuotaIndicator from "../components/QuotaIndicator";
 import ScrollReveal from "../components/ScrollReveal";
@@ -24,13 +23,13 @@ import {
 } from "../services/medicalAI";
 import { checkInteractionsSimple } from "../services/medicationChecker";
 import { getCurrentHealthState } from "../services/healthGraph";
-import { getAllRxNorm, getAllVectors, retrieveContext, getAllChatHistory, storeChatEntry, deleteChatEntry, getSetting, getItem } from "../lib/idb";
+import { getAllRxNorm, getAllVectors, retrieveContext, getSetting, getItem } from "../lib/idb";
 import { useStatus } from "../hooks/useStatus";
 import { getPersona, buildSystemPrompt, generateGreeting } from "../services/personaEngine";
 import { scanMessage, scanAIResponse } from "../services/crisisDetector";
 import { showCrisisPopup, dismissCrisisPopup, registerCrisisHandler } from "../services/crisisManager";
 import {
-  X, Send, Mic, ArrowLeft, AlertCircle, CheckCircle, FileText, Image, Calendar, Pill, Globe, Volume2, VolumeX, Camera, Clock, Plus, Menu
+  X, Send, Mic, ArrowLeft, AlertCircle, CheckCircle, FileText, Image, Calendar, Pill, Globe, Volume2, VolumeX, Camera, Clock, Plus
 } from "lucide-react";
 import { getUserProfile } from "../lib/idb";
 import { useRole } from "../hooks/auth/useRole";
@@ -142,13 +141,10 @@ export default function AIAssistant() {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [activeModel, setActiveModel] = useState<'online' | 'cached' | 'offline' | null>(null);
   const [quotaRemaining, setQuotaRemaining] = useState(1500);
-  const [modelType, setModelType] = useState<'gemma4-31b' | 'tinyllama-1.1b'>('gemma4-31b');
-   const chatEndRef = useRef<HTMLDivElement>(null);
-   // Chat history sidebar
-   const [showSidebar, setShowSidebar] = useState(false);
-   const [chatHistory, setChatHistory] = useState<any[]>([]);
-   // Streaming state
-   const [isStreaming, setIsStreaming] = useState(false);
+   const [modelType, setModelType] = useState<'gemma4-31b' | 'tinyllama-1.1b'>('gemma4-31b');
+    const chatEndRef = useRef<HTMLDivElement>(null);
+    // Streaming state
+    const [isStreaming, setIsStreaming] = useState(false);
    const [currentChunk, setCurrentChunk] = useState("");
    // Dynamic quick actions based on context
    const [dynamicQuickActions, setDynamicQuickActions] = useState<Array<{label: string, handler: string}>>([]);
@@ -224,26 +220,14 @@ export default function AIAssistant() {
       case 'simplify': return 'Can you explain that in simpler terms?';
       default: return handler;
     }
-  };
-
-   useEffect(() => {
-     const loadChatHistory = async () => {
-       try {
-         const entries = await getAllChatHistory();
-         setChatHistory(entries);
-       } catch (err) {
-         console.error('Failed to load chat history:', err);
-       }
-     };
-     loadChatHistory();
-   }, []);
+   };
 
    useEffect(() => {
      chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
    }, [messages]);
 
-  useEffect(() => {
-    registerCrisisHandler((state: any) => {
+   useEffect(() => {
+     registerCrisisHandler((state: any) => {
       setCrisisVisible(state.visible);
       setCrisisState({ riskLevel: state.riskLevel, matchedPattern: state.matchedPattern });
     });
@@ -542,13 +526,14 @@ const handleSpeechInput = async () => {
            emotionalState: summaryResult.emotionalState,
            model: summaryResult.model
          });
-         // Update model status from last route result
-         const lastRes = getLastRouteResult();
-         if (lastRes?.source === 'online') setActiveModel('online');
-         else if (lastRes?.source === 'cached-gemma') setActiveModel('cached');
-         else if (lastRes?.source === 'offline') setActiveModel('offline');
-         setIsProcessing(false);
-         return;
+          // Update model status from last route result
+          const lastRes = getLastRouteResult();
+          if (lastRes?.source === 'online') setActiveModel('online');
+          else if (lastRes?.source === 'cached-gemma') setActiveModel('cached');
+          else if (lastRes?.source === 'offline') setActiveModel('offline');
+          if (lastRes?.quotaRemaining !== undefined) setQuotaRemaining(lastRes.quotaRemaining);
+          setIsProcessing(false);
+          return;
        }
 
 
@@ -610,11 +595,12 @@ const handleSpeechInput = async () => {
                 emotionalState: aiResult.emotionalState,
                 model: aiResult.model
               });
-              const lastRes = getLastRouteResult();
-              if (lastRes?.source === 'online') setActiveModel('online');
-              else if (lastRes?.source === 'cached-gemma') setActiveModel('cached');
-              else setActiveModel('offline');
-            } catch (innerErr) {
+               const lastRes = getLastRouteResult();
+               if (lastRes?.source === 'online') setActiveModel('online');
+               else if (lastRes?.source === 'cached-gemma') setActiveModel('cached');
+               else setActiveModel('offline');
+               if (lastRes?.quotaRemaining !== undefined) setQuotaRemaining(lastRes.quotaRemaining);
+             } catch (innerErr) {
               console.error('RAG path error:', innerErr);
               const aiResult = await askMedicalQuestion(healthState, text, systemPrompt, userRole, userId);
               addMessage("assistant", aiResult.text, {
@@ -696,6 +682,7 @@ const handleSpeechInput = async () => {
           if (lastRes?.source === 'online') setActiveModel('online');
           else if (lastRes?.source === 'cached-gemma') setActiveModel('cached');
           else if (lastRes?.source === 'offline') setActiveModel('offline');
+          if (lastRes?.quotaRemaining !== undefined) setQuotaRemaining(lastRes.quotaRemaining);
          } catch (err) {
            console.error('Streaming error:', err);
            // Replace placeholder with error message
@@ -723,34 +710,6 @@ const handleSpeechInput = async () => {
     setCrisisVisible(false);
   };
 
-  // Load chat history from IndexedDB
-  const loadChatHistory = async () => {
-    try {
-      const entries = await getAllChatHistory();
-      setChatHistory(entries);
-    } catch (err) {
-      console.error('Failed to load chat history:', err);
-    }
-  };
-
-  // Persist current conversation on unmount
-  useEffect(() => {
-    return () => {
-      if (messages.length > 0) {
-        const firstUserMsg = messages.find(m => m.role === 'user');
-        const title = firstUserMsg ? firstUserMsg.content.substring(0, 30) + (firstUserMsg.content.length > 30 ? '...' : '') : 'New Chat';
-        const lastMsg = messages[messages.length - 1];
-        const preview = lastMsg ? lastMsg.content.substring(0, 50) : '';
-        storeChatEntry({
-          title,
-          preview,
-          messages: messages,
-          createdAt: Date.now(),
-        }).catch(console.error);
-      }
-    };
-  }, [messages]);
-
   return (
     <div className="flex flex-col h-full min-h-screen bg-slate-900">
       <CrisisPopup
@@ -762,19 +721,10 @@ const handleSpeechInput = async () => {
       />
 
         <header className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-2xl border-b border-white/5 px-4 py-4">
-          <div className="flex items-center gap-4">
-            {/* Sidebar toggle */}
-            <button
-              onClick={() => setShowSidebar(true)}
-              className="p-2.5 -ml-2 rounded-xl hover:bg-white/5 transition-colors text-slate-300 hover:text-slate-100"
-              aria-label="Open chat history"
-            >
-              <Menu size={22} />
-            </button>
-
-            <button onClick={() => navigate(-1)} className="p-2.5 -ml-2 rounded-xl hover:bg-white/5 transition-colors text-slate-300 hover:text-slate-100">
-              <ArrowLeft size={22} />
-            </button>
+           <div className="flex items-center gap-4">
+             <button onClick={() => navigate(-1)} className="p-2.5 rounded-xl hover:bg-white/5 transition-colors text-slate-300 hover:text-slate-100">
+               <ArrowLeft size={22} />
+             </button>
             <div className="relative">
               <VitaAvatar state="online" size={44} />
               <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-slate-900 bg-teal-500" />
@@ -1032,45 +982,9 @@ const handleSpeechInput = async () => {
                 </div>
               </motion.div>
             </ScrollReveal>
-          )}
+           )}
 
-      {/* Chat history sidebar */}
-       <ChatHistorySidebar
-         open={showSidebar}
-         onClose={() => setShowSidebar(false)}
-         history={chatHistory}
-         onSelectChat={(entry) => {
-           // Load selected chat history into messages
-           setMessages(entry.messages || []);
-         }}
-         onDeleteChat={async (id) => {
-           await deleteChatEntry(id);
-           setChatHistory(prev => prev.filter(e => e.id !== id));
-         }}
-         onNewChat={() => {
-           setMessages([]);
-           setCurrentInput("");
-         }}
-       />
-
-       {/* Collapsible history bar toggle */}
-       {showSidebar && (
-         <motion.button
-           initial={{ x: -16 }}
-           animate={{ x: 0 }}
-           exit={{ x: -16 }}
-           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-           onClick={() => setShowSidebar(false)}
-           className="fixed left-4 top-1/2 -translate-y-1/2 z-40 p-2.5 rounded-r-xl bg-slate-800/90 backdrop-blur-xl border border-r-0 border-slate-700/50 text-slate-400 hover:text-slate-100 hover:border-slate-600/50 transition-all shadow-lg hover:shadow-[0_0_30px_rgba(20,184,166,0.2)]"
-           aria-label="Toggle chat history"
-         >
-           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-             <polyline points="15 18 9 12 15 6" />
-           </svg>
-         </motion.button>
-       )}
-
-      <div className="sticky bottom-0 bg-slate-900/90 backdrop-blur-2xl border-t border-white/5 p-4">
+        <div className="sticky bottom-0 bg-slate-900/90 backdrop-blur-2xl border-t border-white/5 p-4">
         <AnimatePresence>
           {showTranslation && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">

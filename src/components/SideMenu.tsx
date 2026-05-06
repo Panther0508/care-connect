@@ -138,9 +138,9 @@ export default function SideMenu({ open, onOpenChange }: SideMenuProps) {
               </button>
             </div>
 
-            {/* Navigation links with teal scrollbar */}
-            <nav className="flex-1 overflow-y-auto py-6 px-3 custom-scrollbar">
-              <ul className="space-y-2">
+             {/* Navigation links with teal scrollbar */}
+             <nav className="flex-1 overflow-y-auto py-6 px-3 custom-scrollbar" role="navigation" aria-label="Main navigation">
+               <ul className="space-y-2">
                 {menuItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = location.pathname === item.route;

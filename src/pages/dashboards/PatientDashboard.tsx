@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { TrendingUp, Activity, Heart, Pill, Target } from "lucide-react";
+import { Link } from "react-router-dom";
 import { getCurrentHealthState } from "../../services/healthGraph";
 import PWAInstallPrompt from "../../components/PWAInstallPrompt";
 
@@ -62,25 +63,24 @@ export default function PatientDashboard() {
         </div>
       </div>
 
-      {/* Quick actions */}
-      <div className="grid grid-cols-2 gap-3">
-        <a href="/medications" className="glass-card p-4 hover:border-teal-500/30 transition-all text-center">
-          <Pill className="text-teal-400 mx-auto mb-2" size={20} />
-           <p className="text-base font-medium text-white">Meds</p>
-        </a>
-        <a href="/ai" className="glass-card p-4 hover:border-teal-500/30 transition-all text-center">
-          <Activity className="text-cyan-400 mx-auto mb-2" size={20} />
-           <p className="text-base font-medium text-white">Ask AI</p>
-        </a>
-        <a href="/cycle" className="glass-card p-4 hover:border-teal-500/30 transition-all text-center">
-          <Heart className="text-rose-400 mx-auto mb-2" size={20} />
-           <p className="text-base font-medium text-white">Cycle</p>
-        </a>
-        <a href="/rewards" className="glass-card p-4 hover:border-teal-500/30 transition-all text-center">
-          <Target className="text-amber-400 mx-auto mb-2" size={20} />
-           <p className="text-base font-medium text-white">Rewards</p>
-        </a>
-       </div>
+        <div className="grid grid-cols-2 gap-3">
+         <Link to="/medications" className="glass-card p-4 hover:border-teal-500/30 transition-all text-center">
+           <Pill className="text-teal-400 mx-auto mb-2" size={20} />
+            <p className="text-base font-medium text-white">Meds</p>
+         </Link>
+         <Link to="/ai" className="glass-card p-4 hover:border-teal-500/30 transition-all text-center">
+           <Activity className="text-cyan-400 mx-auto mb-2" size={20} />
+            <p className="text-base font-medium text-white">Ask AI</p>
+         </Link>
+         <Link to="/cycle" className="glass-card p-4 hover:border-teal-500/30 transition-all text-center">
+           <Heart className="text-rose-400 mx-auto mb-2" size={20} />
+            <p className="text-base font-medium text-white">Cycle</p>
+         </Link>
+         <Link to="/rewards" className="glass-card p-4 hover:border-teal-500/30 transition-all text-center">
+           <Target className="text-amber-400 mx-auto mb-2" size={20} />
+            <p className="text-base font-medium text-white">Rewards</p>
+         </Link>
+        </div>
 
        {/* PWA Install Prompt */}
        <PWAInstallPrompt />

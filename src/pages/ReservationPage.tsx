@@ -148,14 +148,15 @@ export default function ReservationPage() {
      );
    }
 
-  if (!facility) {
-    return (
-      <div className="text-center py-10 text-slate-500 flex flex-col gap-4 items-center">
-        <p>No active reservation found.</p>
-        <button onClick={() => navigate("/")} className="btn-secondary">Go to Search</button>
-      </div>
-    );
-  }
+   if (!facility) {
+     return (
+       <div className="text-center py-10 text-slate-500 flex flex-col gap-4 items-center">
+         <VitaAvatar state="empty" size={80} />
+         <p>No reservation selected. Please go back and select a facility.</p>
+         <button onClick={() => navigate("/")} className="btn-secondary">Back to Search</button>
+       </div>
+     );
+   }
 
   const shakeAnimation = {
     shaking: { x: [-5, 5, -5, 5, 0], transition: { duration: 0.3 } }
