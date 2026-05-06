@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import { motion } from "framer-motion";
+import { ArrowRight } from "lucide-react";
 
 export default function Onboarding() {
   const { isSignedIn, isLoaded } = useAuth();
