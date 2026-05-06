@@ -33,53 +33,53 @@ html {
 @tailwind utilities;
 
 /* Base font size enforcement per Phase 4 spec */
-html { font-size: 16px; }
-body { font-size: 1rem; line-height: 1.6; }
+html { font-size: 112.5%; /* 18px base for enhanced readability */ }
+body { font-size: 1.0625rem; line-height: 1.625; }
 
-h1 { font-size: 2.25rem; font-weight: 700; }
-h2 { font-size: 1.75rem; font-weight: 700; }
-h3 { font-size: 1.375rem; font-weight: 600; }
-h4 { font-size: 1.125rem; font-weight: 600; }
+h1 { font-size: 2.75rem; font-weight: 700; }
+h2 { font-size: 2.25rem; font-weight: 700; }
+h3 { font-size: 1.75rem; font-weight: 600; }
+h4 { font-size: 1.375rem; font-weight: 600; }
 
 button, [role="button"], .btn, [class*="btn"] {
-  font-size: 0.9375rem;
+  font-size: 1rem;
   font-weight: 600;
 }
 label, .label, figcaption {
-  font-size: 0.9375rem;
+  font-size: 1rem;
 }
 
 /* Global heading sizes — fix visual hierarchy (headings were smaller than body) */
-h1 { font-size: 2.25rem; font-weight: 700; letter-spacing: -0.02em; font-family: 'Plus Jakarta Sans', sans-serif; }
-h2 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.02em; font-family: 'Plus Jakarta Sans', sans-serif; }
-h3 { font-size: 1.375rem; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif; }
-h4 { font-size: 1.125rem; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif; }
+h1 { font-size: 2.75rem; font-weight: 700; letter-spacing: -0.02em; font-family: 'Plus Jakarta Sans', sans-serif; }
+h2 { font-size: 2.25rem; font-weight: 700; letter-spacing: -0.02em; font-family: 'Plus Jakarta Sans', sans-serif; }
+h3 { font-size: 1.75rem; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif; }
+h4 { font-size: 1.375rem; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif; }
 
 @layer base {
   html {
     scroll-behavior: smooth;
     font-size: 100%; /* 16px base for consistent scaling */
   }
-  body {
-    @apply bg-slate-900 text-slate-100 font-sans;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    font-variant-numeric: tabular-nums;
-    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
-    background-color: #0F172A;
-    position: relative;
-    overflow-x: hidden;
-    font-size: 1rem; /* 16px base */
-    line-height: 1.6;
-  }
+   body {
+     @apply bg-slate-900 text-slate-100 font-sans;
+     -webkit-font-smoothing: antialiased;
+     -moz-osx-font-smoothing: grayscale;
+     font-variant-numeric: tabular-nums;
+     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+     background-color: #0F172A;
+     position: relative;
+     overflow-x: hidden;
+     font-size: 1.0625rem; /* 17px base for readability */
+     line-height: 1.625;
+   }
 
-  /* Heading sizes for accessibility - increased sizes */
-  h1 { font-size: 2.5rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
-  h2 { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.3; }
-  h3 { font-size: 1.5rem; font-weight: 600; line-height: 1.4; }
-  h4 { font-size: 1.25rem; font-weight: 600; line-height: 1.4; }
-  h5 { font-size: 1.125rem; font-weight: 600; line-height: 1.4; }
-  h6 { font-size: 1rem; font-weight: 600; line-height: 1.4; }
+   /* Heading sizes for accessibility - increased sizes */
+   h1 { font-size: 2.75rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; }
+   h2 { font-size: 2.25rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; }
+   h3 { font-size: 1.75rem; font-weight: 600; line-height: 1.3; }
+   h4 { font-size: 1.375rem; font-weight: 600; line-height: 1.4; }
+   h5 { font-size: 1.1875rem; font-weight: 600; line-height: 1.4; }
+   h6 { font-size: 1.0625rem; font-weight: 600; line-height: 1.4; }
 
   /* Touch targets minimum 44×44 px per WCAG 2.5.5 */
   button, a, [role="button"], input[type="submit"] {
@@ -1036,6 +1036,6 @@ nav a span,
 nav button span,
 .feature-badge,
 .badge-text {
-  font-size: clamp(16px, 1rem, 18px) !important;
+  font-size: clamp(1rem, 1.125rem, 1.5rem);
   min-height: 1.25rem;
 }
