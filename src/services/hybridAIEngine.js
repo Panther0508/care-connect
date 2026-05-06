@@ -405,7 +405,10 @@ export async function generateHybridResponse({
     if (parallelResult.judged) {
       result = {
         text: applyGuardrails(parallelResult.judged.winner.text, role),
-        reasoning: [{ type: 'search', title: 'Parallel Gemma Models', description: `Evaluated ${parallelResult.responses.length} model responses` }],
+        reasoning: [
+          { type: 'search', title: 'Parallel Gemma Models', description: Evaluated \ model responses },
+          { type: 'judge', title: 'Judge evaluation', description: parallelResult.judged.reasoning }
+        ],
         citations: [],
         emotionalState: finalEmotion,
         model: parallelResult.judged.winner.model,
