@@ -224,13 +224,13 @@ const App = () => {
                 </ProtectedRoute>
               </AuthSyncGate>
             } />
-             <Route path="/ai" element={
-               <AuthSyncGate>
-                 <ProtectedRoute allowedRoles={['patient', 'clinician']}>
-                   <PageWrapper><AIAssistant /></PageWrapper>
-                 </ProtectedRoute>
-               </AuthSyncGate>
-             } />
+              <Route path="/ai" element={
+                <AuthSyncGate>
+                  <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw']}>
+                    <PageWrapper><AIAssistant /></PageWrapper>
+                  </ProtectedRoute>
+                </AuthSyncGate>
+              } />
 
              {/* Patient wellness routes */}
              <Route path="/nutrition" element={

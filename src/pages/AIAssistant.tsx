@@ -1035,23 +1035,40 @@ const handleSpeechInput = async () => {
           )}
 
       {/* Chat history sidebar */}
-      <ChatHistorySidebar
-        open={showSidebar}
-        onClose={() => setShowSidebar(false)}
-        history={chatHistory}
-        onSelectChat={(entry) => {
-          // Load selected chat history into messages
-          setMessages(entry.messages || []);
-        }}
-        onDeleteChat={async (id) => {
-          await deleteChatEntry(id);
-          setChatHistory(prev => prev.filter(e => e.id !== id));
-        }}
-        onNewChat={() => {
-          setMessages([]);
-          setCurrentInput("");
-        }}
-      />
+       <ChatHistorySidebar
+         open={showSidebar}
+         onClose={() => setShowSidebar(false)}
+         history={chatHistory}
+         onSelectChat={(entry) => {
+           // Load selected chat history into messages
+           setMessages(entry.messages || []);
+         }}
+         onDeleteChat={async (id) => {
+           await deleteChatEntry(id);
+           setChatHistory(prev => prev.filter(e => e.id !== id));
+         }}
+         onNewChat={() => {
+           setMessages([]);
+           setCurrentInput("");
+         }}
+       />
+
+       {/* Collapsible history bar toggle */}
+       {showSidebar && (
+         <motion.button
+           initial={{ x: -16 }}
+           animate={{ x: 0 }}
+           exit={{ x: -16 }}
+           transition={{ type: "spring", stiffness: 300, damping: 30 }}
+           onClick={() => setShowSidebar(false)}
+           className="fixed left-4 top-1/2 -translate-y-1/2 z-40 p-2.5 rounded-r-xl bg-slate-800/90 backdrop-blur-xl border border-r-0 border-slate-700/50 text-slate-400 hover:text-slate-100 hover:border-slate-600/50 transition-all shadow-lg hover:shadow-[0_0_30px_rgba(20,184,166,0.2)]"
+           aria-label="Toggle chat history"
+         >
+           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+             <polyline points="15 18 9 12 15 6" />
+           </svg>
+         </motion.button>
+       )}
 
       <div className="sticky bottom-0 bg-slate-900/90 backdrop-blur-2xl border-t border-white/5 p-4">
         <AnimatePresence>

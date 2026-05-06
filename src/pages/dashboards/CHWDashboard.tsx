@@ -30,19 +30,26 @@ export default function CHWDashboard() {
         ))}
         </div>
 
-      {/* Quick actions - AI Triage */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-semibold text-white">Quick Actions</h2>
-        <div className="flex flex-wrap gap-2">
-          <NavLink
-            to="/chw-triage"
-            className="glass-card px-4 py-2 rounded-xl text-base font-medium text-teal-400 hover:border-teal-500/25 hover:text-teal-300 transition-all flex items-center gap-2"
-          >
-            <Sparkles size={16} />
-            AI Triage
-          </NavLink>
-        </div>
-      </div>
+       {/* Quick actions */}
+       <div className="space-y-3">
+         <h2 className="text-lg font-semibold text-white">Quick Actions</h2>
+         <div className="flex flex-wrap gap-2">
+           <NavLink
+             to="/ai"
+             className="glass-card px-4 py-2 rounded-xl text-base font-medium text-cyan-400 hover:border-cyan-500/25 hover:text-cyan-300 transition-all flex items-center gap-2"
+           >
+             <Sparkles size={16} />
+             AI Assistant
+           </NavLink>
+           <NavLink
+             to="/chw-triage"
+             className="glass-card px-4 py-2 rounded-xl text-base font-medium text-teal-400 hover:border-teal-500/25 hover:text-teal-300 transition-all flex items-center gap-2"
+           >
+             <Sparkles size={16} />
+             AI Triage
+           </NavLink>
+         </div>
+       </div>
 
       {/* Today's Tasks */}
       <div className="space-y-3">
