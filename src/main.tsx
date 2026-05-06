@@ -7,6 +7,7 @@
 
 import { next as Automerge } from '@automerge/automerge/slim';
 import wasmUrl from '@automerge/automerge/automerge.wasm?url';
+import './index.css';
 
 // Initialize WASM — this must complete before any Automerge API is used
 await Automerge.initializeWasm(wasmUrl).catch((err) => {

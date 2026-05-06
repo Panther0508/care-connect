@@ -2,7 +2,7 @@ import type { Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
-  content: ["./src/**/*.{js,jsx,ts,tsx}", "./index.html"],
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}", "./src/**/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
@@ -17,12 +17,13 @@ export default {
         success: "#10B981",
         "success-glow": "rgba(16, 185, 129, 0.3)",
         error: "#EF4444",
+        danger: "#EF4444",
         "error-glow": "rgba(239, 68, 68, 0.3)",
         "text-primary": "#F1F5F9",
         "text-secondary": "#94A3B8",
         "text-muted": "#64748B",
         "text-disabled": "#475569",
-        border: "rgba(148, 163, 184, 0.15)",
+        border: "rgba(148, 163, 184, 0.12)",
         "border-strong": "rgba(148, 163, 184, 0.3)",
         "border-hover": "rgba(148, 163, 184, 0.12)",
         "border-active": "rgba(20, 184, 166, 0.25)",

@@ -464,8 +464,9 @@ h4 { font-size: 1.125rem; font-weight: 600; font-family: 'Plus Jakarta Sans', sa
   .badge-error { background: rgba(239, 68, 68, 0.2); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.3); }
 }
 
+
 @layer utilities {
-  /* Color palette enforcement — override disallowed colors */
+   /* Color palette enforcement — override disallowed colors */
   .bg-black, .bg-gray-900, .bg-slate-950, .bg-neutral-900 {
     background-color: #0F172A !important;
   }
@@ -679,11 +680,10 @@ h4 { font-size: 1.125rem; font-weight: 600; font-family: 'Plus Jakarta Sans', sa
     animation: pulse-slow 4s ease-in-out infinite;
   }
 
-  /* Ensure body has solid background for tests and visual depth */
-  body {
-    background-color: #0F172A !important;
-  }
-}
+   /* Ensure body has solid background for tests and visual depth */
+   body {
+     background-color: #0F172A !important;
+   }
 
 /* ==================== PREMIUM ANIMATION UTILITIES ==================== */
 
@@ -872,7 +872,7 @@ h4 { font-size: 1.125rem; font-weight: 600; font-family: 'Plus Jakarta Sans', sa
 /* Page transition variants — supplement framer-motion PageWrapper */
 .page-enter-up {
   from { opacity: 0; transform: translateY(30px) scale(0.995); filter: blur(6px); }
-  to   { opacity: 1; transform: translateY(0)  scale(1);    filter: blur(0);   }
+   to   { opacity: 1; transform: translateY(0)  scale(1);    filter: blur(0);   }
 }
 .page-exit-up {
   from { opacity: 1; transform: translateY(0)  scale(1); filter: blur(0);   }
