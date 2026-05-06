@@ -45,16 +45,16 @@ export default function Settings() {
         {tabs.map((tab) => {
           const Icon = tab.icon;
           return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-shrink-0 min-w-[90px] flex items-center gap-2 px-4 py-3 rounded-xl text-base font-medium whitespace-nowrap transition-all border ${
-                activeTab === tab.id
-                  ? 'bg-teal-500/15 border-teal-500/40 text-teal-100'
-                  : 'bg-slate-800/50 border-slate-700/30 text-slate-300 hover:bg-slate-700/50 hover:border-teal-500/30'
-              }`}
-            >
-              <Icon size={18} />
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex-shrink-0 min-w-[90px] flex items-center gap-2 px-4 py-3 rounded-xl text-lg font-medium whitespace-nowrap transition-all border ${
+                  activeTab === tab.id
+                    ? 'bg-teal-500/15 border-teal-500/40 text-teal-100'
+                    : 'bg-slate-800/50 border-slate-700/30 text-slate-300 hover:bg-slate-700/50 hover:border-teal-500/30'
+                }`}
+              >
+              <Icon size={20} />
               {tab.label}
             </button>
           );
