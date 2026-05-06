@@ -28,17 +28,44 @@ test('Profile editing after fix', async ({ page }) => {
 });
 
 test('Passport online AI indicator', async ({ page }) => {
+  // Setup: ensure there is health data
+  await page.goto(`${BASE_URL}/health?devBypass=true`, { waitUntil: 'domcontentloaded' });
+  await page.locator('button:has-text("Add Condition")').first().click();
+  await page.locator('input[name="conditionName"]').fill('Hypertension');
+  await page.locator('button:has-text("Save Condition")').last().click();
+  await expect(page.locator('text=Hypertension')).toBeVisible({ timeout: 30000 });
+
+  // Navigate to passport and generate QR
   await page.goto(`${BASE_URL}/passport?devBypass=true`, { waitUntil: 'domcontentloaded' });
-  // Wait for loading state to appear (may be brief)
+  const pharmacistCard = page.locator('[data-testid="pharmacist"]').first();
+  await expect(pharmacistCard).toBeVisible({ timeout: 30000 });
+  await pharmacistCard.click();
+  const generateBtn = page.locator('button:has-text("Generate")').first();
+  await generateBtn.click();
+
+  // Wait for loading indicator
   const loading = page.locator('text=Generating secure QR...');
   await expect(loading).toBeVisible({ timeout: 30000 });
-  await page.waitForTimeout(2000);
   await page.screenshot({ path: 'tests/screenshots/passport-online-ai-indicator.png' });
 });
 
 test('Upgraded spinner', async ({ page }) => {
-  await page.goto(`${BASE_URL}/ai?devBypass=true`, { waitUntil: 'domcontentloaded' });
-  // Wait for the custom loading spinner to appear (may be brief)
+  // Setup health data first (same as previous test)
+  await page.goto(`${BASE_URL}/health?devBypass=true`, { waitUntil: 'domcontentloaded' });
+  await page.locator('button:has-text("Add Condition")').first().click();
+  await page.locator('input[name="conditionName"]').fill('Hypertension');
+  await page.locator('button:has-text("Save Condition")').last().click();
+  await expect(page.locator('text=Hypertension')).toBeVisible({ timeout: 30000 });
+
+  // Navigate to passport and trigger generation
+  await page.goto(`${BASE_URL}/passport?devBypass=true`, { waitUntil: 'domcontentloaded' });
+  const pharmacistCard = page.locator('[data-testid="pharmacist"]').first();
+  await expect(pharmacistCard).toBeVisible({ timeout: 30000 });
+  await pharmacistCard.click();
+  const generateBtn = page.locator('button:has-text("Generate")').first();
+  await generateBtn.click();
+
+  // Wait for custom loading spinner to appear
   const spinner = page.locator('[data-testid="loading-spinner"]');
   await expect(spinner).toBeVisible({ timeout: 30000 });
   await page.screenshot({ path: 'tests/screenshots/upgraded-spinner.png' });

@@ -21,11 +21,17 @@ export function useIDB() {
           await initMeshOrchestrator();
           if (!cancelled) setReady(true);
         } else {
-          const response = await fetch('/facilities_offline.json');
-          if (!response.ok) {
-            throw new Error(`Failed to load offline data: ${response.status}`);
+          let data: any[] = [];
+          try {
+            const response = await fetch('/facilities_offline.json');
+            if (response.ok) {
+              data = await response.json();
+            } else {
+              console.warn('Offline data fetch failed (status:', response.status, '), using empty dataset');
+            }
+          } catch (err) {
+            console.warn('Failed to fetch offline data, using empty dataset:', err);
           }
-          const data = await response.json();
 
           const facilitiesToStore = data.map(({ embedding, ...facility }) => facility);
           const vectorsToStore = data.map((item: any) => ({

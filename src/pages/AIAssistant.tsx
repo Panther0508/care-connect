@@ -142,7 +142,7 @@ export default function AIAssistant() {
   const [activeModel, setActiveModel] = useState<'online' | 'cached' | 'offline' | null>(null);
   const [quotaRemaining, setQuotaRemaining] = useState(1500);
   const [modelType, setModelType] = useState<'gemma4-31b' | 'tinyllama-1.1b'>('gemma4-31b');
-   const [chatEndRef, setChatEndRef] = useState<HTMLDivElement | null>(null);
+   const chatEndRef = useRef<HTMLDivElement>(null);
    // Chat history sidebar
    const [showSidebar, setShowSidebar] = useState(false);
    const [chatHistory, setChatHistory] = useState<any[]>([]);
@@ -809,101 +809,170 @@ const handleSpeechInput = async () => {
            </div>
          )}
 
-         <AnimatePresence mode="pop-layout">
-           {messages.map((msg, idx) => {
-             const isUser = msg.role === "user";
-             const isSystem = msg.role === "system";
-             const isAssistant = msg.role === "assistant";
-             return (
-               <motion.div key={idx} initial={{ opacity: 0, y: 15, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.2 }} className={`flex ${isUser ? "justify-end" : "justify-start"}`} data-message-role={msg.role}>
-                 <div className={`flex gap-3 max-w-full sm:max-w-[88%] ${isUser ? "flex-row-reverse" : "flex-row"}`}>
-                   {!isUser && !isSystem && (
-                     <div className="flex-shrink-0 mt-0.5">
-                       <div className="w-8 h-8 rounded-xl bg-slate-800/70 border border-slate-700/50 flex items-center justify-center">
-                         <span className="text-xs">AI</span>
-                       </div>
-                     </div>
-                   )}
-                   <div>
-                     {/* Main message bubble */}
-                     <div className={`rounded-2xl px-4 py-3 ${isUser ? "bg-gradient-to-r from-teal-500/30 to-cyan-500/20 text-slate-100 border border-teal-500/20" : isSystem ? "bg-amber-500/10 text-amber-200 border border-amber-500/20 text-sm" : "glass-card text-slate-200"}`}>
-                       {isUser ? (
-                         <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</div>
-                       ) : (
-                         <div className="text-base leading-relaxed prose prose-invert max-w-none prose-p:mb-2 prose-headings:mt-3 prose-headings:mb-1 prose-ul:my-2 prose-ol:my-2 prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-700 prose-code:text-teal-300">
-                           <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                             {msg.content}
-                           </ReactMarkdown>
-                         </div>
-                       )}
-                     </div>
-
-                     {/* Message actions for assistant messages */}
-                     {isAssistant && !isStreaming && (
-                       <div className="mt-1.5 ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <MessageActions content={msg.content} />
-                       </div>
-                     )}
-
-                     {/* Emotional state indicator for assistant */}
-                     {isAssistant && msg.emotionalState && (
-                       <div className="mt-1.5 ml-2 flex items-center gap-1.5">
-                         <span title={`Emotional state: ${msg.emotionalState}`}>{EMOJI_MAP[msg.emotionalState] || '⚪'}</span>
-                         {msg.emotionalState !== 'neutral' && (
-                           <span className="text-xs text-slate-400 capitalize">{msg.emotionalState}</span>
-                         )}
-                       </div>
-                     )}
-
-                     {/* Streaming indicator */}
-                     {isStreaming && (
-                       <div className="mt-2 ml-2 flex items-center gap-2 text-xs text-teal-400">
-                         <div className="w-2 h-2 bg-teal-400 rounded-full animate-pulse" />
-                         <span>Thinking and writing...</span>
-                       </div>
-                     )}
-
-                     {/* Reasoning panel */}
-                     {isAssistant && msg.reasoning && msg.reasoning.length > 0 && (
-                      <div className="mt-2 ml-2">
-                        <ReasoningPanel reasoningSteps={msg.reasoning} />
-                      </div>
+          <AnimatePresence mode="pop-layout">
+            {messages.map((msg, idx) => {
+              const isUser = msg.role === "user";
+              const isSystem = msg.role === "system";
+              const isAssistant = msg.role === "assistant";
+              return (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 18, scale: 0.96, filter: "blur(6px)" }}
+                  animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, scale: 0.94, filter: "blur(3px)" }}
+                  transition={{
+                    duration: 0.32,
+                    ease: [0.25, 0.46, 0.45, 0.94],
+                  }}
+                  className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+                  data-message-role={msg.role}
+                  data-message-type={isUser ? 'user' : 'bot'}
+                >
+                  <div className={`flex gap-3 max-w-full sm:max-w-[88%] ${isUser ? "flex-row-reverse" : "flex-row"}`}>
+                    {!isUser && !isSystem && (
+                      <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 20 }}
+                        className="flex-shrink-0 mt-0.5"
+                      >
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-teal-500/30 to-cyan-500/20 border border-teal-500/30 flex items-center justify-center shadow-sm">
+                          <span className="text-xs text-teal-300 font-bold">AI</span>
+                        </div>
+                      </motion.div>
                     )}
+                    <div>
+                      {/* Main message bubble */}
+                      <motion.div
+                        layout
+                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                        className={`rounded-2xl px-4 py-3 ${isUser ? "bg-gradient-to-r from-teal-500/30 to-cyan-500/20 text-slate-100 border border-teal-500/20" : isSystem ? "bg-amber-500/10 text-amber-200 border border-amber-500/20 text-sm" : "glass-card text-slate-200"}`}
+                      >
+                        {isUser ? (
+                          <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</div>
+                        ) : (
+                          <div className="text-base leading-relaxed prose prose-invert max-w-none prose-p:mb-2 prose-headings:mt-3 prose-headings:mb-1 prose-ul:my-2 prose-ol:my-2 prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-700 prose-code:text-teal-300">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {msg.content}
+                            </ReactMarkdown>
+                          </div>
+                        )}
+                      </motion.div>
 
-                    {/* Citations */}
-                    {isAssistant && msg.citations && msg.citations.length > 0 && (
-                      <div className="mt-2 ml-2 flex flex-wrap items-center gap-2">
-                        {msg.citations.map((c, i) => (
-                          <CitationBadge key={i} citation={c} index={i} />
-                        ))}
-                      </div>
-                    )}
+                      {/* Message actions for assistant messages */}
+                      {isAssistant && !isStreaming && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                          className="mt-1.5 ml-2 group"
+                        >
+                          <MessageActions content={msg.content} />
+                        </motion.div>
+                      )}
+
+                      {/* Emotional state indicator for assistant */}
+                      {isAssistant && msg.emotionalState && (
+                        <motion.div
+                          initial={{ opacity: 0, x: -8 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.15 }}
+                          className="mt-1.5 ml-2 flex items-center gap-1.5"
+                        >
+                          <span title={`Emotional state: ${msg.emotionalState}`}>{EMOJI_MAP[msg.emotionalState] || '⚪'}</span>
+                          {msg.emotionalState !== 'neutral' && (
+                            <span className="text-xs text-slate-400 capitalize">{msg.emotionalState}</span>
+                          )}
+                        </motion.div>
+                      )}
+
+                      {/* Streaming indicator */}
+                      {isStreaming && (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="mt-2 ml-2 flex items-center gap-2 text-xs text-teal-400"
+                        >
+                          <motion.div
+                            className="w-2 h-2 bg-teal-400 rounded-full"
+                            animate={{ scale: [1, 1.3, 1], opacity: [0.6, 1, 0.6] }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
+                          />
+                          <span>Thinking and writing...</span>
+                        </motion.div>
+                      )}
+
+                      {/* Reasoning panel */}
+                      {isAssistant && msg.reasoning && msg.reasoning.length > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: "auto" }}
+                          transition={{ delay: 0.25, duration: 0.3 }}
+                          className="mt-2 ml-2 overflow-hidden"
+                        >
+                          <ReasoningPanel reasoningSteps={msg.reasoning} />
+                        </motion.div>
+                      )}
+
+                      {/* Citations */}
+                      {isAssistant && msg.citations && msg.citations.length > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 6 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 }}
+                          className="mt-2 ml-2 flex flex-wrap items-center gap-2"
+                        >
+                          {msg.citations.map((c, i) => (
+                            <CitationBadge key={i} citation={c} index={i} />
+                          ))}
+                        </motion.div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
 
         {isProcessing && !isStreaming && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-xl bg-slate-800/70 border border-slate-700/50 flex items-center justify-center flex-shrink-0">
-              <div className="w-4 h-4 border border-teal-400 border-t-transparent rounded-full animate-spin" />
-            </div>
+          <motion.div
+            initial={{ opacity: 0, y: 12, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            className="flex items-start gap-3"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+              className="w-8 h-8 rounded-xl bg-slate-800/70 border border-slate-700/50 flex items-center justify-center flex-shrink-0"
+            >
+              <div className="w-4 h-4 border-2 border-teal-400 border-t-transparent rounded-full" />
+            </motion.div>
             <div className="glass-card px-4 py-3">
-              <div className="text-slate-300 text-sm space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-teal-400 rounded-full animate-pulse" />
+              <div className="text-slate-300 text-sm space-y-2">
+                <motion.div
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  className="flex items-center gap-2"
+                >
+                  <span className="w-2 h-2 bg-teal-400 rounded-full" />
                   <span>Searching your health records...</span>
-                </div>
-                <div className="flex items-center gap-2 opacity-70">
-                  <span className="w-2 h-2 bg-teal-400 rounded-full animate-pulse" style={{ animationDelay: '100ms' }} />
+                </motion.div>
+                <motion.div
+                  animate={{ opacity: [0.3, 0.7, 0.3] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+                  className="flex items-center gap-2"
+                >
+                  <span className="w-2 h-2 bg-teal-400 rounded-full" />
                   <span>Consulting medical knowledge base...</span>
-                </div>
-                <div className="flex items-center gap-2 opacity-70">
-                  <span className="w-2 h-2 bg-teal-400 rounded-full animate-pulse" style={{ animationDelay: '200ms' }} />
+                </motion.div>
+                <motion.div
+                  animate={{ opacity: [0.3, 0.7, 0.3] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
+                  className="flex items-center gap-2"
+                >
+                  <span className="w-2 h-2 bg-teal-400 rounded-full" />
                   <span>Preparing your personalized answer</span>
-                </div>
+                </motion.div>
               </div>
             </div>
           </motion.div>
@@ -911,35 +980,58 @@ const handleSpeechInput = async () => {
         <div ref={chatEndRef} />
       </div>
 
-         {messages.length > 0 && modelLoaded && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="px-4 pb-4">
-            <p className="text-xs text-slate-500 mb-2">Quick actions</p>
-            <div className="flex flex-wrap gap-2">
-              {/* Static quick prompts */}
-              {QUICK_PROMPTS.map((prompt) => (
-                <button
-                  key={prompt.label}
-                  onClick={() => handleSend(prompt.label)}
-                  disabled={isProcessing || isStreaming}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-teal-500/15 to-cyan-500/10 hover:from-teal-500/25 hover:to-cyan-500/20 border border-teal-500/40 hover:border-teal-400/60 text-slate-100 text-base font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(20,184,166,0.25)] hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  {prompt.label}
-                </button>
-              ))}
-              {/* Dynamic context-aware prompts */}
-              {dynamicQuickActions.map((prompt, idx) => (
-                <button
-                  key={`dynamic-${idx}-${prompt.handler}`}
-                  onClick={() => handleSend(getDynamicPromptText(prompt.handler))}
-                  disabled={isProcessing || isStreaming}
-                  className="px-5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-700/70 border border-slate-600/50 hover:border-teal-500/40 text-slate-200 text-base font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  {prompt.label}
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
+          {messages.length > 0 && modelLoaded && (
+            <ScrollReveal delay={100}>
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={{
+                  hidden: { opacity: 0, y: 10 },
+                  visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.05 } },
+                }}
+                className="px-4 pb-4"
+              >
+                <p className="text-xs text-slate-500 mb-2">Quick actions</p>
+                <div className="flex flex-wrap gap-2">
+                  {/* Static quick prompts */}
+                  {QUICK_PROMPTS.map((prompt) => (
+                    <motion.button
+                      key={prompt.label}
+                      variants={{
+                        hidden: { opacity: 0, y: 8, scale: 0.95 },
+                        visible: { opacity: 1, y: 0, scale: 1 },
+                      }}
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => handleSend(prompt.label)}
+                      disabled={isProcessing || isStreaming}
+                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-teal-500/15 to-cyan-500/10 hover:from-teal-500/25 hover:to-cyan-500/20 border border-teal-500/40 hover:border-teal-400/60 text-slate-100 text-base font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(20,184,166,0.25)] min-h-[44px]"
+                    >
+                      {prompt.label}
+                    </motion.button>
+                  ))}
+                  {/* Dynamic context-aware prompts */}
+                  {dynamicQuickActions.map((prompt, idx) => (
+                    <motion.button
+                      key={`dynamic-${idx}-${prompt.handler}`}
+                      variants={{
+                        hidden: { opacity: 0, y: 8, scale: 0.95 },
+                        visible: { opacity: 1, y: 0, scale: 1 },
+                      }}
+                      whileHover={{ scale: 1.05, y: -2 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => handleSend(getDynamicPromptText(prompt.handler))}
+                      disabled={isProcessing || isStreaming}
+                      className="px-5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-700/70 border border-slate-600/50 hover:border-teal-500/40 text-slate-200 text-base font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_15px_rgba(20,184,166,0.15)] min-h-[44px]"
+                    >
+                      {prompt.label}
+                    </motion.button>
+                  ))}
+                </div>
+              </motion.div>
+            </ScrollReveal>
+          )}
 
       {/* Chat history sidebar */}
       <ChatHistorySidebar
@@ -967,7 +1059,7 @@ const handleSpeechInput = async () => {
               <div className="flex items-center gap-2 text-sm">
                 <Globe className="w-4 h-4 text-teal-400" />
                 <span className="text-slate-300">Translate to:</span>
-                <select value={targetLanguage} onChange={(e) => setTargetLanguage(e.target.value)} className="bg-slate-900 text-slate-100 text-xs rounded px-2 py-1 border border-slate-700">
+                <select value={targetLanguage} onChange={(e) => setTargetLanguage(e.target.value)} className="bg-slate-900 text-slate-100 text-sm rounded px-3 py-1.5 border border-slate-700">
                   <option value="auto">Auto</option>
                   {SUPPORTED_LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
                 </select>
@@ -979,7 +1071,7 @@ const handleSpeechInput = async () => {
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">
               <div className="flex items-center gap-2">
                 <Mic className={`w-4 h-4 ${isRecording ? "text-red-400 animate-pulse" : "text-teal-400"}`} />
-                <button onClick={handleSpeechInput} className={`text-xs px-3 py-1.5 rounded-lg ${isRecording ? "bg-red-500/20 text-red-300" : "bg-teal-500/20 text-teal-300"} transition-all`}>{isRecording ? "Listening" : "Click to speak"}</button>
+                <button onClick={handleSpeechInput} className={`text-sm px-4 py-2 rounded-lg ${isRecording ? "bg-red-500/20 text-red-300" : "bg-teal-500/20 text-teal-300"} transition-all`}>{isRecording ? "Listening" : "Click to speak"}</button>
               </div>
             </motion.div>
           )}
@@ -1010,9 +1102,9 @@ const handleSpeechInput = async () => {
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">
               <div className="flex items-center gap-2 text-sm">
                 <Clock className="w-4 h-4 text-teal-400" />
-                <input value={reminderForm.medicationName} onChange={(e) => setReminderForm({ ...reminderForm, medicationName: e.target.value })} placeholder="Medication" className="flex-1 bg-slate-900 text-slate-100 text-xs rounded px-2 py-1 border border-slate-700" />
-                <input type="time" value={reminderForm.time} onChange={(e) => setReminderForm({ ...reminderForm, time: e.target.value })} className="bg-slate-900 text-slate-100 text-xs rounded px-2 py-1 border border-slate-700" />
-                <button onClick={handleQuickReminder} className="text-xs px-3 py-1.5 rounded-lg bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 transition-all">Set</button>
+                 <input value={reminderForm.medicationName} onChange={(e) => setReminderForm({ ...reminderForm, medicationName: e.target.value })} placeholder="Medication" className="flex-1 bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700" />
+                 <input type="time" value={reminderForm.time} onChange={(e) => setReminderForm({ ...reminderForm, time: e.target.value })} className="bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700" />
+                 <button onClick={handleQuickReminder} className="text-sm px-4 py-2 rounded-lg bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 transition-all">Set</button>
               </div>
             </motion.div>
           )}
@@ -1020,14 +1112,14 @@ const handleSpeechInput = async () => {
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">
               <div className="flex items-center gap-2 text-sm">
                 <Calendar className="w-4 h-4 text-teal-400" />
-                <select value={appointmentForm.specialistType} onChange={(e) => setAppointmentForm({ ...appointmentForm, specialistType: e.target.value })} className="bg-slate-900 text-slate-100 text-xs rounded px-2 py-1 border border-slate-700">
+                <select value={appointmentForm.specialistType} onChange={(e) => setAppointmentForm({ ...appointmentForm, specialistType: e.target.value })} className="bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700">
                   <option value="general">General</option>
                   <option value="cardiologist">Cardiologist</option>
                   <option value="endocrinologist">Endocrinologist</option>
                 </select>
-                <input type="date" value={appointmentForm.date} onChange={(e) => setAppointmentForm({ ...appointmentForm, date: e.target.value })} className="bg-slate-900 text-slate-100 text-xs rounded px-2 py-1 border border-slate-700" />
-                <input type="time" value={appointmentForm.time} onChange={(e) => setAppointmentForm({ ...appointmentForm, time: e.target.value })} className="bg-slate-900 text-slate-100 text-xs rounded px-2 py-1 border border-slate-700" />
-                <button onClick={handleQuickAppointment} className="text-xs px-3 py-1.5 rounded-lg bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 transition-all">Schedule</button>
+                <input type="date" value={appointmentForm.date} onChange={(e) => setAppointmentForm({ ...appointmentForm, date: e.target.value })} className="bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700" />
+                <input type="time" value={appointmentForm.time} onChange={(e) => setAppointmentForm({ ...appointmentForm, time: e.target.value })} className="bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700" />
+                <button onClick={handleQuickAppointment} className="text-sm px-4 py-2 rounded-lg bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 transition-all">Schedule</button>
               </div>
             </motion.div>
           )}

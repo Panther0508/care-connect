@@ -153,7 +153,7 @@ const AdminMFAGate: React.FC<AdminMFAGateProps> = ({ children }) => {
         <div className="w-full max-w-md space-y-6">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-white">Admin MFA Setup</h2>
-            <p className="text-muted-foreground">To access admin features, you must enable multi-factor authentication.</p>
+            <p className="text-slate-400">To access admin features, you must enable multi-factor authentication.</p>
           </div>
           
           <div className="space-y-4">
@@ -163,15 +163,15 @@ const AdminMFAGate: React.FC<AdminMFAGateProps> = ({ children }) => {
                 alt="QR Code for MFA setup" 
                 className="w-24 h-24 mx-auto rounded border border-slate-700"
               />
-              <p className="text-muted-foreground text-sm">
-                Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
-              </p>
+               <p className="text-slate-400 text-sm">
+                 Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
+               </p>
             </div>
             
-            <div className="text-center">
-              <p className="text-muted-foreground text-sm">
-                Or enter this secret key manually:
-              </p>
+             <div className="text-center">
+               <p className="text-slate-400 text-sm">
+                 Or enter this secret key manually:
+               </p>
               <p className="font-mono bg-slate-800/50 px-3 py-1 rounded text-xs">
                 JBSWY3DPEHPK3PXP
               </p>
@@ -179,7 +179,7 @@ const AdminMFAGate: React.FC<AdminMFAGateProps> = ({ children }) => {
           </div>
           
           <div className="text-center">
-            <p className="text-muted-foreground">
+            <p className="text-slate-400">
               After scanning, enter the 6-digit code from your authenticator app below:
             </p>
           </div>
@@ -211,7 +211,7 @@ const AdminMFAGate: React.FC<AdminMFAGateProps> = ({ children }) => {
         <div className="w-full max-w-md space-y-6">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-white">Verify MFA Code</h2>
-            <p className="text-muted-foreground">
+            <p className="text-slate-400">
               Enter the 6-digit code from your authenticator app to verify setup.
             </p>
           </div>
@@ -267,7 +267,7 @@ const AdminMFAGate: React.FC<AdminMFAGateProps> = ({ children }) => {
             </div>
           </div>
           
-          <div className="text-center text-muted-foreground text-sm">
+          <div className="text-center text-slate-400 text-sm">
             Need help? <span className="text-teal-400 cursor-hover">Contact support</span>
           </div>
         </div>
@@ -287,10 +287,10 @@ const AdminMFAGate: React.FC<AdminMFAGateProps> = ({ children }) => {
             </div>
           </div>
           
-          <h2 className="text-2xl font-bold text-white">MFA Enabled Successfully!</h2>
-          <p className="text-muted-foreground">
-            Your multi-factor authentication has been activated. You'll be redirected to the admin dashboard.
-          </p>
+           <h2 className="text-2xl font-bold text-white">MFA Enabled Successfully!</h2>
+           <p className="text-slate-400">
+             Your multi-factor authentication has been activated. You'll be redirected to the admin dashboard.
+           </p>
           
           {success && (
             <div className="bg-teal-900/30 border border-teal-700 px-4 py-2 rounded text-teal-400 text-sm">
@@ -298,9 +298,9 @@ const AdminMFAGate: React.FC<AdminMFAGateProps> = ({ children }) => {
             </div>
           )}
           
-          <div className="text-muted-foreground text-sm">
-            Redirecting to admin dashboard...
-          </div>
+           <div className="text-slate-400 text-sm">
+             Redirecting to admin dashboard...
+           </div>
         </div>
       </div>
     );

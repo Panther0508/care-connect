@@ -11,7 +11,7 @@ export default function PatientDashboard() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6 p-4 pb-24">
       <div>
-        <p className="text-slate-400 text-sm">{today}</p>
+        <p className="text-base text-slate-300 font-medium">{today}</p>
         <h1 className="text-2xl font-bold text-white mb-1">Your Health</h1>
       </div>
 
@@ -20,17 +20,17 @@ export default function PatientDashboard() {
         <div className="glass-card p-4 text-center">
           <Activity className="text-teal-400 mx-auto mb-2" size={24} />
           <p className="text-xl font-bold text-white">{health.conditions?.length || 0}</p>
-           <p className="text-base text-slate-400">Conditions</p>
+            <p className="text-lg text-slate-300 font-medium">Conditions</p>
         </div>
         <div className="glass-card p-4 text-center">
           <Pill className="text-emerald-400 mx-auto mb-2" size={24} />
           <p className="text-xl font-bold text-white">{health.medications?.length || 0}</p>
-           <p className="text-base text-slate-400">Medications</p>
+            <p className="text-lg text-slate-300 font-medium">Medications</p>
         </div>
         <div className="glass-card p-4 text-center">
           <Target className="text-amber-400 mx-auto mb-2" size={24} />
           <p className="text-xl font-bold text-white">{health.allergies?.length || 0}</p>
-           <p className="text-base text-slate-400">Allergies</p>
+            <p className="text-lg text-slate-300 font-medium">Allergies</p>
         </div>
       </div>
 

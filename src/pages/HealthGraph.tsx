@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import VitaAvatar from "../components/VitaAvatar";
 import MagnifyingLoader from "../components/MagnifyingLoader";
 import BarcodeScanner from "../components/BarcodeScanner";
+import ScrollReveal from "../components/ScrollReveal";
 import {
   initHealthGraph,
   addCondition,
@@ -224,47 +225,72 @@ export default function HealthGraph() {
     modalType: ModalType,
     renderItem: (item: any) => React.ReactNode
   ) => (
-    <div className="glass-card p-5 rounded-2xl">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
-          {icon}
-          {title}
-        </h2>
-        <button
-          onClick={() => openAddModal(modalType)}
-          className="flex items-center gap-1.5 px-4 py-2 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 rounded-2xl text-sm transition-all duration-200 hover:scale-103 active:scale-97 min-h-[40px]"
-        >
-          <Plus className="w-4 h-4" />
-          {addLabel}
-        </button>
-      </div>
+    <ScrollReveal delay={0}>
+      <div className="glass-card p-5 rounded-2xl">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
+            {icon}
+            {title}
+          </h2>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => openAddModal(modalType)}
+            className="flex items-center gap-1.5 px-4 py-2 bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 rounded-2xl text-sm transition-all duration-200 min-h-[40px]"
+          >
+            <Plus className="w-4 h-4" />
+            {addLabel}
+          </motion.button>
+        </div>
 
-      {items.length === 0 ? (
-        <div className="glass-card p-6 text-center rounded-2xl">
-          <p className="text-slate-400 text-sm">{emptyMessage}</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {items.map((item) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="glass-card p-4 rounded-xl relative group hover:border-teal-400/30 transition-all duration-200"
-            >
-              {renderItem(item)}
-              <button
-                onClick={() => handleDelete(modalType!, item.id)}
-                className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 hover:text-rose-400 p-1 min-h-[32px] min-w-[32px] flex items-center justify-center"
-                title="Delete"
+        {items.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="glass-card p-6 text-center rounded-2xl"
+          >
+            <p className="text-slate-400 text-sm">{emptyMessage}</p>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: { staggerChildren: 0.05, delayChildren: 0.1 },
+              },
+            }}
+            className="space-y-3"
+          >
+            {items.map((item) => (
+              <motion.div
+                key={item.id}
+                variants={{
+                  hidden: { opacity: 0, x: -12, scale: 0.97 },
+                  visible: { opacity: 1, x: 0, scale: 1 },
+                }}
+                layout
+                className="glass-card p-4 rounded-xl relative group hover:border-teal-400/30 transition-all duration-200"
               >
-                <X className="w-4 h-4" />
-              </button>
-            </motion.div>
-          ))}
-        </div>
-      )}
-    </div>
+                {renderItem(item)}
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => handleDelete(modalType!, item.id)}
+                  className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 hover:text-rose-400 p-1 min-h-[32px] min-w-[32px] flex items-center justify-center"
+                  title="Delete"
+                >
+                  <X className="w-4 h-4" />
+                </motion.button>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </div>
+    </ScrollReveal>
   );
 
   if (loading) {
@@ -278,41 +304,55 @@ export default function HealthGraph() {
     );
   }
 
-  return (
-    <div className="space-y-6 p-4 pb-24">
-      <header className="flex items-center gap-4 md:gap-6">
-        <div className="relative">
-          <VitaAvatar state="health" size={80} />
-          <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-[#0F172A]" />
-        </div>
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-100 mb-1">My Health Graph</h1>
-          <p className="text-slate-400 text-sm">
-            Your encrypted personal health record. All data stays on your device.
-          </p>
-        </div>
-      </header>
+   return (
+     <div className="space-y-6 p-4 pb-24">
+       <ScrollReveal>
+         <header className="flex items-center gap-4 md:gap-6">
+           <motion.div
+             initial={{ scale: 0.8, opacity: 0 }}
+             animate={{ scale: 1, opacity: 1 }}
+             transition={{ type: "spring", stiffness: 300, damping: 20 }}
+             className="relative"
+           >
+             <VitaAvatar state="health" size={80} />
+             <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-[#0F172A]" />
+           </motion.div>
+           <motion.div
+             initial={{ opacity: 0, x: -12 }}
+             animate={{ opacity: 1, x: 0 }}
+             transition={{ delay: 0.1 }}
+           >
+             <h1 className="text-2xl md:text-3xl font-bold text-slate-100 mb-1">My Health Graph</h1>
+             <p className="text-slate-400 text-sm">
+               Your encrypted personal health record. All data stays on your device.
+             </p>
+           </motion.div>
+         </header>
+       </ScrollReveal>
 
-      {/* OCR Section: Upload Lab Report */}
-      <section className="glass-card p-5 rounded-2xl">
-        <div className="flex items-center gap-2 mb-4">
-          <FileText className="w-5 h-5 text-teal-400" />
-          <h2 className="text-lg font-semibold text-slate-100">Explain Lab Results</h2>
-        </div>
-        <p className="text-sm text-slate-400 mb-4">
-          Upload a photo or screenshot of your lab report. We'll extract the text and provide a plain-language explanation with color-coded status.
-        </p>
+       {/* OCR Section: Upload Lab Report */}
+       <ScrollReveal delay={100}>
+         <section className="glass-card p-5 rounded-2xl">
+           <div className="flex items-center gap-2 mb-4">
+             <FileText className="w-5 h-5 text-teal-400" />
+             <h2 className="text-lg font-semibold text-slate-100">Explain Lab Results</h2>
+           </div>
+           <p className="text-sm text-slate-400 mb-4">
+             Upload a photo or screenshot of your lab report. We'll extract the text and provide a plain-language explanation with color-coded status.
+           </p>
 
-        {ocrStatus === "idle" && !ocrImage && (
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full py-8 border-2 border-dashed border-slate-600/50 rounded-2xl flex flex-col items-center gap-2 text-slate-400 hover:border-teal-500/50 hover:text-teal-300 transition-colors"
-          >
-            <Upload className="w-8 h-8" />
-            <span className="text-sm font-medium">Tap to upload lab report image</span>
-            <span className="text-xs text-slate-500">Supports JPG, PNG, PDF (via image)</span>
-          </button>
-        )}
+           {ocrStatus === "idle" && !ocrImage && (
+             <motion.button
+               whileHover={{ scale: 1.01 }}
+               whileTap={{ scale: 0.98 }}
+               onClick={() => fileInputRef.current?.click()}
+               className="w-full py-8 border-2 border-dashed border-slate-600/50 rounded-2xl flex flex-col items-center gap-2 text-slate-400 hover:border-teal-500/50 hover:text-teal-300 transition-colors"
+             >
+               <Upload className="w-8 h-8" />
+               <span className="text-sm font-medium">Tap to upload lab report image</span>
+               <span className="text-xs text-slate-500">Supports JPG, PNG, PDF (via image)</span>
+             </motion.button>
+           )}
 
         {ocrStatus === "processing" && (
           <div className="flex flex-col items-center gap-4 py-8">
@@ -373,16 +413,17 @@ export default function HealthGraph() {
           </div>
         )}
 
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-          className="hidden"
-        />
-      </section>
+         <input
+           ref={fileInputRef}
+           type="file"
+           accept="image/*"
+           onChange={handleFileChange}
+           className="hidden"
+         />
+       </section>
+       </ScrollReveal>
 
-      {renderSection(
+       {renderSection(
         "Conditions",
         <Heart className="w-5 h-5 text-rose-400" />,
         conditions,
@@ -668,27 +709,42 @@ function Modal({
   title: string;
   children: React.ReactNode;
 }) {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        className="glass-card w-full max-w-lg p-6 relative rounded-2xl"
-      >
-        <div className="flex items-center justify-between mb-5">
-          <h3 className="text-lg font-semibold text-slate-100">{title}</h3>
-          <button 
-            onClick={onClose} 
-            className="text-slate-400 hover:text-slate-200 p-2 rounded-xl hover:bg-slate-700/50 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={onClose}
+          />
+          {/* Modal */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.92, y: 16 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.92, y: 12 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="glass-card w-full max-w-lg p-6 relative rounded-2xl shadow-2xl"
           >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-        {children}
-      </motion.div>
-    </div>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-lg font-semibold text-slate-100">{title}</h3>
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 90 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={onClose}
+                className="text-slate-400 hover:text-slate-200 p-2 rounded-xl hover:bg-slate-700/50 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+              >
+                <X className="w-5 h-5" />
+              </motion.button>
+            </div>
+            {children}
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
   );
 }

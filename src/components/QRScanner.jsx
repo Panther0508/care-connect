@@ -97,6 +97,18 @@ export default function QRScanner({ onCredentialScanned, onBack }) {
           </div>
         )}
         <div id={SCANNER_ID} className={`w-full ${scanning ? 'block' : 'hidden'}`} />
+
+        {/* Scan overlay — visible scan window */}
+        {scanning && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div
+              className="w-[250px] h-[250px] border-2 border-teal-400 rounded-lg"
+              style={{
+                boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.6)',
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Hidden file input */}

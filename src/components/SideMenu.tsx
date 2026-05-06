@@ -126,7 +126,7 @@ export default function SideMenu({ open, onOpenChange }: SideMenuProps) {
                 </div>
                 <div>
                   <h2 className="text-white font-bold text-lg tracking-tight">VitaChain</h2>
-                  <p className="text-slate-400 text-xs capitalize">{role}</p>
+                   <p className="text-base text-slate-300 font-semibold capitalize">{role}</p>
                 </div>
               </div>
               <button
@@ -162,7 +162,7 @@ export default function SideMenu({ open, onOpenChange }: SideMenuProps) {
                         >
                           <Icon size={20} />
                         </div>
-                        <span className="flex-1 text-left font-medium">{item.label}</span>
+                        <span className="flex-1 text-left font-medium text-base">{item.label}</span>
                         {isActive && (
                           <div className="w-2 h-2 rounded-full bg-teal-400 shadow-[0_0_10px_rgba(20,184,166,0.6)]" />
                         )}

@@ -2,13 +2,23 @@
 // Central coordinator for Mesh Intelligence
 
 // CRITICAL: Automerge v2 requires use() to be called BEFORE any other Automerge imports or usage.
-// This MUST be the FIRST statement in this file (before importing gossipProtocol which uses Automerge at top-level)
+// We defer automerge.use() until initMeshOrchestrator() is called, after WASM init in main.tsx.
 import * as automerge from '@automerge/automerge/slim';
-try {
-  // @ts-ignore
-  automerge.use();
-} catch (e) {
-  if (!e.message?.includes('already')) console.error('Automerge init failed:', e);
+
+let automergeUsed = false;
+
+function ensureAutomergeUsed() {
+  if (!automergeUsed) {
+    try {
+      // @ts-ignore
+      automerge.use();
+      automergeUsed = true;
+    } catch (e) {
+      if (!e.message?.includes('already')) {
+        console.error('Automerge init failed:', e);
+      }
+    }
+  }
 }
 
 import {
@@ -42,6 +52,9 @@ const PERSIST_DELAY_MS = 5000;
  * Initialize mesh orchestrator
  */
 export async function initMeshOrchestrator(): Promise<void> {
+  // Ensure Automerge is initialized (call use() before any init calls)
+  ensureAutomergeUsed();
+
   // Load persisted mesh state
   const saved = await getIDBMeshState('gossip');
   if (saved) {

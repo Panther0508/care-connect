@@ -118,7 +118,7 @@ export default function CycleTrackerPage() {
             <Heart className="text-rose-400" />
             Cycle Tracker
           </h1>
-          <p className="text-slate-400 text-sm">Track your menstrual cycle</p>
+           <p className="text-slate-300 text-sm">Track your menstrual cycle</p>
         </div>
         {user?.unsafeMetadata?.gender === "male" && (
           <span className="text-xs text-amber-400 bg-amber-500/10 px-2 py-1 rounded-full">For female users</span>
@@ -129,17 +129,17 @@ export default function CycleTrackerPage() {
         <div className="grid grid-cols-3 gap-3">
           <div className="glass-card p-3 text-center accent-border-l">
             <div className="text-xl font-bold text-white">{cycleStats.averageCycle}</div>
-            <div className="text-xs text-slate-400 uppercase tracking-wide">Avg Cycle (d)</div>
+            <div className="text-base text-slate-300 uppercase tracking-wide">Avg Cycle (d)</div>
           </div>
           <div className="glass-card p-3 text-center accent-border-l">
             <div className="text-xl font-bold text-white">{cycleStats.periodLogs}</div>
-            <div className="text-xs text-slate-400 uppercase tracking-wide">Periods Logged</div>
+            <div className="text-base text-slate-300 uppercase tracking-wide">Periods Logged</div>
           </div>
           <div className="glass-card p-3 text-center accent-border-l">
-            <div className="text-xl font-bold text-rose-400 truncate">
-              {cycleStats.predictedNext ? new Date(cycleStats.predictedNext).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—"}
-            </div>
-            <div className="text-xs text-slate-400 uppercase tracking-wide">Next Period</div>
+               <div className="text-xl font-bold text-rose-400 truncate">
+                 {cycleStats.predictedNext ? new Date(cycleStats.predictedNext).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "—"}
+               </div>
+                <div className="text-base text-slate-300 uppercase tracking-wide">Next Period</div>
           </div>
         </div>
       )}
@@ -190,7 +190,7 @@ export default function CycleTrackerPage() {
         </h3>
 
         <div className="mb-4">
-          <label className="text-xs text-slate-400 mb-2 block">Flow</label>
+          <label className="text-sm text-slate-300 mb-2 block font-medium">Flow</label>
           <div className="flex gap-2 flex-wrap">
             {FLOW_LEVELS.map(level => (
               <button key={level.value} onClick={() => setFlow(level.value)}
@@ -204,7 +204,7 @@ export default function CycleTrackerPage() {
         </div>
 
         <div className="mb-4">
-          <label className="text-xs text-slate-400 mb-2 block">Pain Level (0-10)</label>
+          <label className="text-sm text-slate-300 mb-2 block font-medium">Pain Level (0-10)</label>
           <div className="flex items-center gap-2 flex-wrap">
             {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(p => (
               <motion.button key={p} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
@@ -217,7 +217,7 @@ export default function CycleTrackerPage() {
         </div>
 
         <div className="mb-4">
-          <label className="text-xs text-slate-400 mb-2 block">Mood</label>
+          <label className="text-sm text-slate-300 mb-2 block font-medium">Mood</label>
           <div className="flex gap-2 flex-wrap">
             {MOODS.map(m => (
               <motion.button key={m} whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}
@@ -230,7 +230,7 @@ export default function CycleTrackerPage() {
         </div>
 
         <div className="mb-4">
-          <label className="text-xs text-slate-400 mb-2 block">Notes (optional)</label>
+          <label className="text-sm text-slate-300 mb-2 block font-medium">Notes (optional)</label>
           <textarea value={notes} onChange={e => setNotes(e.target.value)} rows={2}
             placeholder="Any symptoms, cravings, or observations..."
             className="w-full px-3 py-2 bg-slate-900/50 border border-slate-700/30 rounded-xl text-sm text-slate-200 resize-none glass-input" />

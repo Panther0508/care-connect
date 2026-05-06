@@ -1,40 +1,31 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // ENTRY POINT — CRITICAL INITIALIZATION ORDER
 // ═══════════════════════════════════════════════════════════════════════════════
-// MUST execute in this exact order before ANY other code:
-// 1. Initialize Automerge WASM (Automerge v2.2 requirement)
-// 2. Configure HuggingFace env
-// 3. Then import React and other modules
+// 1. Initialize Automerge WASM (must complete before any Automerge usage)
+// 2. Then load the rest of the application (dynamic import)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-// Step 1: Initialize Automerge WASM FIRST — before any module that uses Automerge
-// This uses the proper v2.2+ API: initializeWasm()
 import { next as Automerge } from '@automerge/automerge/slim';
 import wasmUrl from '@automerge/automerge/automerge.wasm?url';
 
-// Initialize WASM - top-level await is supported via vite-plugin-top-level-await
-Automerge.initializeWasm(wasmUrl).catch(() => {});
+// Initialize WASM — this must complete before any Automerge API is used
+await Automerge.initializeWasm(wasmUrl).catch((err) => {
+  console.error('Failed to initialize Automerge WASM:', err);
+});
 
-// Step 2: Initialize i18next (must happen before any component uses translation)
-import './i18n';
+// WASM ready — now load the application modules
+await import('./i18n'); // i18n side-effects
 
-// Step 3: Configure HuggingFace Transformers BEFORE any transformers code runs
-// Local models should be allowed for embedding models (stored in /public/models/)
-import { env } from '@huggingface/transformers';
-env.allowLocalModels = false; // Default: disable local for remote models
-env.useBrowserCache = true;
-
-// Step 3: Standard React imports
-import { BrowserRouter } from "react-router-dom";
-import { ClerkProvider } from "@clerk/clerk-react";
-import App from "./App.tsx";
-import "./index.css";
-import { ErrorBoundary } from "./components/ErrorBoundary";
-import { StatusProvider } from "./context/StatusContext";
-import { createRoot } from "react-dom/client";
-import { initFoodDatabase } from "./services/foodDatabase";
-import { initExerciseDatabase } from "./services/exerciseDatabase";
-import { ensureAllIndexed } from "./services/advancedRAG";
+// Import React and app code dynamically after WASM init
+const { default: App } = await import('./App');
+import { createRoot } from 'react-dom/client';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { StatusProvider } from './context/StatusContext';
+import { BrowserRouter } from 'react-router-dom';
+import { ClerkProvider } from '@clerk/clerk-react';
+import { initFoodDatabase } from './services/foodDatabase';
+import { initExerciseDatabase } from './services/exerciseDatabase';
+import { ensureAllIndexed } from './services/advancedRAG';
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 

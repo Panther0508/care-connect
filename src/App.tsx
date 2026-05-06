@@ -84,13 +84,38 @@ const ImageLibrary = lazy(() => import("./pages/ImageLibrary"));
 const AvatarCustomization = lazy(() => import("./pages/AvatarCustomization"));
 const AnatomyExplorer = lazy(() => import("./pages/AnatomyExplorer"));
 
-// Page wrapper with animation
-const PageWrapper = ({ children }) => (
+// Page wrapper with premium multi-axis page transitions
+const pageVariants = {
+  initial: { opacity: 0, y: 24, x: 0, filter: "blur(8px)", scale: 0.995 },
+  animate: { opacity: 1, y: 0, x: 0, filter: "blur(0px)", scale: 1 },
+  exit: { opacity: 0, y: -18, x: 0, filter: "blur(6px)", scale: 0.995 },
+};
+
+const pageTransition = {
+  type: "tween",
+  ease: [0.25, 0.46, 0.45, 0.94],
+  duration: 0.32,
+};
+
+// Stagger variant for children inside pages
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.06,
+      delayChildren: 0.08,
+    },
+  },
+};
+
+const PageWrapper = ({ children }: { children: React.ReactNode }) => (
   <motion.div
-    initial={{ opacity: 0, y: 15, filter: "blur(4px)" }}
-    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-    exit={{ opacity: 0, y: -15, filter: "blur(4px)" }}
-    transition={{ duration: 0.25, ease: "easeOut" }}
+    variants={pageVariants}
+    initial="initial"
+    animate="animate"
+    exit="exit"
+    transition={pageTransition}
     className="w-full h-full"
   >
     {children}
@@ -140,7 +165,10 @@ const App = () => {
   const location = useLocation();
   const { isLoaded } = useAuth();
 
-  if (!isLoaded) {
+  // Only show global loading screen in production. In development, we render immediately
+  // to allow bypassing auth via devBypass and to avoid blocking when env vars are missing.
+  const isProd = import.meta.env?.PROD;
+  if (isProd && !isLoaded) {
     return <LoadingFallback message="Loading VitaChain..." showProgress />;
   }
 

@@ -20,7 +20,7 @@ export default function ClinicianDashboard() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6 p-4 pb-24">
       <div>
         <h1 className="text-2xl font-bold text-white mb-1">Clinician Dashboard</h1>
-        <p className="text-slate-400 text-sm">Your clinical overview for today</p>
+        <p className="text-base text-slate-300">Your clinical overview for today</p>
       </div>
 
       {/* Stats */}
@@ -28,12 +28,12 @@ export default function ClinicianDashboard() {
         <div className="glass-card p-4">
           <Calendar className="text-teal-400 mb-2" size={20} />
           <p className="text-2xl font-bold text-white">{todayCount}</p>
-          <p className="text-xs text-slate-400">Today's Appointments</p>
+           <p className="text-sm text-slate-300">Today's Appointments</p>
         </div>
         <div className="glass-card p-4">
           <FileText className="text-amber-400 mb-2" size={20} />
           <p className="text-2xl font-bold text-white">{pendingReports}</p>
-          <p className="text-xs text-slate-400">Pending Reports</p>
+           <p className="text-sm text-slate-300">Pending Reports</p>
         </div>
       </div>
 
@@ -50,11 +50,11 @@ export default function ClinicianDashboard() {
             <div key={apt.id} className="p-3 rounded-xl bg-slate-800/30 border border-slate-700/30 flex items-center justify-between">
               <div>
                 <p className="font-medium text-white">{apt.patient}</p>
-                <p className="text-xs text-slate-400">{apt.type}</p>
+                 <p className="text-sm text-slate-300">{apt.type}</p>
               </div>
               <div className="text-right">
                 <p className="text-sm text-slate-300">{apt.time}</p>
-                <span className={`text-xs px-2 py-0.5 rounded-full ${apt.status === "confirmed" ? "bg-emerald-500/20 text-emerald-300" : "bg-amber-500/20 text-amber-300"}`}>
+                 <span className={`text-xs px-2 py-0.5 rounded-full ${apt.status === "confirmed" ? "bg-emerald-500/20 text-emerald-300" : "bg-amber-500/20 text-amber-300"}`}>
                   {apt.status}
                 </span>
               </div>
@@ -71,7 +71,7 @@ export default function ClinicianDashboard() {
             <div key={note.id} className="p-3 rounded-xl bg-slate-800/30 border border-slate-700/30">
               <div className="flex items-center justify-between mb-1">
                 <p className="font-medium text-white text-sm">{note.patient}</p>
-                <span className="text-xs text-slate-500">{note.time}</span>
+                 <span className="text-sm text-slate-500">{note.time}</span>
               </div>
               <p className="text-slate-300 text-sm">{note.note}</p>
             </div>

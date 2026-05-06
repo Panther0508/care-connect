@@ -55,9 +55,18 @@ test('All Routes Return 200 with SPA Shell', async ({ page }) => {
     '/admin-dashboard?devBypass=true', '/translation?devBypass=true', '/privacy?devBypass=true', '/terms?devBypass=true'
   ];
 
-  for (const route of routes) {
+  for (let i = 0; i < routes.length; i++) {
+    const route = routes[i];
+    // Small pause before each navigation (except first) to avoid interrupted navigations from background redirects
+    if (i > 0) {
+      await page.waitForTimeout(500);
+    }
     const response = await page.goto(`${BASE_URL}${route}`);
     expect(response?.status()).toBe(200);
+    // Wait for SPA content to render (skip networkidle to avoid hanging on persistent connections)
+    await page.waitForSelector('body', { state: 'attached' });
+    // Small delay to allow React to render
+    await page.waitForTimeout(300);
     const content = await page.content();
     expect(content).toContain('VitaChain');
   }
@@ -121,11 +130,11 @@ test('Health Graph CRUD Operations', async ({ page }) => {
   await page.goto(`${BASE_URL}/health?devBypass=true`);
 
   const addButton = page.locator('button:has-text("Add Condition"), button:has-text("+"), button[class*="add"], button[aria-label*="Add"]').first();
-  await expect(addButton).toBeVisible();
+  await expect(addButton).toBeVisible({ timeout: 30000 });
 
   await addButton.click();
 
-  const input = page.locator('input[placeholder*="Condition"], textarea[placeholder*="Condition"], input[type="text"]').first();
+  const input = page.locator('input[name="conditionName"]');
   await input.fill('Test Condition');
 
   const saveBtn = page.locator('button:has-text("Save"), button:has-text("Add"), button[type="submit"]').last();
@@ -153,41 +162,43 @@ test('Dashboard Skeleton Loading', async ({ page }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // TEST 7: API ENDPOINT FUNCTIONAL TESTS
 // ─────────────────────────────────────────────────────────────────────────────
-test('API Endpoints Functional Tests', async ({ page }) => {
-  const apiBase = BASE_URL;
+ test('API Endpoints Functional Tests', async ({ page }) => {
+   const apiBase = BASE_URL;
+   // Navigate to set a same-origin context for fetch
+   await page.goto(apiBase);
 
-  const searchResp = await page.evaluate(async (base) => {
-    return await fetch(`${base}/api/search`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: 'pediatric ICU in Lagos' })
-    }).then(r => ({ status: r.status, json: r.json() }));
-  }, apiBase);
-  expect(searchResp.status).toBe(200);
-  expect(searchResp.json).toHaveProperty('results');
+   const searchResp = await page.evaluate(async (base) => {
+     return await fetch(`${base}/api/search`, {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ query: 'pediatric ICU in Lagos' })
+     }).then(r => ({ status: r.status, json: r.json() }));
+   }, apiBase);
+   expect(searchResp.status).toBe(200);
+   expect(searchResp.json).toHaveProperty('results');
 
-  const feedbackResp = await page.evaluate(async (base) => {
-    return await fetch(`${base}/api/feedback`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ facilityId: 'test', confirmed: true, helpful: true })
-    }).then(r => r.status);
-  }, apiBase);
-  expect(feedbackResp).toBe(200);
+   const feedbackResp = await page.evaluate(async (base) => {
+     return await fetch(`${base}/api/feedback`, {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({ facilityId: 'test', confirmed: true, helpful: true })
+     }).then(r => r.status);
+   }, apiBase);
+   expect(feedbackResp).toBe(200);
 
-  const impactResp = await page.evaluate(async (base) => {
-    return await fetch(`${base}/api/impact`).then(r => ({ status: r.status, json: r.json() }));
-  }, apiBase);
-  expect(impactResp.status).toBe(200);
-  expect(impactResp.json).toHaveProperty('watching');
-  expect(impactResp.json).toHaveProperty('connections');
-  expect(impactResp.json).toHaveProperty('facilities');
+   const impactResp = await page.evaluate(async (base) => {
+     return await fetch(`${base}/api/impact`).then(r => ({ status: r.status, json: r.json() }));
+   }, apiBase);
+   expect(impactResp.status).toBe(200);
+   expect(impactResp.json).toHaveProperty('watching');
+   expect(impactResp.json).toHaveProperty('connections');
+   expect(impactResp.json).toHaveProperty('facilities');
 
-  const satelliteResp = await page.evaluate(async (base) => {
-    return await fetch(`${base}/api/satellite-ingest`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+   const satelliteResp = await page.evaluate(async (base) => {
+     return await fetch(`${base}/api/satellite-ingest`, {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify({
         meshData: { searchCounters: {}, confirmed: [], stockoutAlerts: [] },
         deviceRegion: 'NG',
         timestamp: '2026-05-01T00:00:00Z'

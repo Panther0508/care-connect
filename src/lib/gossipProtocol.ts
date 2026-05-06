@@ -3,15 +3,8 @@
 
 import * as automerge from '@automerge/automerge/slim';
 
-// Ensure Automerge is initialized BEFORE any Automerge API is used in this module
-try {
-  // @ts-ignore
-  automerge.use();
-} catch (e) {
-  if (!e.message?.includes('already')) {
-    console.error('Automerge init failed in gossipProtocol:', e);
-  }
-}
+// NOTE: Automerge.use() is called by meshOrchestrator during initMeshOrchestrator(),
+// after WASM has been initialized in main.tsx. Do NOT call automerge.use() at top-level here.
 
 export interface StockoutAlert {
   drugName: string;
