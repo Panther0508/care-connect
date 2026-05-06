@@ -91,12 +91,6 @@ export default {
         "spin-slow": {
           to: { transform: "rotate(360deg)" },
         },
-        "ping-sm": {
-          "75%, 100%": {
-            transform: "scale(2)",
-            opacity: "0",
-          },
-        },
       },
       spacing: {
         "128": "32rem",
@@ -114,7 +108,7 @@ export default {
         "140": "140",
         "150": "150",
       },
-       fontSize: {
+      fontSize: {
         "xs": ["0.8125rem", { lineHeight: "1.125rem" }],  // 13px
         "sm": ["0.9375rem", { lineHeight: "1.25rem" }],  // 15px
         "base": ["1.0625rem", { lineHeight: "1.625rem" }],  // 17px
@@ -174,9 +168,4 @@ export default {
       },
     },
   },
-   plugins: [
-     require('tailwindcss-fluid-type')({
-       settings: ['xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl', '4xl'],
-     }),
-   ],
 } satisfies Config;
