@@ -23,11 +23,6 @@ html { scroll-behavior: smooth; }
 /* Consistent box-sizing */
 *, *::before, *::after { box-sizing: border-box; }
 
-/* Base font size for accessibility - ensures text is readable */
-html {
-  font-size: 100%; /* 16px base */
-}
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -55,11 +50,11 @@ h2 { font-size: 2.25rem; font-weight: 700; letter-spacing: -0.02em; font-family:
 h3 { font-size: 1.75rem; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif; }
 h4 { font-size: 1.375rem; font-weight: 600; font-family: 'Plus Jakarta Sans', sans-serif; }
 
-@layer base {
-  html {
-    scroll-behavior: smooth;
-    font-size: 100%; /* 16px base for consistent scaling */
-  }
+ @layer base {
+   html {
+     scroll-behavior: smooth;
+     font-size: 112.5%; /* 18px base for enhanced readability */
+   }
    body {
      @apply bg-slate-900 text-slate-100 font-sans;
      -webkit-font-smoothing: antialiased;
