@@ -1,5 +1,5 @@
 // src/services/userProfile.ts
-// User profile management with local storage (offline-only, no Clerk sync)
+// User profile management with local storage (offline-only, local storage only)
 
 import { deriveKey, encrypt, decrypt, generateSalt } from '../lib/encryption';
 import { getUserProfile as saveToIDB, storeUserProfile, getUserProfile as loadFromIDB } from '../lib/idb';
@@ -44,46 +44,4 @@ export async function saveProfile(userId: string, passphrase: string, data: Prof
 
   // Store in IndexedDB (plain for now; could encrypt sensitive fields)
   await storeUserProfile(profile);
-}
-
-export async function syncProfileToClerk(userId: string, profile: ProfileData, clerkUser: any): Promise<void> {
-  try {
-    await clerkUser.update({
-      firstName: profile.displayName.split(' ')[0],
-      lastName: profile.displayName.split(' ').slice(1).join(' ') || '',
-      publicMetadata: {
-        ...clerkUser.publicMetadata,
-        gender: profile.gender,
-        biologicalSex: profile.biologicalSex,
-        dateOfBirth: profile.dateOfBirth,
-        height: profile.height,
-        weight: profile.weight,
-        activityLevel: profile.activityLevel,
-        preferredLanguage: profile.preferredLanguage,
-        enableCycleTracking: profile.enableCycleTracking,
-      },
-    });
-  } catch (err) {
-    console.error('Failed to sync profile to Clerk:', err);
-    throw err;
-  }
-}
-
-export async function loadProfileFromClerk(clerkUser: any): Promise<ProfileData | null> {
-  const meta = clerkUser.publicMetadata;
-  if (!meta) return null;
-
-  return {
-    displayName: clerkUser.fullName || '',
-    phone: clerkUser.phoneNumbers?.[0]?.phoneNumber || '',
-    gender: meta.gender || '',
-    biologicalSex: meta.biologicalSex || '',
-    dateOfBirth: meta.dateOfBirth || null,
-    height: meta.height || null,
-    weight: meta.weight || null,
-    activityLevel: meta.activityLevel || '',
-    avatarUrl: clerkUser.imageUrl || '',
-    preferredLanguage: meta.preferredLanguage || 'en',
-    enableCycleTracking: meta.enableCycleTracking || false,
-  };
 }

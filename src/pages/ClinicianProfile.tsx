@@ -55,7 +55,7 @@ export default function ClinicianProfile() {
       if (stored) {
         setForm(stored);
       } else {
-        // Prefill from Clerk
+        // Prefill from user info
         const fullName = user.fullName || '';
         const parts = fullName.split(' ');
         setForm(prev => ({
@@ -73,7 +73,7 @@ export default function ClinicianProfile() {
     setSaving(true);
     try {
       await setItem(`clinician_profile_${user.id}`, form);
-      // Could also sync to Clerk publicMetadata if desired
+      // Could also sync to metadata if desired
       setEditing(false);
     } catch (err) {
       console.error('Failed to save profile:', err);

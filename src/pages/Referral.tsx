@@ -19,7 +19,7 @@ export default function Referral() {
       if (!isLoaded || !user) return;
 
       try {
-        // Use centralized service that handles localStorage caching & Clerk
+        // Use centralized service that handles localStorage caching
         const code = await generateOrGetReferralCode(user);
         setReferralCode(code);
 

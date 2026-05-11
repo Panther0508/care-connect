@@ -142,7 +142,7 @@ function ProfileTab() {
     load();
   }, [user]);
 
-  // Fallback: populate displayName from Clerk if empty
+  // Fallback: populate displayName from user info if empty
   useEffect(() => {
     if (isLoaded && user && !form.displayName) {
       setForm(prev => ({ ...prev, displayName: user.fullName || '' }));
@@ -216,7 +216,7 @@ function ProfileTab() {
         updatedAt: Date.now(),
       };
       await storeUserProfile(profile);
-      // Sync to Clerk publicMetadata (best-effort)
+      // Sync to local metadata (best-effort)
       try {
         await user.update({
           publicMetadata: {
@@ -233,7 +233,7 @@ function ProfileTab() {
           }
         });
       } catch (e) {
-        console.warn('Clerk publicMetadata update failed (non-critical):', e);
+        console.warn('Local metadata update failed (non-critical):', e);
       }
       showStatus('success', 'Profile Saved', 'Your profile has been updated.');
     } catch (err) {
@@ -718,14 +718,14 @@ function SecurityTab() {
         ) : (
           <div className="text-amber-400">Not enabled – required for admin accounts</div>
         )}
-        <p className="text-xs text-slate-500 mt-2">Managed through your Clerk account settings.</p>
+        <p className="text-xs text-slate-500 mt-2">Managed through your account settings.</p>
       </div>
 
       {/* Active Sessions placeholder */}
       <div className="bg-slate-800/40 rounded-xl p-4 border border-slate-700/30">
         <h4 className="font-medium text-white mb-2">Active Sessions</h4>
         <p className="text-sm text-slate-400">This device – Active now</p>
-        <p className="text-xs text-slate-500 mt-1">Other sessions can be managed through Clerk.</p>
+        <p className="text-xs text-slate-500 mt-1">Session management is local to this device.</p>
       </div>
     </div>
   );
@@ -928,7 +928,7 @@ function DeleteTab() {
   const { showStatus } = useStatus();
 
   const handleDelete = async () => {
-    // In production: call Clerk's deleteUser API and clear IndexedDB
+    // In production: clear local data and account and clear IndexedDB
     showStatus('error', 'Not Implemented', 'Account deletion will be available in a future update.');
     setConfirmDelete(false);
   };

@@ -31,17 +31,17 @@ export default function StepAdminMFA({ onNext, onBack, onMFAComplete }: StepAdmi
       const email = user.emailAddresses[0].emailAddress;
       setTotpIdentifier(email);
 
-      // Try to get real QR code from Clerk
+      // Try to get real QR code from TOTP service
       try {
-        const clerkAuth = (window as any).Clerk;
-        if (clerkAuth && typeof clerkAuth.totps?.createTotp === 'function') {
-          clerkAuth.totps.createTotp({ userId: user.id }).then((result: any) => {
+        const totpService = (window as any).TOTPService || (window as any).Clerk;
+        if (totpService && typeof totpService.totps?.createTotp === 'function') {
+          totpService.totps.createTotp({ userId: user.id }).then((result: any) => {
             if (result?.data?.totp?.[0]?.qrCode) {
               setQrCodeUrl(result.data.totp[0].qrCode);
             }
           });
         } else {
-          throw new Error('Clerk TOTP not available');
+          throw new Error('TOTP service not available');
         }
       } catch {
         // Fallback to mock QR
@@ -61,10 +61,10 @@ export default function StepAdminMFA({ onNext, onBack, onMFAComplete }: StepAdmi
     setError(null);
 
     try {
-      const clerkAuth = (window as any).Clerk;
+      const totpService = (window as any).TOTPService || (window as any).Clerk;
 
-      if (clerkAuth && typeof clerkAuth.verifyTotp === 'function') {
-        const result = await clerkAuth.verifyTotp({
+      if (totpService && typeof totpService.verifyTotp === 'function') {
+        const result = await totpService.verifyTotp({
           code: totpCode,
           totpIdentifier,
         });
@@ -73,8 +73,8 @@ export default function StepAdminMFA({ onNext, onBack, onMFAComplete }: StepAdmi
           setSuccess(true);
           setMfaStep('mfa-complete');
 
-          if (typeof clerkAuth.setSessionStrategy === 'function') {
-            await clerkAuth.setSessionStrategy({ strategy: 'totp' });
+          if (typeof totpService.setSessionStrategy === 'function') {
+            await totpService.setSessionStrategy({ strategy: 'totp' });
           }
         } else {
           throw new Error('Verification failed');

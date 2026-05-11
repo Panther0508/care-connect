@@ -13,22 +13,22 @@ const AdminMFAGate: React.FC<AdminMFAGateProps> = ({ children }) => {
   
   // Determine if user is admin
   const isAdmin = user?.publicMetadata?.role === 'admin';
-  // Check if MFA is enabled
-  const mfaEnabled = user?.twoFactorEnabled ?? false;
+  // Check if MFA is enabled (offline mode - check localStorage)
+  const mfaEnabled = localStorage.getItem('admin_mfa_enabled') === 'true';
   
    // If not admin or MFA already enabled, render children (biometric lock will be applied separately)
    if (!isAdmin || mfaEnabled) {
-     return <>{children}</>;
-   }
+    return <>{children}</>;
+  }
   
    // If not loaded yet, show loading
-   if (!isLoaded) {
-     return (
-       <div className="min-h-screen flex items-center justify-center bg-slate-900">
-         <MagnifyingLoader size={32} />
-       </div>
-     );
-   }
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-900">
+        <MagnifyingLoader size={32} />
+      </div>
+    );
+  }
   
   // MFA setup flow states
   const [mfaStep, setMfaStep] = useState<'totp-setup' | 'totp-verify' | 'mfa-complete'>('totp-setup');
@@ -46,15 +46,15 @@ const AdminMFAGate: React.FC<AdminMFAGateProps> = ({ children }) => {
          const email = user.emailAddresses[0].emailAddress;
          setTotpIdentifier(email);
 
-         // Try Clerk's native TOTP creation first
+         // Try TOTP service's native TOTP creation first
          try {
-           const clerkAuth = (window as any).Clerk;
-           if (clerkAuth && typeof clerkAuth.totps?.createTotp === 'function') {
-             const { data } = await clerkAuth.totps.createTotp({
+           const totpService = (window as any).TOTPService || (window as any).Clerk;
+           if (totpService && typeof totpService.totps?.createTotp === 'function') {
+             const { data } = await totpService.totps.createTotp({
                userId: user.id,
              });
 
-             // Use the secret and QR code from Clerk
+             // Use the secret and QR code from TOTP service
              const secret = data?.totp?.[0]?.secret;
              const qrCode = data?.totp?.[0]?.qrCode;
 
@@ -64,7 +64,7 @@ const AdminMFAGate: React.FC<AdminMFAGateProps> = ({ children }) => {
              }
            }
          } catch (error) {
-           console.warn('Failed to get Clerk TOTP provisioning, falling back to mock:', error);
+           console.warn('Failed to get TOTP provisioning, falling back to mock:', error);
          }
 
          // Fallback: Mock QR code using email as identifier
@@ -87,12 +87,11 @@ const AdminMFAGate: React.FC<AdminMFAGateProps> = ({ children }) => {
      setError(null);
 
      try {
-       // Attempt to use Clerk's native verifyTotp method via window.Clerk
-       // See: https://clerk.com/docs/references/react/verify-totp
-       const clerkAuth = (window as any).Clerk;
+       // Attempt to use TOTP service's native verifyTotp method via window
+       const totpService = (window as any).TOTPService || (window as any).Clerk;
 
-       if (clerkAuth && typeof clerkAuth.verifyTotp === 'function') {
-         const result = await clerkAuth.verifyTotp({
+       if (totpService && typeof totpService.verifyTotp === 'function') {
+         const result = await totpService.verifyTotp({
            code: totpCode,
            totpIdentifier,
          });
@@ -102,16 +101,15 @@ const AdminMFAGate: React.FC<AdminMFAGateProps> = ({ children }) => {
            setMfaStep('mfa-complete');
 
            // Set session strategy to TOTP for future auth
-           if (typeof clerkAuth.setSessionStrategy === 'function') {
-             await clerkAuth.setSessionStrategy({ strategy: 'totp' });
+           if (typeof totpService.setSessionStrategy === 'function') {
+             await totpService.setSessionStrategy({ strategy: 'totp' });
            }
          } else {
            throw new Error('Verification failed');
          }
        } else {
          // Fallback for development: mock verification
-         // In production, always use real Clerk API
-         console.warn('Clerk.verifyTotp not available - using mock verification');
+         console.warn('TOTP verify not available - using mock verification');
          await new Promise(resolve => setTimeout(resolve, 1000));
          setSuccess(true);
          setMfaStep('mfa-complete');
@@ -139,6 +137,9 @@ const AdminMFAGate: React.FC<AdminMFAGateProps> = ({ children }) => {
            );
          }
 
+         // Mark MFA as enabled in localStorage for offline mode
+         localStorage.setItem('admin_mfa_enabled', 'true');
+
          // Navigate to admin dashboard
          window.location.href = '/admin';
        }, 2000);
@@ -164,14 +165,14 @@ const AdminMFAGate: React.FC<AdminMFAGateProps> = ({ children }) => {
                 className="w-24 h-24 mx-auto rounded border border-slate-700"
               />
                <p className="text-slate-400 text-sm">
-                 Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
-               </p>
+                  Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
+                </p>
             </div>
             
-             <div className="text-center">
-               <p className="text-slate-400 text-sm">
-                 Or enter this secret key manually:
-               </p>
+            <div className="text-center">
+              <p className="text-slate-400 text-sm">
+                Or enter this secret key manually:
+              </p>
               <p className="font-mono bg-slate-800/50 px-3 py-1 rounded text-xs">
                 JBSWY3DPEHPK3PXP
               </p>

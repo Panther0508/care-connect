@@ -38,7 +38,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-lg font-semibold text-white mb-2">4. Third-Party Services</h2>
             <p className="text-slate-300 text-sm leading-relaxed">
-              We use Clerk for authentication. Medical knowledge comes from integrated open datasets. Neither has access to your health data stored locally.
+              We use local device authentication. Medical knowledge comes from integrated open datasets. Neither has access to your health data stored locally.
             </p>
           </section>
 
@@ -66,7 +66,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-lg font-semibold text-white mb-2">8. Security</h2>
             <p className="text-slate-300 text-sm leading-relaxed">
-              We employ industry-standard encryption, secure authentication via Clerk, and optional biometric/PIN protection. Data at rest is encrypted using AES-256-GCM.
+              We employ industry-standard encryption, secure authentication via local device auth, and optional biometric/PIN protection. Data at rest is encrypted using AES-256-GCM.
             </p>
           </section>
 

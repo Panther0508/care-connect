@@ -8,18 +8,18 @@ export function useRole() {
   // IMMEDIATE synchronous read from localStorage — always available
   const localStorageRole = (localStorage.getItem('user_role') as UserRole) || null;
 
-  // Clerk-based role (may be null initially)
-  const clerkRole = isLoaded && user ? getRoleFromMetadata(user.publicMetadata) : null;
+  // Metadata-based role (may be null initially)
+  const metadataRole = isLoaded && user ? getRoleFromMetadata(user.publicMetadata) : null;
 
-  // Final role: prefer Clerk if available, fall back to localStorage
-  const role = clerkRole || localStorageRole;
+  // Final role: prefer metadata if available, fall back to localStorage
+  const role = metadataRole || localStorageRole;
 
-  // Background sync: whenever Clerk loads with a role that differs from localStorage, update localStorage
+  // Background sync: whenever metadata loads with a role that differs from localStorage, update localStorage
   useEffect(() => {
-    if (isLoaded && user && clerkRole && clerkRole !== localStorageRole) {
-      localStorage.setItem('user_role', clerkRole);
+    if (isLoaded && user && metadataRole && metadataRole !== localStorageRole) {
+      localStorage.setItem('user_role', metadataRole);
     }
-  }, [isLoaded, user, clerkRole, localStorageRole]);
+  }, [isLoaded, user, metadataRole, localStorageRole]);
 
   const permissions = role ? (ROLE_PERMISSIONS[role] || []) : [];
 
@@ -48,6 +48,6 @@ export function useRole() {
     isClinician,
     isCHW,
     isPatient,
-    isLoading: false, // Always false — we always have a role from localStorage or Clerk
+    isLoading: false, // Always false — we always have a role from localStorage or metadata
   };
 }

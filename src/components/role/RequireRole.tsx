@@ -8,7 +8,7 @@ interface GuardProps {
   allowedRoles?: UserRole | UserRole[];
 }
 
-// Session verification gate — prevents access until Clerk metadata is synced, but allows localStorage role bypass
+// Session verification gate — prevents access until metadata is synced, but allows localStorage role bypass
 export function AuthSyncGate({ children }: { children: React.ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth();
   const location = useLocation();
@@ -23,13 +23,13 @@ export function AuthSyncGate({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
-  // If we have a role in localStorage, we trust onboarding is complete — bypass Clerk loading state
+  // If we have a role in localStorage, we trust onboarding is complete — bypass loading state
   const storedRole = localStorage.getItem('user_role') as UserRole | null;
   if (storedRole) {
     return <>{children}</>;
   }
 
-  // No localStorage role yet → show verifying screen while Clerk loads
+  // No localStorage role yet → show verifying screen while auth loads
   if (!isLoaded) {
     return <LoadingFallback message="Verifying your session..." />;
   }

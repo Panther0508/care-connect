@@ -40,7 +40,8 @@ export function openDB(): Promise<IDBDatabase> {
           { name: "supportTickets", keyPath: "id", autoIncrement: true },
           { name: "auditLogs", keyPath: "id", autoIncrement: true },
           { name: "evaluations", keyPath: "id", autoIncrement: true },
-          { name: "trainingRecords", keyPath: "id", autoIncrement: true }
+          { name: "trainingRecords", keyPath: "id", autoIncrement: true },
+          { name: "mentalHealthLogs", keyPath: "id", autoIncrement: true }
         ];
 
         stores.forEach(s => {

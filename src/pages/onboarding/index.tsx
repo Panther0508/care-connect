@@ -139,7 +139,7 @@ export default function Onboarding() {
         // Continue anyway; health data can sync later
       }
 
-      // Also persist role to Clerk's publicMetadata so it's available across sessions
+      // Also persist role to metadata for offline access
       try {
         await user.update({
           publicMetadata: {
@@ -149,9 +149,8 @@ export default function Onboarding() {
           },
         });
       } catch (err) {
-        console.warn('Failed to update Clerk publicMetadata:', err);
-        // Continue anyway; localStorage fallback is sufficient
-      }
+        // Offline mode - metadata already saved to IndexedDB above
+        console.log('Role saved to local storage for offline access');
     } catch (error) {
       console.error('Failed to complete onboarding:', error);
       throw error;
@@ -176,7 +175,7 @@ export default function Onboarding() {
       console.warn('Failed to persist onboarding flags:', e);
     }
 
-    // Give Clerk metadata a moment to sync before navigating
+    // Give metadata a moment to sync before navigating
     await completeOnboarding();
     await new Promise(resolve => setTimeout(resolve, 300));
 

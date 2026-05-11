@@ -35,9 +35,9 @@ export async function updateUserMetadata(
 }
 
 export async function getUserRole(user: User): Promise<string | null> {
-  // Check Clerk publicMetadata first
-  const clerkRole = user.publicMetadata?.role as string | undefined;
-  if (clerkRole) return clerkRole;
+  // Check publicMetadata first
+  const metadataRole = user.publicMetadata?.role as string | undefined;
+  if (metadataRole) return metadataRole;
 
   // Fallback to cached role from onboarding (IndexedDB)
   const cachedRole = await getItem<string>(ROLE_CACHE_KEY);

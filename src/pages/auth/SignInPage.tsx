@@ -17,7 +17,7 @@ export default function SignInPage() {
 
   const handleBiometricSuccess = () => {
     // For demo: if biometric verifies, we simulate a signed-in state
-    // In production, this would trigger Clerk's sign-in via custom token
+    // In production, this will redirect to onboarding via custom token
     setBiometricError("");
     // Optionally: navigate to dashboard or show success message
     navigate("/dashboard");

@@ -13,7 +13,7 @@ let dbInstance = null;
  * Generate or retrieve a referral code for the user
  * Implements "one person, one referral code" policy:
  *   1. Check localStorage cache first (fastest)
- *   2. Check Clerk publicMetadata
+ *   2. Check user metadata
  *   3. Generate new code only if neither exists
  */
 export const generateOrGetReferralCode = async (user) => {
@@ -33,9 +33,9 @@ export const generateOrGetReferralCode = async (user) => {
     const metadata = user.publicMetadata || {};
     let code = metadata.referralCode;
 
-    // 2. Check Clerk publicMetadata
+    // 2. Check user metadata
     if (code) {
-      // Found in Clerk — cache in localStorage for future fast lookup
+      // Found in metadata — cache in localStorage for future fast lookup
       try {
         localStorage.setItem('vitachain_referral_code', code);
       } catch (e) { /* ignore */ }
@@ -44,13 +44,7 @@ export const generateOrGetReferralCode = async (user) => {
 
     // 3. Neither source has a code — generate a new one
     code = `VITA-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
-    // Store in both Clerk and localStorage
-    await user.update({
-      publicMetadata: {
-        ...metadata,
-        referralCode: code,
-      },
-    });
+    // Store in both metadata and localStorage
     try {
       localStorage.setItem('vitachain_referral_code', code);
     } catch (e) { /* ignore */ }
