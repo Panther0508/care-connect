@@ -21,7 +21,7 @@ if (IS_TEST_MODE) {
   env.localModelPath = '/models/';
 }
 
-// Override env.fetch to convert slash-based model paths to dot-separated release asset names
+// Override env.fetch to convert model requests to GitHub Release URLs
 const ORIGINAL_FETCH = env.fetch;
 env.fetch = async (input, init) => {
   // In test mode, pass through unchanged (use local /models/)
@@ -29,40 +29,35 @@ env.fetch = async (input, init) => {
     return ORIGINAL_FETCH(input, init);
   }
 
-  // Resolve URL string from various input types
-  let urlObj;
+  // Handle different input types
+  let urlStr = '';
   if (typeof input === 'string') {
-    try {
-      urlObj = new URL(input);
-    } catch (e) {
-      // Relative path - resolve against current origin
-      try {
-        urlObj = new URL(input, window.location.origin);
-      } catch (e2) {
-        return ORIGINAL_FETCH(input, init);
-      }
-    }
+    urlStr = input;
   } else if (input instanceof Request) {
-    urlObj = new URL(input.url);
+    urlStr = input.url;
   } else if (input && typeof input === 'object' && 'url' in input) {
-    try {
-      urlObj = new URL(input.url);
-    } catch (e) {
-      return ORIGINAL_FETCH(input, init);
-    }
-  } else {
-    return ORIGINAL_FETCH(input, init);
+    urlStr = input.url;
   }
 
-  // Check if request targets a model file under /models/
-  if (urlObj.pathname.startsWith('/models/')) {
-    // Path after '/models/'
-    const relativePath = urlObj.pathname.substring('/models/'.length);
-    // GitHub Release format: Xenova/TinyLlama... -> Xenova-TinyLlama...
-    // Slahses are converted to dashes, except for the file itself which uses dots
-    const dashified = relativePath.replace(/\//g, '-');
-    const releaseUrl = `${GITHUB_RELEASE_BASE}/${dashified}${urlObj.search}`;
-    if (import.meta.env.DEBUG) console.log('[modelLoader] redirect', urlObj.pathname, '→', releaseUrl);
+  if (!urlStr) return ORIGINAL_FETCH(input, init);
+
+  // Check if this is a HuggingFace model URL or a /models/ path
+  const hfModelMatch = urlStr.match(/huggingface\.co\/(Xenova\/[A-Za-z0-9_-]+)/);
+  const localModelMatch = urlStr.match(/\/models\/(Xenova\/[A-Za-z0-9_-]+)/);
+
+  if (hfModelMatch) {
+    const modelPath = hfModelMatch[1];
+    const dashified = modelPath.replace(/\//g, '-');
+    const releaseUrl = `${GITHUB_RELEASE_BASE}/${dashified}`;
+    if (import.meta.env.DEBUG) console.log('[modelLoader] redirect HF', urlStr, '→', releaseUrl);
+    return ORIGINAL_FETCH(releaseUrl, init);
+  }
+
+  if (localModelMatch) {
+    const modelPath = localModelMatch[1];
+    const dashified = modelPath.replace(/\//g, '-');
+    const releaseUrl = `${GITHUB_RELEASE_BASE}/${dashified}`;
+    if (import.meta.env.DEBUG) console.log('[modelLoader] redirect local', urlStr, '→', releaseUrl);
     return ORIGINAL_FETCH(releaseUrl, init);
   }
 
@@ -92,37 +87,37 @@ const modelLoading = {
 
 const MODEL_CONFIGS = {
   textGeneration: {
-    model: '/models/Xenova/TinyLlama-1.1B-Chat-v1.0',
+    model: 'Xenova/TinyLlama-1.1B-Chat-v1.0',
     task: 'text-generation',
     options: { model_type: 'llama' }
   },
   embedding: {
-    model: '/models/Xenova/all-MiniLM-L6-v2',
+    model: 'Xenova/all-MiniLM-L6-v2',
     task: 'feature-extraction',
     options: {}
   },
   featureExtraction: {
-    model: '/models/Xenova/all-MiniLM-L6-v2',
+    model: 'Xenova/all-MiniLM-L6-v2',
     task: 'feature-extraction',
     options: {}
   },
   zeroShotImage: {
-    model: '/models/Xenova/clip-vit-base-patch32',
+    model: 'Xenova/clip-vit-base-patch32',
     task: 'zero-shot-image-classification',
     options: {}
   },
   speechRecognition: {
-    model: '/models/Xenova/whisper-tiny',
+    model: 'Xenova/whisper-tiny',
     task: 'automatic-speech-recognition',
     options: {}
   },
   translation: {
-    model: '/models/Xenova/nllb-200-distilled-600M',
+    model: 'Xenova/nllb-200-distilled-600M',
     task: 'translation',
     options: {}
   },
   qwen: {
-    model: '/models/Xenova/Qwen1.5-0.5B-Chat',
+    model: 'Xenova/Qwen1.5-0.5B-Chat',
     task: 'text-generation',
     options: { model_type: 'qwen' }
   }
