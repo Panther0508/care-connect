@@ -1,5 +1,5 @@
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '../../context/AuthContext';
 import { UserRole } from '../../lib/roles';
 import LoadingFallback from '../LoadingFallback';
 
@@ -95,6 +95,10 @@ export function ProtectedRoute({ children, allowedRoles }: GuardProps) {
 
   if (!storedRole) {
     return <Navigate to="/onboarding" state={{ from: location }} replace />;
+  }
+
+  if (!allowedRoles) {
+    return <>{children}</>;
   }
 
   const rolesArray = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];

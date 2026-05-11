@@ -2,35 +2,12 @@
 // Avatar Customization - Unlockable accessories
 // Uses native IndexedDB
 
+import { openDB } from '../lib/idb';
 const DB_NAME = 'vitachain-avatar';
 const DB_VERSION = 1;
 const AVATAR_STORE = 'avatarData';
 
 let dbInstance = null;
-
-const openDB = async () => {
-  if (dbInstance) return dbInstance;
-
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains(AVATAR_STORE)) {
-        db.createObjectStore(AVATAR_STORE, { keyPath: 'userId' });
-      }
-    };
-
-    request.onsuccess = (event) => {
-      dbInstance = event.target.result;
-      resolve(dbInstance);
-    };
-
-    request.onerror = (event) => {
-      reject(event.target.error);
-    };
-  });
-};
 
 // Accessory definitions
 export const ACCESSORIES = [

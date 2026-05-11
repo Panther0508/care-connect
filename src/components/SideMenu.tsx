@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Home, Sparkles, Heart, Settings, LogOut, Shield, Users, Map, FileText, Bell, AlertTriangle } from "lucide-react";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "../context/AuthContext";
 import { clearActiveUser } from "../services/healthGraph";
 import { useRole } from "../hooks/auth/useRole";
 

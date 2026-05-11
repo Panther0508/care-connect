@@ -1,7 +1,9 @@
 // public/serviceWorker.js
 // VitaChain Service Worker – offline support, AI model pre-caching, and background sync
 
-const CACHE_NAME = 'vitachain-cache-v6'; // Bumped version to force clean cache
+const CACHE_NAME = 'vitachain-cache-v7';
+const DOT_MODEL_CACHE = 'vita-dot-model-cache-v1';
+
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -28,34 +30,9 @@ const ASSETS_TO_CACHE = [
   '/images/icons/healthicons/mental_health.svg',
 ];
 
-  // HuggingFace CDN URLs for models (@huggingface/transformers v4)
-  const HF_CDN_URL = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers';
-  
-  // VitaChain AI models hosted on GitHub Releases
-  const VITACHAIN_MODELS_URL = 'https://github.com/vitachain-ai/models/releases/download/v1.0';
-  
-  // Model files we expect to cache
-  const MODEL_PATTERNS = [
-    (path) => path.includes('Xenova/TinyLlama-1.1B-Chat-v1.0'),
-    (path) => path.includes('Xenova/all-MiniLM-L6-v2'),
-    (path) => path.includes('Xenova/whisper-tiny'),
-    (path) => path.includes('facebook/nllb-200-distilled-600M'),
-    (path) => path.includes('Xenova/clip-vit-base-patch32'),
-    (path) => path.includes('@huggingface/transformers'),
-    (path) => path.includes('huggingface.co') && (path.includes('.json') || path.includes('.bin') || path.includes('.onnx') || path.includes('.msgpack')),
-    // VitaChain GitHub Releases models — user-requested host
-    (path) => path.includes('Panther0508/care-connect/releases/download'),
-    (path) => path.includes('decoder_model_merged_quantized.onnx'),
-    (path) => path.includes('tinyllama-1.1b-chat.onnx'),
-    // Gemma 4 E2B browser model (stretch goal)
-    (path) => path.includes('gemma-4-e2b-it') || path.includes('gemma-4'),
-    (path) => path.includes('MediaPipe') && path.includes('gemma')
-  ];
-
-  // Also cache embedding model specific patterns
-  const EMBEDDING_PATTERNS = [
-    (path) => path.includes('Xenova/all-MiniLM-L6-v2'),
-  ];
+// VitaChain AI models hosted on GitHub Releases (v2.1.0-buildfix)
+// Assets use dot-separated filenames (e.g. Xenova.TinyLlama-1.1B-Chat-v1.0.config.json)
+const VITACHAIN_RELEASE_BASE = 'https://github.com/Panther0508/care-connect/releases/download/v2.1.0-buildfix';
 
 // Pending reminders queue (stored in IndexedDB and memory)
 let pendingReminders = {
@@ -165,26 +142,28 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // GitHub Releases model files — cache for offline use
-  if (url.hostname.includes('github.com') && url.pathname.includes('/releases/')) {
-    event.respondWith(
-      caches.match(event.request).then(async (cached) => {
-        if (cached && cached.status === 200) return cached;
-        
-        try {
-          const networkResponse = await fetch(event.request);
-          if (networkResponse.status === 200) {
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
-          }
-          return networkResponse;
-        } catch (err) {
-          return cached || new Response('Model download failed', { status: 503 });
-        }
-      })
-    );
-    return;
-  }
+   // GitHub Releases model files — cache-first for offline use (immutable assets)
+   if (url.hostname.includes('github.com') && url.pathname.includes('/releases/')) {
+     event.respondWith(
+       caches.open(DOT_MODEL_CACHE).then(async (dotCache) => {
+         const cached = await dotCache.match(event.request);
+         if (cached && cached.status === 200) {
+           return cached; // cache-first
+         }
+
+         try {
+           const networkResponse = await fetch(event.request);
+           if (networkResponse.status === 200) {
+             dotCache.put(event.request, networkResponse.clone());
+           }
+           return networkResponse;
+         } catch (err) {
+           return cached || new Response('Model download failed', { status: 503 });
+         }
+       })
+     );
+     return;
+   }
 
   // Default: network-first with cache fallback
   event.respondWith(

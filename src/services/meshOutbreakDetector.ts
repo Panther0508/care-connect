@@ -1,5 +1,6 @@
 // src/services/meshOutbreakDetector.ts
 // Privacy-preserving outbreak detection from anonymised search counters
+// Enhanced with demo-mode simulation for competitions
 
 import { getMeshState } from '../lib/gossipProtocol';
 import type { MeshDoc } from '../lib/gossipProtocol';
@@ -9,6 +10,61 @@ const ALERT_COOLDOWN_DAYS = 7;
 const ALERT_COOLDOWN_MS = ALERT_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
 
 const ALERTS_STORAGE_KEY = 'mesh_outbreak_alerts';
+const DEMO_MODE_KEY = 'mesh_demo_mode';
+
+// Demo-mode: pre-canned plausible outbreaks for Nigeria/West Africa
+const DEMO_ALERTS: OutbreakAlert[] = [
+  {
+    id: 'demo-1',
+    term: 'malaria',
+    region: 'Lagos State',
+    count: 127,
+    firstDetectedAt: Date.now() - 5 * 86400000,
+    lastDetectedAt: Date.now(),
+    notifiedAt: Date.now(),
+    status: 'active',
+  },
+  {
+    id: 'demo-2',
+    term: 'cholera',
+    region: 'Abuja FCT',
+    count: 43,
+    firstDetectedAt: Date.now() - 3 * 86400000,
+    lastDetectedAt: Date.now() - 3600000,
+    notifiedAt: Date.now() - 86400000,
+    status: 'monitoring',
+  },
+  {
+    id: 'demo-3',
+    term: 'lassa fever',
+    region: 'Rivers State',
+    count: 28,
+    firstDetectedAt: Date.now() - 7 * 86400000,
+    lastDetectedAt: Date.now() - 2 * 86400000,
+    notifiedAt: Date.now() - 3 * 86400000,
+    status: 'active',
+  },
+];
+
+// Generate 7-day history for charts
+export function getHistoricalTrend(days: number = 7): { date: string; malaria: number; cholera: number; fever: number }[] {
+  const trend = [];
+  const now = Date.now();
+  const oneDay = 86400000;
+
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date(now - i * oneDay);
+    const dateStr = date.toISOString().split('T')[0];
+    // Plausible variations
+    trend.push({
+      date: dateStr,
+      malaria: Math.floor(80 + Math.random() * 60 + (i * 5)),
+      cholera: Math.floor(20 + Math.random() * 30),
+      fever: Math.floor(40 + Math.random() * 50),
+    });
+  }
+  return trend;
+}
 
 interface OutbreakAlert {
   id: string;
@@ -146,6 +202,15 @@ async function persistAlertToInbox(alert: OutbreakAlert): Promise<void> {
 
 // Get all outbreak alerts for display
 export async function getOutbreakAlerts(): Promise<OutbreakAlert[]> {
+  const demoEnabled = await isDemoModeEnabled();
+  if (demoEnabled) {
+    // Return demo alerts with dynamic lastDetectedAt to appear fresh
+    return DEMO_ALERTS.map(alert => ({
+      ...alert,
+      lastDetectedAt: alert.id === 'demo-1' ? Date.now() : Date.now() - Math.random() * 86400000,
+    }));
+  }
+
   try {
     const detectorState = await loadDetectorState();
     return detectorState.alerts;
@@ -153,6 +218,34 @@ export async function getOutbreakAlerts(): Promise<OutbreakAlert[]> {
     console.error('Failed to get outbreak alerts:', e);
     return [];
   }
+}
+
+// Enable demo mode (for competitions)
+export async function enableDemoMode(): Promise<void> {
+  localStorage.setItem(DEMO_MODE_KEY, 'true');
+  // Seed initial demo alerts into detector state so they persist across reloads
+  const state = await loadDetectorState();
+  // Merge demo alerts, avoiding duplicates
+  for (const demo of DEMO_ALERTS) {
+    if (!state.alerts.some(a => a.id === demo.id)) {
+      state.alerts.push({ ...demo, notifiedAt: Date.now(), firstDetectedAt: Date.now() - 86400000 });
+    }
+  }
+  await saveDetectorState(state);
+}
+
+// Disable demo mode
+export async function disableDemoMode(): Promise<void> {
+  localStorage.removeItem(DEMO_MODE_KEY);
+  // Remove demo alerts from detector state
+  const state = await loadDetectorState();
+  state.alerts = state.alerts.filter(a => !a.id.startsWith('demo-'));
+  await saveDetectorState(state);
+}
+
+// Check if demo mode is enabled
+export async function isDemoModeEnabled(): Promise<boolean> {
+  return localStorage.getItem(DEMO_MODE_KEY) === 'true';
 }
 
 // Get aggregated search counters (for CHW dashboard)

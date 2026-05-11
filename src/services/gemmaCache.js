@@ -2,25 +2,12 @@
 // Gemma 4 Response Cache Service - Phase 3
 // Stores every online Gemma response as embedding for offline retrieval
 
+import { openDB } from '../lib/idb';
 import { embedText } from './hybridAIRouter.js';
 
 const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 // Open DB connection
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open('vitachain', 12); // Unified to v12
-    request.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains('gemmaCache')) {
-        db.createObjectStore('gemmaCache', { keyPath: 'id' });
-      }
-    };
-    request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error);
-  });
-}
-
 // Cosine similarity helper
 function cosineSimilarity(a, b) {
   if (!a || !b || a.length !== b.length) return 0;

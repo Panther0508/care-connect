@@ -6,7 +6,7 @@ import { getAllFacilities } from "../lib/idb";
 import { motion, AnimatePresence } from "framer-motion";
 import VitaAvatar from "../components/VitaAvatar";
 import { useStatus } from "../hooks/useStatus";
-import { getOutbreakAlerts } from "../services/meshOutbreakDetector";
+import { getOutbreakAlerts, isDemoModeEnabled } from "../services/meshOutbreakDetector";
 import MagnifyingLoader from "../components/MagnifyingLoader";
 
 const PLACEHOLDERS = [
@@ -34,6 +34,7 @@ export default function HomePage() {
     publicFacility: false,
     availability247: false
   });
+  const [isSimulating, setIsSimulating] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -53,6 +54,15 @@ export default function HomePage() {
      loadAlerts();
      const interval = setInterval(loadAlerts, 30000);
      return () => clearInterval(interval);
+   }, []);
+
+   // Check demo mode flag
+   useEffect(() => {
+     const checkDemo = async () => {
+       const demo = await isDemoModeEnabled();
+       setIsSimulating(demo);
+     };
+     checkDemo();
    }, []);
 
    // Real-time outbreak alert listener
@@ -184,17 +194,22 @@ export default function HomePage() {
           </div>
         </motion.div>
 
-        {/* Outbreak Alerts (Requirement 7.5) */}
-        {outbreakAlerts.length > 0 && (
-          <div data-outbreak-alert className="glass-card p-4 border-l-4 border-rose-500 bg-rose-500/10">
-            <div className="flex items-center gap-2 text-rose-300 font-semibold mb-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 4v16h16V4"/>
-                <path d="M8 13h8"/>
-                <path d="M12 8v5"/>
-              </svg>
-              Active Health Alerts
-            </div>
+         {/* Outbreak Alerts (Requirement 7.5) */}
+         {outbreakAlerts.length > 0 && (
+           <div data-outbreak-alert className="glass-card p-4 border-l-4 border-rose-500 bg-rose-500/10">
+             <div className="flex items-center gap-2 text-rose-300 font-semibold mb-2">
+               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                 <path d="M4 4v16h16V4"/>
+                 <path d="M8 13h8"/>
+                 <path d="M12 8v5"/>
+               </svg>
+               Active Health Alerts
+               {isSimulating && (
+                 <span className="ml-auto px-2 py-0.5 text-[10px] font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full flex items-center gap-1">
+                   Simulated
+                 </span>
+               )}
+             </div>
             <div className="space-y-1">
               {outbreakAlerts.slice(0, 3).map((alert: any) => (
                 <div key={alert.id} className="text-sm text-slate-200">

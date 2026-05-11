@@ -7,31 +7,14 @@ const PROHIBITED_PATTERNS = [
   // Diagnostic overreach
   /\byou (?:have|suffer from|are|show)\s+(?:definite|clear|certain)\s+(?:cancer|tumor|malignant|terminal|death|fatal)\b/i,
   /\b(?:I (?:diagnose|prescribe)|this (?:is|definitely|certainly)\s+(?:cancer|tumor|malignant))\b/i,
-  // Direct prescription
-  /\byou should|I recommend|take|start|use|stop|discontinue\s+(?:your|the)\s+(?:medication|treatment|pill|drug)\b/i,
+  // Direct prescription - ensures only matched as full words to avoid false positives (e.g., "nausea")
+  /\b(?:you should|I recommend|take|start|use|stop|discontinue)\s+(?:your|the)\s+(?:medication|treatment|pill|drug)\b/i,
   // Overdose/poison
   /\b(?:overdose|poison|toxic|fatal|lethal)\s+(?:dose|amount|level)\b/i,
   // DIY dangerous treatment
   /\b(?:treat|cure|heal|eliminate|remove)\s+(?:yourself|on your own)\s+(?:cancer|tumor|disease)\b/i,
   // False certainty
   /\b(?:100%|absolutely|certainly|guaranteed|always|never)\s+(?:cure|heal|work|effective)\b/i
-];
-
-// Template leakage patterns (internal markers that must never appear in user-facing output)
-const TEMPLATE_LEAK_PATTERNS = [
-  /\*?\s*Plain language\?\s*Yes/i,
-  /\*?\s*Defined terms\?/i,
-  /\*?\s*No diagnosis\?/i,
-  /\*?\s*No prescribing\?/i,
-  /\*?\s*Citations included\?/i,
-  /\*?\s*Correct phrasing\?/i,
-  /\*?\s*Format followed\?/i,
-  /\*?\s*Checkmarks?:?\s*✓/i,
-  /^--+ SECTION \d+ --+$/i,
-  /^OUTPUT FORMAT/i,
-  /^QUALITY RULES/i,
-  /^SECTION \d+:?\s*$/i,
-  /\b(?:Self-evaluation|Quality check|Template test|Section \d+)\b/i
 ];
 
 // Crisis keyword triggers (requires immediate resource offer)
@@ -59,15 +42,6 @@ export function applyGuardrails(rawText, role = 'patient') {
    for (const pattern of PROHIBITED_PATTERNS) {
      if (pattern.test(cleaned)) {
        cleaned = cleaned.replace(pattern, '[REDACTED — consult a healthcare professional directly]');
-     }
-   }
-
-   // 3. Remove template leakage (internal evaluation markers)
-   for (const pattern of TEMPLATE_LEAK_PATTERNS) {
-     if (pattern.test(cleaned)) {
-       // If we detect template leakage, replace entire response with clean fallback
-       cleaned = 'I am temporarily unable to provide a complete response. Please try again in a moment, or contact a healthcare provider for immediate assistance.';
-       break;
      }
    }
 

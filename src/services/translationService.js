@@ -2,6 +2,7 @@
 // Offline translation service using NLLB-200 and OPUS-MT fallback
 // Supports 200+ languages with FLORES-200 code mapping
 
+import { openDB } from '../lib/idb';
 import { pipeline, env } from '@huggingface/transformers';
 
 env.allowLocalModels = true;
@@ -251,7 +252,6 @@ async function cacheTranslation(text, srcLang, tgtLang, translation) {
 }
 
 // Need IDB with translation cache store
-let idbPromise = null;
 async function openIDB() {
   if (idbPromise) return idbPromise;
   idbPromise = new Promise((resolve, reject) => {

@@ -684,19 +684,43 @@ h4 { font-size: 1.375rem; font-weight: 600; font-family: 'Plus Jakarta Sans', sa
     50% { box-shadow: 0 0 20px rgba(20, 184, 166, 0.8); }
   }
 
-  @keyframes pulse-slow {
-    0%, 100% { opacity: 0.6; transform: scale(1); }
-    50% { opacity: 0.8; transform: scale(1.05); }
+  /* Premium Glows */
+  .glow-teal { filter: drop-shadow(0 0 8px rgba(20, 184, 166, 0.4)); }
+  .glow-amber { filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.4)); }
+  
+  .text-glow-premium {
+    text-shadow: 0 0 20px rgba(20, 184, 166, 0.3), 0 0 40px rgba(20, 184, 166, 0.1);
   }
 
-  .animate-pulse-slow {
-    animation: pulse-slow 4s ease-in-out infinite;
+  /* Interaction Layers */
+  .hover-glow-teal:hover {
+    box-shadow: 0 0 30px rgba(20, 184, 166, 0.2);
+    border-color: rgba(20, 184, 166, 0.4);
   }
 
-   /* Ensure body has solid background for tests and visual depth */
-   body {
-     background-color: #0F172A !important;
-   }
+  /* Mobile-first scroll behavior */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+/* Base style resets and global overrides */
+:root {
+  --glass-blur: 24px;
+}
+
+body {
+  background-color: #0F172A;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(20, 184, 166, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.05) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(236, 72, 153, 0.05) 0px, transparent 50%);
+  background-attachment: fixed;
+}
 
 /* ==================== PREMIUM ANIMATION UTILITIES ==================== */
 

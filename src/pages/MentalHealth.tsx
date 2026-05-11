@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "../context/AuthContext";
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import {

@@ -111,5 +111,8 @@
   "ticketStatusAnswered": "answered",
   "ticketStatusClosed": "closed",
   "markAsAnswered": "Mark as answered",
-  "closeTicket": "Close"
+  "closeTicket": "Close",
+  "aiReasoning": "AI Reasoning",
+  "steps": "steps",
+  "step": "step"
 }

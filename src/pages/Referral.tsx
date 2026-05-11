@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from 'react';
 import { useStatus } from '../hooks/useStatus';
 import { Share2, Check, Gift, Users } from 'lucide-react';

@@ -2,41 +2,13 @@
 // Quest Engine - Gamification quests
 // Uses native IndexedDB
 
+import { openDB } from '../lib/idb';
 const DB_NAME = 'vitachain-quests';
 const DB_VERSION = 1;
 const QUEST_PROGRESS_STORE = 'questProgress';
 const QUEST_HISTORY_STORE = 'questHistory';
 
 let dbInstance = null;
-
-const openDB = async () => {
-  if (dbInstance) return dbInstance;
-
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains(QUEST_PROGRESS_STORE)) {
-        // Composite key [userId, questId]
-        const store = db.createObjectStore(QUEST_PROGRESS_STORE, { keyPath: 'id', autoIncrement: false });
-        store.createIndex('userId', 'userId');
-      }
-      if (!db.objectStoreNames.contains(QUEST_HISTORY_STORE)) {
-        db.createObjectStore(QUEST_HISTORY_STORE, { keyPath: 'id', autoIncrement: true });
-      }
-    };
-
-    request.onsuccess = (event) => {
-      dbInstance = event.target.result;
-      resolve(dbInstance);
-    };
-
-    request.onerror = (event) => {
-      reject(event.target.error);
-    };
-  });
-};
 
 // Quest definitions
 export const QUESTS = [

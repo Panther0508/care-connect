@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "../context/AuthContext";
+
+// Global test-mode configuration
+const IS_TEST_MODE = import.meta.env.VITE_E2E_MODE === 'true';
 import VitaAvatar from "../components/VitaAvatar";
 import CrisisPopup from "../components/CrisisPopup";
 import ReasoningPanel from "../components/ReasoningPanel";
@@ -29,11 +32,13 @@ import { getPersona, buildSystemPrompt, generateGreeting } from "../services/per
 import { scanMessage, scanAIResponse } from "../services/crisisDetector";
 import { showCrisisPopup, dismissCrisisPopup, registerCrisisHandler } from "../services/crisisManager";
 import {
-  X, Send, Mic, ArrowLeft, AlertCircle, CheckCircle, FileText, Image, Calendar, Pill, Globe, Volume2, VolumeX, Camera, Clock, Plus
+  X, Send, Mic, ArrowLeft, AlertCircle, CheckCircle, FileText, Image, Calendar, Pill, Globe, Volume2, VolumeX, Camera, Clock, Plus, Sparkles, Brain
 } from "lucide-react";
 import { getUserProfile } from "../lib/idb";
 import { useRole } from "../hooks/auth/useRole";
 import LoadingSpinner from "../components/LoadingSpinner";
+import GlassCard from "../components/GlassCard";
+
 
 // Phase 2 services
 import { translateText } from "../services/translationService";
@@ -251,41 +256,25 @@ export default function AIAssistant() {
     });
   }, []);
 
-  useEffect(() => {
+useEffect(() => {
     const loadProfileAndPersona = async () => {
       try {
-        const clerkUser = (window as any).Clerk?.user;
-        if (clerkUser) {
-          setUserProfile({
-            displayName: clerkUser.fullName || "there",
-            gender: clerkUser.publicMetadata?.gender || "",
-            dateOfBirth: clerkUser.publicMetadata?.dateOfBirth || null,
-            biologicalSex: clerkUser.publicMetadata?.biologicalSex || "",
-            countryCode: clerkUser.publicMetadata?.countryCode || "ng",
-            emergencyContact: clerkUser.publicMetadata?.emergencyContact || null,
-          });
-          const p = getPersona("patient", clerkUser.publicMetadata);
+        // Try to get user profile from IndexedDB first
+        const userId = (await getItem<string>('user_id')) || 'default-user';
+        const profile = await getUserProfile(userId);
+        if (profile) {
+          setUserProfile(profile);
+          const p = getPersona("patient", profile);
           setPersona(p);
-          const greeting = generateGreeting(p, clerkUser.fullName || "there");
+          const greeting = generateGreeting(p, profile.displayName || "there");
           setMessages([{ role: "assistant", content: greeting }]);
         } else {
-          // Try to get user profile from IndexedDB
-           const userId = (await getItem<string>('user_id')) || 'default-user';
-          const profile = await getUserProfile(userId);
-          if (profile) {
-            setUserProfile(profile);
-            const p = getPersona("patient", profile);
-            setPersona(p);
-            const greeting = generateGreeting(p, profile.displayName || "there");
-            setMessages([{ role: "assistant", content: greeting }]);
-          } else {
-            const defaultProfile = { displayName: "there" };
-            setUserProfile(defaultProfile);
-            const p = getPersona("patient", {});
-            setPersona(p);
-            const greeting = generateGreeting(p, "there");
-            setMessages([{ role: "assistant", content: greeting }]);
-          }
+          const defaultProfile = { displayName: "there" };
+          setUserProfile(defaultProfile);
+          const p = getPersona("patient", {});
+          setPersona(p);
+          const greeting = generateGreeting(p, "there");
+          setMessages([{ role: "assistant", content: greeting }]);
         }
       } catch (err) {
         console.error("Error loading profile:", err);
@@ -302,6 +291,26 @@ export default function AIAssistant() {
 
   useEffect(() => {
     const prepareModel = async () => {
+      // In test mode, force load the model immediately
+      if (IS_TEST_MODE) {
+        setLoadingModel(true);
+        try {
+          await loadModel();
+          setModelLoaded(true);
+          showStatus("success", "AI Engine Ready", "You can now use the assistant offline.");
+        } catch (err) {
+          console.error("Failed to load offline model:", err);
+          setModelLoaded(true);
+        } finally {
+          setLoadingModel(false);
+          if (loaderToastRef.current) {
+            dismissStatus(loaderToastRef.current);
+            loaderToastRef.current = null;
+          }
+        }
+        return;
+      }
+
       // Check if we're online first - if offline, skip model load
       if (typeof navigator !== 'undefined' && !navigator.onLine) {
         console.log('Offline mode - skipping TinyLlama load, will use cache/fallback on first query');
@@ -793,361 +802,200 @@ const handleSpeechInput = async () => {
           </div>
         </header>
 
-       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-         {!modelLoaded && (
-           <div className="flex flex-col items-center justify-center py-24 text-center px-6">
-             <LoadingSpinner size={96} />
-             <p className="text-amber-400 font-semibold text-lg mb-2">Loading AI Engine</p>
-             <p className="text-slate-500 text-sm">Downloading TinyLlama 1.1B — first load only.</p>
-           </div>
-         )}
-
+      <main className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scrollbar-hide">
+        {!modelLoaded && (
+          <div className="flex flex-col items-center justify-center py-24 text-center px-6">
+            <LoadingSpinner size={64} />
+            <p className="text-teal-400 font-bold text-lg mt-4">Initialising AI Engine</p>
+            <p className="text-slate-500 text-sm">Loading on-device intelligence...</p>
+          </div>
+        )}
+        
+        <div className="max-w-3xl mx-auto space-y-6">
           <AnimatePresence mode="pop-layout">
             {messages.map((msg, idx) => {
               const isUser = msg.role === "user";
-              const isSystem = msg.role === "system";
               const isAssistant = msg.role === "assistant";
               return (
                 <motion.div
                   key={idx}
-                  initial={{ opacity: 0, y: 18, scale: 0.96, filter: "blur(6px)" }}
-                  animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                  exit={{ opacity: 0, scale: 0.94, filter: "blur(3px)" }}
-                  transition={{
-                    duration: 0.32,
-                    ease: [0.25, 0.46, 0.45, 0.94],
-                  }}
+                  initial={{ opacity: 0, y: 12, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
                   className={`flex ${isUser ? "justify-end" : "justify-start"}`}
-                  data-message-role={msg.role}
-                  data-message-type={isUser ? 'user' : 'bot'}
                 >
-                  <div className={`flex gap-3 max-w-full sm:max-w-[88%] ${isUser ? "flex-row-reverse" : "flex-row"}`}>
-                    {!isUser && !isSystem && (
-                      <motion.div
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: 0.1, type: "spring", stiffness: 300, damping: 20 }}
-                        className="flex-shrink-0 mt-0.5"
-                      >
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-teal-500/30 to-cyan-500/20 border border-teal-500/30 flex items-center justify-center shadow-sm">
-                          <span className="text-xs text-teal-300 font-bold">AI</span>
+                  <div className={`max-w-[85%] md:max-w-[75%] ${isUser ? "order-1" : "order-2"}`}>
+                    <GlassCard 
+                      className={`p-4 md:p-5 ${
+                        isUser 
+                          ? "bg-teal-600/20 border-teal-500/30 text-white rounded-2xl rounded-tr-sm" 
+                          : "bg-slate-800/40 border-white/5 text-slate-100 rounded-2xl rounded-tl-sm shadow-glass-loose"
+                      }`}
+                      depth={isUser ? "tight" : "loose"}
+                      hover={false}
+                    >
+                      {isAssistant && (
+                        <div className="flex items-center gap-2 mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-teal-400/80">
+                          <Sparkles size={12} />
+                          Vita Intelligence
                         </div>
-                      </motion.div>
-                    )}
-                    <div>
-                      {/* Main message bubble */}
-                      <motion.div
-                        layout
-                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                        className={`rounded-2xl px-4 py-3 ${isUser ? "bg-gradient-to-r from-teal-500/30 to-cyan-500/20 text-slate-100 border border-teal-500/20" : isSystem ? "bg-amber-500/10 text-amber-200 border border-amber-500/20 text-sm" : "glass-card text-slate-200"}`}
-                      >
-                        {isUser ? (
-                          <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.content}</div>
-                        ) : (
-                          <div className="text-base leading-relaxed prose prose-invert max-w-none prose-p:mb-2 prose-headings:mt-3 prose-headings:mb-1 prose-ul:my-2 prose-ol:my-2 prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-700 prose-code:text-teal-300">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                              {msg.content}
-                            </ReactMarkdown>
-                          </div>
-                        )}
-                      </motion.div>
-
-                      {/* Message actions for assistant messages */}
-                      {isAssistant && !isStreaming && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 4 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.2 }}
-                          className="mt-1.5 ml-2 group"
-                        >
-                          <MessageActions content={msg.content} />
-                        </motion.div>
                       )}
-
-                      {/* Emotional state indicator for assistant */}
-                      {isAssistant && msg.emotionalState && (
-                        <motion.div
-                          initial={{ opacity: 0, x: -8 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.15 }}
-                          className="mt-1.5 ml-2 flex items-center gap-1.5"
-                        >
-                          <span title={`Emotional state: ${msg.emotionalState}`}>{EMOJI_MAP[msg.emotionalState] || '⚪'}</span>
-                          {msg.emotionalState !== 'neutral' && (
-                            <span className="text-xs text-slate-400 capitalize">{msg.emotionalState}</span>
-                          )}
-                        </motion.div>
-                      )}
-
-                       {/* Streaming indicator - only show on the latest assistant message being streamed */}
-                       {isAssistant && isStreaming && idx === messages.length - 1 && (
-                         <motion.div
-                           initial={{ opacity: 0 }}
-                           animate={{ opacity: 1 }}
-                           className="mt-2 ml-2 flex items-center gap-2 text-xs text-teal-400"
-                         >
-                           <motion.div
-                             className="w-2 h-2 bg-teal-400 rounded-full"
-                             animate={{ scale: [1, 1.3, 1], opacity: [0.6, 1, 0.6] }}
-                             transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
-                           />
-                           <span>Thinking and writing...</span>
-                         </motion.div>
-                       )}
-
-                      {/* Reasoning panel */}
+                      <div className="prose prose-invert prose-sm max-w-none prose-p:mb-2 prose-headings:mt-4 prose-headings:mb-2">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          {msg.content}
+                        </ReactMarkdown>
+                      </div>
+                      
                       {isAssistant && msg.reasoningSteps && msg.reasoningSteps.length > 0 && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          transition={{ delay: 0.25, duration: 0.3 }}
-                          className="mt-2 ml-2 overflow-hidden"
-                        >
-                          <ReasoningPanel
-                            reasoningSteps={msg.reasoningSteps}
-                            modelUsed={msg.model || 'AI Model'}
-                            responseTime={msg.responseTimeMs || 0}
-                            citations={msg.citations}
-                          />
-                        </motion.div>
+                        <div className="mt-4 pt-4 border-t border-white/5">
+                          <ReasoningPanel steps={msg.reasoningSteps} />
+                        </div>
                       )}
 
-                      {/* Citations */}
                       {isAssistant && msg.citations && msg.citations.length > 0 && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 6 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.3 }}
-                          className="mt-2 ml-2 flex flex-wrap items-center gap-2"
-                        >
-                          {msg.citations.map((c, i) => (
-                            <CitationBadge key={i} citation={c} index={i} />
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {msg.citations.map((cite, cIdx) => (
+                            <CitationBadge key={cIdx} index={cite.index} url={cite.url} title={cite.title} />
                           ))}
-                        </motion.div>
+                        </div>
                       )}
-                    </div>
+
+                      {isAssistant && (
+                        <div className="mt-3 flex items-center justify-between opacity-50 hover:opacity-100 transition-opacity">
+                           <MessageActions 
+                              content={msg.content} 
+                              onSpeak={() => handleTextToSpeech(msg.content)}
+                              isSpeaking={isSpeakingNow && lastSpokenIndex.current === idx}
+                            />
+                            {msg.responseTimeMs && (
+                              <span className="text-[10px] text-slate-500 font-mono">
+                                {(msg.responseTimeMs / 1000).toFixed(2)}s
+                              </span>
+                            )}
+                        </div>
+                      )}
+                    </GlassCard>
                   </div>
                 </motion.div>
               );
             })}
           </AnimatePresence>
 
-        {isProcessing && !isStreaming && (
-          <motion.div
-            initial={{ opacity: 0, y: 12, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            className="flex items-start gap-3"
-          >
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-              className="w-8 h-8 rounded-xl bg-slate-800/70 border border-slate-700/50 flex items-center justify-center flex-shrink-0"
-            >
-              <div className="w-4 h-4 border-2 border-teal-400 border-t-transparent rounded-full" />
-            </motion.div>
-            <div className="glass-card px-4 py-3">
-              <div className="text-slate-300 text-sm space-y-2">
-                <motion.div
-                  animate={{ opacity: [0.5, 1, 0.5] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                  className="flex items-center gap-2"
-                >
-                  <span className="w-2 h-2 bg-teal-400 rounded-full" />
-                  <span>Searching your health records...</span>
-                </motion.div>
-                <motion.div
-                  animate={{ opacity: [0.3, 0.7, 0.3] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
-                  className="flex items-center gap-2"
-                >
-                  <span className="w-2 h-2 bg-teal-400 rounded-full" />
-                  <span>Consulting medical knowledge base...</span>
-                </motion.div>
-                <motion.div
-                  animate={{ opacity: [0.3, 0.7, 0.3] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.4 }}
-                  className="flex items-center gap-2"
-                >
-                  <span className="w-2 h-2 bg-teal-400 rounded-full" />
-                  <span>Preparing your personalized answer</span>
-                </motion.div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-        <div ref={chatEndRef} />
-      </div>
-
-          {messages.length > 0 && modelLoaded && (
-            <ScrollReveal delay={100}>
-              <motion.div
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={{
-                  hidden: { opacity: 0, y: 10 },
-                  visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.05 } },
-                }}
-                className="px-4 pb-4"
-              >
-                <p className="text-xs text-slate-500 mb-2">Quick actions</p>
-                <div className="flex flex-wrap gap-2">
-                  {/* Static quick prompts */}
-                  {QUICK_PROMPTS.map((prompt) => (
-                    <motion.button
-                      key={prompt.label}
-                      variants={{
-                        hidden: { opacity: 0, y: 8, scale: 0.95 },
-                        visible: { opacity: 1, y: 0, scale: 1 },
-                      }}
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => handleSend(prompt.label)}
-                      disabled={isProcessing || isStreaming}
-                      className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-teal-500/15 to-cyan-500/10 hover:from-teal-500/25 hover:to-cyan-500/20 border border-teal-500/40 hover:border-teal-400/60 text-slate-100 text-base font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_20px_rgba(20,184,166,0.25)] min-h-[44px]"
-                    >
-                      {prompt.label}
-                    </motion.button>
-                  ))}
-                  {/* Dynamic context-aware prompts */}
-                  {dynamicQuickActions.map((prompt, idx) => (
-                    <motion.button
-                      key={`dynamic-${idx}-${prompt.handler}`}
-                      variants={{
-                        hidden: { opacity: 0, y: 8, scale: 0.95 },
-                        visible: { opacity: 1, y: 0, scale: 1 },
-                      }}
-                      whileHover={{ scale: 1.05, y: -2 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => handleSend(getDynamicPromptText(prompt.handler))}
-                      disabled={isProcessing || isStreaming}
-                      className="px-5 py-2.5 rounded-xl bg-slate-800/60 hover:bg-slate-700/70 border border-slate-600/50 hover:border-teal-500/40 text-slate-200 text-base font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-[0_0_15px_rgba(20,184,166,0.15)] min-h-[44px]"
-                    >
-                      {prompt.label}
-                    </motion.button>
-                  ))}
+          {isProcessing && !isStreaming && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
+              <GlassCard className="p-4 bg-slate-800/40 border-white/5 rounded-2xl rounded-tl-sm" hover={false}>
+                <div className="flex gap-1.5 items-center">
+                   <div className="flex gap-1">
+                      <span className="w-1.5 h-1.5 bg-teal-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                      <span className="w-1.5 h-1.5 bg-teal-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                      <span className="w-1.5 h-1.5 bg-teal-500 rounded-full animate-bounce" />
+                   </div>
+                   <span className="text-xs text-slate-500 font-medium ml-2">Consulting health graph...</span>
                 </div>
+              </GlassCard>
+            </motion.div>
+          )}
+          <div ref={chatEndRef} className="h-4" />
+        </div>
+      </main>
+
+      <footer className="sticky bottom-0 z-30 p-4 bg-slate-900/80 backdrop-blur-xl border-t border-white/5">
+        <div className="max-w-3xl mx-auto space-y-4">
+          <AnimatePresence>
+            {(showTranslation || showSpeech || showImageUpload || showReminders || showAppointments) && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: "auto" }}
+                exit={{ opacity: 0, y: 10, height: 0 }}
+                className="bg-slate-800/50 rounded-2xl border border-white/5 overflow-hidden"
+              >
+                {showTranslation && (
+                  <div className="p-3 flex items-center gap-3 border-b border-white/5">
+                    <Globe size={16} className="text-teal-400" />
+                    <select value={targetLanguage} onChange={(e) => setTargetLanguage(e.target.value)} className="flex-1 bg-transparent text-sm text-white focus:outline-none">
+                      <option value="auto">Auto Translate</option>
+                      {SUPPORTED_LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
+                    </select>
+                  </div>
+                )}
+                {showReminders && (
+                  <div className="p-3 flex items-center gap-3 border-b border-white/5">
+                    <Pill size={16} className="text-teal-400" />
+                    <input value={reminderForm.medicationName} onChange={(e) => setReminderForm({ ...reminderForm, medicationName: e.target.value })} placeholder="Medication..." className="flex-1 bg-transparent text-sm text-white focus:outline-none" />
+                    <button onClick={handleQuickReminder} className="text-xs font-bold text-teal-400 uppercase">Set</button>
+                  </div>
+                )}
               </motion.div>
-            </ScrollReveal>
-           )}
+            )}
+          </AnimatePresence>
 
-        <div className="sticky bottom-0 bg-slate-900/90 backdrop-blur-2xl border-t border-white/5 p-4">
-        <AnimatePresence>
-          {showTranslation && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">
-              <div className="flex items-center gap-2 text-sm">
-                <Globe className="w-4 h-4 text-teal-400" />
-                <span className="text-slate-300">Translate to:</span>
-                <select value={targetLanguage} onChange={(e) => setTargetLanguage(e.target.value)} className="bg-slate-900 text-slate-100 text-sm rounded px-3 py-1.5 border border-slate-700">
-                  <option value="auto">Auto</option>
-                  {SUPPORTED_LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.name}</option>)}
-                </select>
-                {isTranslating && <span className="text-amber-400 text-xs">Translating...</span>}
-              </div>
-            </motion.div>
-          )}
-          {showSpeech && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">
-              <div className="flex items-center gap-2">
-                <Mic className={`w-4 h-4 ${isRecording ? "text-red-400 animate-pulse" : "text-teal-400"}`} />
-                <button onClick={handleSpeechInput} className={`text-sm px-4 py-2 rounded-lg ${isRecording ? "bg-red-500/20 text-red-300" : "bg-teal-500/20 text-teal-300"} transition-all`}>{isRecording ? "Listening" : "Click to speak"}</button>
-              </div>
-            </motion.div>
-          )}
-          {showTTS && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">
-              <div className="flex items-center gap-2 text-sm">
-                {isSpeakingNow ? <VolumeX className="w-4 h-4 text-red-400" /> : <Volume2 className="w-4 h-4 text-teal-400" />}
-                <span className="text-slate-300">Text-to-Speech</span>
-                 <button onClick={() => {
-                   const lastAssistantMsg = [...messages].reverse().find(m => m.role === 'assistant');
-                   if (lastAssistantMsg) {
-                     handleTextToSpeech(lastAssistantMsg.content);
-                   }
-                 }} className="text-xs px-3 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 transition-all">Play last</button>
-              </div>
-            </motion.div>
-          )}
-          {showImageUpload && (
-            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">
-              <div className="flex items-center gap-2">
-                <Camera className="w-4 h-4 text-teal-400" />
-                <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handleImageUpload} className="hidden" />
-                <button onClick={() => fileInputRef.current?.click()} className={`text-xs px-3 py-1.5 rounded-lg ${isAnalyzingImage ? "bg-slate-500/20" : "bg-teal-500/20 text-teal-300"} transition-all`} disabled={isAnalyzingImage}>{isAnalyzingImage ? "Analyzing..." : "Upload Image"}</button>
-              </div>
-            </motion.div>
-          )}
-           {showReminders && (
-             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">
-               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 text-sm">
-                 <Clock className="w-4 h-4 text-teal-400 flex-shrink-0" />
-                  <input value={reminderForm.medicationName} onChange={(e) => setReminderForm({ ...reminderForm, medicationName: e.target.value })} placeholder="Medication" className="flex-1 bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700 min-w-0" />
-                  <input type="time" value={reminderForm.time} onChange={(e) => setReminderForm({ ...reminderForm, time: e.target.value })} className="bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700 flex-shrink-0" />
-                  <button onClick={handleQuickReminder} className="text-sm px-4 py-2 rounded-lg bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 transition-all flex-shrink-0">Set</button>
-               </div>
-             </motion.div>
-           )}
-           {showAppointments && (
-             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-slate-800/50 border-b border-white/5 px-4 py-3">
-               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 text-sm">
-                 <Calendar className="w-4 h-4 text-teal-400 flex-shrink-0" />
-                 <select value={appointmentForm.specialistType} onChange={(e) => setAppointmentForm({ ...appointmentForm, specialistType: e.target.value })} className="bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700 flex-shrink-0">
-                   <option value="general">General</option>
-                   <option value="cardiologist">Cardiologist</option>
-                   <option value="endocrinologist">Endocrinologist</option>
-                 </select>
-                 <input type="date" value={appointmentForm.date} onChange={(e) => setAppointmentForm({ ...appointmentForm, date: e.target.value })} className="bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700 flex-shrink-0" />
-                 <input type="time" value={appointmentForm.time} onChange={(e) => setAppointmentForm({ ...appointmentForm, time: e.target.value })} className="bg-slate-900 text-slate-100 text-sm rounded px-3 py-2 border border-slate-700 flex-shrink-0" />
-                 <button onClick={handleQuickAppointment} className="text-sm px-4 py-2 rounded-lg bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 transition-all flex-shrink-0">Schedule</button>
-               </div>
-             </motion.div>
-           )}
-        </AnimatePresence>
-
-        <form onSubmit={(e) => { e.preventDefault(); handleSend(currentInput); }} className="flex items-end gap-3">
-          <div className="flex-1 relative group">
-            <textarea
-              value={currentInput}
-              onChange={(e) => setCurrentInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(currentInput); } }}
-              placeholder="Ask me anything about your health records..."
-              disabled={isProcessing || !modelLoaded}
-              rows={1}
-              className="glass-input w-full py-3 pr-12 text-base resize-none min-h-[48px] max-h-32"
-            />
-            <button type="button" onClick={() => handleSend(currentInput)} disabled={isProcessing || !currentInput.trim() || !modelLoaded} className="absolute right-2 bottom-2 p-1.5 rounded-lg bg-teal-500/20 hover:bg-teal-500/30 text-teal-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-              <Send size={16} />
-            </button>
+          <div className="flex flex-wrap gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {[...QUICK_PROMPTS, ...dynamicQuickActions].map((qp, i) => (
+              <button
+                key={i}
+                onClick={() => handleSend('handler' in qp ? getDynamicPromptText(qp.handler) : qp.label)}
+                className="whitespace-nowrap px-4 py-2 bg-slate-800/50 hover:bg-teal-500/10 border border-white/5 hover:border-teal-500/30 rounded-full text-xs font-bold text-slate-400 hover:text-teal-400 transition-all"
+              >
+                {qp.label}
+              </button>
+            ))}
           </div>
-          <div className="flex gap-1 relative">
-            <button
-              type="button"
-              onClick={() => setShowToolMenu(!showToolMenu)}
-              className={`p-2.5 rounded-xl ${showToolMenu ? "bg-teal-500/30 text-teal-300" : "bg-slate-800/70 text-slate-400 hover:text-slate-300"} transition-colors`}
-              title="More tools"
-            >
-              <Plus size={18} />
-            </button>
-             {showToolMenu && (
-               <motion.div
-                 initial={{ opacity: 0, scale: 0.9, y: 10 }}
-                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                 className="absolute bottom-full left-0 right-0 mb-2 mx-auto w-48 bg-slate-800/90 backdrop-blur-xl border border-slate-700/50 rounded-xl shadow-lg z-50 overflow-hidden sm:w-48 sm:right-0 sm:left-auto"
-               >
-                 <div className="flex flex-col py-2">
-                   <button type="button" onClick={() => { setShowTranslation(!showTranslation); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Translate"><Globe size={18} /></button>
-                   <button type="button" onClick={() => { setShowSpeech(!showSpeech); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Voice input"><Mic size={18} /></button>
-                   <button type="button" onClick={() => { setShowImageUpload(!showImageUpload); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Upload image"><Camera size={18} /></button>
-                   <button type="button" onClick={() => { setShowReminders(!showReminders); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Medication reminder"><Pill size={18} /></button>
-                   <button type="button" onClick={() => { setShowAppointments(!showAppointments); setShowToolMenu(false); }} className="p-2.5 hover:bg-slate-700/50 text-slate-300 flex justify-center" title="Schedule appointment"><Calendar size={18} /></button>
-                 </div>
-               </motion.div>
-             )}
-          </div>
-        </form>
-        <p className="text-sm text-slate-500 text-center mt-3 leading-relaxed">Vita provides general health information and does not substitute professional medical advice.</p>
-      </div>
 
+          <div className="relative group">
+            <div className="absolute inset-0 bg-teal-500/5 blur-2xl group-focus-within:bg-teal-500/10 transition-all rounded-full" />
+            <GlassCard className="relative flex items-center gap-2 p-2 pl-4 rounded-2xl border-white/10" depth="loose">
+              <input
+                type="text"
+                value={currentInput}
+                onChange={(e) => setCurrentInput(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleSend(currentInput)}
+                placeholder="Ask Vita anything..."
+                className="flex-1 bg-transparent border-none focus:ring-0 text-slate-100 placeholder-slate-500 text-sm font-medium py-2"
+              />
+              <div className="flex items-center gap-1">
+                <button 
+                  onClick={() => setShowToolMenu(!showToolMenu)}
+                  className={`p-2 rounded-xl transition-all ${showToolMenu ? "bg-teal-500/20 text-teal-400" : "hover:bg-white/5 text-slate-500 hover:text-slate-300"}`}
+                >
+                  <Plus size={20} />
+                </button>
+                <button
+                  onClick={() => handleSend(currentInput)}
+                  disabled={!currentInput.trim() || isProcessing}
+                  className="p-2.5 bg-teal-600 hover:bg-teal-500 disabled:opacity-50 disabled:bg-slate-800 text-white rounded-xl shadow-lg shadow-teal-900/20 transition-all"
+                >
+                  <Send size={20} />
+                </button>
+              </div>
+
+              <AnimatePresence>
+                {showToolMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                    animate={{ opacity: 1, scale: 1, y: -20 }}
+                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                    className="absolute bottom-full right-0 mb-4 w-48 bg-slate-800/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-50"
+                  >
+                    <div className="flex flex-col p-1">
+                      <button onClick={() => { setShowImageUpload(true); setShowToolMenu(false); }} className="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-sm text-slate-300 transition-colors">
+                        <Camera size={18} className="text-teal-400" />
+                        Analyze Skin
+                      </button>
+                      <button onClick={() => { setShowReminders(true); setShowToolMenu(false); }} className="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-sm text-slate-300 transition-colors">
+                        <Pill size={18} className="text-teal-400" />
+                        Set Reminder
+                      </button>
+                      <button onClick={() => { setShowTranslation(true); setShowToolMenu(false); }} className="flex items-center gap-3 p-3 hover:bg-white/5 rounded-xl text-sm text-slate-300 transition-colors">
+                        <Globe size={18} className="text-teal-400" />
+                        Translate
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </GlassCard>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

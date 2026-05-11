@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { biometricVerify, isBiometricAvailable } from '@/lib/biometric/biometricAuth';
 import { adminAuditLogger } from '@/services/adminAuditLogger';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@/context/AuthContext';
 import MagnifyingLoader from './MagnifyingLoader';
 
 interface AdminBiometricLockProps {
@@ -68,7 +68,7 @@ export default function AdminBiometricLock({
               'biometric.success',
               'admin_access',
               {},
-              user.publicMetadata?.did
+              (user.publicMetadata as any)?.did
             );
           }
         } else {
@@ -79,7 +79,7 @@ export default function AdminBiometricLock({
               'biometric.failed',
               'admin_access',
               { reason: result.error || 'verification_failed' },
-              user.publicMetadata?.did
+              (user.publicMetadata as any)?.did
             );
           }
           redirectRef.current = true;
@@ -94,7 +94,7 @@ export default function AdminBiometricLock({
           'biometric.error',
           'admin_access',
           { error: error instanceof Error ? error.message : 'unknown' },
-          user.publicMetadata?.did
+          (user.publicMetadata as any)?.did
         );
       }
       redirectRef.current = true;
@@ -111,12 +111,12 @@ export default function AdminBiometricLock({
       setBiometricVerified(true);
       setLastActivity(Date.now());
       if (user?.id) {
-        adminAuditLogger.log(user.id, 'biometric.success', 'admin_access_fallback', {}, user.publicMetadata?.did);
+        adminAuditLogger.log(user.id, 'biometric.success', 'admin_access_fallback', {}, (user.publicMetadata as any)?.did);
       }
     } else {
       setPinInput('');
       if (user?.id) {
-        adminAuditLogger.log(user.id, 'biometric.failed', 'admin_access_fallback', { reason: 'invalid_pin' }, user.publicMetadata?.did);
+        adminAuditLogger.log(user.id, 'biometric.failed', 'admin_access_fallback', { reason: 'invalid_pin' }, (user.publicMetadata as any)?.did);
       }
       redirectRef.current = true;
       window.location.href = '/dashboard';
@@ -314,7 +314,7 @@ export default function AdminBiometricLock({
                       'session.extended',
                       'admin_session',
                       {},
-                      user.publicMetadata?.did
+                      (user.publicMetadata as any)?.did
                     );
                   }
                 }}

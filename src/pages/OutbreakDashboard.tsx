@@ -9,8 +9,8 @@ import type { Facility } from "../services/aiSearch";
 import { MapContainer, TileLayer, CircleMarker, Popup, HeatmapLayer } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { useStatus } from "../hooks/useStatus";
-import { getOutbreakAlerts, OUTBREAK_THRESHOLD, type OutbreakAlert } from "../services/meshOutbreakDetector";
-import { AlertTriangle, Activity, MapPin, Clock, CheckCircle } from "lucide-react";
+import { getOutbreakAlerts, OUTBREAK_THRESHOLD, enableDemoMode, isDemoModeEnabled } from "../services/meshOutbreakDetector";
+import { AlertTriangle, Activity, MapPin, Clock, CheckCircle, FlaskConical } from "lucide-react";
 
 export default function OutbreakDashboard() {
   const { showStatus } = useStatus();
@@ -41,8 +41,31 @@ export default function OutbreakDashboard() {
     };
 
     refresh();
-    const interval = setInterval(refresh, 10000);
+    // Refresh every 30 seconds for demo smoothness
+    const interval = setInterval(refresh, 30000);
     return () => clearInterval(interval);
+  }, []);
+
+  // Auto-enable demo mode on first mount if no real mesh activity exists
+  useEffect(() => {
+    const maybeEnableDemo = async () => {
+      const demoAlready = await isDemoModeEnabled();
+      if (demoAlready) {
+        setIsSimulating(true);
+        return;
+      }
+      // If no search counters at all, seed demo mode for the competition demo
+      if (Object.keys(meshData.searchCounters).length === 0 && outbreakAlerts.length === 0) {
+        await enableDemoMode();
+        setIsSimulating(true);
+        // Reload to show demo alerts
+        const alerts = await getOutbreakAlerts();
+        setOutbreakAlerts(alerts);
+        showStatus?.('info', 'Demo Mode Active', 'Showing simulated outbreak data');
+      }
+    };
+    maybeEnableDemo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadFacilities = async () => {
@@ -108,7 +131,15 @@ export default function OutbreakDashboard() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-3xl font-bold text-slate-100 mb-2">Outbreak Intelligence</h1>
+        <div className="flex items-center gap-2 mb-2">
+          <h1 className="text-3xl font-bold text-slate-100">Outbreak Intelligence</h1>
+          {isSimulating && (
+            <span className="px-2 py-0.5 text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-full flex items-center gap-1">
+              <FlaskConical size={12} />
+              Simulated
+            </span>
+          )}
+        </div>
         <p className="text-slate-400 text-sm">
           Anonymised community signals. No personal data leaves your device.
         </p>
@@ -327,8 +358,14 @@ export default function OutbreakDashboard() {
         </section>
       )}
 
-      <footer className="text-center text-xs text-slate-600 py-4">
-        All data is aggregated and anonymised. No personal information is transmitted.
+      <footer className="text-center text-xs text-slate-600 py-4 space-y-1">
+        <p>All data is aggregated and anonymised. No personal information is transmitted.</p>
+        {isSimulating && (
+          <p className="text-amber-500/70">
+            <FlaskConical size={10} className="inline mr-1" />
+            Real-time satellite sync is simulated. Production integration with Starlink Direct-to-Cell is planned.
+          </p>
+        )}
       </footer>
     </div>
   );

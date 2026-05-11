@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "./context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { lazy, Suspense } from "react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -558,27 +558,9 @@ const App = () => {
                 </ProtectedRoute>
               </AuthSyncGate>
             } />
-            <Route path="/terms" element={
-              <AuthSyncGate>
-                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
-                  <PageWrapper><TermsOfService /></PageWrapper>
-                </ProtectedRoute>
-              </AuthSyncGate>
-            } />
-            <Route path="/privacy" element={
-              <AuthSyncGate>
-                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
-                  <PageWrapper><PrivacyPolicy /></PageWrapper>
-                </ProtectedRoute>
-              </AuthSyncGate>
-            } />
-            <Route path="/contact" element={
-              <AuthSyncGate>
-                <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
-                  <PageWrapper><ContactUs /></PageWrapper>
-                </ProtectedRoute>
-              </AuthSyncGate>
-            } />
+            <Route path="/terms" element={<PageWrapper><TermsOfService /></PageWrapper>} />
+            <Route path="/privacy" element={<PageWrapper><PrivacyPolicy /></PageWrapper>} />
+            <Route path="/contact" element={<PageWrapper><ContactUs /></PageWrapper>} />
             <Route path="/language" element={
               <AuthSyncGate>
                 <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
@@ -597,60 +579,37 @@ const App = () => {
             <Route path="/admin" element={
               <AuthSyncGate>
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <Suspense fallback={<LoadingFallback />}>
-                    <AdminMFAGate>
-                      <AdminBiometricLock>
-                        <PageWrapper><AdminDashboard /></PageWrapper>
-                      </AdminBiometricLock>
-                    </AdminMFAGate>
-                  </Suspense>
+                  <AdminMFAGate><AdminBiometricLock><PageWrapper><AdminDashboard /></PageWrapper></AdminBiometricLock></AdminMFAGate>
                 </ProtectedRoute>
               </AuthSyncGate>
             } />
             <Route path="/audit-log" element={
               <AuthSyncGate>
                 <ProtectedRoute allowedRoles={['admin']}>
-                  <Suspense fallback={<LoadingFallback />}>
-                    <AdminMFAGate>
-                      <AdminBiometricLock>
-                        <PageWrapper><AuditLog /></PageWrapper>
-                      </AdminBiometricLock>
-                    </AdminMFAGate>
-                  </Suspense>
+                  <AdminMFAGate><AdminBiometricLock><PageWrapper><AuditLog /></PageWrapper></AdminBiometricLock></AdminMFAGate>
                 </ProtectedRoute>
               </AuthSyncGate>
              } />
               <Route path="/training" element={
                 <AuthSyncGate>
                   <ProtectedRoute allowedRoles={['admin']}>
-                    <Suspense fallback={<LoadingFallback />}>
-                      <AdminMFAGate>
-                        <AdminBiometricLock>
-                          <PageWrapper><TrainingDashboard /></PageWrapper>
-                        </AdminBiometricLock>
-                      </AdminMFAGate>
-                    </Suspense>
+                    <AdminMFAGate><AdminBiometricLock><PageWrapper><TrainingDashboard /></PageWrapper></AdminBiometricLock></AdminMFAGate>
                   </ProtectedRoute>
                 </AuthSyncGate>
               } />
               <Route path="/evaluation" element={
                 <AuthSyncGate>
                   <ProtectedRoute allowedRoles={['admin']}>
-                    <Suspense fallback={<LoadingFallback />}>
-                      <AdminMFAGate>
-                        <AdminBiometricLock>
-                          <PageWrapper><EvaluationDashboard /></PageWrapper>
-                        </AdminBiometricLock>
-                      </AdminMFAGate>
-                    </Suspense>
+                    <AdminMFAGate><AdminBiometricLock><PageWrapper><EvaluationDashboard /></PageWrapper></AdminBiometricLock></AdminMFAGate>
                   </ProtectedRoute>
                 </AuthSyncGate>
               } />
              
                {/* Fallback */}
                <Route path="*" element={<NotFound />} />
-           </Routes></ErrorBoundary>
-        </AnimatePresence>
+           </Routes>
+           </ErrorBoundary>
+         </AnimatePresence>
       </Suspense>
       <SpeedInsights />
     </AppLayout>
@@ -658,3 +617,5 @@ const App = () => {
 };
 
 export default App;
+
+

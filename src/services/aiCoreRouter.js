@@ -1,10 +1,10 @@
 // src/services/aiCoreRouter.js
-// VITACHAIN AI CORE ROUTER GÇö SINGLE ENTRY POINT FOR ALL AI CALLS
-// Refactored from hybridAIRouter.js GÇö now THE ONLY canonical AI gateway
+// VITACHAIN AI CORE ROUTER GÃ‡Ã¶ SINGLE ENTRY POINT FOR ALL AI CALLS
+// Refactored from hybridAIRouter.js GÃ‡Ã¶ now THE ONLY canonical AI gateway
 // Responsibilities: routing, fallback ladder, caching, safety, evaluation, logging
 
 import { pipeline, env } from '@huggingface/transformers';
-import { getEmbeddingModel, getTextGenerator, getTokenizer } from './modelLoader.js';
+import { getEmbeddingModel, getTextGenerator, getTokenizer, getTextGeneratorForRole } from './modelLoader.js';
 import { searchWeb } from './webSearchService';
 import { searchPubMed } from './pubmedSearch';
 import { searchClinicalTrials } from './clinicalTrialsSearch';
@@ -19,25 +19,22 @@ import { logInteraction } from './selfTrainingEngine';
 import { applyGuardrails } from './safetyGuardrails.js';
 import { evaluateResponse } from './evaluationEngine.js';
 
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
 // CONFIGURATION
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemma-4-31b-it:generateContent';
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-001:generateContent';
+const GEMINI_JUDGE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent';
 const DAILY_QUOTA = parseInt(import.meta.env.VITE_DAILY_QUOTA || '1500');
 const CACHE_TTL = 7 * 24 * 60 * 60 * 1000; // 1 week
 const EMBEDDING_MODEL = 'Xenova/all-MiniLM-L6-v2';
 const VECTOR_DIM = 384;
 
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
 // STATE
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
 let quotaUsed = 0;
 let quotaResetDate = new Date().toDateString();
 let embedder = null;
-let embedderLoaded = false;
-let embedderLoading = false;
-let embedderError = null;
-let embedderCooldownUntil = 0; // Cooldown timestamp after permanent failure
 let generator = null;
 let generatorLoaded = false;
 let generatorLoading = false;
@@ -49,9 +46,9 @@ let lastReasoning = [];
 export function getLastRouteResult() { return lastResult; }
 export function getLastReasoning() { return lastReasoning; }
 
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
 // QUOTA MANAGEMENT
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
 function resetQuotaIfNewDay() {
   const today = new Date().toDateString();
   if (today !== quotaResetDate) {
@@ -68,9 +65,9 @@ function incrementQuota() {
   quotaUsed++;
 }
 
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
 // REASONING STEP TRACKING (for DeepSeek-style collapsible panel)
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
 
 /**
  * Create a reasoning step object
@@ -211,9 +208,9 @@ function buildReasoningSteps({
   return steps;
 }
 
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
 // EMBEDDING (for semantic cache) - with offline fallback
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
 export async function loadEmbedder() {
   if (embedderLoaded) return embedder;
   if (embedderLoading) {
@@ -244,11 +241,11 @@ export async function loadEmbedder() {
       embedder = await getEmbeddingModel();
       embedderLoaded = true;
       embedderLoading = false;
-      console.log('G£à Embedder ready (all-MiniLM-L6-v2)');
+      console.log('âœ… Embedder ready (all-MiniLM-L6-v2)');
       return embedder;
     } catch (err) {
       lastErr = err;
-      console.warn(`GÜán+Å Embedder attempt ${attempt} failed:`, err?.message || err);
+      console.warn(`âš ï¸ Embedder attempt ${attempt} failed:`, err?.message || err);
       if (attempt < maxAttempts) {
         const delay = attempt === 1 ? 2000 : attempt === 2 ? 4000 : 3600000; // 1 hour on 3rd attempt
         console.log(`Retrying in ${delay}ms...`);
@@ -263,7 +260,7 @@ export async function loadEmbedder() {
   embedderLoaded = false;
   embedderLoading = false; // Reset loading flag
   embedderCooldownUntil = Date.now() + 20 * 60 * 1000; // 20 minutes cooldown
-  console.error('G¥î Embedder failed after 3 attempts, using keyword fallback');
+  console.error('âŒ Embedder failed after 3 attempts, using keyword fallback');
   return null;
 }
 
@@ -300,9 +297,9 @@ function keywordEmbed(text) {
   return vec.map(v => v / mag);
 }
 
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
 // OFFLINE MODEL (TinyLlama 1.1B)
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
 export async function loadTinyLlama() {
   if (generatorLoaded) return generator;
   if (generatorLoading) {
@@ -317,7 +314,7 @@ export async function loadTinyLlama() {
     generator = await getTextGenerator();
     generatorLoaded = true;
     generatorLoading = false;
-    console.log('G£à TinyLlama 1.1B ready (offline)');
+    console.log('âœ… TinyLlama 1.1B ready (offline)');
     return generator;
   } catch (err) {
     generatorLoading = false;
@@ -326,38 +323,13 @@ export async function loadTinyLlama() {
   }
 }
 
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
-// INDEXEDDB GÇö cache + training + evaluation logs
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
+// INDEXEDDB GÃ‡Ã¶ cache + training + evaluation logs
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
 let dbInstance = null;
 async function openDB() {
-  if (dbInstance) return dbInstance;
-  
-  if (typeof indexedDB === 'undefined') {
-    throw new Error('IndexedDB not available in this environment');
-  }
-  
-  return new Promise((resolve, reject) => {
-    try {
-       const req = indexedDB.open('vitachain', 12); // unified version v12
-      req.onupgradeneeded = (e) => {
-        const db = e.target.result;
-        if (!db.objectStoreNames.contains('gemmaCache')) db.createObjectStore('gemmaCache', { keyPath: 'id' });
-        if (!db.objectStoreNames.contains('emotionThreads')) db.createObjectStore('emotionThreads', { keyPath: 'userId' });
-        if (!db.objectStoreNames.contains('trainingPairs')) db.createObjectStore('trainingPairs', { keyPath: 'id', autoIncrement: true });
-        if (!db.objectStoreNames.contains('evaluationLogs')) db.createObjectStore('evaluationLogs', { keyPath: 'id', autoIncrement: true });
-        if (!db.objectStoreNames.contains('queryLogs')) db.createObjectStore('queryLogs', { keyPath: 'id', autoIncrement: true });
-      };
-      req.onsuccess = (e) => { dbInstance = e.target.result; resolve(dbInstance); };
-      req.onerror = (e) => {
-        console.error('IDB open error:', e.target.error);
-        reject(e.target.error);
-      };
-    } catch (err) {
-      console.error('IDB init failed:', err);
-      reject(err);
-    }
-  });
+  const { openDB: openAppDB } = await import('../lib/idb');
+  return openAppDB();
 }
 
 async function storeEvaluationScore(evaluation) {
@@ -445,14 +417,14 @@ function cosineSimilarity(a, b) {
   return dot / (Math.sqrt(magA) * Math.sqrt(magB) || 1);
 }
 
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
 // ENRICHMENT ENGINE (multi-source medical data)
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
 async function enrichWithWebData(query) {
   const data = { web: [], pubmed: [], clinicalTrials: [], openFDA: [], who: null, diseaseSh: null, searchSource: 'unknown' };
 
   try {
-    // Tiered search: LangSearch GåÆ DuckDuckGo GåÆ Wikipedia (all free, no API keys required)
+    // Tiered search: LangSearch GÃ¥Ã† DuckDuckGo GÃ¥Ã† Wikipedia (all free, no API keys required)
     const webResults = await searchWeb(query, 5);
     data.web = webResults;
     data.searchSource = webResults[0]?.source || 'unknown';
@@ -551,52 +523,59 @@ function detectCountryFromQuery(query, isoLength = 3) {
   return null;
 }
 
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
 // GEMMA 4 API CALL (primary online)
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
-async function callGemmaAPI(prompt, systemPrompt) {
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
+async function callGemmaAPI(prompt, systemPrompt, useJudge = false) {
   const key = import.meta.env.VITE_GEMINI_API_KEY;
   if (!key) throw new Error('VITE_GEMINI_API_KEY not set');
 
+  const endpoint = useJudge ? GEMINI_JUDGE_URL : GEMINI_API_URL;
+  const modelName = useJudge ? 'gemini-1.5-flash' : 'gemini-2.0-flash';
+
   const body = {
-    systemInstruction: { parts: [{ text: systemPrompt }] },
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { temperature: 0.3, maxOutputTokens: 2048, topP: 0.9 },
-    safetySettings: [
-      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_ONLY_HIGH' },
-      { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
-      { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
-      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' }
-    ]
+    contents: [{ 
+      role: 'user',
+      parts: [{ text: `${systemPrompt}\n\nUser Query: ${prompt}` }] 
+    }],
+    generationConfig: { 
+      temperature: useJudge ? 0.1 : 0.3, 
+      maxOutputTokens: 2048, 
+      topP: 0.9,
+      responseMimeType: useJudge ? "application/json" : "text/plain"
+    }
   };
 
-  const resp = await fetch(`${GEMINI_API_URL}?key=${key}`, {
+  const resp = await fetch(`${endpoint}?key=${key}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)
   });
 
-  if (!resp.ok) throw new Error(`Gemini API ${resp.status}`);
+  if (!resp.ok) {
+    const errorData = await resp.json().catch(() => ({}));
+    throw new Error(`Gemini API ${resp.status}: ${errorData.error?.message || 'Unknown error'}`);
+  }
 
   const data = await resp.json();
   const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  return { text, model: 'gemma4-31b', source: 'gemini-api' };
+  return { text, model: modelName, source: 'gemini-api' };
 }
 
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
-// MAIN ROUTER GÇö THE ONLY ENTRY POINT
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
+// MAIN ROUTER GÃ‡Ã¶ THE ONLY ENTRY POINT
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
 /**
  * Route a structured prompt through the AI system
  * @param {object} options
- * @param {string} options.structuredPrompt GÇö Full 4-section prompt (from promptLibrary)
- * @param {string} options.role GÇö 'patient' | 'clinician' | 'chw'
- * @param {string} options.userId GÇö for emotional threading
- * @param {object} options.emotionalContext GÇö { emotionResult, threadTurns, trendSummary }
- * @param {object} options.enrichment GÇö pre-fetched enrichment data (optional, fetched if not provided)
- * @param {boolean} options.useCache GÇö allow cache lookup (default: true)
- * @param {string} options.extractedQuery GÇö Original user query for web search (default: first 200 chars of structuredPrompt)
- * @param {function} options.onStep GÇö Callback fired when each reasoning step completes (for streaming UI)
+ * @param {string} options.structuredPrompt GÃ‡Ã¶ Full 4-section prompt (from promptLibrary)
+ * @param {string} options.role GÃ‡Ã¶ 'patient' | 'clinician' | 'chw'
+ * @param {string} options.userId GÃ‡Ã¶ for emotional threading
+ * @param {object} options.emotionalContext GÃ‡Ã¶ { emotionResult, threadTurns, trendSummary }
+ * @param {object} options.enrichment GÃ‡Ã¶ pre-fetched enrichment data (optional, fetched if not provided)
+ * @param {boolean} options.useCache GÃ‡Ã¶ allow cache lookup (default: true)
+ * @param {string} options.extractedQuery GÃ‡Ã¶ Original user query for web search (default: first 200 chars of structuredPrompt)
+ * @param {function} options.onStep GÃ‡Ã¶ Callback fired when each reasoning step completes (for streaming UI)
  * @returns {Promise<object>} { text, reasoningSteps[], citations[], emotionalState, model, source, evaluation }
  */
 export async function routeQuery({
@@ -620,9 +599,9 @@ export async function routeQuery({
     return step;
   }
 
-  // GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
   // CRITICAL: Log router invocation for debugging
-  // GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+  // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
   const isOnline = typeof navigator !== 'undefined' && navigator.onLine;
   const quotaInfo = getQuotaRemaining();
   console.log('[AI Router] routeQuery called. Online:', isOnline, 'Credits:', quotaInfo.used + '/' + DAILY_QUOTA, '(Remaining:', quotaInfo.remaining + ')', 'Role:', role || 'none');
@@ -631,7 +610,7 @@ export async function routeQuery({
   let finalExtractedQuery = extractedQuery;
   if (!finalExtractedQuery) {
     // Try to find the TASK section and extract from there
-    const taskMatch = structuredPrompt.match(/GöÇGöÇGöÇ SECTION 2: TASK GöÇGöÇGöÇ\s*([^GöÇ]*?)(?=GöÇGöÇGöÇ SECTION|$)/s);
+    const taskMatch = structuredPrompt.match(/â”€â”€â”€ SECTION 2: TASK â”€â”€â”€\s*([^GÃ¶Ã‡]*?)(?=â”€â”€â”€ SECTION|$)/s);
     if (taskMatch && taskMatch[1]) {
       finalExtractedQuery = taskMatch[1].split('\n')[0].trim();
     }
@@ -696,8 +675,10 @@ export async function routeQuery({
    // 4. Assemble full system prompt with emotional context
   let fullSystemPrompt = structuredPrompt;
   if (emotionalHistory) {
-    fullSystemPrompt += `\n\nGöÇGöÇGöÇ CONVERSATION HISTORY GöÇGöÇGöÇ\n${emotionalHistory}`;
+    fullSystemPrompt += `\n\nâ”€â”€â”€ CONVERSATION HISTORY â”€â”€â”€\n${emotionalHistory}`;
   }
+  
+  fullSystemPrompt += `\n\nCOMMAND: Output ONLY the medical response following the specified format. Do NOT repeat the instructions, quality rules, or section headers from the system prompt in your final output. Begin your response immediately with SECTION 1.`;
 
   // 5. Check online status & quota
   const hasQuota = quotaInfo.remaining > 0;
@@ -710,7 +691,7 @@ export async function routeQuery({
         try {
           // Build final enriched prompt
           const enrichedPrompt = enrichment
-            ? `${structuredPrompt}\n\nGöÇGöÇGöÇ MEDICAL LITERATURE GöÇGöÇGöÇ\n${formatEnrichmentForPrompt(enrichment)}`
+            ? `${structuredPrompt}\n\nâ”€â”€â”€ MEDICAL LITERATURE â”€â”€â”€\n${formatEnrichmentForPrompt(enrichment)}`
             : structuredPrompt;
 
           // Call Gemma 4 with timing
@@ -1065,9 +1046,9 @@ export async function routeQuery({
       }
 } // close routeQuery function
 
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
 // UTILITIES
-// GöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇGöÇ
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€GÃ¶Ã‡GÃ¶Ã‡
 
 function formatEnrichmentForPrompt(enrichment) {
   let ctx = '';
@@ -1129,6 +1110,7 @@ function simpleHash(str) {
   return Math.abs(hash).toString(36);
 }
 
-// End of module GÇö all exports are named above
+// End of module GÃ‡Ã¶ all exports are named above
+
 
 

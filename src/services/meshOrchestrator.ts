@@ -217,6 +217,12 @@ export function stopMeshOrchestrator(): void {
   saveToStorage();
 }
 
+export function getConnectedPeerCount(): number {
+  // TODO: implement actual peer counting via bluetooth or simulated transport
+  // For now, return 0
+  return 0;
+}
+
 // Singleton export
 export const meshOrchestrator = {
   init: initMeshOrchestrator,
@@ -227,5 +233,6 @@ export const meshOrchestrator = {
   mergeWithRemote,
   getCurrentMesh,
   getAggregatedMeshData,
+  getConnectedPeerCount,
   stop: stopMeshOrchestrator,
 };

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from "../../../context/AuthContext";
 import { motion } from 'framer-motion';
 
 interface StepAdminMFAProps {
@@ -45,7 +45,7 @@ export default function StepAdminMFA({ onNext, onBack, onMFAComplete }: StepAdmi
         }
       } catch {
         // Fallback to mock QR
-        const mockQrData = `otpauth://totp/CareConnect:${email}?secret=JBSWY3DPEHPK3PXP&issuer=CareConnect`;
+        const mockQrData = `otpauth://totp/VitaChain:${email}?secret=JBSWY3DPEHPK3PXP&issuer=VitaChain`;
         setQrCodeUrl(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(mockQrData)}`);
       }
     }

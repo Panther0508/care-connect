@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@/context/AuthContext';
 import { getPassportShares, getPassportScans, PassportShare, PassportScan } from '../lib/idb';
 import { initPassport } from '../services/passport';
 

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "../context/AuthContext";
 import { motion } from "framer-motion";
 import { ArrowRight, Check } from "lucide-react";
 import { useStatus } from "../hooks/useStatus";
@@ -11,6 +11,10 @@ export default function Onboarding() {
   const navigate = useNavigate();
   const { showStatus } = useStatus();
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const [gender, setGender] = useState("");
+  const [dob, setDob] = useState("");
+  const [country, setCountry] = useState("NG");
+  const [language, setLanguage] = useState("en");
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -32,6 +36,10 @@ export default function Onboarding() {
     }
     // Store role and completion flag
     localStorage.setItem("user_role", selectedRole);
+    localStorage.setItem("user_gender", gender);
+    localStorage.setItem("user_dob", dob);
+    localStorage.setItem("user_country", country);
+    localStorage.setItem("user_language", language);
     localStorage.setItem("onboarding_completed", "true");
     navigate("/dashboard");
   };
@@ -120,7 +128,7 @@ export default function Onboarding() {
           <div className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1.5">Gender</label>
-              <select className="glass-input w-full px-4 py-3 text-sm">
+              <select className="glass-input w-full px-4 py-3 text-sm" value={gender} onChange={(e) => setGender(e.target.value)}>
                 <option value="">Select gender</option>
                 <option value="female">Female</option>
                 <option value="male">Male</option>
@@ -130,12 +138,12 @@ export default function Onboarding() {
 
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1.5">Date of Birth</label>
-              <input type="date" className="glass-input w-full px-4 py-3 text-sm" />
+              <input type="date" className="glass-input w-full px-4 py-3 text-sm" value={dob} onChange={(e) => setDob(e.target.value)} />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1.5">Country</label>
-              <select className="glass-input w-full px-4 py-3 text-sm">
+              <select className="glass-input w-full px-4 py-3 text-sm" value={country} onChange={(e) => setCountry(e.target.value)}>
                 <option value="NG">Nigeria</option>
                 <option value="KE">Kenya</option>
                 <option value="GH">Ghana</option>
@@ -147,7 +155,7 @@ export default function Onboarding() {
 
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1.5">Primary Language</label>
-              <select className="glass-input w-full px-4 py-3 text-sm">
+              <select className="glass-input w-full px-4 py-3 text-sm" value={language} onChange={(e) => setLanguage(e.target.value)}>
                 <option value="en">English</option>
                 <option value="ha">Hausa</option>
                 <option value="yo">Yoruba</option>

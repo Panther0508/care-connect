@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from "../context/AuthContext";
 import { storeSetting, getSetting } from '../lib/idb';
 import { toast } from '../hooks/use-toast';
 

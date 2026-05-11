@@ -3,6 +3,7 @@
 // Parallel-fire Gemma models + Gemma-3B judge + silent sequential fallback
 // Hybrid BM25-vector RAG + knowledge distillation
 
+import { openDB } from '../lib/idb';
 import { pipeline, env } from '@huggingface/transformers';
 import { loadEmbedder, embedText } from './advancedRAG.js';
 import { searchWeb } from './webSearchService.js';
@@ -24,9 +25,9 @@ const TINYLLAMA_GITHUB_RELEASES_URL = 'https://github.com/Panther0508/care-conne
 
 // Model endpoints configuration
 const MODEL_ENDPOINTS = {
-  // Gemma models for parallel fire
-  gemma_4_31b: 'https://generativelanguage.googleapis.com/v1beta/models/gemma-4-31b-it:generateContent',
-  gemma_3b_judge: 'https://generativelanguage.googleapis.com/v1beta/models/gemma-3-4b-it:generateContent',
+  // Gemini models for parallel fire
+  gemini_2_0: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-001:generateContent',
+  gemini_judge: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent',
   // Fallback models
   openrouter_gemma: 'google/gemma-2-9b-it:free',
   hf_medical_llama: 'google/medllama3-8b'
@@ -38,27 +39,6 @@ const MODEL_ENDPOINTS = {
 
 let dbInstance = null;
 let embedderReady = false;
-
-async function openDB() {
-  if (dbInstance) return dbInstance;
-  return new Promise((resolve, reject) => {
-     const req = indexedDB.open('vitachain', 12); // bumped for hybrid engine
-    req.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains('searchCache')) {
-        db.createObjectStore('searchCache', { keyPath: 'query' });
-      }
-      if (!db.objectStoreNames.contains('judgeResults')) {
-        db.createObjectStore('judgeResults', { keyPath: 'id', autoIncrement: true });
-      }
-      if (!db.objectStoreNames.contains('bm25Index')) {
-        db.createObjectStore('bm25Index', { keyPath: 'id' });
-      }
-    };
-    req.onsuccess = (e) => { dbInstance = e.target.result; resolve(dbInstance); };
-    req.onerror = (e) => reject(e.target.error);
-  });
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PHASE 1: PARALLEL FIRE + GEMMA JUDGE
@@ -78,16 +58,10 @@ export async function fireAllModelsInParallel(prompt, systemPrompt) {
   const promises = [];
   const modelIds = [];
 
-  // Fire Gemma 4 31B (primary online)
+  // Fire Gemini 2.0 Flash (primary online)
   if (geminiKey) {
-    promises.push(callGemmaAPI(prompt, systemPrompt, 'gemma-4-31b'));
-    modelIds.push('gemma-4-31b');
-  }
-
-  // Fire Gemma 3B judge as parallel backup
-  if (geminiKey) {
-    promises.push(callGemmaAPI(prompt, systemPrompt, 'gemma-3-4b'));
-    modelIds.push('gemma-3-4b');
+    promises.push(callGemmaAPI(prompt, systemPrompt, 'gemini-2.0-flash'));
+    modelIds.push('gemini-2.0-flash');
   }
 
   // Fire OpenRouter Gemma as fallback
@@ -102,25 +76,29 @@ export async function fireAllModelsInParallel(prompt, systemPrompt) {
     modelIds.push('medllama3-8b');
   }
 
-  // ALWAYS fire TinyLlama locally (offline-capable) - NO GUARD
-  promises.push(runTinyLlama(prompt, systemPrompt));
+  // ALWAYS fire TinyLlama locally (offline-capable)
+  promises.push(runTinyLlama(prompt, systemPrompt).catch(e => ({ text: '', source: 'error', model: 'tinyllama-1.1b' })));
   modelIds.push('tinyllama-1.1b');
 
-  // Execute all in parallel with error handling
+  // Execute all in parallel
   const results = await Promise.allSettled(promises);
 
   const responses = results.map((r, i) => ({
     model: modelIds[i],
-    success: r.status === 'fulfilled',
+    success: r.status === 'fulfilled' && r.value?.text?.length > 10,
     text: r.status === 'fulfilled' ? r.value?.text || '' : '',
     source: r.status === 'fulfilled' ? r.value?.source || 'online' : 'error',
     error: r.status === 'rejected' ? r.reason?.message : null
-  })).filter(r => r.success && r.text.length > 10);
+  })).filter(r => r.success);
 
   // Judge the responses if we have multiple
   let judged = null;
   if (responses.length > 1 && geminiKey) {
-    judged = await judgeResponses(prompt, responses);
+    try {
+      judged = await judgeResponses(prompt, responses);
+    } catch (judgeErr) {
+      console.warn('Judging failed:', judgeErr);
+    }
   }
 
   return { responses, judged };
@@ -134,32 +112,25 @@ async function judgeResponses(prompt, responses) {
   if (responses.length === 0) return null;
 
   try {
-    // Build judging prompt
-    const judgingPrompt = `You are a medical AI evaluator. Compare these responses to the query and select the best one.
-
-Query: ${prompt.substring(0, 200)}
-
+    const judgingPrompt = `Evaluate these medical AI responses and pick the best one.
+Query: ${prompt.substring(0, 300)}
 Responses:
-${responses.map((r, i) => `[${i + 1}] ${r.model}: ${r.text.substring(0, 300)}...`).join('\n\n')}
+${responses.map((r, i) => `[ID: ${i + 1}] Model ${r.model}:\n${r.text.substring(0, 500)}...\n---`).join('\n\n')}
 
-Select the winner (1-${responses.length}) and explain why in 1-2 sentences.`;
+Select the winner ID (1-${responses.length}) and explain why.
+Return JSON ONLY: {"winner": ID, "reasoning": "string"}`;
 
-    const judgeSystemPrompt = `You are a medical AI critic. Evaluate responses for:
-1. Medical accuracy
-2. Clarity for patients
-3. Completeness
-4. Safety
+    const judgeSystemPrompt = "You are a senior medical AI critic. Select the most accurate, safe, and helpful response. Return JSON.";
 
-Return JSON: {"winner": N, "reasoning": "..."}`;
-
-    const result = await callGemmaAPI(judgingPrompt, judgeSystemPrompt, 'gemma-3-4b');
+    const result = await callGemmaAPI(judgingPrompt, judgeSystemPrompt, 'gemini-1.5-flash');
     
     let parsed;
     try {
-      parsed = JSON.parse(result.text);
+      const cleanJson = result.text.replace(/```json|```/g, '').trim();
+      parsed = JSON.parse(cleanJson);
     } catch (e) {
-      // Fallback: pick first response
-      parsed = { winner: 1, reasoning: 'Auto-selected first viable response' };
+      console.warn('Judge returned invalid JSON:', result.text);
+      parsed = { winner: 1, reasoning: 'Auto-selected first response due to parsing error' };
     }
 
     const winnerIdx = (parsed.winner || 1) - 1;
@@ -169,7 +140,7 @@ Return JSON: {"winner": N, "reasoning": "..."}`;
       reasoning: parsed.reasoning
     };
   } catch (err) {
-    console.warn('Judging failed, using first response:', err);
+    console.warn('Judging process failed:', err);
     return { winner: responses[0], allResponses: responses, reasoning: 'Fallback to first available' };
   }
 }
@@ -181,18 +152,22 @@ async function callGemmaAPI(prompt, systemPrompt, modelName) {
   const key = import.meta.env.VITE_GEMINI_API_KEY;
   if (!key) throw new Error('VITE_GEMINI_API_KEY not set');
 
-  const modelMap = {
-    'gemma-4-31b': 'gemma-4-31b-it',
-    'gemma-3-4b': 'gemma-3-4b-it'
-  };
+  const isJudge = modelName === 'gemini-1.5-flash';
+  const endpoint = isJudge ? MODEL_ENDPOINTS.gemini_judge : MODEL_ENDPOINTS.gemini_2_0;
 
   const body = {
-    systemInstruction: { parts: [{ text: systemPrompt }] },
-    contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { temperature: 0.3, maxOutputTokens: 2048, topP: 0.9 }
+    contents: [{ 
+      role: 'user',
+      parts: [{ text: `${systemPrompt}\n\n${prompt}` }] 
+    }],
+    generationConfig: { 
+      temperature: isJudge ? 0.1 : 0.3,
+      maxOutputTokens: 2048,
+      responseMimeType: isJudge ? "application/json" : "text/plain"
+    }
   };
 
-  const resp = await fetch(`${MODEL_ENDPOINTS.gemma_4_31b}?key=${key}`, {
+  const resp = await fetch(`${endpoint}?key=${key}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body)

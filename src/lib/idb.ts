@@ -1,109 +1,55 @@
 export function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("vitachain", 12); // Bumped to v12 for auditLogs, evaluations, trainingRecords stores
+    const request = indexedDB.open("vitachain", 12);
 
     request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
       const db = (event.target as IDBOpenDBRequest).result;
       try {
-        // Core stores (v1-v3)
-        if (!db.objectStoreNames.contains("facilities")) {
-          db.createObjectStore("facilities", { keyPath: "id" });
-        }
-        if (!db.objectStoreNames.contains("vectors")) {
-          db.createObjectStore("vectors", { keyPath: "id" });
-        }
-        if (!db.objectStoreNames.contains("needs")) {
-          db.createObjectStore("needs", { keyPath: "timestamp" });
-        }
-        if (!db.objectStoreNames.contains("healthGraph")) {
-          db.createObjectStore("healthGraph", { keyPath: "key" });
-        }
-        if (!db.objectStoreNames.contains("rxnorm")) {
-          db.createObjectStore("rxnorm", { keyPath: "drugName" });
-        }
+        const stores = [
+          { name: "facilities", keyPath: "id" },
+          { name: "vectors", keyPath: "id" },
+          { name: "needs", keyPath: "timestamp" },
+          { name: "healthGraph", keyPath: "key" },
+          { name: "rxnorm", keyPath: "drugName" },
+          { name: "searchLogs", keyPath: "id", autoIncrement: true },
+          { name: "meshState", keyPath: "key" },
+          { name: "passportShares", keyPath: "id", autoIncrement: true },
+          { name: "passportScans", keyPath: "id", autoIncrement: true },
+          { name: "kv", keyPath: "key" },
+          { name: "realtimeCache", keyPath: "key" },
+          { name: "datasetVectors", keyPath: "id" },
+          { name: "medicationReminders", keyPath: "id" },
+          { name: "appointments", keyPath: "id" },
+          { name: "translationCache", keyPath: "key" },
+          { name: "userProfile", keyPath: "userId" },
+          { name: "settings", keyPath: "key" },
+          { name: "appState", keyPath: "key" },
+          { name: "gemmaCache", keyPath: "id" },
+          { name: "searchCache", keyPath: "query" },
+          { name: "emotionThreads", keyPath: "userId" },
+          { name: "trainingPairs", keyPath: "id", autoIncrement: true },
+          { name: "evaluationLogs", keyPath: "id", autoIncrement: true },
+          { name: "queryLogs", keyPath: "id", autoIncrement: true },
+          { name: "foodDatabase", keyPath: "id" },
+          { name: "exerciseDatabase", keyPath: "id" },
+          { name: "foodLogs", keyPath: "id", autoIncrement: true },
+          { name: "workoutLogs", keyPath: "id", autoIncrement: true },
+          { name: "cycleData", keyPath: "id", autoIncrement: true },
+          { name: "dailyHydration", keyPath: "date" },
+          { name: "sleepLogs", keyPath: "id", autoIncrement: true },
+          { name: "supportTickets", keyPath: "id", autoIncrement: true },
+          { name: "auditLogs", keyPath: "id", autoIncrement: true },
+          { name: "evaluations", keyPath: "id", autoIncrement: true },
+          { name: "trainingRecords", keyPath: "id", autoIncrement: true }
+        ];
 
-        // Mesh & search (v4)
-        if (!db.objectStoreNames.contains("searchLogs")) {
-          db.createObjectStore("searchLogs", { keyPath: "id", autoIncrement: true });
-        }
-        if (!db.objectStoreNames.contains("meshState")) {
-          db.createObjectStore("meshState", { keyPath: "key" });
-        }
-        if (!db.objectStoreNames.contains("passportShares")) {
-          db.createObjectStore("passportShares", { keyPath: "id", autoIncrement: true });
-        }
-        if (!db.objectStoreNames.contains("passportScans")) {
-          db.createObjectStore("passportScans", { keyPath: "id", autoIncrement: true });
-        }
-        if (!db.objectStoreNames.contains("kv")) {
-          db.createObjectStore("kv", { keyPath: "key" });
-        }
-        if (!db.objectStoreNames.contains("realtimeCache")) {
-          db.createObjectStore("realtimeCache", { keyPath: "key" });
-        }
-
-        // Wellness & data (v5)
-        if (!db.objectStoreNames.contains("datasetVectors")) {
-          db.createObjectStore("datasetVectors", { keyPath: "id" });
-        }
-        if (!db.objectStoreNames.contains("medicationReminders")) {
-          db.createObjectStore("medicationReminders", { keyPath: "id" });
-        }
-        if (!db.objectStoreNames.contains("appointments")) {
-          db.createObjectStore("appointments", { keyPath: "id" });
-        }
-        if (!db.objectStoreNames.contains("translationCache")) {
-          db.createObjectStore("translationCache", { keyPath: "key" });
-        }
-        if (!db.objectStoreNames.contains("userProfile")) {
-          db.createObjectStore("userProfile", { keyPath: "userId" });
-        }
-        if (!db.objectStoreNames.contains("settings")) {
-          db.createObjectStore("settings", { keyPath: "key" });
-        }
-        if (!db.objectStoreNames.contains("appState")) {
-          db.createObjectStore("appState", { keyPath: "key" });
-        }
-
-        // AI cache (v6-v7)
-        if (!db.objectStoreNames.contains("gemmaCache")) {
-          db.createObjectStore("gemmaCache", { keyPath: "id" });
-        }
-        if (!db.objectStoreNames.contains("searchCache")) {
-          db.createObjectStore("searchCache", { keyPath: "query" });
-        }
-
-        // ==================== v8: Full store set ====================
-
-        // Food & exercise databases
-        if (!db.objectStoreNames.contains("foodDatabase")) {
-          db.createObjectStore("foodDatabase", { keyPath: "id" });
-        }
-        if (!db.objectStoreNames.contains("exerciseDatabase")) {
-          db.createObjectStore("exerciseDatabase", { keyPath: "id" });
-        }
-
-        // Wellness logs
-        if (!db.objectStoreNames.contains("foodLogs")) {
-          db.createObjectStore("foodLogs", { keyPath: "id", autoIncrement: true });
-        }
-        if (!db.objectStoreNames.contains("workoutLogs")) {
-          db.createObjectStore("workoutLogs", { keyPath: "id", autoIncrement: true });
-        }
-        if (!db.objectStoreNames.contains("cycleData")) {
-          db.createObjectStore("cycleData", { keyPath: "id", autoIncrement: true });
-        }
-        if (!db.objectStoreNames.contains("dailyHydration")) {
-          db.createObjectStore("dailyHydration", { keyPath: "date" });
-        }
-        if (!db.objectStoreNames.contains("sleepLogs")) {
-          db.createObjectStore("sleepLogs", { keyPath: "id", autoIncrement: true });
-        }
-
-        // ... (truncated for brevity - all other stores remain within the try block)
+        stores.forEach(s => {
+          if (!db.objectStoreNames.contains(s.name)) {
+            db.createObjectStore(s.name, { keyPath: s.keyPath, autoIncrement: s.autoIncrement });
+          }
+        });
       } catch (error) {
         console.error('IndexedDB migration failed:', error);
-        // Abort the transaction to prevent silent failure
         if (event.target) {
           const request = event.target as IDBOpenDBRequest;
           if (request.transaction) {
@@ -113,7 +59,6 @@ export function openDB(): Promise<IDBDatabase> {
         throw error;
       }
     };
-
 
     request.onsuccess = (event: Event) => {
       resolve((event.target as IDBOpenDBRequest).result);

@@ -2,35 +2,12 @@
 // Milestone Engine - Achievement tracking
 // Uses native IndexedDB
 
+import { openDB } from '../lib/idb';
 const DB_NAME = 'VitaCareDB';
 const DB_VERSION = 1;
 const MILESTONES_STORE = 'userMilestones';
 
 let dbInstance = null;
-
-const openDB = async () => {
-  if (dbInstance) return dbInstance;
-
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains(MILESTONES_STORE)) {
-        db.createObjectStore(MILESTONES_STORE, { keyPath: 'id' });
-      }
-    };
-
-    request.onsuccess = (event) => {
-      dbInstance = event.target.result;
-      resolve(dbInstance);
-    };
-
-    request.onerror = (event) => {
-      reject(event.target.error);
-    };
-  });
-};
 
 /**
  * Save a milestone as achieved for the user

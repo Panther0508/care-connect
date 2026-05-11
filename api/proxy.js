@@ -1,4 +1,4 @@
-import fetch from 'node-fetch';
+// Using native globalThis.fetch (Node 18+)
 
 // CORS-enabled serverless proxy for bypassing browser restrictions
 export default async function handler(req, res) {
@@ -46,7 +46,7 @@ export default async function handler(req, res) {
        method: method,
        headers: forwardedHeaders,
        body: body !== undefined ? JSON.stringify(body) : undefined,
-       timeout: 15000,
+       signal: AbortSignal.timeout(15000),
      });
 
     const contentType = response.headers.get('content-type');

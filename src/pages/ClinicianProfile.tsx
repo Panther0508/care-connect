@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from "../context/AuthContext";
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { setItem, getItem } from '../lib/idb';

@@ -1,7 +1,6 @@
 // src/services/userProfile.ts
-// User profile management with local encryption and Clerk sync
+// User profile management with local storage (offline-only, no Clerk sync)
 
-import { getUser, updateUser } from '@clerk/clerk-react';
 import { deriveKey, encrypt, decrypt, generateSalt } from '../lib/encryption';
 import { getUserProfile as saveToIDB, storeUserProfile, getUserProfile as loadFromIDB } from '../lib/idb';
 

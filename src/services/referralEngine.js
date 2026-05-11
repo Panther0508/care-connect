@@ -2,35 +2,12 @@
 // Referral System - Track invites and rewards
 // Uses native IndexedDB
 
+import { openDB } from '../lib/idb';
 const DB_NAME = 'VitaCareDB';
 const DB_VERSION = 1;
 const REFERRALS_STORE = 'referrals';
 
 let dbInstance = null;
-
-const openDB = async () => {
-  if (dbInstance) return dbInstance;
-
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains(REFERRALS_STORE)) {
-        db.createObjectStore(REFERRALS_STORE, { keyPath: 'id' });
-      }
-    };
-
-    request.onsuccess = (event) => {
-      dbInstance = event.target.result;
-      resolve(dbInstance);
-    };
-
-    request.onerror = (event) => {
-      reject(event.target.error);
-    };
-  });
-};
 
 /**
  * Generate or retrieve a referral code for the user

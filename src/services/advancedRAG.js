@@ -3,23 +3,20 @@
 // Pre-embeds datasets, uses HNSW-style approximate search, feeds context to Gemma & TinyLlama
 
 import { pipeline, env } from '@huggingface/transformers';
+import { getEmbeddingModel } from './modelLoader.js';
+
 
 // Configure for LOCAL embedding model only — no remote CDN fetches
-env.localModelPath = '/models/';  // Local model directory
-env.allowRemoteModels = false;   // Block HuggingFace CDN
-env.allowLocalModels = true;     // Allow local /models/ path
-env.useBrowserCache = true;
+// env.localModelPath = '/models/';  // Local model directory
+// env.allowRemoteModels = false;   // Block HuggingFace CDN
+// env.allowLocalModels = true;     // Allow local /models/ path
+// env.useBrowserCache = true;
 // Note: env.fetch override is set globally in main.tsx before any imports
 
 const EMBEDDING_MODEL = 'Xenova/all-MiniLM-L6-v2';
 const VECTOR_DIM = 384;
 
 let embedder = null;
-let embedderLoading = false;
-let embedderLoaded = false;
-let embedderError = null;
-let embedderCooldownUntil = 0; // Cooldown timestamp after permanent failure
-
 // Simple keyword-based embedding fallback (offline-safe)
 function keywordEmbed(text) {
   const words = text.toLowerCase().split(/\s+/);
@@ -103,7 +100,7 @@ const DATASETS = {
   },
   'nigeria-drug-registry': {
     file: '/data/nigeria-drug-registry.json',
-    textFn: (item) => `${item.brandName || ''} ${item.genericName || ''} ${indications || ''}`,
+    textFn: (item) => `${item.brandName || ''} ${item.genericName || ''} ${item.indications || ''}`,
     label: 'Nigeria Drug Registry'
   },
   'ddx-cards': {
@@ -122,63 +119,8 @@ let dbVersion = 12; // Unified vitachain schema version
 
 // Load embedding model
 export async function loadEmbedder() {
-  if (embedderLoaded) return embedder;
-  if (embedderLoading) {
-    // Wait for in-flight load
-    while (embedderLoading) { await new Promise(r => setTimeout(r, 50)); }
-    if (embedderLoaded) return embedder;
-    if (embedderError) return null; // failed earlier
-  }
-
-  // Cooldown check after permanent failure
-  if (embedderError && embedderCooldownUntil) {
-    if (Date.now() < embedderCooldownUntil) {
-      console.log('Advanced RAG embedder in cooldown until', new Date(embedderCooldownUntil).toISOString());
-      return null;
-    } else {
-      // Cooldown expired, reset error to allow retry
-      embedderError = null;
-    }
-  }
-
-  embedderLoading = true;
-  const maxAttempts = 3;
-  let lastErr = null;
-
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      console.log(`Loading embedding model (attempt ${attempt}/${maxAttempts}): ${EMBEDDING_MODEL}`);
-      embedder = await pipeline('feature-extraction', EMBEDDING_MODEL, {
-        progress_callback: (progress) => {
-          if (progress.status === 'downloading') {
-            const pct = Math.round((progress.loaded / progress.total) * 100);
-            console.log(`  Embedding model: ${pct}%`);
-          }
-        }
-      });
-      embedderLoaded = true;
-      embedderLoading = false;
-      console.log('✅ Embedding model loaded (all-MiniLM-L6-v2, 384 dims)');
-      return embedder;
-    } catch (err) {
-      lastErr = err;
-      console.warn(`⚠️ Embedder attempt ${attempt} failed:`, err?.message || err);
-      if (attempt < maxAttempts) {
-        const delay = attempt === 1 ? 2000 : attempt === 2 ? 4000 : 6000;
-        console.log(`Retrying in ${delay}ms...`);
-        await new Promise(r => setTimeout(r, delay));
-      }
-    }
-  }
-
-  // All attempts failed
-  embedderError = lastErr;
-  embedder = null;
-  embedderLoaded = false;
-  embedderLoading = false; // Reset loading flag
-  embedderCooldownUntil = Date.now() + 20 * 60 * 1000; // 20 minutes cooldown
-  console.error('❌ Embedder failed after 3 attempts, using keyword fallback');
-  return null;
+  if (!embedder) embedder = await getEmbeddingModel();
+  return embedder;
 }
 
 // Generate embedding

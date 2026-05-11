@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CreditCard, Shield, Check } from 'lucide-react';
 import { initiateSquadPayment } from '../services/squadPayment';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@/context/AuthContext';
 import { useStatus } from '../hooks/useStatus';
 import MagnifyingLoader from './MagnifyingLoader';
 
@@ -33,16 +33,16 @@ export default function SquadPaymentModal({ open, onClose, onSuccess }: SquadPay
   const [processing, setProcessing] = useState(false);
   const [selectedPlan] = useState(PLANS[0]);
 
-  const handlePay = async () => {
-    if (!user) return;
-    setProcessing(true);
-    try {
-      const result = await initiateSquadPayment({
-        amount: selectedPlan.price,
-        plan: selectedPlan.id,
-        userId: user.id,
-        email: user.primaryEmailAddress?.emailAddress,
-      });
+const handlePay = async () => {
+     if (!user) return;
+     setProcessing(true);
+     try {
+       const result = await initiateSquadPayment({
+         amount: selectedPlan.price,
+         plan: selectedPlan.id,
+         userId: user.id,
+         email: "offline@vita.app",
+       });
 
       if (result.success && result.checkoutUrl) {
         window.location.href = result.checkoutUrl;

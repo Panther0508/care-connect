@@ -2,39 +2,13 @@
 // Education Engine - Health Education Modules
 // Uses native IndexedDB
 
+import { openDB } from '../lib/idb';
 const DB_NAME = 'VitaCareDB';
 const DB_VERSION = 2; // bumped to 2 for potential schema updates
 const MODULES_STORE = 'educationModules';
 const PROGRESS_STORE = 'educationProgress';
 
 let dbInstance = null;
-
-const openDB = async () => {
-  if (dbInstance) return dbInstance;
-
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains(MODULES_STORE)) {
-        db.createObjectStore(MODULES_STORE, { keyPath: 'id' });
-      }
-      if (!db.objectStoreNames.contains(PROGRESS_STORE)) {
-        db.createObjectStore(PROGRESS_STORE, { keyPath: 'id' }); // id = userId_moduleId
-      }
-    };
-
-    request.onsuccess = (event) => {
-      dbInstance = event.target.result;
-      resolve(dbInstance);
-    };
-
-    request.onerror = (event) => {
-      reject(event.target.error);
-    };
-  });
-};
 
 /**
  * Fetch education modules from the JSON file and store in IndexedDB

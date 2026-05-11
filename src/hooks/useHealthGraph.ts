@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '@/context/AuthContext';
 import { setActiveUser, getCurrentHealthState, clearActiveUser } from '../services/healthGraph';
 import { getItem } from '../lib/idb';
 import { decryptPassphrase } from '../lib/encryption';

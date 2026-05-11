@@ -23,77 +23,21 @@ import { createRoot } from 'react-dom/client';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { StatusProvider } from './context/StatusContext';
 import { BrowserRouter } from 'react-router-dom';
-import { ClerkProvider } from '@clerk/clerk-react';
+import { AuthProvider } from './context/AuthContext';
 import { initFoodDatabase } from './services/foodDatabase';
 import { initExerciseDatabase } from './services/exerciseDatabase';
 import { ensureAllIndexed } from './services/advancedRAG';
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
-if (!PUBLISHABLE_KEY) {
-  console.warn("VITE_CLERK_PUBLISHABLE_KEY is not set. Clerk auth will be disabled.");
-}
-
-// URGENT: Force-unregister any existing service workers to break stale cache loop
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.getRegistrations().then((registrations) => {
-    for (const registration of registrations) {
-      registration.unregister();
-    }
-  });
-}
-
-// Service Worker registration for offline AI model caching
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/serviceWorker.js", { updateViaCache: 'none' })
-    .then((registration) => {
-      if (registration.waiting) {
-        try {
-          registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-        } catch (err) {
-          console.warn('Failed to send SKIP_WAITING to waiting SW:', err);
-        }
-      }
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing;
-        if (newWorker) {
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
-              window.location.reload();
-            }
-          });
-        }
-      });
-    })
-    .catch((err) => console.log("ServiceWorker registration failed:", err));
-}
-
-// Initialize offline databases
-initFoodDatabase().catch(err => console.error('Failed to init food DB:', err));
-initExerciseDatabase().catch(err => console.error('Failed to init exercise DB:', err));
-
-// Index RAG datasets on first startup (non-blocking)
-ensureAllIndexed().catch(err => console.error('RAG indexing failed:', err));
-
-// Migrate any existing localStorage user data to IndexedDB (non-blocking)
-import('./lib/dataMigration').then(({ runMigration }) => {
-  runMigration().catch(err => console.error('Data migration failed:', err));
-}).catch(err => console.error('Failed to load migration module:', err));
-
-const clerkProviderProps = PUBLISHABLE_KEY
-  ? { publishableKey: PUBLISHABLE_KEY, rethrowOfflineNetworkErrors: true }
-  : { publishableKey: "pk_test_placeholder", rethrowOfflineNetworkErrors: true };
-
 function Root() {
   return (
     <ErrorBoundary>
-      <ClerkProvider {...clerkProviderProps}>
+      <AuthProvider>
         <StatusProvider>
           <BrowserRouter>
             <App />
           </BrowserRouter>
         </StatusProvider>
-      </ClerkProvider>
+      </AuthProvider>
     </ErrorBoundary>
   );
 }

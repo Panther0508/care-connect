@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from "../context/AuthContext";
 import { motion } from 'framer-motion';
 import { useTranslation } from '../services/translation/useTranslation';
 import { useStatus } from '../hooks/useStatus';
@@ -11,6 +11,7 @@ import { Settings as SettingsIcon, User, Lock, Bell, CreditCard, Download, Trash
 import { getSetting, storeSetting } from '../lib/idb';
 import { getUserProfile, storeUserProfile, type UserProfile } from '../lib/idb';
 import PWAInstallPrompt from '../components/PWAInstallPrompt';
+import { registerBiometric, disableBiometric, isBiometricRegistered } from '../services/biometricAuth';
 
 type Tab = 'profile' | 'security' | 'notifications' | 'subscription' | 'export' | 'delete' | 'referral' | 'support' | 'language' | 'voice' | 'install';
 
@@ -461,12 +462,33 @@ function SecurityTab() {
     });
   }, []);
 
-  const toggleBiometric = async () => {
-    const newVal = !biometricEnabled;
-    setBiometricEnabled(newVal);
-    await storeSetting('biometric_enabled', newVal);
-    showStatus('success', newVal ? 'Biometric Enabled' : 'Biometric Disabled', '');
-  };
+   const toggleBiometric = async () => {
+     const newVal = !biometricEnabled;
+
+     if (newVal) {
+       // Enabling biometrics — register credential
+       if (!user?.id) {
+         showStatus('error', 'Cannot enable', 'You must be logged in to enable biometrics');
+         return;
+       }
+       const result = await registerBiometric(user.id);
+       if (!result.success) {
+         showStatus('error', 'Registration Failed', result.error || 'Could not register biometric');
+         return;
+       }
+       setBiometricEnabled(true);
+       await storeSetting('biometric_enabled', true);
+       showStatus('success', 'Biometric Enabled', 'You can now use fingerprint/face to unlock');
+     } else {
+       // Disabling biometrics — clear credentials
+       if (user?.id) {
+         await disableBiometric(user.id);
+       }
+       setBiometricEnabled(false);
+       await storeSetting('biometric_enabled', false);
+       showStatus('success', 'Biometric Disabled', 'Biometric unlock has been turned off');
+     }
+   };
 
   // Hash PIN using SHA-256
   const hashPin = async (pin: string): Promise<string> => {

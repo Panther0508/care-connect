@@ -2,7 +2,6 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Globe, Check } from "lucide-react";
 import { useTranslation } from "../services/translation/useTranslation";
-import { changeLanguage } from "../services/i18n";
 
 const LANGUAGES = [
   { code: "en", name: "English", flag: "🇺🇸" },
@@ -13,13 +12,12 @@ const LANGUAGES = [
 ];
 
 export default function LanguageSelector() {
-  const { t, lang, changeLang } = useTranslation();
+  const { t, lang, changeLanguage } = useTranslation();
   const [selected, setSelected] = useState(lang);
 
   const handleSelect = async (code: string) => {
     setSelected(code);
     await changeLanguage(code);
-    changeLang(code);
   };
 
   return (

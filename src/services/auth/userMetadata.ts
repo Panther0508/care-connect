@@ -1,4 +1,4 @@
-import { User } from '@clerk/clerk-react';
+import type { User } from '../../context/AuthContext';
 import { getItem, setItem } from '../../lib/idb';
 
 const ROLE_CACHE_KEY = 'pending_user_role';

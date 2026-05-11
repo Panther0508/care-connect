@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "../context/AuthContext";
 import { useStatus } from "../hooks/useStatus";
 import { FileText, Printer, Mail, User, Stethoscope, MessageSquare } from "lucide-react";
 import { getCurrentHealthState } from "../services/healthGraph";

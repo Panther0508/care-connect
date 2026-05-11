@@ -1,24 +1,27 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { useSignIn } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 import VitaAvatar from "../components/VitaAvatar";
+import { useAuth } from "../context/AuthContext";
 
 export default function ResetPassword() {
-  const { signIn } = useSignIn();
   const navigate = useNavigate();
-  const location = useLocation();
-  const code = new URLSearchParams(location.search).get("code");
-
+  const { isSignedIn } = useAuth();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
+  // Offline: auto-skip if already signed in
+  if (isSignedIn) {
+    navigate("/dashboard");
+    return null;
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!code) {
-      setError("Missing reset code. Please use the link from your email.");
+    if (!newPassword || !confirmPassword) {
+      setError("Please fill in both password fields.");
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -32,12 +35,12 @@ export default function ResetPassword() {
 
     setLoading(true);
     setError("");
+    // Offline: just save to localStorage for demo purposes
     try {
-      // Use the signIn resource to reset password with the code
-      await signIn?.resetPassword({ code, newPassword });
+      localStorage.setItem("offline_password", newPassword);
       setSuccess(true);
     } catch (err) {
-      setError(err?.message || "Failed to reset password. The code may be invalid or expired.");
+      setError("Failed to reset password.");
     } finally {
       setLoading(false);
     }
@@ -47,8 +50,8 @@ export default function ResetPassword() {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="glass-card p-8 max-w-md w-full space-y-4">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-white">Set New Password</h1>
-          <p className="text-slate-400">Enter your new password below.</p>
+          <h1 className="text-2xl font-bold text-white">Set Password</h1>
+          <p className="text-slate-400">Create a password to secure your offline profile.</p>
         </div>
 
         {!success ? (
@@ -64,7 +67,7 @@ export default function ResetPassword() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">Confirm New Password</label>
+              <label className="block text-sm font-medium text-slate-300 mb-1">Confirm Password</label>
               <input
                 type="password"
                 placeholder="Confirm new password"
@@ -74,7 +77,7 @@ export default function ResetPassword() {
               />
             </div>
             <button type="submit" disabled={loading} className="btn-primary w-full">
-              {loading ? "Updating..." : "Update Password"}
+              {loading ? "Updating..." : "Save Password"}
             </button>
             {error && <p className="text-rose-400 text-sm">{error}</p>}
           </form>
@@ -83,7 +86,7 @@ export default function ResetPassword() {
             <div className="flex justify-center">
               <VitaAvatar state="success" size={80} />
             </div>
-            <p className="text-slate-300">Your password has been reset. You can now sign in.</p>
+            <p className="text-slate-300">Password saved! You can now sign in.</p>
             <button onClick={() => navigate("/sign-in")} className="btn-primary w-full">
               Sign In
             </button>

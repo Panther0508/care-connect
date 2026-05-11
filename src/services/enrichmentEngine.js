@@ -1,7 +1,7 @@
 // AI Autonomous Self-Enrichment Engine
 // Runs background knowledge worker after primary AI responses
 
-import { openDB } from 'idb';
+import { openDB } from '../lib/idb';
 
 const DB_NAME = 'vitachain-enrichment';
 const DB_VERSION = 1;

@@ -1,4 +1,4 @@
-# VitaChain
+﻿# VitaChain
 
 A revolutionary AI-powered healthcare platform for Africa, combining offline-first architecture with advanced medical AI to deliver equitable healthcare access.
 
@@ -36,7 +36,7 @@ npm run build
 | Nutrition & Fitness Tracking | Personalized wellness plans | ✅ |
 | Emergency Response System | Crisis detection and one-touch emergency call | ✅ |
 | Multi-Role Authentication | Patient, Clinician, CHW, Admin roles | ✅ |
-| Satellite Data Integration | Real-time health metrics from mesh networks | ✅ |
+| Satellite Data Integration | Real-time health metrics from mesh networks (Currently stubbed with a mock endpoint; production satellite integration is a future roadmap item.) |
 | Biometric Security | Native biometric authentication | ✅ |
 | Multilingual Support | 10+ African languages | ✅ |
 | PWA Installation | Installable web app | ✅ |
@@ -130,7 +130,7 @@ VitaChain provides a revolutionary architecture to close the gap:
 | Feature | Description |
 |---------|-------------|
 | **Personal Health Graph** | Encrypted on-device health records (conditions, medications, allergies, encounters, immunizations, lab results, vitals, family history) using Automerge CRDTs |
-| **Hybrid AI Engine** | Gemma 4 31B online + TinyLlama 1.1B offline + cached-response retrieval. Clinical summaries, medication interaction checks, differential diagnosis, ICD-10 coding, structured JSON output via function calling |
+| **Hybrid AI Engine** | Gemma 4 31B online + TinyLlama 1.1B offline + cached-response retrieval. Clinical summaries, medication interaction checks, differential diagnosis, ICD-10 coding, structured JSON output via function calling (planned) |
 | **Multi-Role Support** | Patient (health companion), Clinician (decision-support), Community Health Worker (triage + protocol guidance), Admin (analytics + user management) |
 | **Wellness Trackers** | Nutrition (food database with 150+ African foods + 500 global foods), Workout (800+ exercises), Cycle tracking, Mental Health (PHQ-9 / GAD-7), Sleep, Hydration, Medication reminders |
 | **Rewards & Gamification** | VitaPoints, 15+ badges, streaks, quests, milestones, celebration animations |
@@ -138,7 +138,7 @@ VitaChain provides a revolutionary architecture to close the gap:
 | **Education Hub** | 30 bite-sized health education modules with quizzes (hypertension, diabetes, maternal health, first aid, etc.) |
 | **Care Locator** | Offline-cached Leaflet map with facility pins, filter by type/distance, trust scores |
 | **Emergency Medical ID** | Lock-screen accessible blood type, allergies, emergency contacts, SOS dial button |
-| **Mesh Intelligence** | Anonymous peer-to-peer gossip over Bluetooth/BroadcastChannel — search counters, facility confirmations, stockout alerts, outbreak detection |
+| **Mesh Intelligence** | Anonymous peer-to-peer gossip over Bluetooth/BroadcastChannel — search counters, facility confirmations, stockout alerts, outbreak detection (Mesh sync is currently simulated via BroadcastChannel (tab‑to‑tab) on web; native Bluetooth LE mesh is available in the Capacitor APK.) |
 | **Universal Health Passport** | W3C Verifiable Credentials encoded as QR codes — share a structured pre-visit summary with any clinician, no internet needed |
 | **Reasoning Trace & Citations** | Every AI response shows its chain-of-thought (data sources queried, retrieval steps, inference) with clickable source badges linking to original URL |
 | **Built-In Evaluation** | Every AI response scored on Safety, Clarity, Usefulness, Medical Responsibility — viewable on an admin dashboard |
@@ -190,7 +190,7 @@ graph TB
 
 **Frontend & Build:** React 18 + TypeScript, Vite, Tailwind CSS, React Router DOM, Framer Motion
 
-**Offline AI (Browser-Native):** Transformers.js v4, ONNX Runtime Web, TinyLlama 1.1B (quantized ONNX, ~450 MB), Qwen 1.5 0.5B (CHW), all-MiniLM-L6-v2 (embeddings), NLLB-200 600M (translation, 200 languages), Whisper-tiny (speech-to-text), CLIP-ViT-Base-Patch32 (image classification), MedSAM-ViT-Base (image segmentation)
+**Offline AI (Browser-Native):** Transformers.js v4, ONNX Runtime Web, TinyLlama 1.1B (offline text generation, ONNX, ~450 MB), all‑MiniLM‑L6‑v2 (offline embeddings, ONNX, ~25 MB), NLLB-200 600M (translation, 200 languages) (requires first online visit for model download), Whisper-tiny (speech-to-text) (requires first online visit for model download), CLIP-ViT-Base-Patch32 (image classification), MedSAM-ViT-Base (image segmentation)
 
 **Online AI (Free Tier):** Gemma 4 31B via Google AI Studio (1,500 calls/day free), OpenRouter (200 req/day free), HuggingFace Serverless (5,000 calls/month), LangSearch / SearXNG / DuckDuckGo (web search), PubMed E-utilities, ClinicalTrials.gov v2, OpenFDA, WHO GHO, disease.sh
 
@@ -328,7 +328,7 @@ Third-party components (Transformers.js, Gemma 4 models, etc.) remain under thei
 - **FAO/INFOODS** — West African Food Composition Table
 - **free-exercise-db** — Public-domain exercise data
 - **FirstAidQA** — Emergency response dataset
-- **Squad / HabariPay** — Payment infrastructure
+- **Squad / HabariPay** — Payment infrastructure (Payment verification endpoint is pending; checkout creation is functional in sandbox mode.)
 - **HealthIcons.org** — CC0 medical icons
 - **Capacitor** — Native mobile bridging
 - **Automerge** — Local-first CRDTs

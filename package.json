@@ -17,9 +17,9 @@
   },
   "dependencies": {
     "@automerge/automerge": "^2.2.8",
+    "@capacitor/android": "^8.3.1",
     "@capacitor/core": "^8.3.1",
     "@capgo/capacitor-native-biometric": "^8.4.2",
-    "@clerk/clerk-react": "^5.61.6",
     "@finegym/fitness-calc": "^1.0.1",
     "@huggingface/transformers": "^4.2.0",
     "@radix-ui/react-accordion": "^1.2.12",

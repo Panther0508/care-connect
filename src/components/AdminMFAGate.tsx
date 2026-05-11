@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from "../context/AuthContext";
 import { Navigate } from 'react-router-dom';
 import { adminAuditLogger } from '@/services/adminAuditLogger';
 import MagnifyingLoader from './MagnifyingLoader';
@@ -68,7 +68,7 @@ const AdminMFAGate: React.FC<AdminMFAGateProps> = ({ children }) => {
          }
 
          // Fallback: Mock QR code using email as identifier
-         const mockQrData = `otpauth://totp/CareConnect:${email}?secret=JBSWY3DPEHPK3PXP&issuer=CareConnect`;
+         const mockQrData = `otpauth://totp/VitaChain:${email}?secret=JBSWY3DPEHPK3PXP&issuer=VitaChain`;
          setQrCodeUrl(`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(mockQrData)}`);
        }
      };

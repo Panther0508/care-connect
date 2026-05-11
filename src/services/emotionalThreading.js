@@ -2,29 +2,12 @@
 // Affective Flow - Thread conversation emotional history
 // Based on AFlow (Affective Flow Language Model for Emotional Support Conversation)
 
+import { openDB } from '../lib/idb';
 const DB_NAME = 'vitachain-emotional';
 const DB_VERSION = 1;
 const STORE = 'threads';
 
 let dbInstance = null;
-
-const openDB = async () => {
-  if (dbInstance) return dbInstance;
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE)) {
-        const store = db.createObjectStore(STORE, { keyPath: 'userId' });
-      }
-    };
-    req.onsuccess = (e) => {
-      dbInstance = e.target.result;
-      resolve(dbInstance);
-    };
-    req.onerror = (e) => reject(e.target.error);
-  });
-};
 
 /**
  * Get emotional thread context for a user

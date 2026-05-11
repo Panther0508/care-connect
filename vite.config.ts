@@ -12,6 +12,20 @@ function apiMockMiddleware(): Plugin {
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         if (req.url?.startsWith('/api/')) {
+          // Mock proxy endpoint for DuckDuckGo and Wikipedia
+          if (req.url?.startsWith('/api/proxy')) {
+            res.setHeader('Content-Type', 'application/json');
+            // Return mock medical search results immediately
+            res.end(JSON.stringify({
+              AbstractText: 'Medical information about symptoms, diagnosis, and treatment options.',
+              Heading: 'Health Information',
+              RelatedTopics: [
+                { Text: 'Common symptoms include fever, headache, and fatigue', FirstURL: 'https://example.com/symptoms' },
+                { Text: 'Treatment guidelines and best practices', FirstURL: 'https://example.com/treatment' }
+              ]
+            }));
+            return;
+          }
           if (req.url.startsWith('/api/search')) {
             res.setHeader('Content-Type', 'application/json');
             res.end(JSON.stringify({ results: [] }));

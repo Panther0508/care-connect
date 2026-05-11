@@ -6,8 +6,7 @@ interface GlassCardProps {
   className?: string;
   hover?: boolean;
   onClick?: () => void;
-  borderColor?: string;
-  glowColor?: string;
+  depth?: 'none' | 'tight' | 'loose';
 }
 
 export default function GlassCard({
@@ -15,22 +14,19 @@ export default function GlassCard({
   className = '',
   hover = true,
   onClick,
-  borderColor = 'border-white/10',
-  glowColor = 'shadow-glow-primary',
+  depth = 'tight',
 }: GlassCardProps) {
-  const baseStyles = 'bg-surface/60 backdrop-blur-xl border rounded-2xl transition-all duration-300';
-  const hoverStyles = hover
-    ? 'hover:border-teal-500/30 hover:bg-slate-800/70 hover:shadow-lg'
-    : '';
   const interactive = onClick ? 'cursor-pointer active:scale-[0.98]' : '';
+  const hoverClass = hover ? 'hover-scale-103 shadow-glass-hover' : '';
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={hover ? { y: -2 } : undefined}
+      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
       onClick={onClick}
-      className={`${baseStyles} ${borderColor} ${hoverStyles} ${glowColor} ${interactive} ${className}`}
+      data-depth={depth}
+      className={`glass-card ${interactive} ${hoverClass} ${className}`}
     >
       {children}
     </motion.div>

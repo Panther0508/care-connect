@@ -2,43 +2,13 @@
 // Adaptive Reminders Engine - Smart notification scheduling
 // Uses native IndexedDB
 
+import { openDB } from '../lib/idb';
 const DB_NAME = 'vitachain-adaptive-reminders';
 const DB_VERSION = 1;
 const SETTINGS_STORE = 'reminderSettings';
 const HISTORY_STORE = 'reminderHistory';
 
 let dbInstance = null;
-
-const openDB = async () => {
-  if (dbInstance) return dbInstance;
-
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result;
-      if (!db.objectStoreNames.contains(SETTINGS_STORE)) {
-        const settingsStore = db.createObjectStore(SETTINGS_STORE, { keyPath: ['userId', 'type'] });
-        settingsStore.createIndex('userId', 'userId');
-      }
-      if (!db.objectStoreNames.contains(HISTORY_STORE)) {
-        const historyStore = db.createObjectStore(HISTORY_STORE, { keyPath: 'id', autoIncrement: true });
-        historyStore.createIndex('userId', 'userId');
-        historyStore.createIndex('type', 'type');
-        historyStore.createIndex('timestamp', 'timestamp');
-      }
-    };
-
-    request.onsuccess = (event) => {
-      dbInstance = event.target.result;
-      resolve(dbInstance);
-    };
-
-    request.onerror = (event) => {
-      reject(event.target.error);
-    };
-  });
-};
 
 // Reminder types
 export const REMINDER_TYPES = [

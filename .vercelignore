@@ -1,1 +1,2 @@
-public/models/Xenova/TinyLlama-1.1B-Chat-v1.0/
+# Ignore local AI model files (loaded from GitHub Release)
+public/models/

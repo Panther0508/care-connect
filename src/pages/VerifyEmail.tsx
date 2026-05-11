@@ -1,25 +1,22 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSignUp } from "@clerk/clerk-react";
 import VitaAvatar from "../components/VitaAvatar";
+import { useAuth } from "../context/AuthContext";
 
 export default function VerifyEmail() {
-  const { signUp } = useSignUp();
   const navigate = useNavigate();
+  const { isSignedIn } = useAuth();
   const [sent, setSent] = useState(false);
-  const [error, setError] = useState("");
 
-  const handleResend = async () => {
-    try {
-      await signUp?.resendVerificationEmail();
-      setSent(true);
-      setError("");
-    } catch (err) {
-      setError(err?.message || "Failed to resend verification email");
-    }
+  // Offline: auto-skip verification if signed in
+  if (isSignedIn) {
+    navigate("/dashboard");
+    return null;
+  }
+
+  const handleContinue = () => {
+    navigate("/sign-in");
   };
-
-  const email = signUp?.emailAddress || "your email";
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -27,27 +24,15 @@ export default function VerifyEmail() {
         <div className="flex justify-center">
           <VitaAvatar state="default" size={80} />
         </div>
-        <h1 className="text-2xl font-bold text-white">Check Your Email!</h1>
+        <h1 className="text-2xl font-bold text-white">Offline Mode</h1>
         <p className="text-slate-400">
-          We've sent a verification link to{" "}
-          <span className="text-teal-300">{email}</span>. Click the link to activate your account.
+          VitaChain works completely offline without email verification.
+          Your health data stays on your device.
         </p>
 
-        {!sent ? (
-          <button onClick={handleResend} className="btn-primary">
-            Resend Verification Email
-          </button>
-        ) : (
-          <p className="text-teal-400 text-sm">Verification email sent! Check your inbox (and spam).</p>
-        )}
-
-        {error && <p className="text-rose-400 text-sm">{error}</p>}
-
-        <p className="text-sm">
-          <button onClick={() => navigate("/sign-in")} className="text-teal-400 hover:underline">
-            Back to Sign In
-          </button>
-        </p>
+        <button onClick={handleContinue} className="btn-primary">
+          Continue to Sign In
+        </button>
       </div>
     </div>
   );

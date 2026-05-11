@@ -1,10 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth } from '../../context/AuthContext';
 import { getItem, setItem, removeItem } from '../../lib/idb';
 
-const OFFLINE_TOKEN_KEY = 'vita_offline_token';
 const OFFLINE_USER_KEY = 'vita_offline_user';
-const GRACE_PERIOD_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 interface OfflineUser {
   id: string;
@@ -18,55 +16,38 @@ interface OfflineUser {
   };
 }
 
-interface OfflineToken {
-  token: string;
-  expiresAt: number;
-  user: OfflineUser;
-}
-
 export function useOfflineAuth() {
-  const { isSignedIn, isLoaded, getToken, signOut, user } = useAuth();
+  const { isSignedIn, isLoaded, user } = useAuth();
   const [isOfflineReady, setIsOfflineReady] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const [offlineToken, setOfflineToken] = useState<OfflineToken | null>(null);
+  const [offlineUser, setOfflineUser] = useState<OfflineUser | null>(null);
 
-  // Store token and user data in encrypted IndexedDB
-  const storeOfflineAuth = useCallback(async (tokenData: OfflineToken) => {
+  // Store user data in IndexedDB
+  const storeOfflineUser = useCallback(async (userData: OfflineUser) => {
     try {
-      await setItem(OFFLINE_TOKEN_KEY, tokenData);
-      console.log('Offline auth data stored');
+      await setItem(OFFLINE_USER_KEY, userData);
+      console.log('Offline user data stored');
     } catch (error) {
-      console.error('Failed to store offline auth:', error);
+      console.error('Failed to store offline user:', error);
     }
   }, []);
 
-  // Retrieve and validate offline token
-  const retrieveOfflineAuth = useCallback(async (): Promise<OfflineToken | null> => {
+  // Retrieve offline user
+  const retrieveOfflineUser = useCallback(async (): Promise<OfflineUser | null> => {
     try {
-      const stored = await getItem<OfflineToken>(OFFLINE_TOKEN_KEY);
-      if (!stored) return null;
-
-      // Check if token is within grace period
-      const now = Date.now();
-      if (now > stored.expiresAt + GRACE_PERIOD_MS) {
-        console.log('Offline token expired');
-        await removeItem(OFFLINE_TOKEN_KEY);
-        return null;
-      }
-
+      const stored = await getItem<OfflineUser>(OFFLINE_USER_KEY);
       return stored;
     } catch (error) {
-      console.error('Failed to retrieve offline auth:', error);
+      console.error('Failed to retrieve offline user:', error);
       return null;
     }
   }, []);
 
-  // Clear offline auth data
+  // Clear offline user data
   const clearOfflineAuth = useCallback(async () => {
     try {
-      await removeItem(OFFLINE_TOKEN_KEY);
       await removeItem(OFFLINE_USER_KEY);
-      setOfflineToken(null);
+      setOfflineUser(null);
     } catch (error) {
       console.error('Failed to clear offline auth:', error);
     }
@@ -74,19 +55,8 @@ export function useOfflineAuth() {
 
   // Monitor online status
   useEffect(() => {
-    const handleOnline = () => {
-      setIsOffline(false);
-      // Attempt to refresh token when back online
-      if (isSignedIn && getToken) {
-        getToken({ forceRefresh: true }).then((newToken) => {
-          console.log('Token refreshed after reconnect');
-        });
-      }
-    };
-
-    const handleOffline = () => {
-      setIsOffline(true);
-    };
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
@@ -95,16 +65,16 @@ export function useOfflineAuth() {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, [isSignedIn, getToken]);
+  }, []);
 
-  // Check for offline token on mount
+  // Check for offline user on mount
   useEffect(() => {
     const checkOfflineAuth = async () => {
-      if (isOffline && !isSignedIn) {
-        const token = await retrieveOfflineAuth();
-        if (token) {
-          setOfflineToken(token);
-          console.log('Offline auth restored for user:', token.user.id);
+      if (isOffline) {
+        const userData = await retrieveOfflineUser();
+        if (userData) {
+          setOfflineUser(userData);
+          console.log('Offline user restored:', userData.id);
         }
       }
     };
@@ -112,55 +82,48 @@ export function useOfflineAuth() {
     if (isLoaded) {
       checkOfflineAuth().then(() => setIsOfflineReady(true));
     }
-  }, [isLoaded, isOffline, isSignedIn, retrieveOfflineAuth]);
+  }, [isLoaded, isOffline, retrieveOfflineUser]);
 
   // Store current session when signed in
   useEffect(() => {
-    if (isSignedIn && user && !isOffline) {
-      // Get fresh token
-      getToken().then((token) => {
-        if (token) {
-          const expiresAt = Date.now() + 60 * 1000; // Clerk tokens are ~60s
-          const offlineData: OfflineToken = {
-            token,
-            expiresAt,
-            user: {
-              id: user.id,
-              firstName: user.firstName || '',
-              lastName: user.lastName || '',
-              email: user.emailAddresses[0]?.emailAddress || '',
-              imageUrl: user.imageUrl || '',
-              publicMetadata: user.publicMetadata as any,
-            },
-          };
-          storeOfflineAuth(offlineData);
-          setOfflineToken(offlineData);
-        }
-      });
+    if (isSignedIn && user) {
+      const offlineData: OfflineUser = {
+        id: user.id,
+        firstName: user.fullName?.split(' ')[0] || '',
+        lastName: user.fullName?.split(' ').slice(1).join(' ') || '',
+        email: '',
+        imageUrl: user.imageUrl || '',
+        publicMetadata: {
+          role: (user.publicMetadata?.role as string) || 'patient',
+          hasCompletedOnboarding: false,
+        },
+      };
+      storeOfflineUser(offlineData);
+      setOfflineUser(offlineData);
     }
-  }, [isSignedIn, user, getToken, storeOfflineAuth, isOffline]);
+  }, [isSignedIn, user, storeOfflineUser]);
 
-  const signOutWithOfflineClear = useCallback(async () => {
+  // Sign out - clear offline data
+  const signOut = useCallback(async () => {
     await clearOfflineAuth();
-    return signOut();
-  }, [clearOfflineAuth, signOut]);
+    localStorage.removeItem("vitachain_session");
+    localStorage.removeItem("vitachain_onboarded");
+    localStorage.removeItem("user_role");
+    localStorage.removeItem("onboarding_completed");
+    localStorage.removeItem("user_name");
+  }, [clearOfflineAuth]);
 
   // Determine if user can access the app
-  const canAccessApp = isSignedIn || (offlineToken !== null);
+  const canAccessApp = isSignedIn || (offlineUser !== null);
 
   return {
     isSignedIn,
     isLoaded,
     isOffline,
-    offlineToken: offlineToken?.user || null,
+    offlineUser,
     isOfflineReady,
     canAccessApp,
-    signOut: signOutWithOfflineClear,
-    refreshToken: async () => {
-      if (isSignedIn && getToken) {
-        return await getToken({ forceRefresh: true });
-      }
-      return offlineToken?.token || null;
-    },
+    signOut,
+    refreshToken: async () => null,
   };
 }

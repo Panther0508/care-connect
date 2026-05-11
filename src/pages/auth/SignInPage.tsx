@@ -1,20 +1,37 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { useAuth, SignIn } from "@clerk/clerk-react";
-import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import BiometricButton from "../../components/BiometricButton";
 
 export default function SignInPage() {
   const { isSignedIn } = useAuth();
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [biometricError, setBiometricError] = useState("");
 
   if (isSignedIn) {
     navigate("/dashboard");
     return null;
   }
 
-  return (
+  const handleBiometricSuccess = () => {
+    // For demo: if biometric verifies, we simulate a signed-in state
+    // In production, this would trigger Clerk's sign-in via custom token
+    setBiometricError("");
+    // Optionally: navigate to dashboard or show success message
+    navigate("/dashboard");
+  };
+
+  const handleBiometricError = (error: string) => {
+    setBiometricError(error);
+  };
+
+  const handleRegisterBiometric = () => {
+    setBiometricError("Please log in first, then enable biometrics in Settings.");
+  };
+
+return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -32,37 +49,30 @@ export default function SignInPage() {
         </div>
 
         <div className="glass-card p-6">
-          <SignIn
-            appearance={{
-              elements: {
-                rootBox: "mx-auto w-full",
-                card: "bg-transparent shadow-none",
-                header: "hidden",
-                footer: "hidden",
-                formButtonPrimary: "bg-teal-600 hover:bg-teal-500 text-white rounded-xl",
-                formFieldInput:
-                  "glass-input w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/30 text-white focus:border-teal-400",
-              },
-            }}
-          />
-          <p className="text-center text-xs text-slate-400 mt-4">
-            Forgot your password?{' '}
-            <button
-              onClick={() => navigate("/forgot-password")}
-              className="text-teal-400 hover:underline"
-            >
-              Reset it
-            </button>
-          </p>
+          <button
+            onClick={() => navigate("/onboarding")}
+            className="w-full bg-teal-600 hover:bg-teal-500 text-white py-3 rounded-xl font-medium"
+          >
+            Get Started
+          </button>
         </div>
 
-        <p className="text-center text-slate-400 text-sm mt-6">
-          Don't have an account?{' '}
+        <div className="mt-6">
+          <BiometricButton
+            onSuccess={handleBiometricSuccess}
+            onError={handleBiometricError}
+            onRegisterRequired={handleRegisterBiometric}
+          />
+          {biometricError && <p className="text-rose-400 text-xs text-center mt-2">{biometricError}</p>}
+        </div>
+
+        <p className="text-center text-xs text-slate-400 mt-4">
+          New to VitaChain?{' '}
           <button
             onClick={() => navigate("/sign-up")}
-            className="text-teal-400 hover:underline font-medium"
+            className="text-teal-400 hover:underline"
           >
-            Sign up
+            Create an account
           </button>
         </p>
       </motion.div>

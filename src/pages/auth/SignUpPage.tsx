@@ -1,13 +1,10 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { useAuth, SignUp } from "@clerk/clerk-react";
-import { Mail, Lock, Eye, EyeOff, ArrowRight, Check } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 export default function SignUpPage() {
   const { isSignedIn } = useAuth();
   const navigate = useNavigate();
-  const [showPassword, setShowPassword] = useState(false);
 
   if (isSignedIn) {
     navigate("/onboarding");
@@ -32,20 +29,12 @@ export default function SignUpPage() {
         </div>
 
         <div className="glass-card p-6">
-          <SignUp
-            afterSignUpUrl="/verify-email"
-            appearance={{
-              elements: {
-                rootBox: "mx-auto w-full",
-                card: "bg-transparent shadow-none",
-                header: "hidden",
-                footer: "hidden",
-                formButtonPrimary: "bg-teal-600 hover:bg-teal-500 text-white rounded-xl",
-                formFieldInput:
-                  "glass-input w-full px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/30 text-white focus:border-teal-400",
-              },
-            }}
-          />
+          <button
+            onClick={() => navigate("/onboarding")}
+            className="w-full bg-teal-600 hover:bg-teal-500 text-white py-3 rounded-xl font-medium"
+          >
+            Get Started
+          </button>
         </div>
 
         <p className="text-center text-slate-400 text-sm mt-6">

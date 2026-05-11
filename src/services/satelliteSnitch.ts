@@ -63,15 +63,18 @@ async function triggerUpload(): Promise<void> {
 
     // Simulated upload - in production would POST to Vercel function
     // For tests, we need to actually POST to mock endpoint
-    try {
-      await fetch('/api/satellite-ingest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-    } catch (e) {
-      // ignore network errors during dev
-    }
+      try {
+        const token = import.meta.env.VITE_SATELLITE_AUTH_TOKEN;
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        await fetch('/api/satellite-ingest', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(payload)
+        });
+      } catch (e) {
+        // ignore network errors during dev
+      }
 
     localStorage.setItem(SYNC_KEY, Date.now().toString());
   } catch (error) {

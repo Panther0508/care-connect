@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { QrCode, Download, Share2, Shield, FileText, AlertTriangle, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth } from "../context/AuthContext";
 import { getCurrentHealthState, initHealthGraph } from "../services/healthGraph";
 import { generatePassport } from "../services/passport";
 import LoadingSpinner from "../components/LoadingSpinner";

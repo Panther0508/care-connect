@@ -1,14 +1,12 @@
-import { useAuth } from '@clerk/clerk-react';
 import { useEffect, useMemo } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { getRoleFromMetadata, ROLES, UserRole, hasPermission, ROLE_PERMISSIONS } from '../../lib/roles';
 
 export function useRole() {
   const { user, isLoaded } = useAuth();
 
   // IMMEDIATE synchronous read from localStorage — always available
-  const localStorageRole = useMemo(() => {
-    return (localStorage.getItem('user_role') as UserRole) || null;
-  }, []);
+  const localStorageRole = (localStorage.getItem('user_role') as UserRole) || null;
 
   // Clerk-based role (may be null initially)
   const clerkRole = isLoaded && user ? getRoleFromMetadata(user.publicMetadata) : null;

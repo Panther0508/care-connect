@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { isBiometricAvailable, getBiometricType, biometricVerify } from '../../../lib/biometric/biometricAuth';
+import { isBiometricAvailable, getBiometricType, biometricVerify, registerBiometric, isBiometricRegistered } from '../../../services/biometricAuth';
 import MagnifyingLoader from '../../../components/MagnifyingLoader';
 
 interface StepBiometricsProps {

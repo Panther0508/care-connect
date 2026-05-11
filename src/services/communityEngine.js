@@ -2,49 +2,13 @@
 // Community Features - Community Health Forum
 // Uses native IndexedDB (no external dependencies)
 
+import { openDB } from '../lib/idb';
 const DB_NAME = 'vitachain-community';
 const DB_VERSION = 1;
 
 let dbInstance = null;
 
 // Open community database
-const openDB = async () => {
-  if (dbInstance) return dbInstance;
-
-  return new Promise((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result;
-
-      // Create object stores for posts
-      if (!db.objectStoreNames.contains('posts')) {
-        const postStore = db.createObjectStore('posts', { keyPath: 'id', autoIncrement: true });
-        postStore.createIndex('topic', 'topic');
-        postStore.createIndex('authorId', 'authorId');
-        postStore.createIndex('createdAt', 'createdAt');
-      }
-
-      // Create object stores for comments
-      if (!db.objectStoreNames.contains('comments')) {
-        const commentStore = db.createObjectStore('comments', { keyPath: 'id', autoIncrement: true });
-        commentStore.createIndex('postId', 'postId');
-        commentStore.createIndex('authorId', 'authorId');
-        commentStore.createIndex('createdAt', 'createdAt');
-      }
-    };
-
-    request.onsuccess = (event) => {
-      dbInstance = event.target.result;
-      resolve(dbInstance);
-    };
-
-    request.onerror = (event) => {
-      reject(event.target.error);
-    };
-  });
-};
-
 // Initialize community database (noop - openDB handles initialization)
 const initCommunityDB = async () => {
   return openDB();

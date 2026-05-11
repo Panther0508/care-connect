@@ -3,31 +3,13 @@
 // Stores query-response pairs for future offline model improvement
 // Based on Gemma teaching pattern from Phase 3 + AFlow research
 
+import { openDB } from '../lib/idb';
 const DB_NAME = 'vitachain-training';
 const DB_VERSION = 1;
 const PAIRS_STORE = 'trainingPairs';
 const CYCLES_STORE = 'trainingCycles';
 
 let dbInstance = null;
-
-const openDB = async () => {
-  if (dbInstance) return dbInstance;
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(PAIRS_STORE)) {
-        db.createObjectStore(PAIRS_STORE, { keyPath: 'id', autoIncrement: true });
-        db.createObjectStore(PAIRS_STORE).createIndex('timestamp', 'timestamp');
-      }
-      if (!db.objectStoreNames.contains(CYCLES_STORE)) {
-        db.createObjectStore(CYCLES_STORE, { keyPath: 'id', autoIncrement: true });
-      }
-    };
-    req.onsuccess = (e) => { dbInstance = e.target.result; resolve(dbInstance); };
-    req.onerror = (e) => reject(e.target.error);
-  });
-};
 
 /**
  * Log an AI interaction as training pair
