@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { TrendingUp, Activity, Heart, Pill, Target, Calendar, ChevronRight, Sparkles } from "lucide-react";
+import { TrendingUp, Activity, Heart, Pill, Target, Calendar, ChevronRight, Sparkles, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { getCurrentHealthState } from "../../services/healthGraph";
 import PWAInstallPrompt from "../../components/PWAInstallPrompt";
