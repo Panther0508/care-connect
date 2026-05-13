@@ -79,6 +79,7 @@ const EncounterLogger = lazy(() => import("./pages/EncounterLogger"));
 const EmergencyID = lazy(() => import("./pages/EmergencyID"));
 const RewardsPage = lazy(() => import("./pages/RewardsPage"));
 const QuestsPage = lazy(() => import("./pages/QuestsPage"));
+const LabReport = lazy(() => import("./pages/LabReport"));
 const TrainingDashboard = lazy(() => import("./pages/TrainingDashboard"));
 const EvaluationDashboard = lazy(() => import("./pages/EvaluationDashboard"));
 const ImageLibrary = lazy(() => import("./pages/ImageLibrary"));
@@ -426,15 +427,24 @@ const App = () => {
               } />
               
               {/* Emergency Medical ID - accessible to all roles */}
-             <Route path="/emergency" element={
-               <AuthSyncGate>
-                 <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
-                   <PageWrapper><EmergencyID /></PageWrapper>
-                 </ProtectedRoute>
-               </AuthSyncGate>
-             } />
-             
-             <Route path="/passport" element={
+              <Route path="/emergency" element={
+                <AuthSyncGate>
+                  <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                    <PageWrapper><EmergencyID /></PageWrapper>
+                  </ProtectedRoute>
+                </AuthSyncGate>
+              } />
+
+              {/* Lab Report OCR */}
+              <Route path="/lab-report" element={
+                <AuthSyncGate>
+                  <ProtectedRoute allowedRoles={['patient', 'clinician', 'chw', 'admin']}>
+                    <PageWrapper><LabReport /></PageWrapper>
+                  </ProtectedRoute>
+                </AuthSyncGate>
+              } />
+
+              <Route path="/passport" element={
               <AuthSyncGate>
                 <ProtectedRoute allowedRoles={['patient', 'chw']}>
                   <PageWrapper><Passport /></PageWrapper>

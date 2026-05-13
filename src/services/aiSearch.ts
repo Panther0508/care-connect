@@ -3,10 +3,8 @@ import { getAllFacilities, getAllVectors } from '../lib/idb';
 import { searchOnline } from './onlineSearch';
 import { meshOrchestrator } from './meshOrchestrator';
 
-// Embedding model: LOCAL ONLY — no remote CDN fetches
-env.localModelPath = '/models/';
-env.allowRemoteModels = false;   // Block HuggingFace CDN
-env.allowLocalModels = true;     // Allow /models/ path
+// Embedding model configuration — relies on global env set by modelLoader
+// No local overrides; inherit allowRemoteModels/allowLocalSettings from modelLoader
 env.useBrowserCache = true;
 
 export interface Facility {

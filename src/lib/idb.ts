@@ -1,6 +1,6 @@
 export function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("vitachain", 15);
+    const request = indexedDB.open("vitachain", 16);
 
     request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
       const db = (event.target as IDBOpenDBRequest).result;
@@ -50,6 +50,24 @@ export function openDB(): Promise<IDBDatabase> {
           { name: "savedLiterature", keyPath: "pmid" },
           { name: "carePlans", keyPath: "conditionId" },
           { name: "carePlanLogs", keyPath: "id", autoIncrement: true },
+          // NEW MISSING STORES ADDED BELOW
+          { name: "reminderSettings", keyPath: "key" },
+          { name: "reminderHistory", keyPath: "id", autoIncrement: true },
+          { name: "posts", keyPath: "id", autoIncrement: true },
+          { name: "comments", keyPath: "id", autoIncrement: true },
+          { name: "avatarData", keyPath: "userId" },
+          { name: "educationModules", keyPath: "id", autoIncrement: true },
+          { name: "educationProgress", keyPath: "id", autoIncrement: true },
+          { name: "threads", keyPath: "userId" },
+          { name: "userMilestones", keyPath: "userId" },
+          { name: "questProgress", keyPath: "id", autoIncrement: true },
+          { name: "questHistory", keyPath: "id", autoIncrement: true },
+          { name: "rewardsData", keyPath: "userId" },
+          { name: "streaksData", keyPath: "userId" },
+          { name: "badgesData", keyPath: "userId" },
+          { name: "trainingCycles", keyPath: "id", autoIncrement: true },
+          { name: "medicationCache", keyPath: "drugName" },
+          { name: "dataCache", keyPath: "key" },
         ];
 
         stores.forEach(s => {
@@ -900,6 +918,18 @@ export async function addMedicationLog(log: Omit<MedicationLog, 'id'>): Promise<
     const store = transaction.objectStore("medicationLogs");
     const request = store.add(log);
     request.onsuccess = () => resolve(request.result as number);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+export async function updateMedicationLog(log: MedicationLog): Promise<void> {
+  if (log.id === undefined) throw new Error('Cannot update MedicationLog without id');
+  const db = await openDB();
+  return new Promise<void>((resolve, reject) => {
+    const transaction = db.transaction("medicationLogs", "readwrite");
+    const store = transaction.objectStore("medicationLogs");
+    const request = store.put(log);
+    request.onsuccess = () => resolve();
     request.onerror = () => reject(request.error);
   });
 }

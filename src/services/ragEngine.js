@@ -5,10 +5,7 @@
 import { pipeline, env } from '@huggingface/transformers';
 import { openDB } from '../lib/idb';
 
-// Embedding model: LOCAL ONLY — no remote CDN fetches
-env.localModelPath = '/models/';
-env.allowRemoteModels = false;   // Block HuggingFace CDN
-env.allowLocalModels = true;     // Allow /models/ path
+// Embedding model uses global env configuration from modelLoader
 env.useBrowserCache = true;
 
 let embedder = null;

@@ -24,7 +24,6 @@ import {
   Mail
 } from "lucide-react";
 import { useState } from "react";
-import { clearActiveUser } from "../services/healthGraph";
 
 interface HamburgerDrawerProps {
   open: boolean;
@@ -76,28 +75,18 @@ export default function HamburgerDrawer({ open, onOpenChange }: HamburgerDrawerP
   const [signingOut, setSigningOut] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const handleSignOut = async () => {
-    setSigningOut(true);
-    try {
-      if (isSignedIn) {
-        await signOut();
-      } else {
-        // Offline fallback: clear local storage
-        localStorage.removeItem("vitachain_session");
-        localStorage.removeItem("vitachain_onboarded");
-        localStorage.removeItem("user_role");
-        localStorage.removeItem("onboarding_completed");
-      }
-      clearActiveUser();
-      navigate("/");
-      onOpenChange(false);
-    } catch (err) {
-      console.error("Sign out error:", err);
-    } finally {
-      setSigningOut(false);
-      setShowConfirm(false);
-    }
-  };
+   const handleSignOut = async () => {
+     setSigningOut(true);
+     try {
+       await signOut();
+       // signOut handles cleanup, state reset, and navigation
+     } catch (err) {
+       console.error("Sign out error:", err);
+     } finally {
+       setSigningOut(false);
+       setShowConfirm(false);
+     }
+   };
 
    // Build menu items based on role
    // We'll defer role check until drawer opens (role is read from localStorage synchronously)

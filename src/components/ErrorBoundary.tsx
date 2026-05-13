@@ -30,8 +30,7 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className="min-h-screen bg-slate-900 flex items-center justify-center text-slate-400 p-4">
           <div className="text-center">
             <h1 className="font-bold text-red-400 mb-2">{i18n.t('error')}</h1>
-            <p className="mb-4">{i18n.t('Something went wrong')}</p>
-            <pre className="text-xs text-slate-500 max-w-md mx-auto overflow-auto">{this.state.error?.message}</pre>
+            <p className="mb-4">{i18n.t('Something went wrong. Please refresh.')}</p>
             <button
               onClick={() => window.location.reload()}
               className="mt-4 btn-primary"

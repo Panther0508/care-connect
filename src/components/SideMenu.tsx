@@ -58,23 +58,14 @@ export default function SideMenu({ open, onOpenChange }: SideMenuProps) {
     onOpenChange(false);
   };
 
-  const handleSignOut = async () => {
-    try {
-      if (isSignedIn) {
-        await signOut();
-      } else {
-        localStorage.removeItem("vitachain_session");
-        localStorage.removeItem("vitachain_onboarded");
-        localStorage.removeItem("user_role");
-        localStorage.removeItem("onboarding_completed");
-      }
-      clearActiveUser();
-      navigate("/");
-      onOpenChange(false);
-    } catch (err) {
-      console.error("Sign out error:", err);
-    }
-  };
+   const handleSignOut = async () => {
+     try {
+       await signOut();
+       // signOut handles cleanup and redirect
+     } catch (err) {
+       console.error("Sign out error:", err);
+     }
+   };
 
   // Trap focus when open (accessibility)
   useEffect(() => {

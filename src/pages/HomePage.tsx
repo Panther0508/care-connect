@@ -43,18 +43,21 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, []);
 
-   // Load outbreak alerts for display
-   useEffect(() => {
-     const loadAlerts = async () => {
-       try {
-         const alerts = await getOutbreakAlerts();
-         setOutbreakAlerts(alerts.filter((a: any) => a.status === 'active'));
-       } catch (e) { console.error('Failed to load outbreak alerts:', e); }
-     };
-     loadAlerts();
-     const interval = setInterval(loadAlerts, 30000);
-     return () => clearInterval(interval);
-   }, []);
+    // Load outbreak alerts for display
+    useEffect(() => {
+      const loadAlerts = async () => {
+        try {
+          const alerts = await getOutbreakAlerts();
+          setOutbreakAlerts(alerts.filter((a: any) => a.status === 'active'));
+        } catch (e) {
+          console.error('Failed to load outbreak alerts:', e);
+          // Silently fail - alerts are non-critical
+        }
+      };
+      loadAlerts();
+      const interval = setInterval(loadAlerts, 30000);
+      return () => clearInterval(interval);
+    }, []);
 
    // Check demo mode flag
    useEffect(() => {

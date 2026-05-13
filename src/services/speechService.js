@@ -3,7 +3,7 @@
 
 import { pipeline, env } from '@huggingface/transformers';
 
-env.allowLocalModels = true;
+// Use global env configuration from modelLoader; enable browser cache
 env.useBrowserCache = true;
 
 let whisperModel = null;

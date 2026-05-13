@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { askMedicalQuestion, isModelReady, loadModel } from "../services/medicalAI";
 import { v4 as uuidv4 } from "uuid";
 import { getDB, storeMentalHealthLog } from "../lib/idb";
+import { useStatus } from "../hooks/useStatus";
 
 interface Question {
   id: string;
@@ -66,6 +67,7 @@ const INTERPRETATION = {
 
 export default function MentalHealthPage() {
   const { user } = useAuth();
+  const { showStatus } = useStatus();
   const [activeTab, setActiveTab] = useState<"phq9" | "gad7">("phq9");
   const [answers, setAnswers] = useState<Record<string, number>>({});
   const [result, setResult] = useState<{ score: number; interpretation: string; color: string; icon: LucideIcon } | null>(null);
@@ -88,64 +90,67 @@ export default function MentalHealthPage() {
     setResult({ score: total, interpretation: range.label, color: range.color, icon: range.icon });
   };
 
-  const saveResult = async () => {
-    if (!user || !result) return;
-    const log = {
-      userId: user.id,
-      type: activeTab,
-      score: result.score,
-      interpretation: result.interpolation,
-      responses: answers,
-      timestamp: Date.now(),
-      date: new Date().toISOString().split("T")[0],
-    };
-    try {
-      const db = await getDB();
-      await storeMentalHealthLog(log);
-    } catch (err) {
-      console.error("Failed to save mental health log:", err);
-    }
-  };
+   const saveResult = async () => {
+     if (!user || !result) return;
+     const log = {
+       userId: user.id,
+       type: activeTab,
+       score: result.score,
+       interpretation: result.interpretation,
+       responses: answers,
+       timestamp: Date.now(),
+       date: new Date().toISOString().split("T")[0],
+     };
+     try {
+       const db = await getDB();
+       await storeMentalHealthLog(log);
+     } catch (err) {
+       console.error("Failed to save mental health log:", err);
+       showStatus('error', 'Save Failed', 'Could not save your assessment result.');
+     }
+   };
 
   const handleViewResult = () => {
     calculateScore();
     saveResult();
   };
 
-  const startAiChat = async () => {
-    if (!result || !user) return;
-    setAiLoading(true);
-    const summary = `I completed the ${activeTab === "phq9" ? "PHQ-9" : "GAD-7"} questionnaire. My score was ${result.score} (${result.interpretation}). Can you provide some supportive advice?`;
-    try {
-      // We'd ideally get health state here, but for now pass minimal context
-      const response = await askMedicalQuestion({ conditions: [], medications: [], allergies: [] }, summary);
-      setAiMessages([{ role: "user", content: summary }, { role: "assistant", content: response }]);
-      setShowAiChat(true);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setAiLoading(false);
-    }
-  };
+   const startAiChat = async () => {
+     if (!result || !user) return;
+     setAiLoading(true);
+     const summary = `I completed the ${activeTab === "phq9" ? "PHQ-9" : "GAD-7"} questionnaire. My score was ${result.score} (${result.interpretation}). Can you provide some supportive advice?`;
+     try {
+       // We'd ideally get health state here, but for now pass minimal context
+       const response = await askMedicalQuestion({ conditions: [], medications: [], allergies: [] }, summary);
+       setAiMessages([{ role: "user", content: summary }, { role: "assistant", content: response }]);
+       setShowAiChat(true);
+     } catch (err) {
+       console.error(err);
+       showStatus('error', 'AI Error', 'Could not generate supportive advice. Please try again.');
+     } finally {
+       setAiLoading(false);
+     }
+   };
 
-  const sendAiMessage = async () => {
-    if (!aiInput.trim() || aiLoading) return;
-    const userMsg = aiInput;
-    setAiMessages(prev => [...prev, { role: "user", content: userMsg }]);
-    setAiInput("");
-    setAiLoading(true);
-    try {
-      // Contextualize with previous conversation
-      const context = aiMessages.map(m => `${m.role}: ${m.content}`).join("\n");
-      const response = await askMedicalQuestion({ conditions: [], medications: [], allergies: [] }, context + "\n\nUser: " + userMsg);
-      setAiMessages(prev => [...prev, { role: "assistant", content: response }]);
-    } catch (err) {
-      console.error(err);
-      setAiMessages(prev => [...prev, { role: "assistant", content: "I'm sorry, I encountered an error. Please try again." }]);
-    } finally {
-      setAiLoading(false);
-    }
-  };
+   const sendAiMessage = async () => {
+     if (!aiInput.trim() || aiLoading) return;
+     const userMsg = aiInput;
+     setAiMessages(prev => [...prev, { role: "user", content: userMsg }]);
+     setAiInput("");
+     setAiLoading(true);
+     try {
+       // Contextualize with previous conversation
+       const context = aiMessages.map(m => `${m.role}: ${m.content}`).join("\n");
+       const response = await askMedicalQuestion({ conditions: [], medications: [], allergies: [] }, context + "\n\nUser: " + userMsg);
+       setAiMessages(prev => [...prev, { role: "assistant", content: response }]);
+     } catch (err) {
+       console.error(err);
+       showStatus('error', 'Send Failed', 'Could not send message. Try again.');
+       setAiMessages(prev => [...prev, { role: "assistant", content: "I'm sorry, I encountered an error. Please try again." }]);
+     } finally {
+       setAiLoading(false);
+     }
+   };
 
   const ResourceIcon = result?.icon || Brain;
 

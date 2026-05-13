@@ -5,7 +5,8 @@
 import { openDB } from '../lib/idb';
 import { pipeline, env } from '@huggingface/transformers';
 
-env.allowLocalModels = true;
+// env configuration is centralized in modelLoader.js
+// Use browser cache for offline reuse
 env.useBrowserCache = true;
 
 let translator = null;

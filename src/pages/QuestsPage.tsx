@@ -1,132 +1,221 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Check, Sparkles, Target, Award, Star, Medal, Crown, Flame, Zap } from "lucide-react";
+import { Plus, Check, Sparkles, Target, Award, Star, Medal, Crown, Flame, Zap, Loader2 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { getActiveQuests, getAvailableQuests, joinQuest, updateQuestProgress, getQuestHistory } from "../services/questEngine";
+import { useStatus } from "../hooks/useStatus";
+import LoadingSpinner from "../components/LoadingSpinner";
 
-export default function RewardsPage() {
-  const [points, setPoints] = useState(2450);
-  const [streak, setStreak] = useState(7);
+interface Quest {
+  id: string;
+  title: string;
+  description: string;
+  duration: number;
+  requirements: Array<{ type: string; count: number; per?: string }>;
+  rewardPoints: number;
+  badgeUnlock?: string;
+  difficulty: "easy" | "medium" | "hard";
+  progress?: number;
+  daysRemaining?: number;
+  joinedAt?: string;
+}
 
-  const quests = [
-    { id: 1, title: "Log your vitals for 7 days", reward: 100, completed: true },
-    { id: 2, title: "Complete 3 workouts", reward: 150, completed: false },
-    { id: 3, title: "Ask AI 5 health questions", reward: 75, completed: false },
-    { id: 4, title: "Medication adherence — 5 days", reward: 120, completed: true },
-    { id: 5, title: "Read 2 health articles", reward: 50, completed: false },
-  ];
+export default function QuestsPage() {
+  const { user } = useAuth();
+  const { showStatus } = useStatus();
+  const [activeQuests, setActiveQuests] = useState<Quest[]>([]);
+  const [availableQuests, setAvailableQuests] = useState<Quest[]>([]);
+  const [completedQuestHistory, setCompletedQuestHistory] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [joining, setJoining] = useState<string | null>(null);
 
-  const badges = [
-    { id: 1, name: "First Steps", icon: Star, earned: true, desc: "Complete your first health log" },
-    { id: 2, name: "Week Warrior", icon: Flame, earned: true, desc: "7-day streak achieved" },
-    { id: 3, name: "Medication Master", icon: Medal, earned: false, desc: "Perfect adherence for 30 days" },
-    { id: 4, name: "Knowledge Seeker", icon: Zap, earned: false, desc: "Ask 50 AI questions" },
-    { id: 5, name: "Health Champion", icon: Crown, earned: false, desc: "Earn all other badges" },
-  ];
+  useEffect(() => {
+    if (user) {
+      loadData();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
-  const completed = quests.filter(q => q.completed).length;
-  const totalRewards = quests.reduce((sum, q) => sum + (q.completed ? q.reward : 0), 0);
+  async function loadData() {
+    try {
+      setLoading(true);
+      const userId = user?.id || "default";
+
+      const [active, available, history] = await Promise.all([
+        getActiveQuests(userId),
+        getAvailableQuests(userId),
+        getQuestHistory(userId),
+      ]);
+
+      setActiveQuests(active as Quest[]);
+      setAvailableQuests(available as Quest[]);
+      setCompletedQuestHistory(history);
+    } catch (err) {
+      console.error("Failed to load quests:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleJoin(questId: string) {
+    if (!user) return;
+    try {
+      setJoining(questId);
+      const result = await joinQuest(user.id, questId);
+      if (result.success) {
+        showStatus("success", "Quest Joined!", "Complete tasks to earn rewards.");
+        await loadData();
+      } else {
+        showStatus("warning", "Already Joined", "This quest is already in progress.");
+      }
+    } catch (err: any) {
+      console.error("Failed to join quest:", err);
+      showStatus("error", "Error", err?.message || "Could not join quest.");
+    } finally {
+      setJoining(null);
+    }
+  }
+
+  const completedCount = activeQuests.filter((q) => (q as any).completed).length;
+  const totalRewards = activeQuests.reduce((sum, q) => sum + (q.progress || 0), 0);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-4">
+          <LoadingSpinner size={48} />
+          <p className="text-slate-400 text-sm">Loading quests...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-6 p-4 pb-24">
       <div>
-        <h1 className="text-2xl font-bold text-white mb-1">Rewards</h1>
-        <p className="text-slate-400">Stay motivated, earn points</p>
+        <h1 className="text-2xl font-bold text-white mb-1">Quests</h1>
+        <p className="text-slate-400">Complete challenges, earn rewards</p>
       </div>
 
-      {/* Stats row */}
+      {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
         <div className="glass-card p-4 text-center">
-          <p className="text-3xl font-bold text-teal-400">{points.toLocaleString()}</p>
-          <p className="text-slate-400 text-xs mt-1">Total Points</p>
+          <p className="text-3xl font-bold text-teal-400">{activeQuests.length}</p>
+          <p className="text-slate-400 text-xs mt-1">Active Quests</p>
         </div>
         <div className="glass-card p-4 text-center">
           <div className="flex items-center justify-center gap-1 text-amber-400 text-2xl mb-1">
             <Flame size={24} />
-            <span className="font-bold">{streak}</span>
+            <span className="font-bold">{completedQuestHistory.length}</span>
           </div>
-          <p className="text-slate-400 text-xs">Day Streak</p>
+          <p className="text-slate-400 text-xs">Completed</p>
         </div>
       </div>
 
-      {/* Daily quests */}
-      <div className="glass-card p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-white">Daily Quests</h2>
-          <span className="text-xs text-slate-400">{completed}/{quests.length} completed</span>
-        </div>
+      {/* Active quests */}
+      {activeQuests.length > 0 && (
+        <div className="glass-card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-white">Active Quests</h2>
+            <span className="text-xs text-slate-400">{completedCount}/{activeQuests.length} completed</span>
+          </div>
+          <div className="h-1.5 bg-slate-700/50 rounded-full overflow-hidden mb-4">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${(completedCount / activeQuests.length) * 100}%` }}
+              transition={{ duration: 0.8 }}
+              className="h-full bg-gradient-to-r from-teal-500 to-cyan-500"
+            />
+          </div>
 
-        {/* Progress bar */}
-        <div className="h-1.5 bg-slate-700/50 rounded-full overflow-hidden mb-4">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${(completed / quests.length) * 100}%` }}
-            transition={{ duration: 0.8 }}
-            className="h-full bg-gradient-to-r from-teal-500 to-cyan-500"
-          />
-        </div>
-
-        <div className="space-y-2.5">
-          {quests.map((quest) => (
-            <div
-              key={quest.id}
-              className={`p-3 rounded-xl border transition-all ${
-                quest.completed
-                  ? "bg-emerald-500/10 border-emerald-500/20"
-                  : "bg-slate-800/30 border-slate-700/30"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                    quest.completed ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-700/50 text-slate-400"
-                  }`}
-                >
-                  {quest.completed ? <Check size={16} /> : <Target size={16} />}
-                </div>
-                <div className="flex-1">
-                  <p className={`text-sm font-medium ${quest.completed ? "text-emerald-300" : "text-white"}`}>
-                    {quest.title}
-                  </p>
-                  <p className="text-xs text-slate-400">{quest.reward} pts</p>
-                </div>
-                {quest.completed && <Sparkles size={16} className="text-amber-400" />}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Badges */}
-      <div className="glass-card p-5">
-        <h2 className="text-lg font-semibold text-white mb-4">Badges</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {badges.map((badge) => {
-            const Icon = badge.icon;
-            return (
-              <motion.div
-                key={badge.id}
-                whileHover={{ scale: badge.earned ? 1.02 : 1 }}
-                className={`p-4 rounded-xl border text-center ${
-                  badge.earned
-                    ? "bg-gradient-to-b from-amber-500/10 to-transparent border-amber-500/20"
-                    : "bg-slate-800/30 border-slate-700/30 opacity-60 grayscale"
+          <div className="space-y-2.5">
+            {activeQuests.map((quest) => (
+              <div
+                key={quest.id}
+                className={`p-3 rounded-xl border transition-all ${
+                  (quest as any).completed
+                    ? "bg-emerald-500/10 border-emerald-500/20"
+                    : "bg-slate-800/30 border-slate-700/30"
                 }`}
               >
-                <div
-                  className={`w-10 h-10 mx-auto rounded-full flex items-center justify-center mb-2 ${
-                    badge.earned ? "bg-amber-500/20 text-amber-400" : "bg-slate-700/50 text-slate-500"
-                  }`}
-                >
-                  <Icon size={20} />
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                      (quest as any).completed ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-700/50 text-slate-400"
+                    }`}
+                  >
+                    {(quest as any).completed ? <Check size={16} /> : <Target size={16} />}
+                  </div>
+                  <div className="flex-1">
+                    <p className={`text-sm font-medium ${(quest as any).completed ? "text-emerald-300" : "text-white"}`}>
+                      {quest.title}
+                    </p>
+                    <p className="text-xs text-slate-400">{quest.rewardPoints} pts • {quest.duration} days</p>
+                  </div>
+                  {(quest as any).completed && <Sparkles size={16} className="text-amber-400" />}
                 </div>
-                <p className={`font-medium text-sm ${badge.earned ? "text-white" : "text-slate-500"}`}>
-                  {badge.name}
-                </p>
-                <p className="text-xs text-slate-500 mt-0.5">{badge.desc}</p>
-              </motion.div>
-            );
-          })}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Available quests */}
+      {availableQuests.length > 0 && (
+        <div className="glass-card p-5">
+          <h2 className="text-lg font-semibold text-white mb-4">Available Quests</h2>
+          <div className="space-y-3">
+            {availableQuests.map((quest) => (
+              <div key={quest.id} className="p-4 rounded-xl border bg-slate-800/30 border-slate-700/30">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-semibold text-white">{quest.title}</h3>
+                  <span
+                    className={`px-2 py-1 rounded text-xs font-medium ${
+                      quest.difficulty === "easy"
+                        ? "bg-emerald-500/20 text-emerald-300"
+                        : quest.difficulty === "medium"
+                        ? "bg-amber-500/20 text-amber-300"
+                        : "bg-rose-500/20 text-rose-300"
+                    }`}
+                  >
+                    {quest.difficulty}
+                  </span>
+                </div>
+                <p className="text-sm text-slate-300 mb-3">{quest.description}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-400">Reward: {quest.rewardPoints} pts</span>
+                  <button
+                    onClick={() => handleJoin(quest.id)}
+                    disabled={joining === quest.id}
+                    className="px-4 py-2 bg-teal-600 hover:bg-teal-500 disabled:bg-slate-700 disabled:opacity-50 rounded-lg text-white text-sm font-medium transition-colors"
+                  >
+                    {joining === quest.id ? <Loader2 size={14} className="animate-spin" /> : "Join"}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* History */}
+      {completedQuestHistory.length > 0 && (
+        <div className="glass-card p-5">
+          <h2 className="text-lg font-semibold text-white mb-4">Completed Quests</h2>
+          <div className="space-y-2">
+            {completedQuestHistory.map((entry, idx) => (
+              <div key={idx} className="flex items-center justify-between p-3 rounded-lg bg-slate-800/30">
+                <div className="flex items-center gap-3">
+                  <Check className="text-emerald-400" size={16} />
+                  <span className="text-sm text-slate-200">{entry.title || "Quest"}</span>
+                </div>
+                <span className="text-sm text-teal-400">+{entry.rewardPoints} pts</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }

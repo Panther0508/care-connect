@@ -11,6 +11,7 @@ import {
   Clock
 } from "lucide-react";
 import { getHydration, setHydration, type HydrationLog } from "../lib/idb";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const GLASS_SIZE_ML = 250;
 const DEFAULT_GOAL = 8; // glasses
@@ -20,23 +21,51 @@ export default function HydrationPage() {
   const [today, setToday] = useState("");
   const [glasses, setGlasses] = useState(0);
   const [goal, setGoal] = useState(DEFAULT_GOAL);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [weekGlasses, setWeekGlasses] = useState<number[]>(new Array(7).fill(0));
 
   useEffect(() => {
     const dateStr = new Date().toISOString().split("T")[0];
     setToday(dateStr);
-    if (user) loadHydration(dateStr);
+    if (user) {
+      loadHydration(dateStr);
+      loadWeekHydration(user.id, dateStr);
+    } else {
+      setLoading(false);
+    }
   }, [user]);
+
+  const loadWeekHydration = async (userId: string, todayDate: string) => {
+    if (!userId) return;
+    try {
+      const weekData: number[] = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - (6 - i));
+        const dateStr = d.toISOString().split("T")[0];
+        const log = await getHydration(userId, dateStr);
+        weekData.push(log ? log.glasses : 0);
+      }
+      setWeekGlasses(weekData);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadHydration = async (date: string) => {
     if (!user) return;
-    const log = await getHydration(date);
-    if (log) {
-      setGlasses(log.glasses);
-      setGoal(Math.max(1, Math.round(log.totalMl / GLASS_SIZE_ML)));
-    } else {
-      setGlasses(0);
-      setGoal(DEFAULT_GOAL);
+    try {
+      const log = await getHydration(user.id, date);
+      if (log) {
+        setGlasses(log.glasses);
+        setGoal(Math.max(1, Math.round(log.totalMl / GLASS_SIZE_ML)));
+      } else {
+        setGlasses(0);
+        setGoal(DEFAULT_GOAL);
+      }
+    } finally {
+      // Note: loadWeekHydration also sets loading false, so we don't set it here
+      // to avoid race conditions
     }
   };
 
@@ -47,6 +76,7 @@ export default function HydrationPage() {
     setGlasses(newGlasses);
     const log: HydrationLog = {
       date: today,
+      userId: user.id,
       glasses: newGlasses,
       totalMl: newGlasses * GLASS_SIZE_ML,
       lastUpdated: Date.now(),
@@ -58,8 +88,19 @@ export default function HydrationPage() {
   const percentage = Math.min((glasses / goal) * 100, 100);
   const completed = glasses >= goal;
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-4">
+          <LoadingSpinner size={48} />
+          <p className="text-slate-400 text-sm">Loading hydration data...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 p-4 pb-24">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 p-4 pb-24">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -69,8 +110,8 @@ export default function HydrationPage() {
         <p className="text-slate-400 text-sm">Stay hydrated, stay healthy</p>
       </div>
 
-      {/* Goal Card */}
-      <div className="glass-card p-6 text-center relative overflow-hidden">
+      {/* Progress Circle */}
+      <div className="relative flex items-center justify-center py-6">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <svg className="w-40 h-40" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="8" />
@@ -172,25 +213,26 @@ export default function HydrationPage() {
             const d = new Date();
             d.setDate(d.getDate() - (6 - i));
             const dateStr = d.toISOString().split("T")[0];
-            const barHeight = Math.random() * 80 + 20;
             const isToday = dateStr === today;
+            // Height as percentage of daily goal (max 100%)
+            const dayGlasses = weekGlasses[i] || 0;
+            const barHeight = Math.min((dayGlasses / Math.max(goal, 1)) * 100, 100);
             return (
               <div key={i} className="flex-1 flex flex-col items-center gap-2">
                 <div
                   className={`w-full rounded-t transition-all ${
                     isToday ? "bg-blue-500 shadow-glow-primary" : "bg-blue-500/50"
                   }`}
-                  style={{ height: `${barHeight}%` }}
+                  style={{ height: `${Math.max(barHeight, 2)}%` }}
                 />
-                 <span className="text-xs text-slate-500">
-                   {d.toLocaleDateString("en-US", { weekday: "narrow" })}
-                 </span>
+                <span className="text-xs text-slate-500">
+                  {d.toLocaleDateString("en-US", { weekday: "narrow" })}
+                </span>
               </div>
             );
           })}
         </div>
       </div>
     </motion.div>
-
   );
 }

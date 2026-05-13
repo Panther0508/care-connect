@@ -21,11 +21,13 @@ import {
 } from "../services/healthGraph";
 import { getMedicationByBarcode } from "../services/medicationLookup";
 import { ChevronRight, Heart, ScanBarcode, Pill, AlertTriangle, Calendar, Plus, X, Upload, FileText, CheckCircle } from 'lucide-react';
+import { useStatus } from "../hooks/useStatus";
 import type { Condition, Medication, Allergy, Encounter } from "../lib/crdtHealthGraph";
 
 type ModalType = 'condition' | 'medication' | 'allergy' | 'encounter' | null;
 
 export default function HealthGraph() {
+  const { showStatus } = useStatus();
   const [conditions, setConditions] = useState<Condition[]>([]);
   const [medications, setMedications] = useState<Medication[]>([]);
   const [allergies, setAllergies] = useState<Allergy[]>([]);
@@ -68,18 +70,19 @@ export default function HealthGraph() {
     setLoading(false);
   };
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        await initHealthGraph();
-        refreshData();
-      } catch (err) {
-        console.error("Failed to initialize health graph:", err);
-        setLoading(false);
-      }
-    };
-    init();
-  }, []);
+   useEffect(() => {
+     const init = async () => {
+       try {
+         await initHealthGraph();
+         refreshData();
+       } catch (err) {
+         console.error("Failed to initialize health graph:", err);
+         showStatus('error', 'Load Failed', 'Could not load health data.');
+         setLoading(false);
+       }
+     };
+     init();
+   }, []);
 
   const openAddModal = (type: ModalType) => {
     setModalOpen(type);

@@ -5,13 +5,9 @@
 import { pipeline, env } from '@huggingface/transformers';
 import { getEmbeddingModel } from './modelLoader.js';
 
-
-// Configure for LOCAL embedding model only — no remote CDN fetches
-// env.localModelPath = '/models/';  // Local model directory
-// env.allowRemoteModels = false;   // Block HuggingFace CDN
-// env.allowLocalModels = true;     // Allow local /models/ path
-// env.useBrowserCache = true;
-// Note: env.fetch override is set globally in main.tsx before any imports
+// env configuration is managed centrally by modelLoader.js
+// Use browser cache for offline model reuse
+env.useBrowserCache = true;
 
 const EMBEDDING_MODEL = 'Xenova/all-MiniLM-L6-v2';
 const VECTOR_DIM = 384;

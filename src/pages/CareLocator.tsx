@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
-import { Search, MapPin, Phone, Star, Navigation } from "lucide-react";
+import { Search, MapPin, Phone, Star, Navigation, Loader2 } from "lucide-react";
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { getItem, getAllFacilities, storeFacilities } from "../lib/idb";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 interface Facility {
   id: string;
@@ -11,49 +16,137 @@ interface Facility {
   rating: number;
   phone: string;
   services: string[];
+  latitude: number;
+  longitude: number;
 }
-
-const MOCK_FACILITIES: Facility[] = [
-  {
-    id: "1",
-    name: "Lagos General Hospital",
-    type: "General Hospital",
-    address: "1 Broad St, Lagos Island",
-    distance: "2.3 km",
-    rating: 4.5,
-    phone: "+234 800 123 4567",
-    services: ["Emergency", "Laboratory", "Pharmacy", "Imaging"],
-  },
-  {
-    id: "2",
-    name: "Abuja Primary Care Centre",
-    type: "Primary Care",
-    address: "45 Aminu Kano Crescent, Wuse",
-    distance: "0.8 km",
-    rating: 4.2,
-    phone: "+234 800 987 6543",
-    services: ["General Consultations", "Vaccinations", "Maternal Health"],
-  },
-  {
-    id: "3",
-    name: "Kano Specialist Hospital",
-    type: "Specialist",
-    address: "7 Hospital Rd, Kano",
-    distance: "5.1 km",
-    rating: 4.0,
-    phone: "+234 800 456 7890",
-    services: ["Cardiology", "Neurology", "Surgery"],
-  },
-];
 
 export default function CareLocator() {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Facility | null>(null);
+  const [facilities, setFacilities] = useState<Facility[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const mapRef = useRef<L.Map | null>(null);
 
-  const filtered = MOCK_FACILITIES.filter((f) =>
+  // Load facilities from IndexedDB or fallback to JSON
+  useEffect(() => {
+    async function loadFacilities() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Try to load from IDB first
+        let stored = await getAllFacilities();
+        if (stored.length === 0) {
+          // Fallback to public JSON
+          try {
+            const response = await fetch("/facilities_offline.json");
+            const data = await response.json();
+            stored = data.facilities || data || [];
+            // Store for future use
+            await storeFacilities(stored);
+          } catch (err) {
+            console.error("Failed to load facilities:", err);
+            setError("Could not load facilities data.");
+            setLoading(false);
+            return;
+          }
+        }
+
+        setFacilities(stored as Facility[]);
+
+        // Get user location
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+              setUserLocation(coords);
+              // Fly to user location after a short delay
+              setTimeout(() => {
+                if (mapRef.current) {
+                  mapRef.current.flyTo(coords, 13);
+                }
+              }, 500);
+            },
+            () => {
+              // Permission denied — use default view (Nigeria)
+              setUserLocation([9.0820, 8.6753]);
+            }
+          );
+        } else {
+          // Geolocation not supported
+          setUserLocation([9.0820, 8.6753]); // Center of Nigeria
+        }
+      } catch (err) {
+        console.error("Error loading facilities:", err);
+        setError("Failed to load facilities.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadFacilities();
+  }, []);
+
+  const filtered = facilities.filter((f) =>
     f.name.toLowerCase().includes(search.toLowerCase()) ||
     f.type.toLowerCase().includes(search.toLowerCase())
   );
+
+  // Custom marker icon
+  const hospitalIcon = new L.Icon({
+    iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png",
+    shadowUrl: "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+  });
+
+  // Component to fly to selected facility
+  function FlyToSelected() {
+    const map = useMap();
+    useMapEvents({
+      click() {
+        // No-op; we just want map ref
+      },
+    });
+    if (selected && selected.latitude && selected.longitude) {
+      map.flyTo([selected.latitude, selected.longitude], 16, { duration: 0.8 });
+    }
+    return null;
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-4">
+          <LoadingSpinner size={48} />
+          <p className="text-slate-400 text-sm">Loading facilities...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -15 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        className="w-full"
+      >
+        <div className="p-4 pb-24">
+          <h1 className="text-2xl font-bold text-white mb-2">Find Care</h1>
+          <div className="glass-card p-6 text-center">
+            <p className="text-rose-300">{error}</p>
+          </div>
+        </div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -78,13 +171,44 @@ export default function CareLocator() {
           />
         </div>
 
-        {/* Map placeholder */}
-        <div className="glass-card p-6 h-48 flex items-center justify-center mb-6">
-          <div className="text-center">
-            <MapPin className="text-slate-400 mx-auto mb-2" size={32} />
-            <p className="text-slate-500 text-sm">Interactive map view coming soon.</p>
-            <p className="text-slate-600 text-xs mt-1">Currently showing list view</p>
-          </div>
+        {/* Map */}
+        <div className="glass-card p-0 overflow-hidden mb-6" style={{ height: "300px", borderRadius: "16px" }}>
+          {userLocation && (
+            <MapContainer
+              center={userLocation}
+              zoom={13}
+              className="h-full w-full"
+              whenCreated={(map) => {
+                mapRef.current = map;
+              }}
+              zoomControl={false}
+            >
+              <FlyToSelected />
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              {filtered.map((facility) => (
+                <Marker
+                  key={facility.id}
+                  position={[facility.latitude, facility.longitude]}
+                  icon={hospitalIcon}
+                  eventHandlers={{
+                    click: () => setSelected(facility),
+                  }}
+                >
+                  <Popup>
+                    <div className="text-slate-900">
+                      <strong>{facility.name}</strong>
+                      <p className="text-sm">{facility.type}</p>
+                      <p className="text-xs">{facility.address}</p>
+                      <p className="text-xs">⭐ {facility.rating}</p>
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+            </MapContainer>
+          )}
         </div>
 
         {/* Facility list */}
@@ -157,10 +281,25 @@ export default function CareLocator() {
                   </div>
                 </div>
                 <div className="flex gap-3 pt-2">
-                  <button className="flex-1 px-4 py-2.5 bg-teal-600 hover:bg-teal-500 rounded-xl text-white font-medium transition-colors">
+                  <button
+                    className="flex-1 px-4 py-2.5 bg-teal-600 hover:bg-teal-500 rounded-xl text-white font-medium transition-colors"
+                    onClick={() => {
+                      if (userLocation) {
+                        window.open(
+                          `https://www.google.com/maps/dir/?api=1&destination=${selected.latitude},${selected.longitude}`,
+                          "_blank"
+                        );
+                      }
+                    }}
+                  >
                     Get Directions
                   </button>
-                  <button className="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-white transition-colors">
+                  <button
+                    className="px-4 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-xl text-white transition-colors"
+                    onClick={() => {
+                      window.location.href = `tel:${selected.phone}`;
+                    }}
+                  >
                     Call Now
                   </button>
                 </div>

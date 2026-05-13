@@ -215,11 +215,12 @@ export default function AIAssistant() {
       if (!voiceModeEnabled || messages.length === 0) return;
       const lastIdx = messages.length - 1;
       const lastMsg = messages[lastIdx];
-      if (lastMsg.role === 'assistant' && lastIdx !== lastSpokenIndex.current) {
+        if (lastMsg.role === 'assistant' && lastIdx !== lastSpokenIndex.current) {
         speakText(lastMsg.content, { language: 'en' }).then(() => {
           setIsSpeakingNow(true);
         }).catch(err => {
           console.error('TTS failed:', err);
+          showStatus('error', 'Voice Failed', 'Could not speak response. Check your device audio settings.');
         });
         lastSpokenIndex.current = lastIdx;
       }
@@ -452,31 +453,33 @@ const handleSpeechInput = async () => {
 
   const handleQuickReminder = async () => {
     if (!reminderForm.medicationName) return;
-    try {
-      await scheduleReminder(
-        Date.now().toString(),
-        reminderForm.medicationName,
-        [reminderForm.time],
-        reminderForm.days
-      );
-      setReminderForm({ medicationName: "", time: "09:00", days: [0, 1, 2, 3, 4, 5, 6] });
-      addMessage("assistant", "Medication reminder set successfully!");
-    } catch (err) {
-      console.error("Failed to set reminder:", err);
-    }
+   try {
+       await scheduleReminder(
+         Date.now().toString(),
+         reminderForm.medicationName,
+         [reminderForm.time],
+         reminderForm.days
+       );
+       setReminderForm({ medicationName: "", time: "09:00", days: [0, 1, 2, 3, 4, 5, 6] });
+       addMessage("assistant", "Medication reminder set successfully!");
+     } catch (err) {
+       console.error("Failed to set reminder:", err);
+       showStatus('error', 'Reminder Failed', 'Could not schedule reminder. Please try again.');
+     }
   };
 
   const handleQuickAppointment = async () => {
-    try {
-      const appointment = await scheduleAppointment({
-        ...appointmentForm,
-        date: appointmentForm.date,
-        purpose: appointmentForm.purpose || "Routine checkup",
-      });
-      addMessage("assistant", `Appointment scheduled for ${appointment.date} at ${appointment.time} with ${appointment.specialistType}.`);
-    } catch (err) {
-      console.error("Failed to schedule appointment:", err);
-    }
+   try {
+     const appointment = await scheduleAppointment({
+       ...appointmentForm,
+       date: appointmentForm.date,
+       purpose: appointmentForm.purpose || "Routine checkup",
+     });
+     addMessage("assistant", `Appointment scheduled for ${appointment.date} at ${appointment.time} with ${appointment.specialistType}.`);
+   } catch (err) {
+     console.error("Failed to schedule appointment:", err);
+     showStatus('error', 'Appointment Failed', 'Could not schedule appointment. Please try again.');
+   }
   };
 
   const handleSend = async (text: string) => {
@@ -758,48 +761,17 @@ const handleSpeechInput = async () => {
     setCrisisVisible(false);
   };
 
-  return (
-    <div className="flex flex-col h-full min-h-screen bg-slate-900">
-      <CrisisPopup
-        visible={crisisVisible}
-        riskLevel={crisisState.riskLevel}
-        matchedPattern={crisisState.matchedPattern}
-        onDismiss={handleDismissCrisis}
-        userProfile={userProfile}
-      />
+   return (
+     <div className="flex flex-col h-full min-h-screen bg-slate-900">
+       <CrisisPopup
+         visible={crisisVisible}
+         riskLevel={crisisState.riskLevel}
+         matchedPattern={crisisState.matchedPattern}
+         onDismiss={handleDismissCrisis}
+         userProfile={userProfile}
+       />
 
-        <header className="sticky top-0 z-30 bg-slate-900/80 backdrop-blur-2xl border-b border-white/5 px-4 py-4">
-           <div className="flex items-center gap-4">
-             <button onClick={() => navigate(-1)} className="p-2.5 rounded-xl hover:bg-white/5 transition-colors text-slate-300 hover:text-slate-100">
-               <ArrowLeft size={22} />
-             </button>
-            <div className="relative">
-              <VitaAvatar state="online" size={44} />
-              <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-slate-900 bg-teal-500" />
-            </div>
-             <div className="flex-1 min-w-0">
-               <div className="flex items-center gap-2">
-                 <h1 className="text-xl font-bold text-white leading-tight">Vita AI</h1>
-                 {activeModel && (
-                   <QuotaIndicator
-                     remaining={quotaRemaining}
-                     limit={1500}
-                     model={activeModel === 'online' || activeModel === 'cached' ? 'gemma4-31b' : 'tinyllama-1.1b'}
-                     source={activeModel}
-                   />
-                 )}
-               </div>
-               <p className="text-slate-400 text-xs">
-                 {activeModel === 'online' && `Gemma 4 31B • Online mode • ${quotaRemaining.toLocaleString()}/1,500 queries`}
-                 {activeModel === 'cached' && `Gemma 4 (cached) • Offline-capable • Responses cached`}
-                 {activeModel === 'offline' && 'TinyLlama 1.1B • Fully offline'}
-                 {!activeModel && 'Loading AI model...'}
-               </p>
-             </div>
-          </div>
-        </header>
-
-      <main className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scrollbar-hide">
+       <main className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scrollbar-hide">
         {!modelLoaded && (
           <div className="flex flex-col items-center justify-center py-24 text-center px-6">
             <LoadingSpinner size={64} />

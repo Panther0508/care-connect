@@ -31,10 +31,13 @@ const openDB = async () => {
       }
     };
 
-    request.onsuccess = (event) => {
-      dbInstance = event.target.result;
-      resolve(dbInstance);
-    }// Action constants
+     request.onsuccess = (event) => {
+       dbInstance = event.target.result;
+       resolve(dbInstance);
+      };
+    }); // end new Promise
+  } // end openDB
+  // Action constants
 export const ACTION_LOGIN_DAILY = 'login_daily';
 export const ACTION_COMPLETE_AI_CHAT = 'complete_ai_chat';
 export const ACTION_SHARE_PASSPORT = 'share_passport';

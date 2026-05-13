@@ -4,11 +4,12 @@ import { useOnlineStatus } from "../hooks/useOnlineStatus";
 import { AnimatePresence, motion } from "framer-motion";
 import { useStatus } from "../hooks/useStatus";
 import OutbreakAlertNotifier from "./OutbreakAlertNotifier";
-import { Menu, X, Lock } from "lucide-react";
+import { Menu, X, Lock, ArrowLeft } from "lucide-react";
 import { useIDB } from "../hooks/useIDB";
 import StatusToastContainer from "./StatusToastContainer";
 import SideMenu from "./SideMenu";
 import { getSetting, storeSetting } from "../lib/idb";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const IS_TEST_MODE = import.meta.env.VITE_E2E_MODE === 'true';
 
@@ -21,9 +22,14 @@ export default function AppLayout({ children }: AppLayoutProps) {
   const { showStatus } = useStatus();
   const [sideMenuOpen, setSideMenuOpen] = useState(false);
   const { ready: idbReady } = useIDB();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const [lastScrollY, setLastScrollY] = useState(0);
   const [headerVisible, setHeaderVisible] = useState(true);
+
+  // Determine if we should show back button (not on home page)
+  const showBackButton = location.pathname !== '/';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -181,7 +187,16 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <div className={`fixed top-4 left-4 z-40 flex items-center gap-3 transition-transform duration-300 ${
         headerVisible ? 'translate-y-0 opacity-100' : '-translate-y-20 opacity-0'
       }`}>
-        <button onClick={() => setSideMenuOpen(true)} className="p-3 rounded-full">
+        {showBackButton && (
+          <button 
+            onClick={() => navigate(-1)} 
+            className="p-3 rounded-full hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
+            aria-label="Go back"
+          >
+            <ArrowLeft size={20} />
+          </button>
+        )}
+        <button onClick={() => setSideMenuOpen(true)} className="p-3 rounded-full hover:bg-white/10 text-slate-300 hover:text-white transition-colors">
           <Menu size={20} />
         </button>
         <a href="/" className="text-lg font-bold hidden sm:block">VitaChain</a>

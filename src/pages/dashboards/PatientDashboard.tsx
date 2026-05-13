@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
-import { TrendingUp, Activity, Heart, Pill, Target, Calendar, ChevronRight, Sparkles, ShieldCheck } from "lucide-react";
+import { TrendingUp, Activity, Heart, Pill, Target, Calendar, ChevronRight, Sparkles, ShieldCheck, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { getCurrentHealthState } from "../../services/healthGraph";
+import { useEffect, useState } from "react";
+import { getCurrentHealthState, initHealthGraph } from "../../services/healthGraph";
 import PWAInstallPrompt from "../../components/PWAInstallPrompt";
 import GlassCard from "../../components/GlassCard";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -19,14 +21,42 @@ const staggerItem = {
 };
 
 export default function PatientDashboard() {
-  const health = getCurrentHealthState();
+  const [health, setHealth] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        await initHealthGraph();
+        setHealth(getCurrentHealthState());
+      } catch (err) {
+        console.error('Failed to load health data:', err);
+        setHealth({ conditions: [], medications: [], allergies: [] });
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-4">
+          <LoadingSpinner size={48} />
+          <p className="text-slate-400 text-sm">Loading health overview...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <motion.div 
-      initial={{ opacity: 0 }} 
-      animate={{ opacity: 1 }} 
-      exit={{ opacity: 0 }} 
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       className="space-y-8 p-4 pb-24 max-w-4xl mx-auto"
     >
       <header className="flex justify-between items-end">
@@ -35,21 +65,21 @@ export default function PatientDashboard() {
           <h1 className="text-3xl font-bold text-white tracking-tight">Health Overview</h1>
         </div>
         <div className="w-12 h-12 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center text-teal-400 shadow-inner">
-           <Heart size={24} fill="currentColor" />
+          <Heart size={24} fill="currentColor" />
         </div>
       </header>
 
       {/* Quick stats */}
-      <motion.div 
+      <motion.div
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
         className="grid grid-cols-3 gap-4"
       >
         {[
-          { icon: Activity, label: "Conditions", count: health.conditions?.length || 0, color: "text-teal-400", bg: "bg-teal-500/10" },
-          { icon: Pill, label: "Meds", count: health.medications?.length || 0, color: "text-emerald-400", bg: "bg-emerald-500/10" },
-          { icon: Target, label: "Allergies", count: health.allergies?.length || 0, color: "text-amber-400", bg: "bg-amber-500/10" },
+          { icon: Activity, label: "Conditions", count: health?.conditions?.length || 0, color: "text-teal-400", bg: "bg-teal-500/10" },
+          { icon: Pill, label: "Meds", count: health?.medications?.length || 0, color: "text-emerald-400", bg: "bg-emerald-500/10" },
+          { icon: Target, label: "Allergies", count: health?.allergies?.length || 0, color: "text-amber-400", bg: "bg-amber-500/10" },
         ].map((stat, i) => (
           <motion.div key={i} variants={staggerItem}>
             <GlassCard className="p-4 text-center group" depth="tight">
@@ -83,7 +113,7 @@ export default function PatientDashboard() {
         </GlassCard>
 
         <GlassCard className="p-6 border-l-4 border-l-amber-500 group" onClick={() => {}} depth="loose">
-           <div className="flex items-center gap-3 mb-4">
+          <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-amber-500/10 text-amber-400 rounded-lg">
               <Calendar size={20} />
             </div>
@@ -115,7 +145,7 @@ export default function PatientDashboard() {
               <p className="text-sm text-slate-400">Your readings have improved by <span className="text-emerald-400 font-bold">12%</span> over the past month. Keep up the good work!</p>
             </div>
           </GlassCard>
-          
+
           <GlassCard className="p-5 flex items-center gap-4" hover={false}>
             <div className="w-12 h-12 bg-indigo-500/10 text-indigo-400 rounded-full flex items-center justify-center shrink-0">
               <Heart size={24} />

@@ -12,6 +12,7 @@ import { getSetting, storeSetting } from '../lib/idb';
 import { getUserProfile, storeUserProfile, type UserProfile } from '../lib/idb';
 import PWAInstallPrompt from '../components/PWAInstallPrompt';
 import { registerBiometric, disableBiometric, isBiometricRegistered } from '../services/biometricAuth';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 type Tab = 'profile' | 'security' | 'notifications' | 'subscription' | 'export' | 'delete' | 'referral' | 'support' | 'language' | 'voice' | 'install';
 
@@ -113,11 +114,15 @@ function ProfileTab() {
   });
   const [saving, setSaving] = useState(false);
   const [photoChanging, setPhotoChanging] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Load IDB profile on mount
   useEffect(() => {
     async function load() {
-      if (!user?.id) return;
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
       try {
         const profile = await getUserProfile(user.id);
         if (profile) {
@@ -137,6 +142,9 @@ function ProfileTab() {
         }
       } catch (e) {
         console.error('Failed to load profile:', e);
+        showStatus('error', 'Load Failed', 'Could not load profile data.');
+      } finally {
+        setLoading(false);
       }
     }
     load();
@@ -560,9 +568,20 @@ function SecurityTab() {
      } finally {
        setChanging(false);
      }
-   };
+  };
 
-   return (
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[300px]">
+        <div className="flex flex-col items-center gap-4">
+          <LoadingSpinner size={48} />
+          <p className="text-slate-400 text-sm">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold text-white">Security</h3>
 
@@ -925,12 +944,44 @@ function ExportTab() {
 
 function DeleteTab() {
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const { showStatus } = useStatus();
 
   const handleDelete = async () => {
-    // In production: clear local data and account and clear IndexedDB
-    showStatus('error', 'Not Implemented', 'Account deletion will be available in a future update.');
-    setConfirmDelete(false);
+    setDeleting(true);
+    try {
+      // 1. Clear all localStorage
+      localStorage.clear();
+      
+      // 2. Delete all IndexedDB databases
+      if ('indexedDB' in window) {
+        try {
+          const dbs = await (indexedDB as any).databases();
+          for (const db of dbs || []) {
+            if (db.name) {
+              await new Promise<void>((resolve, reject) => {
+                const request = (indexedDB as any).deleteDatabase(db.name);
+                request.onsuccess = () => resolve();
+                request.onerror = () => reject(request.error);
+              });
+            }
+          }
+        } catch (err) {
+          console.warn('Error clearing databases:', err);
+        }
+      }
+      
+      showStatus('success', 'Account Deleted', 'All local data has been permanently removed.');
+      
+      // 3. Hard redirect to onboarding after brief delay
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1500);
+    } catch (err) {
+      console.error('Delete error:', err);
+      showStatus('error', 'Error', 'Failed to delete account. Please try again.');
+      setDeleting(false);
+    }
   };
 
   return (
@@ -953,14 +1004,16 @@ function DeleteTab() {
             <button
               onClick={() => setConfirmDelete(false)}
               className="px-4 py-2 border border-slate-600 rounded-lg hover:bg-slate-700 transition-colors"
+              disabled={deleting}
             >
               Cancel
             </button>
             <button
               onClick={handleDelete}
-              className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg font-semibold transition-colors"
+              disabled={deleting}
+              className="px-4 py-2 bg-red-600 hover:bg-red-500 rounded-lg font-semibold transition-colors disabled:opacity-50"
             >
-              Yes, Delete Everything
+              {deleting ? 'Deleting…' : 'Yes, Delete Everything'}
             </button>
           </div>
         </div>

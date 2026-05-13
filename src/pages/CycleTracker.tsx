@@ -15,6 +15,7 @@ import {
   Activity
 } from "lucide-react";
 import { addCycleLog, getCycleLogs, type CycleLog } from "../lib/idb";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const FLOW_LEVELS = [
   { value: "none" as const, label: "None", color: "bg-slate-600", icon: <Target size={12} /> },
@@ -33,16 +34,26 @@ export default function CycleTrackerPage() {
   const [pain, setPain] = useState(0);
   const [mood, setMood] = useState(MOODS[0]);
   const [notes, setNotes] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) loadLogs();
+    if (user) {
+      loadLogs();
+    } else {
+      setLoading(false);
+    }
   }, [user]);
 
   const loadLogs = async () => {
     if (!user) return;
-    const data = await getCycleLogs(user.id, 365);
-    setLogs(data);
+    try {
+      const data = await getCycleLogs(user.id, 365);
+      setLogs(data);
+    } catch (err) {
+      console.error('Failed to load cycle logs:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const saveLog = async () => {
@@ -109,6 +120,17 @@ export default function CycleTrackerPage() {
     const level = FLOW_LEVELS.find(f => f.value === log.flow);
     return level?.color || "";
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-4">
+          <LoadingSpinner size={48} />
+          <p className="text-slate-400 text-sm">Loading cycle data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 p-4 pb-24">

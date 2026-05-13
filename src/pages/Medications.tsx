@@ -11,7 +11,8 @@ import {
   AlertCircle,
   CheckCircle
 } from "lucide-react";
-import { addMedicationLog, getMedicationLogs, type MedicationLog } from "../lib/idb";
+import { addMedicationLog, getMedicationLogs, updateMedicationLog, type MedicationLog } from "../lib/idb";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 interface Medication {
   id: string;
@@ -32,15 +33,26 @@ export default function MedicationsPage() {
   const [times, setTimes] = useState(["08:00"]);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) loadLogs();
+    if (user) {
+      loadLogs();
+    } else {
+      setLoading(false);
+    }
   }, [user]);
 
   const loadLogs = async () => {
     if (!user) return;
-    const data = await getMedicationLogs(user.id, 100);
-    setLogs(data);
+    try {
+      const data = await getMedicationLogs(user.id, 100);
+      setLogs(data);
+    } catch (err) {
+      console.error('Failed to load medication logs:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const addTimeSlot = () => {
@@ -84,13 +96,22 @@ export default function MedicationsPage() {
   };
 
   const markAsTaken = useCallback(async (logId: number, time: string) => {
-    // Load, update, and save back
+    // Find the log entry
     const log = logs.find(l => l.id === logId);
     if (!log) return;
+    
     const newTaken = [...(log.takenTimes || []), time];
-    // Update via direct IDB put (need to import update function, but we'll do quick hack by re-adding is fine for demo)
-    // For now just locally update optimism; in production we'd have updateMedicationLog
+    
+    // Optimistic UI update
     setLogs(prev => prev.map(l => l.id === logId ? { ...l, takenTimes: newTaken } : l));
+    
+    // Persist the update to IndexedDB
+    try {
+      await updateMedicationLog({ ...log, takenTimes: newTaken });
+    } catch (err) {
+      console.error('Failed to update medication log:', err);
+      // Revert on error? For now just log
+    }
   }, [logs]);
 
   // Compute today's schedule
@@ -100,6 +121,17 @@ export default function MedicationsPage() {
   // Check upcoming doses (simple)
   const now = new Date();
   const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-4">
+          <LoadingSpinner size={48} />
+          <p className="text-slate-400 text-sm">Loading medications...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 p-4 pb-24">

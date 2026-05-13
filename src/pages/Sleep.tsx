@@ -12,6 +12,7 @@ import {
   TrendingUp
 } from "lucide-react";
 import { addSleepLog, getSleepLogs, type SleepLog } from "../lib/idb";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const QUALITY_LABELS = ["Very Poor", "Poor", "Fair", "Good", "Excellent"];
 
@@ -24,15 +25,26 @@ export default function SleepPage() {
   const [quality, setQuality] = useState<3>(3);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (user) loadLogs();
+    if (user) {
+      loadLogs();
+    } else {
+      setLoading(false);
+    }
   }, [user]);
 
   const loadLogs = async () => {
     if (!user) return;
-    const data = await getSleepLogs(user.id, 30);
-    setLogs(data);
+    try {
+      const data = await getSleepLogs(user.id, 30);
+      setLogs(data);
+    } catch (err) {
+      console.error('Failed to load sleep logs:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const calculateDuration = (start: string, end: string): number => {
@@ -65,6 +77,17 @@ export default function SleepPage() {
 
   const avgDuration = logs.length ? Math.round(logs.reduce((sum, l) => sum + l.durationMinutes, 0) / logs.length) : 0;
   const avgQuality = logs.length ? (logs.reduce((sum, l) => sum + l.quality, 0) / logs.length).toFixed(1) : "0";
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="flex flex-col items-center gap-4">
+          <LoadingSpinner size={48} />
+          <p className="text-slate-400 text-sm">Loading sleep data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6 p-4 pb-24">
