@@ -1,6 +1,6 @@
 export function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("vitachain", 14);
+    const request = indexedDB.open("vitachain", 15);
 
     request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
       const db = (event.target as IDBOpenDBRequest).result;
@@ -19,6 +19,7 @@ export function openDB(): Promise<IDBDatabase> {
           { name: "realtimeCache", keyPath: "key" },
           { name: "datasetVectors", keyPath: "id" },
           { name: "medicationReminders", keyPath: "id" },
+          { name: "medicationLogs", keyPath: "id", autoIncrement: true },
           { name: "appointments", keyPath: "id" },
           { name: "translationCache", keyPath: "key" },
           { name: "userProfile", keyPath: "userId" },

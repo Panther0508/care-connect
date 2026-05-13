@@ -9,13 +9,13 @@ if (IS_TEST_MODE) {
   // Tests: use local /models/ only, no network fetches
   env.allowRemoteModels = false;
   env.allowLocalModels = true;
+  // Note: localModelPath used only in test mode
   env.localModelPath = '/models/';
 } else {
   // Development/Production: use HuggingFace CDN directly (has CORS headers)
-  // Models are cached in browser CacheStorage after first download
+  // Models download from huggingface.co; when offline, browser serves from CacheStorage/IndexedDB
   env.allowRemoteModels = true;
-  env.allowLocalModels = true; // Allow fallback to cached local models
-  env.localModelPath = '/models/';
+  env.allowLocalModels = true; // Required for offline access to cached models
 }
 
 // Model state singleton - exported for all modules to use
