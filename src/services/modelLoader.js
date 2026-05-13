@@ -1,12 +1,9 @@
 // src/services/modelLoader.js
-// Centralized Model Loader — GitHub Release integration with dot-separated asset names
+// Centralized Model Loader — uses HuggingFace CDN with proper CORS headers
 import { pipeline, env } from '@huggingface/transformers';
 
 // Global test-mode configuration — evaluated once at module load
 const IS_TEST_MODE = import.meta.env.VITE_E2E_MODE === 'true';
-
-// GitHub Release base for model assets (dotted filenames)
-const GITHUB_RELEASE_BASE = 'https://github.com/Panther0508/care-connect/releases/download/v2.1.0-buildfix';
 
 if (IS_TEST_MODE) {
   // Tests: use local /models/ only, no network fetches
@@ -14,55 +11,12 @@ if (IS_TEST_MODE) {
   env.allowLocalModels = true;
   env.localModelPath = '/models/';
 } else {
-  // Development/Production: use GitHub Release via fetch override
+  // Development/Production: use HuggingFace CDN directly (has CORS headers)
+  // Models are cached in browser CacheStorage after first download
   env.allowRemoteModels = true;
-  env.allowLocalModels = false;
-  // Set localModelPath to a base that will be intercepted
+  env.allowLocalModels = true; // Allow fallback to cached local models
   env.localModelPath = '/models/';
 }
-
-// Override env.fetch to convert model requests to GitHub Release URLs
-const ORIGINAL_FETCH = env.fetch;
-env.fetch = async (input, init) => {
-  // In test mode, pass through unchanged (use local /models/)
-  if (IS_TEST_MODE) {
-    return ORIGINAL_FETCH(input, init);
-  }
-
-  // Handle different input types
-  let urlStr = '';
-  if (typeof input === 'string') {
-    urlStr = input;
-  } else if (input instanceof Request) {
-    urlStr = input.url;
-  } else if (input && typeof input === 'object' && 'url' in input) {
-    urlStr = input.url;
-  }
-
-  if (!urlStr) return ORIGINAL_FETCH(input, init);
-
-  // Check if this is a HuggingFace model URL or a /models/ path
-  const hfModelMatch = urlStr.match(/huggingface\.co\/(Xenova\/[A-Za-z0-9_-]+)/);
-  const localModelMatch = urlStr.match(/\/models\/(Xenova\/[A-Za-z0-9_-]+)/);
-
-  if (hfModelMatch) {
-    const modelPath = hfModelMatch[1];
-    const dashified = modelPath.replace(/\//g, '-');
-    const releaseUrl = `${GITHUB_RELEASE_BASE}/${dashified}`;
-    if (import.meta.env.DEBUG) console.log('[modelLoader] redirect HF', urlStr, '→', releaseUrl);
-    return ORIGINAL_FETCH(releaseUrl, init);
-  }
-
-  if (localModelMatch) {
-    const modelPath = localModelMatch[1];
-    const dashified = modelPath.replace(/\//g, '-');
-    const releaseUrl = `${GITHUB_RELEASE_BASE}/${dashified}`;
-    if (import.meta.env.DEBUG) console.log('[modelLoader] redirect local', urlStr, '→', releaseUrl);
-    return ORIGINAL_FETCH(releaseUrl, init);
-  }
-
-  return ORIGINAL_FETCH(input, init);
-};
 
 // Model state singleton - exported for all modules to use
 let globalModelLoaded = false;
@@ -148,8 +102,9 @@ async function loadModel(type, onProgress) {
     env.allowLocalModels = true;
     env.localModelPath = '/models/';
   } else {
+    // Use HuggingFace CDN with CORS; allow local cache for offline reuse
     env.allowRemoteModels = true;
-    env.allowLocalModels = false;
+    env.allowLocalModels = true; // Enable IndexedDB/CacheStorage fallback
     env.localModelPath = '/models/';
   }
 

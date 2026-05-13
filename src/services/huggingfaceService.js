@@ -1,5 +1,6 @@
 // src/services/huggingfaceService.js
 // HuggingFace Serverless Inference - 5,000 calls/month free
+// Direct calls to HuggingFace Inference API (CORS-enabled)
 // https://huggingface.co/inference-api
 
 const API_KEY = import.meta.env.VITE_HF_API_KEY;
@@ -13,7 +14,7 @@ const MEDICAL_MODELS = [
 ];
 
 /**
- * Query HuggingFace inference API
+ * Query HuggingFace inference API directly (no proxy)
  * @param {string} prompt - User prompt
  * @param {string} systemPrompt - System instruction (optional)
  * @param {string} modelId - Specific model
@@ -21,6 +22,7 @@ const MEDICAL_MODELS = [
  */
 export async function queryHuggingFace(prompt, systemPrompt = '', modelId = null) {
   if (!API_KEY) {
+    console.warn('[HuggingFace] VITE_HF_API_KEY not set — skipping HuggingFace tier');
     throw new Error('VITE_HF_API_KEY not set');
   }
 
@@ -30,25 +32,24 @@ export async function queryHuggingFace(prompt, systemPrompt = '', modelId = null
     ? `${systemPrompt}\n\nUser: ${prompt}\nAssistant:`
     : prompt;
 
-   try {
-     const response = await fetch('/api/proxy', {
-       method: 'POST',
-       headers: { 'Content-Type': 'application/json' },
-       body: JSON.stringify({
-         targetUrl: `${BASE_URL}/${encodeURIComponent(model)}`,
-         method: 'POST',
-         body: {
-           inputs: fullPrompt,
-           parameters: {
-             max_new_tokens: 800,
-             temperature: 0.3,
-             top_p: 0.9,
-             do_sample: true,
-             return_full_text: false
-           }
-         }
-       })
-     });
+  try {
+    const response = await fetch(`${BASE_URL}/${encodeURIComponent(model)}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`
+      },
+      body: JSON.stringify({
+        inputs: fullPrompt,
+        parameters: {
+          max_new_tokens: 800,
+          temperature: 0.3,
+          top_p: 0.9,
+          do_sample: true,
+          return_full_text: false
+        }
+      })
+    });
 
     if (!response.ok) {
       if (response.status === 503) {

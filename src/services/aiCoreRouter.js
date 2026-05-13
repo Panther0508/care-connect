@@ -1035,22 +1035,22 @@ export async function routeQuery({
         lastReasoning = reasoningSteps;
         return tinyResult;
        } catch (err) {
-         console.error('[AI Router] Tier 5 FAILED: TinyLlama error:', err.message, '? ALL TIERS EXHAUSTED');
-         const fallbackText = 'All AI models are currently unavailable. Please check your internet connection and try again. For urgent medical questions, contact a healthcare provider directly.';
-         const errorResult = {
-           text: fallbackText,
-           reasoningSteps,
-           citations: [],
-           emotionalState: finalEmotion,
-           model: 'none',
-           source: 'error',
-           evaluation: { overall: 0, components: { factual: 0, clarity: 0, safety: 0, completeness: 0 } },
-           quotaRemaining: 0
-         };
-         lastResult = errorResult;
-         lastReasoning = reasoningSteps;
-         return errorResult;
-      }
+          console.error('[AI Router] Tier 5 FAILED: TinyLlama error:', err.message, '? ALL TIERS EXHAUSTED');
+          const fallbackText = "I'm currently unable to process your request. Please try again in a moment. For urgent medical concerns, contact a healthcare provider directly.";
+          const errorResult = {
+            text: fallbackText,
+            reasoningSteps,
+            citations: [],
+            emotionalState: finalEmotion,
+            model: 'none',
+            source: 'error',
+            evaluation: { overall: 0, components: { factual: 0, clarity: 0, safety: 0, completeness: 0 } },
+            quotaRemaining: 0
+          };
+          lastResult = errorResult;
+          lastReasoning = reasoningSteps;
+          return errorResult;
+       }
 } // close routeQuery function
 
 // ───────────────────────────────────────────────────────────────────────────GöÇGöÇ
