@@ -300,7 +300,7 @@ useEffect(() => {
           showStatus("success", "AI Engine Ready", "You can now use the assistant offline.");
         } catch (err) {
           console.error("Failed to load offline model:", err);
-          setModelLoaded(true);
+          setModelLoaded(true); // Allow trying online fallbacks
         } finally {
           setLoadingModel(false);
           if (loaderToastRef.current) {
@@ -311,48 +311,45 @@ useEffect(() => {
         return;
       }
 
-      // Check if we're online first - if offline, skip model load
-      if (typeof navigator !== 'undefined' && !navigator.onLine) {
-        console.log('Offline mode - skipping TinyLlama load, will use cache/fallback on first query');
-        setModelLoaded(true); // Allow chat to work with offline/cached responses
-        return;
-      }
-
-      // Only load model if user has actually interacted with AI (lazy load)
+      // For all users: attempt to load the model regardless of online status
+      // TinyLlama can load from cache offline, Gemma will fail gracefully to offline mode
       const hasInteracted = localStorage.getItem('vita_ai_interacted');
+      
+      // If user hasn't interacted yet, defer loading but mark UI as ready
       if (!hasInteracted) {
         console.log('Deferring AI model load until first user interaction');
-        setModelLoaded(true); // Set to true to allow UI, actual lazy load will trigger on first send
+        setModelLoaded(true); // UI can show; actual load happens on first send
         return;
       }
 
-       try {
-         setLoadingModel(true);
-         loaderToastRef.current = showStatus(
-           "loading",
-           "Initialising AI Engine",
-           "Loading offline model — this only happens once.",
-           { duration: 0 as any }
-         );
-         await loadModel((progress: any) => {
-           if (progress && progress.status === "downloading") {
-             console.log(`Downloading: ${Math.round((progress.loaded || 0) / (progress.total || 1) * 100)}%`);
-           }
-         });
-         setModelLoaded(true);
-         showStatus("success", "AI Engine Ready", "You can now use the assistant offline.");
-       } catch (err) {
-         console.error("Failed to load offline model:", err);
-         showStatus("warning", "AI Limited", "Offline model unavailable — using online mode only.");
-         // Still mark as loaded to allow usage (will use online APIs)
-         setModelLoaded(true);
-       } finally {
-         setLoadingModel(false);
-         if (loaderToastRef.current) {
-           dismissStatus(loaderToastRef.current);
-           loaderToastRef.current = null;
-         }
-       }
+      // User has interacted before or just now - load the model
+      setLoadingModel(true);
+      loaderToastRef.current = showStatus(
+        "loading",
+        "Initialising AI Engine",
+        "Loading offline model — this only happens once.",
+        { duration: 0 as any }
+      );
+      try {
+        await loadModel((progress: any) => {
+          if (progress && progress.status === "downloading") {
+            console.log(`Downloading: ${Math.round((progress.loaded || 0) / (progress.total || 1) * 100)}%`);
+          }
+        });
+        setModelLoaded(true);
+        showStatus("success", "AI Engine Ready", "You can now use the assistant offline.");
+      } catch (err) {
+        console.error("Failed to load offline model:", err);
+        // Still mark as loaded - will use online APIs or TinyLlama on-demand
+        setModelLoaded(true);
+        showStatus("warning", "AI Limited", "Some AI features may be limited. Using available models.");
+      } finally {
+        setLoadingModel(false);
+        if (loaderToastRef.current) {
+          dismissStatus(loaderToastRef.current);
+          loaderToastRef.current = null;
+        }
+      }
     };
     prepareModel();
   }, []);
@@ -482,42 +479,42 @@ const handleSpeechInput = async () => {
     }
   };
 
-   const handleSend = async (text: string) => {
-      if (!text.trim()) return;
+  const handleSend = async (text: string) => {
+    if (!text.trim()) return;
 
-      // Cancel any ongoing speech
-      if (isSpeakingNow) {
-        cancelSpeech();
-        setIsSpeakingNow(false);
+    // Cancel any ongoing speech
+    if (isSpeakingNow) {
+      cancelSpeech();
+      setIsSpeakingNow(false);
+    }
+
+    // Mark that user has interacted (for future sessions)
+    localStorage.setItem('vita_ai_interacted', 'true');
+
+    // Lazy load model on first use if not loaded yet
+    if (!modelLoaded) {
+      setLoadingModel(true);
+      try {
+        await loadModel((progress: any) => {
+          if (progress && progress.status === "downloading") {
+            console.log(`Downloading: ${Math.round((progress.loaded || 0) / (progress.total || 1) * 100)}%`);
+          }
+        });
+        setModelLoaded(true);
+        showStatus("success", "AI Engine Ready", "You can now use the assistant offline.");
+      } catch (err) {
+        console.error("Failed to load AI model:", err);
+        // Mark as loaded anyway to prevent repeated load attempts, and let query proceed (will use online/fallback)
+        setModelLoaded(true);
+        showStatus("warning", "AI Limited", "Local AI unavailable. Using online fallbacks if available.");
+      } finally {
+        setLoadingModel(false);
       }
+    }
 
-      // Mark that user has interacted (for future sessions)
-      localStorage.setItem('vita_ai_interacted', 'true');
-
-     // Lazy load model on first use if not loaded yet
-     if (!modelLoaded) {
-       setLoadingModel(true);
-       try {
-         await loadModel((progress: any) => {
-           if (progress && progress.status === "downloading") {
-             console.log(`Downloading: ${Math.round((progress.loaded || 0) / (progress.total || 1) * 100)}%`);
-           }
-         });
-         setModelLoaded(true);
-         showStatus("success", "AI Engine Ready", "You can now use the assistant offline.");
-       } catch (err) {
-         console.error("Failed to load TinyLlama model:", err);
-         addMessage("system", "AI model failed to load. Some features may be limited.");
-         setLoadingModel(false);
-         return;
-       } finally {
-         setLoadingModel(false);
-       }
-     }
-
-      setCurrentInput("");
-      setIsProcessing(true);
-      const requestStartTime = Date.now();
+    setCurrentInput("");
+    setIsProcessing(true);
+    const requestStartTime = Date.now();
 
     // CRISIS DETECTION Layer 1 & 2
     const detectionResult = scanMessage(text);

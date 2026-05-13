@@ -3,6 +3,7 @@
 // All prompt logic lives in promptLibrary; routing logic lives in aiCoreRouter
 
 import { routeQuery, loadEmbedder as aiLoadEmbedder, getQuotaRemaining } from './aiCoreRouter.js';
+import { getTextGeneratorForRole, isModelLoaded as getGlobalModelLoaded } from './modelLoader.js';
 import { buildStructuredPrompt, buildPatientTaskPrompt } from './promptLibrary.js';
 
 // Legacy model state tracking (for UI components)
@@ -11,43 +12,32 @@ let modelLoading = false;
 let loadError = null;
 
 /**
- * Load the medical AI — initializes embedding model (deferred until first interaction)
+ * Load the medical AI — initializes both embedding model and text generation model
  */
 export async function loadModel(onProgress?: (pct: number) => void) {
-  if (modelLoaded) return;
-  if (modelLoading) {
-    while (modelLoading) { await new Promise(r => setTimeout(r, 50)); }
-    if (loadError) throw loadError;
-    return;
-  }
-
-  modelLoading = true;
-  try {
-    // Load embedder via aiCoreRouter (cached singleton)
-    await aiLoadEmbedder();
-    modelLoaded = true;
-    modelLoading = false;
-  } catch (err) {
-    loadError = err;
-    modelLoading = false;
-    throw err;
-  }
+  // Load in parallel: embedder (for caching) + text generator (for offline fallback)
+  await Promise.all([
+    aiLoadEmbedder(),
+    getTextGeneratorForRole('patient', onProgress)
+  ]);
+  // Global state is set by modelLoader automatically
 }
 
 /**
  * Check if model (embedder) is ready
  */
 export function isModelReady() {
-  return modelLoaded;
+  return getGlobalModelLoaded();
 }
 
 /**
  * Get detailed model load status
  */
 export function modelStatus() {
-  if (modelLoaded) return { loaded: true, loading: false, error: null };
-  if (loadError) return { loaded: false, loading: false, error: loadError.message };
-  return { loaded: false, loading: modelLoading, error: null };
+  const loaded = getGlobalModelLoaded();
+  if (loaded) return { loaded: true, loading: false, error: null };
+  // Could not determine loading state without direct access to modelLoader internals
+  return { loaded: false, loading: false, error: 'Not loaded or failed' };
 }
 
 /**

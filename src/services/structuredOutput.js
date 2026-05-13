@@ -1,49 +1,22 @@
 // src/services/structuredOutput.js
 // Structured output generation for consistent AI responses
-// Uses JSON schema with LLM sampling
+// Uses centralized model loading from modelLoader to avoid duplicate instances
 
-import { pipeline, env } from '@huggingface/transformers';
-
-env.allowLocalModels = true;
-env.useBrowserCache = true;
+import { getTextGenerator, isModelLoaded } from './modelLoader.js';
 
 let generator = null;
-let modelLoaded = false;
-let modelLoading = false;
-let loadError = null;
-
-const MODEL_NAME = 'Xenova/TinyLlama-1.1B-Chat-v1.0';
 let tokenizer = null;
 
 /**
  * Load the generator model for structured output
+ * Uses the singleton from modelLoader
  */
 export async function loadStructuredModel(onProgress) {
-  if (modelLoaded) return true;
-  if (modelLoading) {
-    while (modelLoading) {
-      await new Promise(r => setTimeout(r, 100));
-    }
-    if (loadError) throw loadError;
-    return true;
-  }
-
-  modelLoading = true;
-  try {
-    generator = await pipeline('text-generation', MODEL_NAME, {
-      progress_callback: onProgress,
-      model_type: 'llama',
-    });
-    tokenizer = generator.tokenizer;
-    modelLoaded = true;
-    console.log('✅ Structured output model ready');
-  } catch (err) {
-    console.error('Failed to load structured model:', err);
-    loadError = err;
-    throw err;
-  } finally {
-    modelLoading = false;
-  }
+  // Get the shared generator; modelLoader handles loading if needed
+  generator = await getTextGenerator(onProgress);
+  tokenizer = generator.tokenizer;
+  console.log('✅ Structured output model ready (using shared modelLoader instance)');
+  return true;
 }
 
 /**
@@ -54,7 +27,7 @@ export async function loadStructuredModel(onProgress) {
  * @param {object} options - Generation options
  */
 export async function generateStructured(systemPrompt, userPrompt, schema, options = {}) {
-  if (!modelLoaded) {
+  if (!getGlobalModelLoaded() || !generator) {
     await loadStructuredModel();
   }
 

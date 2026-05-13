@@ -64,6 +64,10 @@ env.fetch = async (input, init) => {
   return ORIGINAL_FETCH(input, init);
 };
 
+// Model state singleton - exported for all modules to use
+let globalModelLoaded = false;
+let globalEmbedderLoaded = false;
+
 // Model cache singleton
 const models = {
   textGeneration: null,
@@ -168,6 +172,15 @@ async function loadModel(type, onProgress) {
       models[type] = loadedModel;
       modelLoading[type] = false;
       console.log(`✅ Model loaded: ${type}`);
+      
+      // Update global state flags
+      if (type === 'textGeneration' || type === 'qwen') {
+        globalModelLoaded = true;
+      }
+      if (type === 'featureExtraction') {
+        globalEmbedderLoaded = true;
+      }
+      
       return loadedModel;
     } catch (err) {
       lastErr = err;
@@ -183,6 +196,15 @@ async function loadModel(type, onProgress) {
   models[type] = null;
   modelLoading[type] = false;
   console.error(`❌ Model ${type} failed to load after ${maxAttempts} attempts`);
+  
+  // Update global state - model not loaded
+  if (type === 'textGeneration' || type === 'qwen') {
+    globalModelLoaded = false;
+  }
+  if (type === 'featureExtraction') {
+    globalEmbedderLoaded = false;
+  }
+  
   throw lastErr;
 }
 
@@ -242,6 +264,19 @@ export function getAllModelStatuses() {
   return statuses;
 }
 
+// Export global model state for other services
+export function isModelLoaded() {
+  return globalModelLoaded;
+}
+
+export function setModelLoaded(status) {
+  globalModelLoaded = status;
+}
+
+export function isEmbedderLoaded() {
+  return globalEmbedderLoaded;
+}
+
 // Initialize models (optional)
 export async function initializeModels(options = {}) {
   const { include = ['featureExtraction', 'textGeneration'] } = options;
@@ -266,5 +301,8 @@ export default {
   getTokenizer,
   getModelStatus,
   getAllModelStatuses,
+  isModelLoaded,
+  setModelLoaded,
+  isEmbedderLoaded,
   initializeModels
 };

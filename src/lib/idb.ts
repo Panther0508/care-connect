@@ -1,6 +1,6 @@
 export function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open("vitachain", 13);
+    const request = indexedDB.open("vitachain", 14);
 
     request.onupgradeneeded = (event: IDBVersionChangeEvent) => {
       const db = (event.target as IDBOpenDBRequest).result;
@@ -41,7 +41,14 @@ export function openDB(): Promise<IDBDatabase> {
           { name: "auditLogs", keyPath: "id", autoIncrement: true },
           { name: "evaluations", keyPath: "id", autoIncrement: true },
           { name: "trainingRecords", keyPath: "id", autoIncrement: true },
-          { name: "mentalHealthLogs", keyPath: "id", autoIncrement: true }
+          { name: "mentalHealthLogs", keyPath: "id", autoIncrement: true },
+          // Additional stores referenced elsewhere in codebase
+          { name: "chatHistory", keyPath: "id", autoIncrement: true },
+          { name: "referrals", keyPath: "id", autoIncrement: true },
+          { name: "contactSubmissions", keyPath: "id", autoIncrement: true },
+          { name: "savedLiterature", keyPath: "pmid" },
+          { name: "carePlans", keyPath: "conditionId" },
+          { name: "carePlanLogs", keyPath: "id", autoIncrement: true },
         ];
 
         stores.forEach(s => {

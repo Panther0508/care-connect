@@ -1,6 +1,6 @@
-import { generateKeyPair, exportPublicKey, exportPrivateKey, importPrivateKey, createCredential, verifyCredential, encodeCredential, decodeCredential } from '../lib/vc';
+import { generateKeyPair, exportPublicKey, importPrivateKey, importPublicKey, createCredential, verifyCredential, encodeCredential, decodeCredential, publicKeyToDid } from '../lib/vc';
 import { getCurrentHealthState, initHealthGraph, setActiveUser } from './healthGraph';
-import { loadModel, generatePreVisitSummary } from './medicalAI';
+import { loadModel, generatePreVisitSummary, isModelReady } from './medicalAI';
 import QRCode from 'qrcode';
 import { meshOrchestrator } from './meshOrchestrator';
 import { addPassportShare, addPassportScan, getFoodLogsForRange } from '../lib/idb';
@@ -16,10 +16,12 @@ export async function initPassport(userId?: string, passphrase = 'vita-demo-2026
   }
   await ensureKeyPair();
   try {
+    // Pre-load AI model for better UX, but don't fail if it's slow/unavailable
     await loadModel();
     modelLoaded = true;
   } catch (err) {
-    console.warn('AI model not yet loaded; will load on demand');
+    console.warn('AI model not yet loaded; passport will use extractive summary fallback');
+    modelLoaded = false;
   }
 }
 
@@ -109,8 +111,14 @@ export async function generatePassport(specialistType, userId) {
   const healthState = getCurrentHealthState();
 
   let summaryText;
-  if (modelLoaded) {
-    summaryText = await generatePreVisitSummary(healthState, specialistType);
+  // Try to use AI if available, but always fall back to extractive summary
+  if (modelLoaded && isModelReady()) {
+    try {
+      summaryText = await generatePreVisitSummary(healthState, specialistType);
+    } catch (err) {
+      console.warn('AI summary generation failed, using fallback:', err);
+      summaryText = generateSimpleSummary(healthState, specialistType);
+    }
   } else {
     summaryText = generateSimpleSummary(healthState, specialistType);
   }

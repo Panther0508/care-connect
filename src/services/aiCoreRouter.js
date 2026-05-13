@@ -4,7 +4,7 @@
 // Responsibilities: routing, fallback ladder, caching, safety, evaluation, logging
 
 import { pipeline, env } from '@huggingface/transformers';
-import { getEmbeddingModel, getTextGenerator, getTokenizer, getTextGeneratorForRole } from './modelLoader.js';
+import { getEmbeddingModel, getTextGenerator, getTokenizer, getTextGeneratorForRole, isModelLoaded, setModelLoaded } from './modelLoader.js';
 import { searchWeb } from './webSearchService';
 import { searchPubMed } from './pubmedSearch';
 import { searchClinicalTrials } from './clinicalTrialsSearch';
@@ -245,6 +245,8 @@ export async function loadEmbedder() {
       embedder = await getEmbeddingModel();
       embedderLoaded = true;
       embedderLoading = false;
+      // Sync global state (for embedder-specific flag we'd need to extend modelLoader)
+      // For now, embedderLoaded local flag is sufficient
       console.log('✅ Embedder ready (all-MiniLM-L6-v2)');
       return embedder;
     } catch (err) {
@@ -305,11 +307,11 @@ function keywordEmbed(text) {
 // OFFLINE MODEL (TinyLlama 1.1B)
 // ───────────────────────────────────────────────────────────────────────────GöÇGöÇ
 export async function loadTinyLlama() {
-  if (generatorLoaded) return generator;
+  if (isModelLoaded()) return generator;
   if (generatorLoading) {
     // Wait for in-flight load
     while (generatorLoading) { await new Promise(r => setTimeout(r, 50)); }
-    if (generatorLoaded) return generator;
+    if (isModelLoaded()) return generator;
     if (generatorError) throw generatorError;
   }
 
@@ -318,6 +320,7 @@ export async function loadTinyLlama() {
     generator = await getTextGenerator();
     generatorLoaded = true;
     generatorLoading = false;
+    setModelLoaded(true); // Sync global state
     console.log('✅ TinyLlama 1.1B ready (offline)');
     return generator;
   } catch (err) {
