@@ -2,7 +2,6 @@
 // VitaChain Service Worker – offline support, AI model pre-caching, and background sync
 
 const CACHE_NAME = 'vitachain-cache-v7';
-const DOT_MODEL_CACHE = 'vita-dot-model-cache-v1';
 
 const ASSETS_TO_CACHE = [
   '/',
@@ -30,9 +29,7 @@ const ASSETS_TO_CACHE = [
   '/images/icons/healthicons/mental_health.svg',
 ];
 
-// VitaChain AI models hosted on GitHub Releases (v2.1.0-buildfix)
-// Assets use dot-separated filenames (e.g. Xenova.TinyLlama-1.1B-Chat-v1.0.config.json)
-const VITACHAIN_RELEASE_BASE = 'https://github.com/Panther0508/care-connect/releases/download/v2.1.0-buildfix';
+
 
 // Pending reminders queue (stored in IndexedDB and memory)
 let pendingReminders = {
@@ -142,28 +139,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-   // GitHub Releases model files — cache-first for offline use (immutable assets)
-   if (url.hostname.includes('github.com') && url.pathname.includes('/releases/')) {
-     event.respondWith(
-       caches.open(DOT_MODEL_CACHE).then(async (dotCache) => {
-         const cached = await dotCache.match(event.request);
-         if (cached && cached.status === 200) {
-           return cached; // cache-first
-         }
 
-         try {
-           const networkResponse = await fetch(event.request);
-           if (networkResponse.status === 200) {
-             dotCache.put(event.request, networkResponse.clone());
-           }
-           return networkResponse;
-         } catch (err) {
-           return cached || new Response('Model download failed', { status: 503 });
-         }
-       })
-     );
-     return;
-   }
 
   // Default: network-first with cache fallback
   event.respondWith(

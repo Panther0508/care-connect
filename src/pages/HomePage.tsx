@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FacilityCard } from "../components/FacilityCard";
 import { searchCare, type Facility } from "../services/aiSearch";
 import { useIDB } from "../hooks/useIDB";
@@ -35,6 +35,7 @@ export default function HomePage() {
     availability247: false
   });
   const [isSimulating, setIsSimulating] = useState(false);
+  const alertsErrorShown = useRef(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -51,7 +52,10 @@ export default function HomePage() {
           setOutbreakAlerts(alerts.filter((a: any) => a.status === 'active'));
         } catch (e) {
           console.error('Failed to load outbreak alerts:', e);
-          // Silently fail - alerts are non-critical
+          if (!alertsErrorShown.current) {
+            showStatus('error', 'Outbreak Alerts', 'Could not load outbreak data.');
+            alertsErrorShown.current = true;
+          }
         }
       };
       loadAlerts();
