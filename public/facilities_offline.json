@@ -1,1 +1,62 @@
-[]
+[
+  {
+    "id": "1",
+    "name": "Lagos General Hospital",
+    "type": "hospital",
+    "address": "1 Broad Street, Lagos Island, Lagos State",
+    "distance": "2.3 km",
+    "rating": 4.5,
+    "phone": "+234 1 234 5678",
+    "services": ["Emergency", "Surgery", "Pediatrics", "General Care"],
+    "latitude": 6.5244,
+    "longitude": 3.3792
+  },
+  {
+    "id": "2",
+    "name": "Abuja Primary Health Centre",
+    "type": "clinic",
+    "address": "12 Ahmadu Bello Way, Central Area, Abuja",
+    "distance": "5.1 km",
+    "rating": 4.2,
+    "phone": "+234 9 123 4567",
+    "services": ["Outpatient", "Maternal Care", "Immunization"],
+    "latitude": 9.0579,
+    "longitude": 7.4951
+  },
+  {
+    "id": "3",
+    "name": "Kano Specialist Hospital",
+    "type": "hospital",
+    "address": "30 Murtala Muhammad Way, Kano",
+    "distance": "8.7 km",
+    "rating": 4.7,
+    "phone": "+234 8 123 4567",
+    "services": ["Emergency", "Surgery", "Cardiology", "Neurology"],
+    "latitude": 12.0022,
+    "longitude": 8.5920
+  },
+  {
+    "id": "4",
+    "name": "Port Harcourt Community Clinic",
+    "type": "clinic",
+    "address": "45 Aba Road, Rumuola, Port Harcourt",
+    "distance": "3.5 km",
+    "rating": 4.0,
+    "phone": "+234 84 123 456",
+    "services": ["Outpatient", "Pharmacy", "Lab Tests"],
+    "latitude": 4.8156,
+    "longitude": 7.0498
+  },
+  {
+    "id": "5",
+    "name": "Ibadan Teaching Hospital",
+    "type": "hospital",
+    "address": "662 Iwo Road, Ibadan, Oyo State",
+    "distance": "12.4 km",
+    "rating": 4.8,
+    "phone": "+234 2 123 4567",
+    "services": ["Emergency", "Surgery", "Oncology", "Research"],
+    "latitude": 7.3775,
+    "longitude": 3.9470
+  }
+]
